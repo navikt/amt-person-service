@@ -1,5 +1,7 @@
 package no.nav.amt.person.service.integration
 
+import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -8,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import java.time.Duration
 
 @ActiveProfiles("integration")
@@ -22,6 +26,25 @@ class IntegrationTestBase {
 		.callTimeout(Duration.ofMinutes(5))
 		.readTimeout(Duration.ofMinutes(5))
 		.build()
+
+	companion object {
+		val mockPdlHttpServer = MockPdlHttpServer()
+		val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
+
+		@JvmStatic
+		@DynamicPropertySource
+		fun startEnvironment(registry: DynamicPropertyRegistry) {
+			mockPdlHttpServer.start()
+			registry.add("pdl.url") { mockPdlHttpServer.serverUrl() }
+			registry.add("pdl.scope") { "test.pdl" }
+
+			mockMachineToMachineHttpServer.start()
+			registry.add("nais.env.azureOpenIdConfigTokenEndpoint") {
+				mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.tokenPath
+			}
+		}
+
+	}
 
 	fun serverUrl() = "http://localhost:$port"
 
