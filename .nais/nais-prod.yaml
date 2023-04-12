@@ -40,3 +40,8 @@ spec:
       enabled: true
   secureLogs:
     enabled: true
+  env:
+    - name: PDL_SCOPE
+      value: api://prod-fss.pdl.pdl-api/.default
+    - name: PDL_URL
+      value: https://pdl-api.prod-fss-pub.nais.io

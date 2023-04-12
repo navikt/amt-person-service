@@ -17,6 +17,8 @@ repositories {
 }
 
 val commonVersion = "3.2023.03.22_12.48-00fcbdc8f455"
+val okhttp3Version = "4.10.0"
+val kotestVersion = "5.5.5"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -28,13 +30,17 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("com.squareup.okhttp3:okhttp:4.9.3")
+	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
 
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("com.github.navikt.common-java-modules:log:$commonVersion")
+	implementation("com.github.navikt.common-java-modules:token-client:$commonVersion")
+	implementation("com.github.navikt.common-java-modules:rest:$commonVersion")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.5")
+	testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
+	testImplementation("io.kotest:kotest-assertions-json-jvm:$kotestVersion")
+	testImplementation("com.squareup.okhttp3:mockwebserver:$okhttp3Version")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
