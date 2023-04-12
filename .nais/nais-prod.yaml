@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://amt-person-service.intern.dev.nav.no
+    - https://amt-person-service.intern.nav.no
   prometheus:
     enabled: true
     path: /internal/prometheus
@@ -40,6 +40,10 @@ spec:
       enabled: true
   secureLogs:
     enabled: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: pdl-api.prod-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
