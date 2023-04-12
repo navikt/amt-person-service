@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.integration
 
+import no.nav.amt.person.service.integration.mock.servers.MockKrrProxyHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
 import okhttp3.OkHttpClient
@@ -30,6 +31,7 @@ class IntegrationTestBase {
 	companion object {
 		val mockPdlHttpServer = MockPdlHttpServer()
 		val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
+		val mockKrrProxyHttpServer = MockKrrProxyHttpServer()
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -42,6 +44,10 @@ class IntegrationTestBase {
 			registry.add("nais.env.azureOpenIdConfigTokenEndpoint") {
 				mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.tokenPath
 			}
+
+			mockKrrProxyHttpServer.start()
+			registry.add("digdir-krr-proxy.url") { mockKrrProxyHttpServer.serverUrl() }
+			registry.add("digdir-krr-proxy.scope") { "test.digdir-krr-proxy" }
 		}
 
 	}

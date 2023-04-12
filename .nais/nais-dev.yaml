@@ -44,9 +44,14 @@ spec:
     outbound:
       external:
         - host: pdl-api.dev-fss-pub.nais.io
+        - host: digdir-krr-proxy.dev.intern.nav.no
   env:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io
+    - name: DIGDIR_KRR_PROXY_SCOPE
+      value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
+    - name: DIGDIR_KRR_PROXY_URL
+      value: https://digdir-krr-proxy.dev.intern.nav.no
 
