@@ -60,7 +60,7 @@ spec:
     - name: DIGDIR_KRR_PROXY_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: DIGDIR_KRR_PROXY_URL
-      value: https://digdir-krr-proxy.dev.intern.nav.no
+      value: https://digdir-krr-proxy.intern.dev.nav.no
     - name: VEILARBOPPFOLGING_URL
       value: https://veilarboppfolging.dev-fss-pub.nais.io
     - name: VEILARBOPPFOLGING_SCOPE
