@@ -52,6 +52,7 @@ spec:
         - host: veilarboppfolging.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: nom-api.intern.nav.no
+        - host: veilarbarena.prod-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
@@ -75,3 +76,6 @@ spec:
       value: api://prod-gcp.nom.nom-api/.default
     - name: NOM_URL
       value: https://nom-api.intern.nav.no
+    - name: VEILARBARENA_URL
+      value: https://veilarbarena.prod-fss-pub.nais.io
+    - name: VEILARBARENA_SCOPE

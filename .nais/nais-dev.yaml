@@ -52,6 +52,7 @@ spec:
         - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: nom-api.intern.dev.nav.no
+        - host: veilarbarena.dev-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
@@ -75,4 +76,7 @@ spec:
       value: api://dev-gcp.nom.nom-api/.default
     - name: NOM_URL
       value: https://nom-api.intern.dev.nav.no
-
+    - name: VEILARBARENA_URL
+      value: https://veilarbarena.dev-fss-pub.nais.io
+    - name: VEILARBARENA_SCOPE
+      value: api://dev-fss.pto.veilarbarena/.default
