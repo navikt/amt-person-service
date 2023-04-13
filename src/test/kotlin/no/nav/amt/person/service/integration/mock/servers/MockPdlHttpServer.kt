@@ -10,10 +10,6 @@ import okhttp3.mockwebserver.RecordedRequest
 
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
-	fun reset() {
-		resetHttpServer()
-	}
-
 	fun mockHentPerson(brukerFnr: String, mockPdlBruker: MockPdlBruker) {
 		val request = toJsonString(
 				GraphqlUtils.GraphqlQuery(

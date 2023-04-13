@@ -42,6 +42,10 @@ spec:
     enabled: true
   accessPolicy:
     outbound:
+      rules:
+        - application: poao-tilgang
+          namespace: poao
+          cluster: dev-gcp
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.dev.intern.nav.no
@@ -62,3 +66,7 @@ spec:
       value: api://dev-fss.pto.veilarboppfolging/.default
     - name: NORG_URL
       value: https://norg2.dev-fss-pub.nais.io
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao.svc.cluster.local
+    - name: POAO_TILGANG_SCOPE
+      value: api://dev-gcp.poao.poao-tilgang/.default
