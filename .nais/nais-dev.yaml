@@ -46,6 +46,7 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.dev.intern.nav.no
         - host: veilarboppfolging.dev-fss-pub.nais.io
+        - host: norg2.dev-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
@@ -59,3 +60,5 @@ spec:
       value: https://veilarboppfolging.dev-fss-pub.nais.io
     - name: VEILARBOPPFOLGING_SCOPE
       value: api://dev-fss.pto.veilarboppfolging/.default
+    - name: NORG_URL
+      value: https://norg2.dev-fss-pub.nais.io
