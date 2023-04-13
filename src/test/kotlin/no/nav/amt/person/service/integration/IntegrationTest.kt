@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.integration
 
-import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -22,7 +21,13 @@ class IntegrationTest : IntegrationTestBase() {
 		template.query(
 			"select count(*) antall_migreringer from flyway_schema_history"
 		) {
-			it.getInt("antall_migreringer") shouldBeGreaterThan 0
+			it.getInt("antall_migreringer") shouldBe 2
+		}
+
+		template.query(
+			"select count(*) antall_tabeller from information_schema.tables where table_schema = 'public'"
+		) {
+			it.getInt("antall_tabeller") shouldBe 6
 		}
 	}
 
