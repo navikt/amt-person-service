@@ -62,21 +62,21 @@ spec:
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: DIGDIR_KRR_PROXY_URL
       value: https://digdir-krr-proxy.intern.dev.nav.no
-    - name: VEILARBOPPFOLGING_URL
-      value: https://veilarboppfolging.dev-fss-pub.nais.io
     - name: VEILARBOPPFOLGING_SCOPE
       value: api://dev-fss.pto.veilarboppfolging/.default
+    - name: VEILARBOPPFOLGING_URL
+      value: https://veilarboppfolging.dev-fss-pub.nais.io
     - name: NORG_URL
       value: https://norg2.dev-fss-pub.nais.io
-    - name: POAO_TILGANG_URL
-      value: http://poao-tilgang.poao.svc.cluster.local
     - name: POAO_TILGANG_SCOPE
       value: api://dev-gcp.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao.svc.cluster.local
     - name: NOM_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
     - name: NOM_URL
       value: https://nom-api.intern.dev.nav.no
-    - name: VEILARBARENA_URL
-      value: https://veilarbarena.dev-fss-pub.nais.io
     - name: VEILARBARENA_SCOPE
       value: api://dev-fss.pto.veilarbarena/.default
+    - name: VEILARBARENA_URL
+      value: https://veilarbarena.dev-fss-pub.nais.io

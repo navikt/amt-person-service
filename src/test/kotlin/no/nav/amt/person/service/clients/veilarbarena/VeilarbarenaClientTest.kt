@@ -44,7 +44,7 @@ class VeilarbarenaClientTest {
 		request.path shouldBe "/veilarbarena/api/arena/status?fnr=987654"
 		request.method shouldBe "GET"
 		request.getHeader("Authorization") shouldBe "Bearer VEILARBARENA_TOKEN"
-		request.getHeader("Nav-Consumer-Id") shouldBe "amt-tiltak"
+		request.getHeader("Nav-Consumer-Id") shouldBe "amt-person-service"
 	}
 
 	@Test

@@ -11,7 +11,7 @@ class VeilarbarenaClient(
 	private val baseUrl: String,
 	private val tokenProvider: Supplier<String>,
 	private val httpClient: OkHttpClient = baseClient(),
-	private val consumerId: String = "amt-tiltak",
+	private val consumerId: String = "amt-person-service",
 ) {
 
 	fun hentBrukerOppfolgingsenhetId(fnr: String): String? {
