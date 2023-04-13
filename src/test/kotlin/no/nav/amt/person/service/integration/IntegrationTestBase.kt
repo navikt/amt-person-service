@@ -3,6 +3,7 @@ package no.nav.amt.person.service.integration
 import no.nav.amt.person.service.integration.mock.servers.MockKrrProxyHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockVeilarboppfolgingHttpServer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -32,6 +33,7 @@ class IntegrationTestBase {
 		val mockPdlHttpServer = MockPdlHttpServer()
 		val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
 		val mockKrrProxyHttpServer = MockKrrProxyHttpServer()
+		val mockVeilarboppfolgingHttpServer = MockVeilarboppfolgingHttpServer()
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -48,6 +50,10 @@ class IntegrationTestBase {
 			mockKrrProxyHttpServer.start()
 			registry.add("digdir-krr-proxy.url") { mockKrrProxyHttpServer.serverUrl() }
 			registry.add("digdir-krr-proxy.scope") { "test.digdir-krr-proxy" }
+
+			mockVeilarboppfolgingHttpServer.start()
+			registry.add("veilarboppfolging.url") { mockVeilarboppfolgingHttpServer.serverUrl() }
+			registry.add("veilarboppfolging.scope") { "test.veilarboppfolging" }
 		}
 
 	}
