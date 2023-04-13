@@ -80,3 +80,18 @@ spec:
       value: api://prod-fss.pto.veilarbarena/.default
     - name: VEILARBARENA_URL
       value: https://veilarbarena.prod-fss-pub.nais.io
+
+  gcp:
+    sqlInstances:
+      - name: amt-person-service
+        collation: nb_NO.UTF8
+        type: POSTGRES_14
+        tier: db-custom-1-3840
+        diskAutoresize: true
+        highAvailability: true
+        pointInTimeRecovery: true
+        insights:
+          enabled: true
+        databases:
+          - name: amt-person-service
+            envVarPrefix: DB

@@ -80,3 +80,12 @@ spec:
       value: api://dev-fss.pto.veilarbarena/.default
     - name: VEILARBARENA_URL
       value: https://veilarbarena.dev-fss-pub.nais.io
+
+  gcp:
+    sqlInstances:
+      - name: amt-person-service
+        collation: nb_NO.UTF8
+        type: POSTGRES_14
+        databases:
+          - name: amt-person-service
+            envVarPrefix: DB
