@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.integration
 
 import no.nav.amt.person.service.integration.mock.servers.*
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -35,6 +36,8 @@ class IntegrationTestBase {
 		val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
 		val mockNomHttpServer = MockNomHttpServer()
 		val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
+
+		val dataSource = SingletonPostgresContainer.getDataSource()
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -71,6 +74,12 @@ class IntegrationTestBase {
 			registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
 			registry.add("veilarbarena.scope") { "test.veilarbarena" }
 
+			val container = SingletonPostgresContainer.getContainer()
+
+			registry.add("spring.datasource.url") { container.jdbcUrl }
+			registry.add("spring.datasource.username") { container.username }
+			registry.add("spring.datasource.password") { container.password }
+			registry.add("spring.datasource.hikari.maximum-pool-size") { 3 }
 		}
 
 	}
