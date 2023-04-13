@@ -33,6 +33,7 @@ class IntegrationTestBase {
 		val mockVeilarboppfolgingHttpServer = MockVeilarboppfolgingHttpServer()
 		val mockNorgHttpServer = MockNorgHttpServer()
 		val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
+		val mockNomHttpServer = MockNomHttpServer()
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -60,6 +61,10 @@ class IntegrationTestBase {
 			mockPoaoTilgangHttpServer.start()
 			registry.add("poao-tilgang.url") { mockPoaoTilgangHttpServer.serverUrl() }
 			registry.add("poao-tilgang.scope") { "test.poao-tilgang" }
+
+			mockNomHttpServer.start()
+			registry.add("nom.url") { mockNomHttpServer.serverUrl() }
+			registry.add("nom.scope") { "test.nom" }
 		}
 
 	}

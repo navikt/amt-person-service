@@ -51,6 +51,7 @@ spec:
         - host: digdir-krr-proxy.intern.nav.no
         - host: veilarboppfolging.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
+        - host: nom-api.intern.nav.no
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
@@ -70,3 +71,7 @@ spec:
       value: http://poao-tilgang.poao.svc.cluster.local
     - name: POAO_TILGANG_SCOPE
       value: api://prod-gcp.poao.poao-tilgang/.default
+    - name: NOM_SCOPE
+      value: api://prod-gcp.nom.nom-api/.default
+    - name: NOM_URL
+      value: https://nom-api.intern.nav.no

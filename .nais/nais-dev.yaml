@@ -48,9 +48,10 @@ spec:
           cluster: dev-gcp
       external:
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: digdir-krr-proxy.dev.intern.nav.no
+        - host: digdir-krr-proxy.intern.dev.nav.no
         - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
+        - host: nom-api.intern.dev.nav.no
   env:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
@@ -70,3 +71,8 @@ spec:
       value: http://poao-tilgang.poao.svc.cluster.local
     - name: POAO_TILGANG_SCOPE
       value: api://dev-gcp.poao.poao-tilgang/.default
+    - name: NOM_SCOPE
+      value: api://dev-gcp.nom.nom-api/.default
+    - name: NOM_URL
+      value: https://nom-api.intern.dev.nav.no
+
