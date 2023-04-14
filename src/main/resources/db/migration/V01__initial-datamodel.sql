@@ -44,13 +44,11 @@ create table if not exists nav_bruker
     modified_at     timestamp with time zone not null default current_timestamp
 );
 
-create type person_rolle_type as enum ('ARRANGOR_ANSATT', 'NAV_BRUKER');
-
 create table if not exists person_rolle
 (
     id          uuid primary key,
     person_id   uuid                     not null references person (id),
-    type        person_rolle_type,
+    type        varchar,
     created_at  timestamp with time zone not null default current_timestamp,
     modified_at timestamp with time zone not null default current_timestamp,
     unique (person_id, type)
