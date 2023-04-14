@@ -6,7 +6,7 @@ create table if not exists person
     mellomnavn         varchar,
     etternavn          varchar                  not null,
     historiske_identer text ARRAY                        default ARRAY []::text[],
-    person_ident_type  varchar                  not null,
+    person_ident_type  varchar,
     created_at         timestamp with time zone not null default current_timestamp,
     modified_at        timestamp with time zone not null default current_timestamp
 );
