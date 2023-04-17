@@ -1,11 +1,6 @@
 package no.nav.amt.person.service.utils
 
-import io.kotest.matchers.date.shouldBeWithin
-import io.kotest.matchers.shouldNotBe
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import java.time.Duration
-import java.time.ZonedDateTime
 import javax.sql.DataSource
 
 object DbTestDataUtils {
