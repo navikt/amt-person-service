@@ -52,6 +52,7 @@ dependencies {
 	testImplementation("com.squareup.okhttp3:mockwebserver:$okhttp3Version")
 	testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 	testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+	testImplementation("io.mockk:mockk:1.13.5")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

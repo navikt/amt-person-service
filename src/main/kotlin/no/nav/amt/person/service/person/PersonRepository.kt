@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.dbo.PersonUpsert
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -31,6 +32,52 @@ class PersonRepository(
 		val parameters = sqlParameters("id" to id)
 
 		return template.query(sql, parameters, rowMapper).first()
+	}
+
+	fun get(personIdent: String): PersonDbo? {
+		val sql = "select * from person where person_ident = :personIdent"
+		val parameters = sqlParameters("personIdent" to personIdent)
+
+		return template.query(sql, parameters, rowMapper).firstOrNull()
+	}
+
+	fun upsert(personUpsert: PersonUpsert) {
+		val sql = """
+			insert into person(
+				id,
+				person_ident,
+				person_ident_type,
+				historiske_identer,
+				fornavn,
+				mellomnavn,
+				etternavn
+			) values (
+				:id,
+				:personIdent,
+				:personIdentType,
+				:historiskeIdenter,
+				:fornavn,
+				:mellomnavn,
+				:etternavn
+			) on conflict(person_ident) do update set
+				fornavn = :fornavn,
+				mellomnavn = :mellomnavn,
+				etternavn = :etternavn,
+				historiske_identer = :historiskeIdenter,
+				modified_at = current_timestamp
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"id" to personUpsert.id,
+			"personIdent" to personUpsert.personIdent,
+			"personIdentType" to personUpsert.personIdentType.toString(),
+			"historiskeIdenter" to personUpsert.historiskeIdenter.toTypedArray(),
+			"fornavn" to personUpsert.fornavn,
+			"mellomnavn" to personUpsert.mellomnavn,
+			"etternavn" to personUpsert.etternavn
+		)
+
+		template.update(sql, parameters)
 	}
 
 }

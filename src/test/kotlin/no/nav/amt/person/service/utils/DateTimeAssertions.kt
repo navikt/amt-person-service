@@ -14,7 +14,17 @@ infix fun ZonedDateTime.shouldBeEqualTo(expected: ZonedDateTime?) {
 	expected!!.shouldBeWithin(Duration.ofSeconds(1), this)
 }
 
+infix fun ZonedDateTime.shouldBeCloseTo(expected: ZonedDateTime?) {
+	expected shouldNotBe null
+	expected!!.shouldBeWithin(Duration.ofSeconds(10), this)
+}
+
 infix fun LocalDateTime.shouldBeEqualTo(expected: LocalDateTime?) {
 	expected shouldNotBe null
 	expected!!.shouldBeWithin(Duration.ofSeconds(1), this)
+}
+
+infix fun LocalDateTime.shouldBeCloseTo(expected: LocalDateTime?) {
+	expected shouldNotBe null
+	expected!!.shouldBeWithin(Duration.ofSeconds(10), this)
 }
