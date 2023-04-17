@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.clients.pdl
 
 import no.nav.amt.person.service.utils.GraphqlUtils
+import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
@@ -93,8 +94,10 @@ class PdlClient(
 			mellomnavn = navn.mellomnavn,
 			etternavn = navn.etternavn,
 			telefonnummer = telefonnummer,
-			adressebeskyttelseGradering = diskresjonskode
+			adressebeskyttelseGradering = diskresjonskode,
+			identer = response.hentIdenter.identer.map { PdlPersonIdent(it.ident, it.historisk, it.gruppe) }
 		)
+
 	}
 
 	private fun getTelefonnummer(telefonnummere: List<PdlQueries.HentPerson.Telefonnummer>): String? {
@@ -113,13 +116,12 @@ class PdlClient(
 		}
 	}
 
-	private fun throwPdlApiErrors(response: PdlQueries.HentPerson.Response) {
+	private fun throwPdlApiErrors(response: GraphqlResponse<*, PdlQueries.PdlErrorExtension>) {
 		var melding = "Feilmeldinger i respons fra pdl:\n"
 		if(response.data == null) melding = "$melding- data i respons er null \n"
 		response.errors?.let { feilmeldinger ->
 			melding += feilmeldinger.joinToString(separator = "") { "- ${it.message} (code: ${it.extensions?.code} details: ${it.extensions?.details})\n" }
 			throw RuntimeException(melding)
-
 		}
 	}
 

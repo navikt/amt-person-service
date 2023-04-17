@@ -92,6 +92,15 @@ object PdlClientTestData {
 							"gradering": "FORTROLIG"
 						}
 					]
+				},
+				"hentIdenter": {
+				  "identer": [
+					{
+					  "ident": "29119826819",
+					  "historisk": false,
+					  "gruppe": "FOLKEREGISTERIDENT"
+					}
+				  ]
 				}
 			}
 		}

@@ -41,7 +41,14 @@ object PdlQueries {
 				adressebeskyttelse(historikk: false) {
 				  gradering
 				}
-			  }
+			  },
+			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, NPID], historikk:true) {
+			  	identer {
+			  		ident,
+			  		historisk,
+			  		gruppe
+			  	}
+		      },
 			}
 		""".trimIndent()
 
@@ -55,10 +62,11 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentPerson: HentPdlPerson,
+			val hentPerson: HentPerson,
+			val hentIdenter: HentIdenter,
 		)
 
-		data class HentPdlPerson(
+		data class HentPerson(
 			val navn: List<Navn>,
 			val telefonnummer: List<Telefonnummer>,
 			val adressebeskyttelse: List<Adressebeskyttelse>
@@ -79,6 +87,17 @@ object PdlQueries {
 		data class Adressebeskyttelse(
 			val gradering: String
 		)
+
+		data class HentIdenter(
+			val identer: List<Ident>
+		)
+
+		data class Ident(
+			val ident: String,
+			val historisk: Boolean,
+			val gruppe: String
+		)
+
 	}
 
 	object HentGjeldendeIdent {

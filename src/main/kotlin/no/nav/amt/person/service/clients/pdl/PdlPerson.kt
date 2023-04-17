@@ -5,5 +5,6 @@ data class PdlPerson(
 	val mellomnavn: String?,
 	val etternavn: String,
 	val telefonnummer: String?,
-	val adressebeskyttelseGradering: AdressebeskyttelseGradering?
+	val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
+	val identer: List<PdlPersonIdent>
 )

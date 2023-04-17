@@ -45,6 +45,11 @@ class PdlClientTest {
 		pdlPerson.etternavn shouldBe "Testersen"
 		pdlPerson.telefonnummer shouldBe "+47 12345678"
 
+		val ident = pdlPerson.identer.first()
+		ident.gruppe shouldBe "FOLKEREGISTERIDENT"
+		ident.historisk shouldBe false
+		ident.ident shouldBe "29119826819"
+
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"

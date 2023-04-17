@@ -32,7 +32,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 			PdlQueries.HentPerson.Response(
 				errors = null,
 				data = PdlQueries.HentPerson.ResponseData(
-					PdlQueries.HentPerson.HentPdlPerson(
+					PdlQueries.HentPerson.HentPerson(
 						navn = listOf(PdlQueries.HentPerson.Navn(mockPdlBruker.fornavn, null, mockPdlBruker.etternavn)),
 						telefonnummer = listOf(PdlQueries.HentPerson.Telefonnummer("47", "12345678", 1)),
 						adressebeskyttelse = if (mockPdlBruker.adressebeskyttelse != null) {
@@ -40,7 +40,8 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 						} else {
 							emptyList()
 						}
-					)
+					),
+					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident("PERSON_IDENT", false, "FOLKEREGISTERIDENT")))
 				)
 			)
 		)
