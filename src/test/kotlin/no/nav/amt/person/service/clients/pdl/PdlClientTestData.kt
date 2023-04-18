@@ -1,4 +1,4 @@
-package no.nav.amt.tiltak.clients.pdl
+package no.nav.amt.person.service.clients.pdl
 
 object PdlClientTestData {
 

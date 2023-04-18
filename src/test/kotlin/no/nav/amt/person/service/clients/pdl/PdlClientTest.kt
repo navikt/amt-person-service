@@ -2,11 +2,11 @@ package no.nav.amt.person.service.clients.pdl
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
-import no.nav.amt.tiltak.clients.pdl.PdlClientTestData.errorPrefix
-import no.nav.amt.tiltak.clients.pdl.PdlClientTestData.flereFeilRespons
-import no.nav.amt.tiltak.clients.pdl.PdlClientTestData.gyldigRespons
-import no.nav.amt.tiltak.clients.pdl.PdlClientTestData.minimalFeilRespons
-import no.nav.amt.tiltak.clients.pdl.PdlClientTestData.nullError
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.errorPrefix
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.nullError
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
