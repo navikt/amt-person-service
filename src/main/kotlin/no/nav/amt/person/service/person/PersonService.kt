@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
-import no.nav.amt.person.service.person.dbo.PersonUpsert
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ class PersonService(
 		return repository.get(id).toModel()
 	}
 
-	fun hentPerson(personIdent: String) : Person {
+	fun hentEllerOpprettPerson(personIdent: String) : Person {
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
@@ -25,7 +24,7 @@ class PersonService(
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe
 
-		val personUpsert = PersonUpsert(
+		val person = Person(
 			id = UUID.randomUUID(),
 			personIdent = personIdent,
 			personIdentType = IdentType.valueOf(personIdentType),
@@ -35,17 +34,9 @@ class PersonService(
 			etternavn = pdlPerson.etternavn,
 		)
 
-		repository.upsert(personUpsert)
+		repository.upsert(person)
 
-		return Person(
-			personUpsert.id,
-			personUpsert.personIdent,
-			personUpsert.personIdentType,
-			personUpsert.fornavn,
-			personUpsert.mellomnavn,
-			personUpsert.etternavn,
-			personUpsert.historiskeIdenter
-		)
+		return person
 	}
 
 }

@@ -3,8 +3,8 @@ package no.nav.amt.person.service.person
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
-import no.nav.amt.person.service.person.dbo.PersonUpsert
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
@@ -58,7 +58,7 @@ class PersonRepositoryTest {
 
 	@Test
 	fun `upsert - ny person - inserter person`() {
-		val person = PersonUpsert(
+		val person = Person(
 			id = UUID.randomUUID(),
 			personIdent = TestData.randomIdent(),
 			personIdentType = IdentType.FOLKEREGISTERIDENT,
@@ -90,7 +90,7 @@ class PersonRepositoryTest {
 
 		testRepository.insertPerson(originalPerson)
 
-		val oppdatertPerson = PersonUpsert(
+		val oppdatertPerson = Person(
 				id = originalPerson.id,
 				personIdent = originalPerson.personIdent,
 				personIdentType = originalPerson.personIdentType,

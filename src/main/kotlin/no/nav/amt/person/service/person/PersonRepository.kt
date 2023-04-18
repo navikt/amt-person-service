@@ -1,8 +1,8 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.dbo.PersonUpsert
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
@@ -41,7 +41,7 @@ class PersonRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
-	fun upsert(personUpsert: PersonUpsert) {
+	fun upsert(person: Person) {
 		val sql = """
 			insert into person(
 				id,
@@ -68,13 +68,13 @@ class PersonRepository(
 		""".trimIndent()
 
 		val parameters = sqlParameters(
-			"id" to personUpsert.id,
-			"personIdent" to personUpsert.personIdent,
-			"personIdentType" to personUpsert.personIdentType.toString(),
-			"historiskeIdenter" to personUpsert.historiskeIdenter.toTypedArray(),
-			"fornavn" to personUpsert.fornavn,
-			"mellomnavn" to personUpsert.mellomnavn,
-			"etternavn" to personUpsert.etternavn
+			"id" to person.id,
+			"personIdent" to person.personIdent,
+			"personIdentType" to person.personIdentType.toString(),
+			"historiskeIdenter" to person.historiskeIdenter.toTypedArray(),
+			"fornavn" to person.fornavn,
+			"mellomnavn" to person.mellomnavn,
+			"etternavn" to person.etternavn
 		)
 
 		template.update(sql, parameters)

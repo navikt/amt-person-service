@@ -26,7 +26,7 @@ class PersonServiceTest {
 	}
 
 	@Test
-	fun `get(personIdent) - personen finnes ikke - opprettes og returnere person`() {
+	fun `hentEllerOpprettPerson - personen finnes ikke - opprettes og returnere person`() {
 		val personIdent = TestData.randomIdent()
 		val identType = IdentType.FOLKEREGISTERIDENT
 		val pdlPerson = PdlPerson(
@@ -44,7 +44,7 @@ class PersonServiceTest {
 		every { pdlClient.hentPerson(personIdent) } returns pdlPerson
 		every { repository.get(personIdent) } returns null
 
-		val person = service.hentPerson(personIdent)
+		val person = service.hentEllerOpprettPerson(personIdent)
 		person.personIdent shouldBe personIdent
 		person.personIdentType shouldBe identType
 		person.fornavn shouldBe pdlPerson.fornavn
