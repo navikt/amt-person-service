@@ -21,6 +21,8 @@ val okhttp3Version = "4.10.0"
 val kotestVersion = "5.5.5"
 val poaoTilgangVersion = "2023.04.12_11.17-8706c9ad4b87"
 val testcontainersVersion = "1.18.0"
+val tokenSupportVersion = "3.0.10"
+val mockkVersion = "1.13.5"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -44,6 +46,8 @@ dependencies {
 
 	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
 
+	implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
+
 	runtimeOnly("org.postgresql:postgresql")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -52,7 +56,7 @@ dependencies {
 	testImplementation("com.squareup.okhttp3:mockwebserver:$okhttp3Version")
 	testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 	testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-	testImplementation("io.mockk:mockk:1.13.5")
+	testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
