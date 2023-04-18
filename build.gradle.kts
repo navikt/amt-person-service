@@ -23,6 +23,7 @@ val poaoTilgangVersion = "2023.04.12_11.17-8706c9ad4b87"
 val testcontainersVersion = "1.18.0"
 val tokenSupportVersion = "3.0.10"
 val mockkVersion = "1.13.5"
+val lang3Version = "3.12.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -46,6 +47,7 @@ dependencies {
 
 	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
 
+	implementation("org.apache.commons:commons-lang3:$lang3Version")
 	implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
 
 	runtimeOnly("org.postgresql:postgresql")

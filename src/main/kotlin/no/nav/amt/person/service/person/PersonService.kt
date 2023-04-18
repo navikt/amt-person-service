@@ -3,6 +3,7 @@ package no.nav.amt.person.service.person
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -11,6 +12,7 @@ class PersonService(
 	val pdlClient: PdlClient,
 	val repository: PersonRepository,
 ) {
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun hentPerson(id: UUID): Person {
 		return repository.get(id).toModel()
@@ -35,6 +37,8 @@ class PersonService(
 		)
 
 		repository.upsert(person)
+
+		log.info("Opprettet ny person med id ${person.id}")
 
 		return person
 	}
