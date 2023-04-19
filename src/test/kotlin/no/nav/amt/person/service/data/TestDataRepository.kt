@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
+import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -60,6 +61,40 @@ class TestDataRepository(
 			"navn" to enhet.navn,
 			"createdAt" to enhet.createdAt,
 			"modifiedAt" to enhet.modifiedAt,
+		)
+
+		template.update(sql, parameters)
+	}
+
+	fun insertNavAnsatt(ansatt: NavAnsattDbo) {
+		val sql = """
+			insert into nav_ansatt(
+				id,
+				nav_ident,
+				navn,
+				telefon,
+				epost,
+				created_at,
+				modified_at
+			) values (
+				:id,
+				:navIdent,
+				:navn,
+				:telefon,
+				:epost,
+				:createdAt,
+				:modifiedAt
+			)
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"id" to ansatt.id,
+			"navIdent" to ansatt.navIdent,
+			"navn" to ansatt.navn,
+			"telefon" to ansatt.telefon,
+			"epost" to ansatt.epost,
+			"createdAt" to ansatt.createdAt,
+			"modifiedAt" to ansatt.modifiedAt,
 		)
 
 		template.update(sql, parameters)
