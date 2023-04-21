@@ -69,8 +69,8 @@ class NomClient(
 			val ansatt = it.ressurs
 
 			NomNavAnsatt(
-				navIdent = ansatt.navIdent,
-				navn = ansatt.visningsNavn ?: "${ansatt.fornavn} ${ansatt.etternavn}",
+				navIdent = ansatt.navident,
+				navn = ansatt.visningsnavn ?: "${ansatt.fornavn} ${ansatt.etternavn}",
 				epost = it.ressurs.epost,
 				telefonnummer = telefonnummer
 			)

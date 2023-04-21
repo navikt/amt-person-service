@@ -36,8 +36,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "H156147",
-					  "visningsNavn": "Alias",
+					  "navident": "H156147",
+					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
 					  "epost": "blaut.slappfisk@nav.no",
@@ -68,8 +68,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "H156147",
-					  "visningsNavn": null,
+					  "navident": "H156147",
+					  "visningsnavn": null,
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
 					  "epost": "blaut.slappfisk@nav.no",
@@ -100,8 +100,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "H156147",
-					  "visningsNavn": "Alias",
+					  "navident": "H156147",
+					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
 					  "epost": "blaut.slappfisk@nav.no",
@@ -177,8 +177,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "H156147",
-					  "visningsNavn": "Alias",
+					  "navident": "H156147",
+					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
 					  "epost": "blaut.slappfisk@nav.no",
@@ -210,8 +210,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "H156147",
-					  "visningsNavn": "Alias",
+					  "navident": "H156147",
+					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
 					  "epost": "blaut.slappfisk@nav.no",
@@ -242,8 +242,8 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navIdent": "${veiledere[0].navIdent}",
-					  "visningsNavn": "${veiledere[0].navn}",
+					  "navident": "${veiledere[0].navIdent}",
+					  "visningsnavn": "${veiledere[0].navn}",
 					  "fornavn": "Fornavn",
 					  "etternavn": "Etternavn",
 					  "epost": "${veiledere[0].epost}",
@@ -253,8 +253,8 @@ class NomClientTest {
 				  },
 				  {
 					"ressurs": {
-					  "navIdent": "${veiledere[1].navIdent}",
-					  "visningsNavn": "${veiledere[1].navn}",
+					  "navident": "${veiledere[1].navIdent}",
+					  "visningsnavn": "${veiledere[1].navn}",
 					  "fornavn": "Fornavn",
 					  "etternavn": "Etternavn",
 					  "epost": "${veiledere[1].epost}",

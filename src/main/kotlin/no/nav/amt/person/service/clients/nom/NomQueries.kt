@@ -9,11 +9,11 @@ object NomQueries {
 	object HentIdenter {
 		val query = """
 			query(${"$"}identer: [String!]!) {
-				ressurser(where: { navIdenter: ${"$"}identer }){
+				ressurser(where: { navidenter: ${"$"}identer }){
 					code
 					ressurs {
 						navIdent
-						visningsNavn
+						visningsnavn
 						fornavn
 						etternavn
 						epost
@@ -58,8 +58,8 @@ object NomQueries {
 		)
 
 		data class Ressurs(
-			val navIdent: String,
-			val visningsNavn: String?,
+			val navident: String,
+			val visningsnavn: String?,
 			val fornavn: String?,
 			val etternavn: String?,
 			val epost: String?,
