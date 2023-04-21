@@ -9,7 +9,7 @@ class NavAnsattUpdater(
 	private val navAnsattRepository: NavAnsattRepository,
 ) {
 
-	private val batchSize = 50
+	private val batchSize = 100
 
 	fun oppdaterAlle() {
 		val ansattBatcher = navAnsattRepository.getAll()
