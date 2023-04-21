@@ -1,6 +1,9 @@
 package no.nav.amt.person.service.nav_ansatt
 
+import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.utils.DbTestDataUtils
@@ -116,6 +119,44 @@ class NavAnsattRepositoryTest {
 		faktiskAnsatt.epost shouldBe oppdatertAnsatt.epost
 		faktiskAnsatt.createdAt shouldBeEqualTo ansatt.createdAt
 		faktiskAnsatt.modifiedAt shouldBeCloseTo LocalDateTime.now()
+	}
+
+	@Test
+	fun `getAll - ansatte finnes - returnerer liste med ansatte`() {
+		val ansatt = TestData.lagNavAnsatt()
+		testRepository.insertNavAnsatt(ansatt)
+
+		val alleAnsatte = repository.getAll()
+
+		alleAnsatte shouldHaveAtLeastSize 1
+		alleAnsatte.firstOrNull{ it.id == ansatt.id } shouldNotBe null
+
+	}
+
+	@Test
+	fun `updateMany - flere ansatte - oppdaterer ansatte`() {
+		val ansatte = listOf(TestData.lagNavAnsatt(), TestData.lagNavAnsatt())
+		ansatte.forEach { testRepository.insertNavAnsatt(it) }
+
+		val oppdaterteAnsatte = listOf(
+			NomNavAnsatt(
+				navIdent = ansatte[0].navIdent,
+				navn =	"nytt navn 1",
+				telefonnummer = ansatte[0].telefon,
+				epost = ansatte[0].epost
+			),
+			NomNavAnsatt(
+				navIdent = ansatte[1].navIdent,
+				navn =	"nytt navn 2",
+				telefonnummer = ansatte[1].telefon,
+				epost = ansatte[1].epost
+			),
+		)
+
+		repository.updateMany(oppdaterteAnsatte)
+
+		repository.get(oppdaterteAnsatte[0].navIdent)!!.navn shouldBe oppdaterteAnsatte[0].navn
+		repository.get(oppdaterteAnsatte[1].navIdent)!!.navn shouldBe oppdaterteAnsatte[1].navn
 	}
 
 }

@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients.nom
 
 import io.kotest.assertions.fail
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.data.TestData
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -230,5 +231,56 @@ class NomClientTest {
 		val veileder = client.hentNavAnsatt("H156147") ?: fail("Fant ikke veileder")
 
 		veileder.telefonnummer shouldBe tjenesteTelefon
+	}
+
+	@Test
+	fun `hentVeiledere - veiledere finnes - returnerer veiledere`() {
+		val veiledere = listOf(TestData.lagNavAnsatt(), TestData.lagNavAnsatt())
+		val veilederRespons = """
+			{
+			  "data": {
+				"ressurser": [
+				  {
+					"ressurs": {
+					  "navIdent": "${veiledere[0].navIdent}",
+					  "visningsNavn": "${veiledere[0].navn}",
+					  "fornavn": "Fornavn",
+					  "etternavn": "Etternavn",
+					  "epost": "${veiledere[0].epost}",
+					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${veiledere[0].telefon}" }]
+					},
+					"code": "OK"
+				  },
+				  {
+					"ressurs": {
+					  "navIdent": "${veiledere[1].navIdent}",
+					  "visningsNavn": "${veiledere[1].navn}",
+					  "fornavn": "Fornavn",
+					  "etternavn": "Etternavn",
+					  "epost": "${veiledere[1].epost}",
+					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${veiledere[1].telefon}" }]
+					},
+					"code": "OK"
+				  }
+				]
+			  }
+			}
+		""".trimIndent()
+
+		server.enqueue(MockResponse().setBody(veilederRespons))
+
+		val faktiskeVeiledere = client.hentNavAnsatte(veiledere.map { it.navIdent })
+		val v1 = faktiskeVeiledere.find { it.navIdent == veiledere[0].navIdent }!!
+		val v2 = faktiskeVeiledere.find { it.navIdent == veiledere[1].navIdent }!!
+
+		v1.navIdent shouldBe veiledere[0].navIdent
+		v1.navn shouldBe veiledere[0].navn
+		v1.telefonnummer shouldBe veiledere[0].telefon
+		v1.epost shouldBe veiledere[0].epost
+
+		v2.navIdent shouldBe veiledere[1].navIdent
+		v2.navn shouldBe veiledere[1].navn
+		v2.telefonnummer shouldBe veiledere[1].telefon
+		v2.epost shouldBe veiledere[1].epost
 	}
 }

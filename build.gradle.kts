@@ -24,6 +24,7 @@ val testcontainersVersion = "1.18.0"
 val tokenSupportVersion = "3.0.10"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
+val shedlockVersion = "5.2.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -44,11 +45,13 @@ dependencies {
 	implementation("com.github.navikt.common-java-modules:log:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:token-client:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:rest:$commonVersion")
+	implementation("com.github.navikt.common-java-modules:job:$commonVersion")
 
 	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
 
 	implementation("org.apache.commons:commons-lang3:$lang3Version")
 	implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
+	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
 
 	runtimeOnly("org.postgresql:postgresql")
 

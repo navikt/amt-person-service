@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.nav_ansatt
 
+import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
@@ -44,6 +45,15 @@ class NavAnsattRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
+	fun getAll(): List<NavAnsattDbo> {
+		val sql = """
+			select * from nav_ansatt
+		""".trimIndent()
+
+		return template.jdbcTemplate.query(sql, rowMapper)
+	}
+
+
 	fun upsert(navAnsatt: NavAnsatt) {
 		val sql = """
 			insert into nav_ansatt(id, nav_ident, navn, telefon, epost)
@@ -64,6 +74,28 @@ class NavAnsattRepository(
 		)
 
 		template.update(sql, parameters)
+	}
+
+	fun updateMany(ansatte: List<NomNavAnsatt>) {
+		val sql = """
+			update nav_ansatt
+			set navn = :navn,
+				telefon = :telefon,
+				epost = :epost,
+				modified_at = current_timestamp
+			where nav_ident = :navIdent
+		""".trimIndent()
+
+		val parameters = ansatte.map { navAnsatt ->
+			sqlParameters(
+				"navIdent" to navAnsatt.navIdent,
+				"navn" to navAnsatt.navn,
+				"telefon" to navAnsatt.telefonnummer,
+				"epost" to navAnsatt.epost,
+			)
+		}
+
+		template.batchUpdate(sql, parameters.toTypedArray())
 	}
 
 }

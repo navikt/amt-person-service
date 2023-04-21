@@ -24,12 +24,12 @@ class NomClient(
 	}
 
 	fun hentNavAnsatt(navIdent: String): NomNavAnsatt? {
-		return hentVeilederTilIdenter(listOf(navIdent))
+		return hentNavAnsatte(listOf(navIdent))
 			.firstOrNull()
 			.also { if(it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 	}
 
-	private fun hentVeilederTilIdenter(navIdenter: List<String>): List<NomNavAnsatt> {
+	fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				NomQueries.HentIdenter.query,

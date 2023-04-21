@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class NavAnsattService(
+ class NavAnsattService(
 	private val navAnsattRepository: NavAnsattRepository,
 	private val nomClient: NomClient,
 	private val veilarboppfolgingClient: VeilarboppfolgingClient,
