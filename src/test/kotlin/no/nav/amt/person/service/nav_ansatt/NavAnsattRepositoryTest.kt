@@ -3,7 +3,6 @@ package no.nav.amt.person.service.nav_ansatt
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.utils.DbTestDataUtils
@@ -134,29 +133,32 @@ class NavAnsattRepositoryTest {
 	}
 
 	@Test
-	fun `updateMany - flere ansatte - oppdaterer ansatte`() {
-		val ansatte = listOf(TestData.lagNavAnsatt(), TestData.lagNavAnsatt())
-		ansatte.forEach { testRepository.insertNavAnsatt(it) }
+	fun `upsertMany - flere ansatte - oppdaterer ansatte`() {
+		val ansatt1 = TestData.lagNavAnsatt()
+		val ansatt2 = TestData.lagNavAnsatt()
+		testRepository.insertNavAnsatt(ansatt1)
+		testRepository.insertNavAnsatt(ansatt2)
 
-		val oppdaterteAnsatte = listOf(
-			NomNavAnsatt(
-				navIdent = ansatte[0].navIdent,
+		val oppdatertAnsatt1 = NavAnsatt(
+				id = ansatt1.id,
+				navIdent = ansatt1.navIdent,
 				navn =	"nytt navn 1",
-				telefonnummer = ansatte[0].telefon,
-				epost = ansatte[0].epost
-			),
-			NomNavAnsatt(
-				navIdent = ansatte[1].navIdent,
-				navn =	"nytt navn 2",
-				telefonnummer = ansatte[1].telefon,
-				epost = ansatte[1].epost
-			),
+				telefon = ansatt1.telefon,
+				epost = ansatt1.epost
 		)
 
-		repository.updateMany(oppdaterteAnsatte)
+		val oppdatertAnsatt2 = NavAnsatt(
+				id = ansatt2.id,
+				navIdent = ansatt2.navIdent,
+				navn =	"nytt navn 2",
+				telefon = ansatt2.telefon,
+				epost = ansatt2.epost
+		)
 
-		repository.get(oppdaterteAnsatte[0].navIdent)!!.navn shouldBe oppdaterteAnsatte[0].navn
-		repository.get(oppdaterteAnsatte[1].navIdent)!!.navn shouldBe oppdaterteAnsatte[1].navn
+		repository.upsertMany(listOf(oppdatertAnsatt1, oppdatertAnsatt2))
+
+		repository.get(oppdatertAnsatt1.navIdent)!!.navn shouldBe oppdatertAnsatt1.navn
+		repository.get(oppdatertAnsatt2.navIdent)!!.navn shouldBe oppdatertAnsatt2.navn
 	}
 
 }

@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.nav_ansatt
 
-import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
@@ -55,16 +54,6 @@ class NavAnsattRepository(
 
 
 	fun upsert(navAnsatt: NavAnsatt) {
-		val sql = """
-			insert into nav_ansatt(id, nav_ident, navn, telefon, epost)
-			values (:id, :navIdent, :navn, :telefon, :epost)
-			on conflict (nav_ident) do update set
-				navn = :navn,
-				telefon = :telefon,
-				epost = :epost,
-				modified_at = current_timestamp
-		""".trimIndent()
-
 		val parameters = sqlParameters(
 			"id" to navAnsatt.id,
 			"navIdent" to navAnsatt.navIdent,
@@ -73,29 +62,32 @@ class NavAnsattRepository(
 			"epost" to navAnsatt.epost,
 		)
 
-		template.update(sql, parameters)
+		template.update(upsertSql, parameters)
 	}
 
-	fun updateMany(ansatte: List<NomNavAnsatt>) {
-		val sql = """
-			update nav_ansatt
-			set navn = :navn,
-				telefon = :telefon,
-				epost = :epost,
-				modified_at = current_timestamp
-			where nav_ident = :navIdent
-		""".trimIndent()
-
+	fun upsertMany(ansatte: List<NavAnsatt>) {
 		val parameters = ansatte.map { navAnsatt ->
 			sqlParameters(
+				"id" to navAnsatt.id,
 				"navIdent" to navAnsatt.navIdent,
 				"navn" to navAnsatt.navn,
-				"telefon" to navAnsatt.telefonnummer,
+				"telefon" to navAnsatt.telefon,
 				"epost" to navAnsatt.epost,
 			)
 		}
 
-		template.batchUpdate(sql, parameters.toTypedArray())
+		template.batchUpdate(upsertSql, parameters.toTypedArray())
+
 	}
+
+	private val upsertSql = """
+			insert into nav_ansatt(id, nav_ident, navn, telefon, epost)
+			values (:id, :navIdent, :navn, :telefon, :epost)
+			on conflict (nav_ident) do update set
+				navn = :navn,
+				telefon = :telefon,
+				epost = :epost,
+				modified_at = current_timestamp
+		""".trimIndent()
 
 }
