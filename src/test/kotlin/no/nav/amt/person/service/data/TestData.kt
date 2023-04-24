@@ -2,6 +2,7 @@ package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
+import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import java.time.LocalDateTime
@@ -65,4 +66,15 @@ object TestData {
 		modifiedAt = modifiedAt,
 	)
 
+	fun lagNavBruker(
+		id: UUID = UUID.randomUUID(),
+		person: PersonDbo = lagPerson(),
+		navVeileder: NavAnsattDbo? = lagNavAnsatt(),
+		navEnhet: NavEnhetDbo? = lagNavEnhet(),
+		telefon: String? = "77788999",
+		epost: String? = "nav_bruker@gmail.com",
+		erSkjermet: Boolean = false,
+		createdAt: LocalDateTime = LocalDateTime.now(),
+		modifiedAt: LocalDateTime = LocalDateTime.now(),
+	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, createdAt, modifiedAt)
 }

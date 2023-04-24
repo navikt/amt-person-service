@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,15 +13,18 @@ import org.junit.jupiter.api.Test
 class NavAnsattServiceTest {
 	lateinit var navAnsattRepository: NavAnsattRepository
 	lateinit var nomClient: NomClient
+	lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
 	lateinit var service: NavAnsattService
 
 	@BeforeEach
 	fun setup() {
 		navAnsattRepository = mockk(relaxUnitFun = true)
 		nomClient = mockk()
+		veilarboppfolgingClient = mockk()
 		service = NavAnsattService(
 			navAnsattRepository = navAnsattRepository,
 			nomClient = nomClient,
+			veilarboppfolgingClient = veilarboppfolgingClient,
 		)
 	}
 

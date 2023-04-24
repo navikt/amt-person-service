@@ -11,3 +11,7 @@ fun ResultSet.getUUID(columnLabel: String): UUID {
 	return UUID.fromString(this.getString(columnLabel))
 }
 
+fun ResultSet.getNullableUUID(columnLabel: String): UUID? {
+	return this.getString(columnLabel)
+		?.let { UUID.fromString(it) }
+}
