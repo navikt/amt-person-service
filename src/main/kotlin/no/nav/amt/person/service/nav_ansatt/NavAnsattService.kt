@@ -50,14 +50,9 @@ class NavAnsattService(
 	}
 
 
-	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsatt? {
-		val tildeltVeilederIdent = veilarboppfolgingClient.hentVeilederIdent(brukersPersonIdent)
-
-		if (tildeltVeilederIdent != null) {
-			return hentEllerOpprettAnsatt(tildeltVeilederIdent)
+	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsatt? =
+		veilarboppfolgingClient.hentVeilederIdent(brukersPersonIdent)?.let {
+			hentEllerOpprettAnsatt(it)
 		}
-
-		return null
-	}
 
 }

@@ -25,7 +25,7 @@ class NavBrukerRepository(
 			person = PersonDbo(
 				id = rs.getUUID("nav_bruker.person_id"),
 				personIdent = rs.getString("person.person_ident"),
-				personIdentType = rs.getString("person.person_ident_type")?.let { IdentType.valueOf(it)},
+				personIdentType = rs.getString("person.person_ident_type")?.let { IdentType.valueOf(it) },
 				historiskeIdenter = (rs.getArray("person.historiske_identer").array as Array<String>).asList(),
 				fornavn = rs.getString("person.fornavn"),
 				mellomnavn = rs.getString("person.mellomnavn"),
@@ -33,9 +33,7 @@ class NavBrukerRepository(
 				createdAt = rs.getTimestamp("person.created_at").toLocalDateTime(),
 				modifiedAt = rs.getTimestamp("person.modified_at").toLocalDateTime(),
 			),
-			navVeileder = if (rs.getNullableUUID("nav_bruker.nav_veileder_id") == null) {
-				null
-			} else {
+			navVeileder = rs.getNullableUUID("nav_bruker.nav_veileder_id")?.let {
 				NavAnsattDbo(
 					id = rs.getUUID("nav_bruker.nav_veileder_id"),
 					navIdent = rs.getString("nav_ansatt.nav_ident"),
@@ -45,10 +43,9 @@ class NavBrukerRepository(
 					createdAt = rs.getTimestamp("nav_ansatt.created_at").toLocalDateTime(),
 					modifiedAt = rs.getTimestamp("nav_ansatt.modified_at").toLocalDateTime(),
 				)
+
 			},
-			navEnhet = if (rs.getNullableUUID("nav_bruker.nav_enhet_id") == null) {
-				null
-			} else {
+			navEnhet = rs.getNullableUUID("nav_bruker.nav_enhet_id")?.let {
 				NavEnhetDbo(
 					id = rs.getUUID("nav_bruker.nav_enhet_id"),
 					enhetId = rs.getString("nav_enhet.nav_enhet_id"),
