@@ -14,9 +14,10 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
 	mavenCentral()
 	maven { setUrl("https://jitpack.io") }
+	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2023.03.22_12.48-00fcbdc8f455"
+val commonVersion = "3.2023.04.18_10.07-0576b4e09008"
 val okhttp3Version = "4.10.0"
 val kotestVersion = "5.5.5"
 val poaoTilgangVersion = "2023.04.12_11.17-8706c9ad4b87"
@@ -25,6 +26,7 @@ val tokenSupportVersion = "3.0.10"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
 val shedlockVersion = "5.2.0"
+val confluentVersion = "7.3.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -46,6 +48,9 @@ dependencies {
 	implementation("com.github.navikt.common-java-modules:token-client:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:rest:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:job:$commonVersion")
+	implementation("com.github.navikt.common-java-modules:kafka:$commonVersion")
+
+	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
 	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
 
@@ -55,12 +60,15 @@ dependencies {
 
 	runtimeOnly("org.postgresql:postgresql")
 
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
 	testImplementation("io.kotest:kotest-assertions-json-jvm:$kotestVersion")
 	testImplementation("com.squareup.okhttp3:mockwebserver:$okhttp3Version")
 	testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 	testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+	testImplementation("org.testcontainers:kafka:$testcontainersVersion")
 	testImplementation("io.mockk:mockk:$mockkVersion")
 }
 

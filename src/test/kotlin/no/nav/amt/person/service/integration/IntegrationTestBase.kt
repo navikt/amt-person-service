@@ -1,6 +1,8 @@
 package no.nav.amt.person.service.integration
 
+import no.nav.amt.person.service.integration.kafka.SingletonKafkaProvider
 import no.nav.amt.person.service.integration.mock.servers.*
+import no.nav.amt.person.service.kafka.config.KafkaProperties
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -9,12 +11,16 @@ import okhttp3.Response
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import java.time.Duration
 
 @ActiveProfiles("integration")
+@Import(IntegrationTestConfiguration::class)
 @TestConfiguration("application-integration.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class IntegrationTestBase {
@@ -102,4 +108,15 @@ class IntegrationTestBase {
 
 		return client.newCall(reqBuilder.build()).execute()
 	}
+}
+
+@Profile("integration")
+@TestConfiguration
+class IntegrationTestConfiguration {
+
+	@Bean
+	fun kafkaProperties(): KafkaProperties {
+		return SingletonKafkaProvider.getKafkaProperties()
+	}
+
 }
