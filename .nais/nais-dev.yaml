@@ -40,6 +40,8 @@ spec:
       enabled: true
   secureLogs:
     enabled: true
+  kafka:
+    pool: nav-dev
   accessPolicy:
     outbound:
       rules:
