@@ -1,13 +1,17 @@
 package no.nav.amt.person.service.integration
 
-import no.nav.amt.person.service.integration.kafka.SingletonKafkaProvider
+import no.nav.amt.person.service.data.TestDataRepository
+import no.nav.amt.person.service.integration.kafka.utils.SingletonKafkaProvider
 import no.nav.amt.person.service.integration.mock.servers.*
 import no.nav.amt.person.service.kafka.config.KafkaProperties
+import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import org.junit.AfterClass
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -32,6 +36,9 @@ class IntegrationTestBase {
 		.callTimeout(Duration.ofMinutes(5))
 		.readTimeout(Duration.ofMinutes(5))
 		.build()
+
+	@Autowired
+	lateinit var testDataRepository: TestDataRepository
 
 	companion object {
 		val mockPdlHttpServer = MockPdlHttpServer()
@@ -86,6 +93,12 @@ class IntegrationTestBase {
 			registry.add("spring.datasource.username") { container.username }
 			registry.add("spring.datasource.password") { container.password }
 			registry.add("spring.datasource.hikari.maximum-pool-size") { 3 }
+		}
+
+		@JvmStatic
+		@AfterClass
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(dataSource)
 		}
 
 	}

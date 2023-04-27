@@ -2,7 +2,7 @@ package no.nav.amt.person.service.nav_bruker
 
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
+import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.poao_tilgang.client.PoaoTilgangClient
@@ -21,6 +21,10 @@ class NavBrukerService(
 
 	fun hentNavBruker(id: UUID): NavBruker {
 		return repository.get(id).toModel()
+	}
+
+	fun hentNavBruker(personIdent: String): NavBruker? {
+		return repository.get(personIdent)?.toModel()
 	}
 
 	fun hentEllerOpprettNavBruker(personIdent: String): NavBruker {
@@ -44,19 +48,13 @@ class NavBrukerService(
 			erSkjermet = erSkjermet,
 		)
 
-		repository.upsert(
-			NavBrukerUpsert(
-				navBruker.id,
-				navBruker.person.id,
-				navBruker.navVeileder?.id,
-				navBruker.navEnhet?.id,
-				navBruker.telefon,
-				navBruker.epost,
-				navBruker.erSkjermet,
-			)
-		)
+		repository.upsert(navBruker.toUpsert())
 
 		return navBruker
+	}
+
+	fun oppdaterNavEnhet(navBruker: NavBruker, navEnhet: NavEnhet?) {
+		repository.upsert(navBruker.toUpsert(navEnhetId = navEnhet?.id))
 	}
 
 }

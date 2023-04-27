@@ -56,7 +56,9 @@ dependencies {
 
 	implementation("org.apache.commons:commons-lang3:$lang3Version")
 	implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
+
 	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
+	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
 
 	runtimeOnly("org.postgresql:postgresql")
 

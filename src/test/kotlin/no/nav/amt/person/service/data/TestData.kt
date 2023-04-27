@@ -18,6 +18,8 @@ object TestData {
 		return ('A'..'Z').random().toString() + (100_000 .. 999_999).random().toString()
 	}
 
+	fun randomEnhetId() = (1000..9999).random().toString()
+
 	fun lagPerson(
 		id: UUID = UUID.randomUUID(),
 		personIdent: String = randomIdent(),
@@ -42,11 +44,12 @@ object TestData {
 
 	fun lagNavEnhet(
 		id: UUID = UUID.randomUUID(),
-		enhetId: String = (1000 .. 9999).random().toString(),
+		enhetId: String = randomEnhetId(),
 		navn: String = "Nav Enhet 1",
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = NavEnhetDbo(id, enhetId, navn, createdAt, modifiedAt)
+
 
 	fun lagNavAnsatt(
 		id: UUID = UUID.randomUUID(),
@@ -77,4 +80,5 @@ object TestData {
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, createdAt, modifiedAt)
+
 }

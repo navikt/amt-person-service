@@ -8,7 +8,9 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Component
 
+@Component
 class TestDataRepository(
 	private val template: NamedParameterJdbcTemplate
 ) {
