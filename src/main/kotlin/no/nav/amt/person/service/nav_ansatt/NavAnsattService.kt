@@ -19,6 +19,10 @@ import java.util.*
 		return navAnsattRepository.get(navAnsattId).toModel()
 	}
 
+	fun hentNavAnsatt(navIdent: String): NavAnsatt? {
+		return navAnsattRepository.get(navIdent)?.toModel()
+	}
+
 	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
 		val navAnsatt = navAnsattRepository.get(navIdent)
 

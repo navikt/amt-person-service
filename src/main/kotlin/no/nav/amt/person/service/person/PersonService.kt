@@ -22,6 +22,8 @@ class PersonService(
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
+	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
+
 	private fun opprettPerson(personIdent: String): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe

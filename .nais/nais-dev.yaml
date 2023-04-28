@@ -84,6 +84,8 @@ spec:
       value: https://veilarbarena.dev-fss-pub.nais.io
     - name: ENDRING_PAA_BRUKER_TOPIC
       value: pto.endring-paa-oppfolgingsbruker-v2
+    - name: SISTE_TILORDNET_VEILEDER_TOPIC
+      value: pto.siste-tilordnet-veileder-v1
 
   gcp:
     sqlInstances:

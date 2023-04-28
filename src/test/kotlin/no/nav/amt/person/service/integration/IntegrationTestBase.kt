@@ -11,6 +11,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import org.junit.AfterClass
+import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -39,6 +40,17 @@ class IntegrationTestBase {
 
 	@Autowired
 	lateinit var testDataRepository: TestDataRepository
+
+	@AfterEach
+	fun cleanUp() {
+		mockKrrProxyHttpServer.resetHttpServer()
+		mockNomHttpServer.resetHttpServer()
+		mockNorgHttpServer.resetHttpServer()
+		mockPdlHttpServer.resetHttpServer()
+		mockPoaoTilgangHttpServer.resetHttpServer()
+		mockVeilarbarenaHttpServer.resetHttpServer()
+		mockVeilarboppfolgingHttpServer.resetHttpServer()
+	}
 
 	companion object {
 		val mockPdlHttpServer = MockPdlHttpServer()

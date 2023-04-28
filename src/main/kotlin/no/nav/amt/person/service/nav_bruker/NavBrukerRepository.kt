@@ -154,4 +154,31 @@ class NavBrukerRepository(
 			$where
 		""".trimIndent()
 	}
+
+	fun finnBrukerId(personIdent: String): UUID? {
+		val sql = """
+			select nb.id as "nav_bruker.id"
+			from nav_bruker nb join person p on nb.person_id = p.id
+			where p.person_ident = :personIdent
+			""".trimMargin()
+
+		val parameters = sqlParameters("personIdent" to personIdent)
+
+		return template.query(sql, parameters) {rs, _ -> rs.getNullableUUID("nav_bruker.id")}.firstOrNull()
+	}
+
+	fun oppdaterNavVeileder(navBrukerId: UUID, veilederId: UUID) {
+		val sql = """
+			update nav_bruker
+			set nav_veileder_id = :veilederId
+			where id = :navBrukerId
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"navBrukerId" to navBrukerId,
+			"veilederId" to veilederId,
+		)
+
+		template.update(sql, parameters)
+	}
 }

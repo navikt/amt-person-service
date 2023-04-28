@@ -27,6 +27,38 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		addResponseHandler(requestPredicate, createPdlBrukerResponse(mockPdlBruker))
 	}
 
+	fun mockHentGjeldendePersonligIdent(ident: String, personIdent: String) {
+		val request = toJsonString(
+			GraphqlUtils.GraphqlQuery(
+				PdlQueries.HentGjeldendeIdent.query,
+				PdlQueries.HentGjeldendeIdent.Variables(ident)
+			)
+		)
+
+		val requestPredicate = { req: RecordedRequest ->
+			req.path == "/graphql"
+				&& req.method == "POST"
+				&& req.body.readUtf8() == request
+		}
+
+		addResponseHandler(requestPredicate, createHentGjeldendeIdentResponse(personIdent))
+	}
+
+	private fun createHentGjeldendeIdentResponse(personIdent: String): MockResponse {
+		val body = toJsonString(
+			PdlQueries.HentGjeldendeIdent.Response(
+				errors = null,
+				data = PdlQueries.HentGjeldendeIdent.ResponseData(
+					PdlQueries.HentGjeldendeIdent.HentIdenter(
+						identer = listOf(PdlQueries.HentGjeldendeIdent.Ident(ident = personIdent))
+					)
+				)
+			)
+		)
+
+		return MockResponse().setResponseCode(200).setBody(body)
+	}
+
 	private fun createPdlBrukerResponse(mockPdlBruker: MockPdlBruker): MockResponse {
 		val body = toJsonString(
 			PdlQueries.HentPerson.Response(

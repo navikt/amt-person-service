@@ -2,6 +2,7 @@ package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
 import no.nav.amt.person.service.kafka.ingestor.EndringPaaBrukerIngestor
+import no.nav.amt.person.service.kafka.ingestor.TildeltVeilederIngestor
 import no.nav.common.kafka.consumer.KafkaConsumerClient
 import no.nav.common.kafka.consumer.feilhandtering.KafkaConsumerRecordProcessor
 import no.nav.common.kafka.consumer.feilhandtering.util.KafkaConsumerRecordProcessorBuilder
@@ -24,6 +25,7 @@ class KafkaConfiguration(
 	kafkaProperties: KafkaProperties,
 	jdbcTemplate: JdbcTemplate,
 	endringPaaBrukerIngestor: EndringPaaBrukerIngestor,
+	tildeltVeilederIngestor: TildeltVeilederIngestor,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -41,6 +43,15 @@ class KafkaConfiguration(
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
 					Consumer<ConsumerRecord<String, String>> { endringPaaBrukerIngestor.ingest(it.value()) }
+				),
+			KafkaConsumerClientBuilder.TopicConfig<String, String>()
+				.withLogging()
+				.withStoreOnFailure(consumerRepository)
+				.withConsumerConfig(
+					kafkaTopicProperties.sisteTilordnetVeilederTopic,
+					Deserializers.stringDeserializer(),
+					Deserializers.stringDeserializer(),
+					Consumer<ConsumerRecord<String, String>> { tildeltVeilederIngestor.ingest(it.value()) }
 				),
 		)
 

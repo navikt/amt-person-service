@@ -124,6 +124,31 @@ class NavBrukerRepositoryTest {
 
 	}
 
+	@Test
+	fun `finnBrukerId - bruker finnes ikke - returnerer null`() {
+		repository.finnBrukerId("en ident") shouldBe null
+	}
+
+	@Test
+	fun `finnBrukerId - bruker finnes - returnerer id`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+
+		repository.finnBrukerId(bruker.person.personIdent) shouldBe bruker.id
+	}
+
+	@Test
+	fun `oppdaterNavVeileder - bruker og veileder finnes - oppdaterer veilderId`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+		val veileder = TestData.lagNavAnsatt()
+		testRepository.insertNavAnsatt(veileder)
+
+		repository.oppdaterNavVeileder(bruker.id, veileder.id)
+
+		repository.get(bruker.id).navVeileder?.id shouldBe veileder.id
+	}
+
 	private fun sammenlign(
 		faktiskBruker: NavBrukerDbo,
 		bruker: NavBrukerDbo,

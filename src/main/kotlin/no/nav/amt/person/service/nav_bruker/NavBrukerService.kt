@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.nav_bruker
 
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
+import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
@@ -55,6 +56,14 @@ class NavBrukerService(
 
 	fun oppdaterNavEnhet(navBruker: NavBruker, navEnhet: NavEnhet?) {
 		repository.upsert(navBruker.toUpsert(navEnhetId = navEnhet?.id))
+	}
+
+	fun finnBrukerId(gjeldendeIdent: String): UUID? {
+		return repository.finnBrukerId(gjeldendeIdent)
+	}
+
+	fun oppdaterNavVeileder(navBrukerId: UUID, veileder: NavAnsatt) {
+		repository.oppdaterNavVeileder(navBrukerId, veileder.id)
 	}
 
 }

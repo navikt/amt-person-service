@@ -12,6 +12,8 @@ class KafkaMessageSender(
 	properties: KafkaProperties,
 	@Value("\${app.env.endringPaaBrukerTopic}")
 	private val endringPaaBrukerTopic: String,
+	@Value("\${app.env.sisteTilordnetVeilederTopic}")
+	private val sisteTilordnetVeilederTopic: String,
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<ByteArray, ByteArray>(properties.producer())
 
@@ -19,6 +21,16 @@ class KafkaMessageSender(
 		kafkaProducer.send(
 			ProducerRecord(
 				endringPaaBrukerTopic,
+				UUID.randomUUID().toString().toByteArray(),
+				jsonString.toByteArray(),
+			)
+		)
+	}
+
+	fun sendTilTildeltVeilederTopic(jsonString: String) {
+		kafkaProducer.send(
+			ProducerRecord(
+				sisteTilordnetVeilederTopic,
 				UUID.randomUUID().toString().toByteArray(),
 				jsonString.toByteArray(),
 			)
