@@ -22,16 +22,20 @@ repositories {
 	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2023.04.18_10.07-0576b4e09008"
-val okhttp3Version = "4.10.0"
-val kotestVersion = "5.5.5"
-val poaoTilgangVersion = "2023.04.12_11.17-8706c9ad4b87"
+val commonVersion = "3.2023.05.02_06.50-0576b4e09008"
+val okhttp3Version = "4.11.0"
+val kotestVersion = "5.6.1"
+val poaoTilgangVersion = "2023.05.02_09.15-64228b754508"
 val testcontainersVersion = "1.18.0"
-val tokenSupportVersion = "3.0.10"
+val tokenSupportVersion = "3.0.11"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
 val shedlockVersion = "5.2.0"
-val confluentVersion = "7.3.1"
+val confluentVersion = "7.3.3"
+val flywayVersion = "9.17.0"
+val jacksonVersion = "2.15.0"
+val micrometerVersion = "1.10.6"
+val postgresVersion = "42.6.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -44,11 +48,11 @@ dependencies {
 
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
-	implementation("org.flywaydb:flyway-core")
+	implementation("org.flywaydb:flyway-core:$flywayVersion")
 
-	implementation("io.micrometer:micrometer-registry-prometheus")
+	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
 	implementation("com.github.navikt.common-java-modules:log:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:token-client:$commonVersion")
 	implementation("com.github.navikt.common-java-modules:rest:$commonVersion")
@@ -65,7 +69,7 @@ dependencies {
 	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
 
-	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("org.postgresql:postgresql:$postgresVersion")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
