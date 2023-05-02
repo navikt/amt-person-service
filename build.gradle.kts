@@ -1,10 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
 plugins {
+	val kotlinVersion = "1.8.10"
+
 	id("org.springframework.boot") version "3.0.5"
 	id("io.spring.dependency-management") version "1.1.0"
-	kotlin("jvm") version "1.7.22"
-	kotlin("plugin.spring") version "1.7.22"
+	id("com.github.davidmc24.gradle.plugin.avro") version "1.7.0"
+	kotlin("plugin.serialization") version kotlinVersion
+	kotlin("jvm") version kotlinVersion
+	kotlin("plugin.spring") version kotlinVersion
 }
 
 group = "no.nav.amt-person-service"
@@ -59,8 +64,9 @@ dependencies {
 
 	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
 
-	runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.person
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
@@ -32,7 +33,7 @@ class PersonRepositoryTest {
 	}
 
 	@Test
-	fun `get - person finnes - returnerer person`() {
+	fun `get(uuid) - person finnes - returnerer person`() {
 		val person = TestData.lagPerson()
 		testRepository.insertPerson(person)
 
@@ -50,11 +51,40 @@ class PersonRepositoryTest {
 	}
 
 	@Test
-	fun `get - person finnes ikke - kaster NoSuchElementException`() {
+	fun `get(uuid) - person finnes ikke - kaster NoSuchElementException`() {
 		assertThrows<NoSuchElementException> {
 			repository.get(UUID.randomUUID())
 		}
 	}
+
+	@Test
+	fun `get(personIdent) - person finnes ikke - returnerer null`() {
+		repository.get(TestData.randomIdent()) shouldBe null
+	}
+
+	@Test
+	fun `getPersoner - flere personer, en finnes ikke - returnerer personer som finnes fra før`() {
+		val person1 = TestData.lagPerson()
+		val person2 = TestData.lagPerson()
+		testRepository.insertPerson(person1)
+		testRepository.insertPerson(person2)
+
+		val personer = repository.getPersoner(listOf(
+			person1.personIdent,
+			person2.personIdent,
+			TestData.randomIdent()
+		))
+
+		personer shouldHaveSize 2
+		personer.any { it.id == person1.id } shouldBe true
+		personer.any { it.id == person2.id } shouldBe true
+	}
+
+	@Test
+	fun `getPersoner - ingen person med ident - returnerer tom liste`() {
+		repository.getPersoner(listOf(TestData.randomIdent())) shouldBe emptyList()
+	}
+
 
 	@Test
 	fun `upsert - ny person - inserter person`() {
@@ -112,6 +142,27 @@ class PersonRepositoryTest {
 		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
 		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn
 		faktiskPerson.createdAt shouldBeEqualTo originalPerson.createdAt
+		faktiskPerson.modifiedAt shouldBeCloseTo LocalDateTime.now()
+	}
+
+	@Test
+	fun `oppdaterIdenter - ny ident - oppdaterer`() {
+		val person = TestData.lagPerson(personIdentType = IdentType.NPID)
+		val nyPersonIdent = TestData.randomIdent()
+		testRepository.insertPerson(person)
+
+		repository.oppdaterIdenter(
+			id = person.id,
+			gjeldendeIdent = nyPersonIdent,
+			gjeldendeIdentType = IdentType.FOLKEREGISTERIDENT,
+			historiskeIdenter = listOf(person.personIdent)
+		)
+
+		val faktiskPerson = repository.get(person.id)
+
+		faktiskPerson.personIdent shouldBe nyPersonIdent
+		faktiskPerson.personIdentType shouldBe IdentType.FOLKEREGISTERIDENT
+		faktiskPerson.historiskeIdenter shouldBe listOf(person.personIdent)
 		faktiskPerson.modifiedAt shouldBeCloseTo LocalDateTime.now()
 	}
 

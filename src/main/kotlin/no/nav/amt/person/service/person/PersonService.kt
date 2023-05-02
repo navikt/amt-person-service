@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
+import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.slf4j.LoggerFactory
@@ -18,11 +19,29 @@ class PersonService(
 		return repository.get(id).toModel()
 	}
 
+	fun hentPerson(personIdent: String): Person? {
+		return repository.get(personIdent)?.toModel()
+	}
+
 	fun hentEllerOpprettPerson(personIdent: String) : Person {
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
 	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
+	fun oppdaterPersonIdent(gjeldendeIdent: String, identType: IdentType, historiskeIdenter: List<String>) {
+		val personer = repository.getPersoner(historiskeIdenter.plus(gjeldendeIdent))
+
+		if(personer.size > 1) {
+			secureLog.error("Vi har flere personer knyttet til ident: $gjeldendeIdent, historiske identer:$historiskeIdenter")
+			log.error("Vi har flere personer knyttet til samme person")
+			throw IllegalStateException("Vi har flere personer knyttet til samme person")
+		}
+
+		personer.firstOrNull()?.let { person ->
+			repository.oppdaterIdenter(person.id, gjeldendeIdent, identType, historiskeIdenter)
+		}
+
+	}
 
 	private fun opprettPerson(personIdent: String): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)

@@ -61,12 +61,16 @@ class IntegrationTestBase {
 		val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
 		val mockNomHttpServer = MockNomHttpServer()
 		val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
+		val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
 
 		val dataSource = SingletonPostgresContainer.getDataSource()
 
 		@JvmStatic
 		@DynamicPropertySource
 		fun startEnvironment(registry: DynamicPropertyRegistry) {
+			mockSchemaRegistryHttpServer.start()
+			registry.add("kafka.schema.registry.url") { mockSchemaRegistryHttpServer.serverUrl() }
+
 			mockPdlHttpServer.start()
 			registry.add("pdl.url") { mockPdlHttpServer.serverUrl() }
 			registry.add("pdl.scope") { "test.pdl" }

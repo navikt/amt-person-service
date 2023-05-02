@@ -80,5 +80,47 @@ class PersonRepository(
 		template.update(sql, parameters)
 	}
 
+	fun getPersoner(identer: List<String>): List<PersonDbo> {
+		if (identer.isEmpty()) return emptyList()
+
+		val sql = """
+			select *
+			from person
+			where person_ident in (:identer)
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"identer" to identer,
+		)
+
+		return template.query(sql, parameters, rowMapper)
+
+	}
+
+	fun oppdaterIdenter(
+		id: UUID,
+		gjeldendeIdent: String,
+		gjeldendeIdentType: IdentType,
+		historiskeIdenter: List<String>,
+	) {
+		val sql = """
+			update person
+			set person_ident = :gjeldendeIdent,
+				person_ident_type = :gjeldendeIdentType,
+				historiske_identer = :historiskeIdenter,
+				modified_at = current_timestamp
+			where id = :id
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"id" to id,
+			"gjeldendeIdent" to gjeldendeIdent,
+			"gjeldendeIdentType" to gjeldendeIdentType.toString(),
+			"historiskeIdenter" to historiskeIdenter.toTypedArray(),
+		)
+
+		template.update(sql, parameters)
+	}
+
 }
 

@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
+import no.nav.amt.person.service.kafka.ingestor.AktorV2Ingestor
 import no.nav.amt.person.service.kafka.ingestor.EndringPaaBrukerIngestor
 import no.nav.amt.person.service.kafka.ingestor.TildeltVeilederIngestor
 import no.nav.common.kafka.consumer.KafkaConsumerClient
@@ -9,8 +10,10 @@ import no.nav.common.kafka.consumer.feilhandtering.util.KafkaConsumerRecordProce
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder
 import no.nav.common.kafka.consumer.util.deserializer.Deserializers
 import no.nav.common.kafka.spring.PostgresJdbcTemplateConsumerRepository
+import no.nav.person.pdl.aktor.v2.Aktor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
@@ -21,11 +24,15 @@ import java.util.function.Consumer
 @Configuration
 @EnableConfigurationProperties(KafkaTopicProperties::class)
 class KafkaConfiguration(
+	@Value("\${kafka.schema.registry.url}") schemaRegistryUrl: String,
+	@Value("\${kafka.schema.registry.username}") schemaRegistryUsername: String,
+	@Value("\${kafka.schema.registry.password}") schemaRegistryPassword: String,
 	kafkaTopicProperties: KafkaTopicProperties,
 	kafkaProperties: KafkaProperties,
 	jdbcTemplate: JdbcTemplate,
 	endringPaaBrukerIngestor: EndringPaaBrukerIngestor,
 	tildeltVeilederIngestor: TildeltVeilederIngestor,
+	aktorV2Ingestor: AktorV2Ingestor,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -52,6 +59,16 @@ class KafkaConfiguration(
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
 					Consumer<ConsumerRecord<String, String>> { tildeltVeilederIngestor.ingest(it.value()) }
+				),
+
+				KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.aktorV2Topic,
+						Deserializers.stringDeserializer(),
+						SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
+						Consumer<ConsumerRecord<String, Aktor>> { aktorV2Ingestor.ingest(it.key(), it.value()) }
 				),
 		)
 

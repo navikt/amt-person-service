@@ -11,6 +11,8 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.model.IdentType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalStateException
 
 class PersonServiceTest {
 
@@ -51,5 +53,19 @@ class PersonServiceTest {
 		person.mellomnavn shouldBe pdlPerson.mellomnavn
 		person.etternavn shouldBe pdlPerson.etternavn
 		person.historiskeIdenter shouldHaveSize 1
+	}
+
+	@Test
+	fun `oppdaterPersonIdent - flere personer knyttet til samme ident - kaster exception`() {
+		val nyIdent = TestData.randomIdent()
+		val historiskeIdenter = listOf(TestData.randomIdent(), TestData.randomIdent())
+
+		every { repository.getPersoner(historiskeIdenter.plus(nyIdent)) } returns
+			historiskeIdenter.map { TestData.lagPerson(personIdent = it) }
+
+		assertThrows<IllegalStateException> {
+			service.oppdaterPersonIdent(nyIdent, IdentType.FOLKEREGISTERIDENT, historiskeIdenter)
+		}
+
 	}
 }

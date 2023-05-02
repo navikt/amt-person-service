@@ -86,6 +86,8 @@ spec:
       value: pto.endring-paa-oppfolgingsbruker-v2
     - name: SISTE_TILORDNET_VEILEDER_TOPIC
       value: pto.siste-tilordnet-veileder-v1
+    - name: AKTOR_V2_TOPIC
+      value: pdl.aktor-v2
 
   gcp:
     sqlInstances:
