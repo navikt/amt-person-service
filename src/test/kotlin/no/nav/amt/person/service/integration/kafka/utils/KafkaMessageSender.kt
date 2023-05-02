@@ -25,15 +25,17 @@ class KafkaMessageSender(
 	private val sisteTilordnetVeilederTopic: String,
 	@Value("\${app.env.aktorV2Topic}")
 	private val aktorV2Topic: String,
+	@Value("\${app.env.skjermedePersonerTopic}")
+	private val skjermedePersonerTopic: String,
 ) {
-	private val kafkaProducer = KafkaProducerClientImpl<ByteArray, ByteArray>(properties.producer())
+	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
 	fun sendTilEndringPaaBrukerTopic(jsonString: String) {
 		kafkaProducer.send(
 			ProducerRecord(
 				endringPaaBrukerTopic,
-				UUID.randomUUID().toString().toByteArray(),
-				jsonString.toByteArray(),
+				UUID.randomUUID().toString(),
+				jsonString,
 			)
 		)
 	}
@@ -42,8 +44,18 @@ class KafkaMessageSender(
 		kafkaProducer.send(
 			ProducerRecord(
 				sisteTilordnetVeilederTopic,
-				UUID.randomUUID().toString().toByteArray(),
-				jsonString.toByteArray(),
+				UUID.randomUUID().toString(),
+				jsonString,
+			)
+		)
+	}
+
+	fun sendTilSkjermetPersonTopic(personIdent: String, erSkjermet: Boolean) {
+		kafkaProducer.send(
+			ProducerRecord(
+				skjermedePersonerTopic,
+				personIdent,
+				erSkjermet.toString(),
 			)
 		)
 	}

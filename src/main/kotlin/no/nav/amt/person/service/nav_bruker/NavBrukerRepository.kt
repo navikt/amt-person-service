@@ -12,7 +12,7 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class NavBrukerRepository(
@@ -170,13 +170,30 @@ class NavBrukerRepository(
 	fun oppdaterNavVeileder(navBrukerId: UUID, veilederId: UUID) {
 		val sql = """
 			update nav_bruker
-			set nav_veileder_id = :veilederId
+			set nav_veileder_id = :veilederId,
+				modified_at = current_timestamp
 			where id = :navBrukerId
 		""".trimIndent()
 
 		val parameters = sqlParameters(
 			"navBrukerId" to navBrukerId,
 			"veilederId" to veilederId,
+		)
+
+		template.update(sql, parameters)
+	}
+
+	fun settSkjermet(navBrukerId: UUID, erSkjermet: Boolean) {
+		val sql = """
+			update nav_bruker
+			set er_skjermet = :erSkjermet,
+				modified_at = current_timestamp
+			where id = :navBrukerId
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"navBrukerId" to navBrukerId,
+			"erSkjermet" to erSkjermet,
 		)
 
 		template.update(sql, parameters)

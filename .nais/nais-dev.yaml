@@ -88,6 +88,8 @@ spec:
       value: pto.siste-tilordnet-veileder-v1
     - name: AKTOR_V2_TOPIC
       value: pdl.aktor-v2
+    - name: SKJERMEDE_PERSONER_STATUS_TOPIC
+      value: nom.skjermede-personer-status-v1
 
   gcp:
     sqlInstances:

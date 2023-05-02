@@ -8,7 +8,7 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class NavBrukerService(
@@ -64,6 +64,10 @@ class NavBrukerService(
 
 	fun oppdaterNavVeileder(navBrukerId: UUID, veileder: NavAnsatt) {
 		repository.oppdaterNavVeileder(navBrukerId, veileder.id)
+	}
+
+	fun settSkjermet(brukerId: UUID, erSkjermet: Boolean) {
+		repository.settSkjermet(brukerId, erSkjermet)
 	}
 
 }

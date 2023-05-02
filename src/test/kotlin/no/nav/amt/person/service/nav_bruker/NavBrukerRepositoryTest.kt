@@ -15,7 +15,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.NoSuchElementException
 
 class NavBrukerRepositoryTest {
 
@@ -146,7 +145,24 @@ class NavBrukerRepositoryTest {
 
 		repository.oppdaterNavVeileder(bruker.id, veileder.id)
 
-		repository.get(bruker.id).navVeileder?.id shouldBe veileder.id
+		val faktiskBruker = repository.get(bruker.id)
+
+		faktiskBruker.navVeileder?.id shouldBe veileder.id
+		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()
+	}
+
+	@Test
+	fun `settSkjermet - bruker er ikke skjermet - oppdaterer erSkjermet`() {
+		val bruker = TestData.lagNavBruker(erSkjermet = false)
+		testRepository.insertNavBruker(bruker)
+
+		repository.settSkjermet(bruker.id, true)
+
+		val faktiskBruker = repository.get(bruker.id)
+
+		faktiskBruker.erSkjermet shouldBe true
+		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()
+
 	}
 
 	private fun sammenlign(
