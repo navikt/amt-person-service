@@ -28,6 +28,18 @@ class GlobalExceptionHandler(
 		}
 	}
 
+	@ExceptionHandler(RuntimeException::class)
+	fun handleException(ex: RuntimeException): ResponseEntity<Response> {
+		return when (ex) {
+			is NoSuchElementException -> buildResponse(HttpStatus.NOT_FOUND, ex)
+			is IllegalStateException -> buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
+			else -> {
+				log.error("Internal server error - ${ex.message}", ex)
+				buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
+			}
+		}
+	}
+
 	private fun buildResponse(
 		status: HttpStatus,
 		exception: Throwable,
