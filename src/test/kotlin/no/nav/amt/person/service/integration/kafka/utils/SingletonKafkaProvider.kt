@@ -11,8 +11,8 @@ import java.util.*
 
 object SingletonKafkaProvider {
 
-	const val producerId = "INTEGRATION_PRODUCER"
-	const val consumerId = "INTEGRATION_CONSUMER"
+	private const val producerId = "INTEGRATION_PRODUCER"
+	private const val consumerId = "INTEGRATION_CONSUMER"
 
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var kafkaContainer: KafkaContainer? = null

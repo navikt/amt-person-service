@@ -64,9 +64,8 @@ dependencies {
 
 	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
 
-    runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("org.postgresql:postgresql")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
