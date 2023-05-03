@@ -1,10 +1,7 @@
 package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
-import no.nav.amt.person.service.kafka.ingestor.AktorV2Ingestor
-import no.nav.amt.person.service.kafka.ingestor.EndringPaaBrukerIngestor
-import no.nav.amt.person.service.kafka.ingestor.SkjermetPersonIngestor
-import no.nav.amt.person.service.kafka.ingestor.TildeltVeilederIngestor
+import no.nav.amt.person.service.kafka.ingestor.*
 import no.nav.common.kafka.consumer.KafkaConsumerClient
 import no.nav.common.kafka.consumer.feilhandtering.KafkaConsumerRecordProcessor
 import no.nav.common.kafka.consumer.feilhandtering.util.KafkaConsumerRecordProcessorBuilder
@@ -12,6 +9,7 @@ import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder
 import no.nav.common.kafka.consumer.util.deserializer.Deserializers
 import no.nav.common.kafka.spring.PostgresJdbcTemplateConsumerRepository
 import no.nav.person.pdl.aktor.v2.Aktor
+import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -34,7 +32,8 @@ class KafkaConfiguration(
 	endringPaaBrukerIngestor: EndringPaaBrukerIngestor,
 	tildeltVeilederIngestor: TildeltVeilederIngestor,
 	aktorV2Ingestor: AktorV2Ingestor,
-	skjermetPersonIngestor: SkjermetPersonIngestor
+	skjermetPersonIngestor: SkjermetPersonIngestor,
+	leesahIngestor: LeesahIngestor,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -62,15 +61,24 @@ class KafkaConfiguration(
 					Deserializers.stringDeserializer(),
 					Consumer<ConsumerRecord<String, String>> { tildeltVeilederIngestor.ingest(it.value()) }
 				),
-				KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
-					.withLogging()
-					.withStoreOnFailure(consumerRepository)
-					.withConsumerConfig(
-						kafkaTopicProperties.aktorV2Topic,
-						Deserializers.stringDeserializer(),
-						SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-						Consumer<ConsumerRecord<String, Aktor>> { aktorV2Ingestor.ingest(it.key(), it.value()) }
-					),
+			KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
+				.withLogging()
+				.withStoreOnFailure(consumerRepository)
+				.withConsumerConfig(
+					kafkaTopicProperties.aktorV2Topic,
+					Deserializers.stringDeserializer(),
+					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
+					Consumer<ConsumerRecord<String, Aktor>> { aktorV2Ingestor.ingest(it.key(), it.value()) }
+				),
+			KafkaConsumerClientBuilder.TopicConfig<String, Personhendelse>()
+				.withLogging()
+				.withStoreOnFailure(consumerRepository)
+				.withConsumerConfig(
+					kafkaTopicProperties.leesahTopic,
+					Deserializers.stringDeserializer(),
+					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
+					Consumer<ConsumerRecord<String, Personhendelse>> { leesahIngestor.ingest(it.value()) }
+				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
 				.withStoreOnFailure(consumerRepository)

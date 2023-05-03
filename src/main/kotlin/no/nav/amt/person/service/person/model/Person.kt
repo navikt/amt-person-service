@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.person.model
 
-import java.util.UUID
+import java.util.*
 
 data class Person(
 	val id: UUID,
@@ -9,5 +9,6 @@ data class Person(
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
-	val historiskeIdenter: List<String>
+	val historiskeIdenter: List<String>,
 )
+

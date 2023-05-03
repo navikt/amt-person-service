@@ -1,11 +1,13 @@
 package no.nav.amt.person.service.nav_bruker
 
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
+import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.model.Person
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.springframework.stereotype.Service
 import java.util.*
@@ -68,6 +70,29 @@ class NavBrukerService(
 
 	fun settSkjermet(brukerId: UUID, erSkjermet: Boolean) {
 		repository.settSkjermet(brukerId, erSkjermet)
+	}
+
+	fun oppdaterKontaktinformasjon(personer: List<Person>) {
+		personer.forEach {person ->
+			repository.finnBrukerId(person.personIdent)?.let { brukerId ->
+				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(person.personIdent)
+				repository.oppdaterKontaktinformasjon(
+					brukerId,
+					kontaktinformasjon.telefonnummer,
+					kontaktinformasjon.epost,
+				)
+
+			}
+		}
+
+	}
+
+	fun slettBrukere(personer: List<Person>) {
+		personer.forEach {
+			repository.deleteByPersonId(it.id)
+			secureLog.info("Har slettet navbruker med personident: ${it.personIdent}")
+		}
+
 	}
 
 }

@@ -198,4 +198,33 @@ class NavBrukerRepository(
 
 		template.update(sql, parameters)
 	}
+
+	fun oppdaterKontaktinformasjon(navBrukerId: UUID, telefon: String?, epost: String?) {
+		val sql = """
+			update nav_bruker
+			set telefon = :telefon,
+				epost = :epost,
+				modified_at = current_timestamp
+			where id = :navBrukerId
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"navBrukerId" to navBrukerId,
+			"telefon" to telefon,
+			"epost" to epost,
+		)
+
+		template.update(sql, parameters)
+	}
+
+	fun deleteByPersonId(personId: UUID) {
+		val sql = """
+			delete from nav_bruker
+			where person_id = :personId
+		""".trimIndent()
+
+		val parameters = sqlParameters("personId" to personId)
+
+		template.update(sql, parameters)
+	}
 }

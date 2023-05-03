@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaString
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -36,9 +35,7 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 			)
 		)
 
-		val schema = SchemaString(msg.schema.toString())
-
-		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", schema.toJson())
+		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", msg.schema)
 
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 
@@ -67,9 +64,7 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 			)
 		)
 
-		val schema = SchemaString(msg.schema.toString())
-
-		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", schema.toJson())
+		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", msg.schema)
 
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 

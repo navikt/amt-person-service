@@ -6,6 +6,7 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.person.pdl.aktor.v2.Aktor
+import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -27,6 +28,8 @@ class KafkaMessageSender(
 	private val aktorV2Topic: String,
 	@Value("\${app.env.skjermedePersonerTopic}")
 	private val skjermedePersonerTopic: String,
+	@Value("\${app.env.leesahTopic}")
+	private val leesahTopic: String,
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
@@ -64,7 +67,18 @@ class KafkaMessageSender(
 		val record = ProducerRecord(aktorV2Topic, key, value)
 		record.headers().add("schemaId", schemaId.toString().toByteArray())
 
-		KafkaProducer<String, Aktor>(Properties().apply {
+		sendAvroRecord(record)
+	}
+
+	fun sendTilLeesahTopic(key: String, value: Personhendelse, schemaId: Int) {
+		val record = ProducerRecord(leesahTopic, key, value)
+		record.headers().add("schemaId", schemaId.toString().toByteArray())
+
+		sendAvroRecord(record)
+	}
+
+	private fun <K, V> sendAvroRecord(record: ProducerRecord<K, V>) {
+		KafkaProducer<K, V>(Properties().apply {
 			put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, SingletonKafkaProvider.getHost())
 			put(KafkaAvroDeserializerConfig.AUTO_REGISTER_SCHEMAS, true)
 			put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl)
@@ -73,7 +87,6 @@ class KafkaMessageSender(
 		}).use { producer ->
 			producer.send(record).get()
 		}
-
 	}
 
 }

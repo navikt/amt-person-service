@@ -6,7 +6,7 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class PersonService(
@@ -27,7 +27,12 @@ class PersonService(
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
+	fun hentPersoner(personIdenter: List<String>): List<Person> {
+		return repository.getPersoner(personIdenter).map { it.toModel() }
+	}
+
 	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
+
 	fun oppdaterPersonIdent(gjeldendeIdent: String, identType: IdentType, historiskeIdenter: List<String>) {
 		val personer = repository.getPersoner(historiskeIdenter.plus(gjeldendeIdent))
 
@@ -39,6 +44,19 @@ class PersonService(
 
 		personer.firstOrNull()?.let { person ->
 			repository.oppdaterIdenter(person.id, gjeldendeIdent, identType, historiskeIdenter)
+		}
+
+	}
+
+	fun oppdaterPerson(person: Person) {
+		repository.upsert(person)
+		log.info("Oppdaterte person med id: ${person.id}")
+	}
+
+	fun slettPersoner(personer: List<Person>) {
+		personer.forEach {
+			repository.delete(it.id)
+			secureLog.info("Har slettet person med personident: ${it.personIdent}")
 		}
 
 	}

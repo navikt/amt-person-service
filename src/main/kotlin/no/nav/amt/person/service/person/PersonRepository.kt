@@ -122,5 +122,15 @@ class PersonRepository(
 		template.update(sql, parameters)
 	}
 
+	fun delete(id: UUID) {
+		val sql = """
+			delete from person where id = :id
+		""".trimIndent()
+
+		val parameters = sqlParameters("id" to id)
+
+		template.update(sql, parameters)
+	}
+
 }
 
