@@ -56,7 +56,7 @@ class PersonService(
 	fun slettPersoner(personer: List<Person>) {
 		personer.forEach {
 			repository.delete(it.id)
-			secureLog.info("Har slettet person med personident: ${it.personIdent}")
+			secureLog.info("Slettet person med personident: ${it.personIdent}")
 		}
 
 	}

@@ -165,6 +165,31 @@ class NavBrukerRepositoryTest {
 
 	}
 
+	@Test
+	fun `oppdaterKontakinformasjon - ny kontaktinfo - oppdaterer bruker`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+
+		val nyttNummer = "nytt telefonnummer"
+		val nyEpost = "ny@epost.dev"
+
+		repository.oppdaterKontaktinformasjon(bruker.id, nyttNummer, nyEpost)
+
+		val faktiskBruker = repository.get(bruker.id)
+		faktiskBruker.telefon shouldBe nyttNummer
+		faktiskBruker.epost shouldBe nyEpost
+	}
+
+	@Test
+	fun `deleteByPersonId - bruker finnes - sletter bruker`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+
+		repository.deleteByPersonId(bruker.person.id)
+
+		repository.get(bruker.person.personIdent) shouldBe null
+	}
+
 	private fun sammenlign(
 		faktiskBruker: NavBrukerDbo,
 		bruker: NavBrukerDbo,

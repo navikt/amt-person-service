@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class PersonRepositoryTest {
 
@@ -164,6 +164,16 @@ class PersonRepositoryTest {
 		faktiskPerson.personIdentType shouldBe IdentType.FOLKEREGISTERIDENT
 		faktiskPerson.historiskeIdenter shouldBe listOf(person.personIdent)
 		faktiskPerson.modifiedAt shouldBeCloseTo LocalDateTime.now()
+	}
+
+	@Test
+	fun `delete - person finnes - sletter person()`(){
+		val person = TestData.lagPerson()
+		testRepository.insertPerson(person)
+
+		repository.delete(person.id)
+
+		repository.get(person.personIdent) shouldBe null
 	}
 
 }

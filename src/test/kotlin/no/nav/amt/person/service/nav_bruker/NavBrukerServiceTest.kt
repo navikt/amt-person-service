@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_bruker
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.data.TestData
@@ -65,6 +66,35 @@ class NavBrukerServiceTest {
 		faktiskBruker.telefon shouldBe kontaktinformasjon.telefonnummer
 		faktiskBruker.epost shouldBe kontaktinformasjon.epost
 		faktiskBruker.erSkjermet shouldBe erSkjermet
+	}
+
+	@Test
+	fun `oppdaterKontaktInformasjon - ingen brukere finnes - oppdaterer ikke`() {
+		val personer = listOf(TestData.lagPerson().toModel(), TestData.lagPerson().toModel())
+
+		every { repository.finnBrukerId(any()) } returns null
+
+		service.oppdaterKontaktinformasjon(personer)
+
+		verify(exactly = 0) { krrProxyClient.hentKontaktinformasjon(any()) }
+		verify(exactly = 0) { repository.oppdaterKontaktinformasjon(any(), any(), any()) }
+	}
+
+	@Test
+	fun `oppdaterKontaktInformasjon - bruker finnes - oppdaterer bruker`() {
+		val bruker = TestData.lagNavBruker()
+		val kontakinformasjon = Kontaktinformasjon(
+				"ny epost",
+				"nytt telefonnummer",
+			)
+
+		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns kontakinformasjon
+
+		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
+
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
+		verify(exactly = 1) { repository.oppdaterKontaktinformasjon(bruker.id, kontakinformasjon.telefonnummer, kontakinformasjon.epost) }
 	}
 
 }
