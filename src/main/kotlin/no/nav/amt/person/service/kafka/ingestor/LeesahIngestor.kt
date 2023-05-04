@@ -39,14 +39,10 @@ class LeesahIngestor(
 
 		val personer = personService.hentPersoner(personidenter)
 
-		if (personer.isEmpty()) {
-			return
-		}
+		if (personer.isEmpty()) return
 
 		if (erAddressebeskyttet(adressebeskyttelse.gradering)) {
-			if (personer.isNotEmpty()) {
-				secureLog.info("Sletter addressebeskyttet personer med personidenter")
-			}
+			secureLog.info("Sletter addressebeskyttet personer med personidenter")
 			navBrukerService.slettBrukere(personer)
 			personService.slettPersoner(personer)
 		}
@@ -60,9 +56,7 @@ class LeesahIngestor(
 
 		val personer = personService.hentPersoner(personidenter)
 
-		if (personer.isEmpty()) {
-			return
-		}
+		if (personer.isEmpty()) return
 
 		personer.forEach { person ->
 			personService.oppdaterPerson(person.copy(
