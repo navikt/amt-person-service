@@ -6,7 +6,7 @@ plugins {
 
 	id("org.springframework.boot") version "3.0.6"
 	id("io.spring.dependency-management") version "1.1.0"
-	id("com.github.davidmc24.gradle.plugin.avro") version "1.7.0"
+	id("com.github.davidmc24.gradle.plugin.avro") version "1.7.1"
 	kotlin("plugin.serialization") version kotlinVersion
 	kotlin("jvm") version kotlinVersion
 	kotlin("plugin.spring") version kotlinVersion
