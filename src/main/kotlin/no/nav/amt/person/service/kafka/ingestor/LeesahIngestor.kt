@@ -25,7 +25,7 @@ class LeesahIngestor(
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
-			OpplysningsType.NAVN_V1.toString() -> oppdaterPersoner(personhendelse.personidenter, personhendelse.navn)
+			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
 		}
@@ -48,7 +48,7 @@ class LeesahIngestor(
 		}
 	}
 
-	private fun oppdaterPersoner(personidenter: List<String>, navn: Navn?) {
+	private fun handterNavn(personidenter: List<String>, navn: Navn?) {
 		if (navn == null) {
 			log.warn("Mottok melding med opplysningstype Navn fra pdl-leesah men navn manglet")
 			return
