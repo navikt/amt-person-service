@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -8,6 +9,7 @@ import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.AsyncUtils
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.junit.jupiter.api.Test
@@ -81,6 +83,28 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			navBrukerService.hentNavBruker(navBruker.person.personIdent) shouldBe null
 			personService.hentPerson(navBruker.person.personIdent) shouldBe null
+		}
+
+	}
+
+	@Test
+	internal fun `Ingest - arrangor ansatt får adressebeskyttelse - sletter nav bruker men ikke person`() {
+		val navBruker = TestData.lagNavBruker()
+		testDataRepository.insertNavBruker(navBruker)
+		testDataRepository.insertRolle(navBruker.person.id, Rolle.ARRANGOR_ANSATT)
+
+		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
+			personIdenter = listOf(navBruker.person.personIdent),
+			gradering = Gradering.STRENGT_FORTROLIG,
+		)
+
+		mockSchemaRegistryHttpServer.registerSchema(1, "leesah-topic", msg.schema)
+
+		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
+
+		AsyncUtils.eventually {
+			navBrukerService.hentNavBruker(navBruker.person.personIdent) shouldBe null
+			personService.hentPerson(navBruker.person.personIdent) shouldNotBe null
 		}
 
 	}

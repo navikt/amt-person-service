@@ -10,6 +10,8 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.RolleService
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +23,7 @@ class NavBrukerServiceTest {
 	lateinit var personService: PersonService
 	lateinit var navAnsattService: NavAnsattService
 	lateinit var navEnhetService: NavEnhetService
+	lateinit var rolleService: RolleService
 	lateinit var krrProxyClient: KrrProxyClient
 	lateinit var poaoTilgangClient: PoaoTilgangClient
 
@@ -32,14 +35,16 @@ class NavBrukerServiceTest {
 		navEnhetService = mockk()
 		krrProxyClient = mockk()
 		poaoTilgangClient = mockk()
+		rolleService = mockk(relaxUnitFun = true)
 
 		service = NavBrukerService(
 			repository = repository,
 			personService = personService,
 			navAnsattService = navAnsattService,
 			navEnhetService = navEnhetService,
+			rolleService = rolleService,
 			krrProxyClient = krrProxyClient,
-			poaoTilgangClient = poaoTilgangClient
+			poaoTilgangClient = poaoTilgangClient,
 		)
 	}
 
@@ -57,6 +62,7 @@ class NavBrukerServiceTest {
 		every { navEnhetService.hentNavEnhetForBruker(person.personIdent) } returns navEnhet.toModel()
 		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns kontaktinformasjon
 		every { poaoTilgangClient.erSkjermetPerson(person.personIdent) } returns ApiResult(result = erSkjermet, throwable = null)
+		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 
 		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personIdent)
 

@@ -7,8 +7,11 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.poao_tilgang.client.PoaoTilgangClient
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -18,9 +21,12 @@ class NavBrukerService(
 	private val personService: PersonService,
 	private val navAnsattService: NavAnsattService,
 	private val navEnhetService: NavEnhetService,
+	private val rolleService: RolleService,
 	private val krrProxyClient: KrrProxyClient,
 	private val poaoTilgangClient: PoaoTilgangClient,
 ) {
+
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun hentNavBruker(id: UUID): NavBruker {
 		return repository.get(id).toModel()
@@ -52,6 +58,7 @@ class NavBrukerService(
 		)
 
 		repository.upsert(navBruker.toUpsert())
+		rolleService.opprettRolle(person.id, Rolle.NAV_BRUKER)
 
 		return navBruker
 	}
@@ -90,7 +97,15 @@ class NavBrukerService(
 	fun slettBrukere(personer: List<Person>) {
 		personer.forEach {
 			repository.deleteByPersonId(it.id)
-			secureLog.info("Har slettet navbruker med personident: ${it.personIdent}")
+			rolleService.fjernRolle(it.id, Rolle.NAV_BRUKER)
+
+			if (!rolleService.harRolle(it.id, Rolle.ARRANGOR_ANSATT)) {
+				personService.slettPerson(it)
+			}
+
+			secureLog.info("Slettet navbruker med personident: ${it.personIdent}")
+			log.info("Slettet navbruker med personId: ${it.id}")
+
 		}
 
 	}

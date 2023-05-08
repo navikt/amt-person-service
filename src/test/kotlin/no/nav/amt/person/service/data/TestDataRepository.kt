@@ -1,14 +1,16 @@
 package no.nav.amt.person.service.data
 
-import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class TestDataRepository(
@@ -108,6 +110,21 @@ class TestDataRepository(
 		template.update(sql, parameters)
 	}
 
+	fun insertRolle(personId: UUID, rolle: Rolle) {
+		val sql = """
+			insert into person_rolle(id, person_id, type)
+			values(:id, :personId, :rolle)
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"id" to UUID.randomUUID(),
+			"personId" to personId,
+			"rolle" to rolle.name,
+		)
+
+		template.update(sql, parameters)
+	}
+
 	fun insertNavBruker(bruker: NavBrukerDbo) {
 		try {
 			insertPerson(bruker.person)
@@ -128,6 +145,8 @@ class TestDataRepository(
 		} catch (e: DuplicateKeyException) {
 			log.warn("Nav enhet med id ${bruker.navEnhet!!.id} er allerede opprettet")
 		}
+
+		insertRolle(bruker.person.id, Rolle.NAV_BRUKER)
 
 		val sql = """
 			insert into nav_bruker(

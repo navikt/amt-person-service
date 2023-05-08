@@ -53,14 +53,6 @@ class PersonService(
 		log.info("Oppdaterte person med id: ${person.id}")
 	}
 
-	fun slettPersoner(personer: List<Person>) {
-		personer.forEach {
-			repository.delete(it.id)
-			secureLog.info("Slettet person med personident: ${it.personIdent}")
-		}
-
-	}
-
 	private fun opprettPerson(personIdent: String): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe
@@ -80,6 +72,13 @@ class PersonService(
 		log.info("Opprettet ny person med id ${person.id}")
 
 		return person
+	}
+
+	fun slettPerson(person: Person) {
+		repository.delete(person.id)
+
+		secureLog.info("Slettet person med ident: ${person.personIdent}")
+		log.info("Slettet person med id: ${person.id}")
 	}
 
 }

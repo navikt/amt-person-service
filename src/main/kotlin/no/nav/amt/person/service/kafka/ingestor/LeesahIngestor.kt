@@ -43,8 +43,9 @@ class LeesahIngestor(
 
 		if (erAddressebeskyttet(adressebeskyttelse.gradering)) {
 			secureLog.info("Sletter addressebeskyttet personer med personidenter")
+			// Sletter ikke arrangøransatte med adressebeskyttelse foreløpig, fordi vi ikke har
+			// funksjonalitet for å håndtere dette i resten av systemet, og det er litt uklart om det er noe vi skal gjøre noe med.
 			navBrukerService.slettBrukere(personer)
-			personService.slettPersoner(personer)
 		}
 	}
 
