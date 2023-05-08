@@ -28,6 +28,8 @@ class NavEnhetService(
 
 	fun hentNavEnhet(id: UUID) = navEnhetRepository.get(id).toModel()
 
+	fun hentNavEnhet(enhetId: String) = navEnhetRepository.get(enhetId)?.toModel()
+
 	private fun opprettEnhet(enhetId: String): NavEnhet? {
 		val norgEnhet = norgClient.hentNavEnhet(enhetId) ?: return null
 

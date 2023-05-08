@@ -36,6 +36,7 @@ val flywayVersion = "9.17.0"
 val jacksonVersion = "2.15.0"
 val micrometerVersion = "1.10.6"
 val postgresVersion = "42.6.0"
+val mockOauth2ServerVersion = "0.5.8"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -64,7 +65,8 @@ dependencies {
 	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
 
 	implementation("org.apache.commons:commons-lang3:$lang3Version")
-	implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
+
+	implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
 
 	implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
@@ -81,7 +83,7 @@ dependencies {
 	testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 	testImplementation("org.testcontainers:kafka:$testcontainersVersion")
 	testImplementation("io.mockk:mockk:$mockkVersion")
-}
+	testImplementation("no.nav.security:mock-oauth2-server:$mockOauth2ServerVersion")}
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
 	this.archiveFileName.set("${archiveBaseName.get()}.${archiveExtension.get()}")

@@ -2,6 +2,7 @@ package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.pdl.AdressebeskyttelseGradering
 import no.nav.amt.person.service.clients.pdl.PdlQueries
+import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.MockHttpServer
@@ -10,6 +11,13 @@ import okhttp3.mockwebserver.RecordedRequest
 
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
+	fun mockHentPerson(person: Person) {
+		mockHentPerson(person.personIdent, MockPdlBruker(
+			fornavn = person.fornavn,
+			etternavn = person.etternavn,
+			adressebeskyttelse = null,
+		))
+	}
 	fun mockHentPerson(brukerFnr: String, mockPdlBruker: MockPdlBruker) {
 		val request = toJsonString(
 				GraphqlUtils.GraphqlQuery(
@@ -24,7 +32,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				&& req.body.readUtf8() == request
 		}
 
-		addResponseHandler(requestPredicate, createPdlBrukerResponse(mockPdlBruker))
+		addResponseHandler(requestPredicate, createPdlBrukerResponse(brukerFnr, mockPdlBruker))
 	}
 
 	fun mockHentGjeldendePersonligIdent(ident: String, personIdent: String) {
@@ -59,7 +67,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		return MockResponse().setResponseCode(200).setBody(body)
 	}
 
-	private fun createPdlBrukerResponse(mockPdlBruker: MockPdlBruker): MockResponse {
+	private fun createPdlBrukerResponse(personIdent: String, mockPdlBruker: MockPdlBruker): MockResponse {
 		val body = toJsonString(
 			PdlQueries.HentPerson.Response(
 				errors = null,
@@ -73,7 +81,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 							emptyList()
 						}
 					),
-					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident("PERSON_IDENT", false, "FOLKEREGISTERIDENT")))
+					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident(personIdent, false, "FOLKEREGISTERIDENT")))
 				)
 			)
 		)

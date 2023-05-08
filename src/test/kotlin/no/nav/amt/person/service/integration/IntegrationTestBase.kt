@@ -6,9 +6,11 @@ import no.nav.amt.person.service.integration.mock.servers.*
 import no.nav.amt.person.service.kafka.config.KafkaProperties
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.junit.AfterClass
 import org.junit.jupiter.api.AfterEach
@@ -62,6 +64,7 @@ class IntegrationTestBase {
 		val mockNomHttpServer = MockNomHttpServer()
 		val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
 		val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
+		val mockOAuthServer = MockOAuthServer()
 
 		val dataSource = SingletonPostgresContainer.getDataSource()
 
@@ -103,6 +106,10 @@ class IntegrationTestBase {
 			registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
 			registry.add("veilarbarena.scope") { "test.veilarbarena" }
 
+			mockOAuthServer.start()
+			registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }
+			registry.add("no.nav.security.jwt.issuer.azuread.accepted-audience") { "test-aud" }
+
 			val container = SingletonPostgresContainer.getContainer()
 
 			registry.add("spring.datasource.url") { container.jdbcUrl }
@@ -137,6 +144,17 @@ class IntegrationTestBase {
 
 		return client.newCall(reqBuilder.build()).execute()
 	}
+
+	fun String.toJsonRequestBody(): RequestBody {
+		val mediaTypeJson = "application/json".toMediaType()
+		return this.toRequestBody(mediaTypeJson)
+	}
+
+	fun emptyRequest(): RequestBody {
+		val mediaTypeHtml = "application/json".toMediaType()
+		return "".toRequestBody(mediaTypeHtml)
+	}
+
 }
 
 @Profile("integration")
