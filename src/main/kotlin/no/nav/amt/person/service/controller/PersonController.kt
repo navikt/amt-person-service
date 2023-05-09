@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.controller
 
+import no.nav.amt.person.service.controller.auth.Issuer
 import no.nav.amt.person.service.controller.dto.*
 import no.nav.amt.person.service.controller.request.ArrangorAnsattRequest
 import no.nav.amt.person.service.controller.request.NavAnsattRequest
@@ -11,7 +12,7 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.*
 
 
@@ -25,7 +26,7 @@ class PersonController (
 	private val rolleService: RolleService,
 ) {
 
-	@Protected
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-bruker")
 	fun hentEllerOpprettNavBruker(
 		@RequestBody request: NavBrukerRequest
@@ -33,7 +34,7 @@ class PersonController (
 		return navBrukerService.hentEllerOpprettNavBruker(request.personIdent).toDto()
 	}
 
-	@Protected
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-ansatt")
 	fun hentEllerOpprettNavAnsatt(
 		@RequestBody request: NavAnsattRequest
@@ -41,7 +42,7 @@ class PersonController (
 		return navAnsattService.hentEllerOpprettAnsatt(request.navIdent).toDto()
 	}
 
-	@Protected
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/arrangor-ansatt")
 	fun hentEllerOpprettArrangorAnsatt(
 		@RequestBody request: ArrangorAnsattRequest,
@@ -50,7 +51,8 @@ class PersonController (
 		rolleService.opprettRolle(person.id, Rolle.ARRANGOR_ANSATT)
 		return person.toArrangorAnsattDto()
 	}
-	@Protected
+
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-enhet")
 	fun hentEllerOpprettNavEnhet(
 		@RequestBody request: NavEnhetRequest
