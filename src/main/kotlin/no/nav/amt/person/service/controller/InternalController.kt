@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.controller
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/internal")
 class InternalController(
-	private val personService: PersonService
+	private val personService: PersonService,
+	private val navBrukerService: NavBrukerService,
 ) {
 
 	@Unprotected
@@ -22,6 +24,17 @@ class InternalController(
 	) {
 		if (isDev() && isInternal(servlet)) {
 			personService.hentEllerOpprettPerson(dollyIdent)
+		}
+	}
+
+	@Unprotected
+	@PostMapping("/nav-bruker/{dollyIdent}")
+	fun opprettNavBruker(
+		servlet: HttpServletRequest,
+		@PathVariable("dollyIdent") dollyIdent: String,
+	) {
+		if (isDev() && isInternal(servlet)) {
+			navBrukerService.hentEllerOpprettNavBruker(dollyIdent)
 		}
 	}
 
