@@ -2,6 +2,7 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.config.SecureLog.secureLog
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.slf4j.LoggerFactory
@@ -32,6 +33,12 @@ class PersonService(
 	}
 
 	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
+
+	fun erAdressebeskyttet(personIdent: String): Boolean {
+		val gradering = pdlClient.hentAdressebeskyttelse(personIdent)
+
+		return gradering != null && gradering != AdressebeskyttelseGradering.UGRADERT
+	}
 
 	fun oppdaterPersonIdent(gjeldendeIdent: String, identType: IdentType, historiskeIdenter: List<String>) {
 		val personer = repository.getPersoner(historiskeIdenter.plus(gjeldendeIdent))

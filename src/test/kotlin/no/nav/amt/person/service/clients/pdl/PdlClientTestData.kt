@@ -106,4 +106,28 @@ object PdlClientTestData {
 		}
 	""".trimIndent()
 
+	val adressebeskyttetResponseMedWarning = """
+		{
+		  "data": {
+		    "hentPerson": {
+				"adressebeskyttelse": [
+					{
+						"gradering": "FORTROLIG"
+					}
+				]
+		    }
+		  },
+		  "extensions": {
+		    "warnings": [
+		      {
+		        "query": "hentPerson",
+		        "id": "tilgangsstyring",
+		        "message": "behandlingsnummer_header_missing",
+		        "details": "header for 'behandlingsnummer' mangler"
+		      }
+		    ]
+		  }
+		}
+	""".trimIndent()
+
 }

@@ -2,11 +2,14 @@ package no.nav.amt.person.service.clients.pdl
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.adressebeskyttetResponseMedWarning
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.errorPrefix
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.nullError
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.utils.LogUtils
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -213,6 +216,35 @@ class PdlClientTest {
 		exception.message shouldBe errorPrefix + nullError +
 			"- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n" +
 			"- Test (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
+	}
+
+	@Test
+	fun `hentAdressebeskyttelse - person har adressebeskyttelse - returnerer gradering`() {
+		val client = PdlClient(
+			serverUrl,
+			{ "TOKEN" },
+		)
+
+		server.enqueue(MockResponse().setBody(adressebeskyttetResponseMedWarning))
+
+		val gradering = client.hentAdressebeskyttelse("FNR")
+
+		gradering shouldBe AdressebeskyttelseGradering.FORTROLIG
+	}
+
+	@Test
+	fun `hentAdressebeskyttelse - warnings i respons - skal logge warnings`() {
+		val client = PdlClient(
+			serverUrl,
+			{ "TOKEN" },
+		)
+
+		server.enqueue(MockResponse().setBody(adressebeskyttetResponseMedWarning))
+
+		LogUtils.withLogs { getLogs ->
+			client.hentAdressebeskyttelse("FNR")
+			getLogs().any { it.message.startsWith("Respons fra Pdl inneholder warnings:")} shouldBe true
+		}
 	}
 
 }

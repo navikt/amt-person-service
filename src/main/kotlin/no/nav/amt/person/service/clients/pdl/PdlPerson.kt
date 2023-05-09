@@ -1,5 +1,7 @@
 package no.nav.amt.person.service.clients.pdl
 
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+
 data class PdlPerson(
 	val fornavn: String,
 	val mellomnavn: String?,

@@ -24,6 +24,22 @@ object PdlQueries {
 		val policy: String? = null
 	)
 
+	data class PdlWarning(
+		val query: String?,
+		val id: String,
+		val message: String,
+		val details: String?
+	)
+
+	data class Extensions(
+		val warnings: List<PdlWarning>
+	)
+
+	data class Adressebeskyttelse(
+		val gradering: String
+	)
+
+
 	object HentPerson {
 		val query = """
 			query(${"$"}ident: ID!) {
@@ -58,7 +74,8 @@ object PdlQueries {
 
 		data class Response(
 			override val errors: List<PdlError>?,
-			override val data: ResponseData?
+			override val data: ResponseData?,
+			val extensions: Extensions?,
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
@@ -84,10 +101,6 @@ object PdlQueries {
 			val prioritet: Int,
 		)
 
-		data class Adressebeskyttelse(
-			val gradering: String
-		)
-
 		data class HentIdenter(
 			val identer: List<Ident>
 		)
@@ -96,6 +109,37 @@ object PdlQueries {
 			val ident: String,
 			val historisk: Boolean,
 			val gruppe: String
+		)
+
+	}
+
+	object HentAdressebeskyttelse {
+		val query = """
+			query(${"$"}ident: ID!) {
+			  hentPerson(ident: ${"$"}ident) {
+				adressebeskyttelse(historikk: false) {
+				  gradering
+				}
+			  },
+			}
+		""".trimIndent()
+
+		data class Variables(
+			val ident: String,
+		)
+
+		data class Response(
+			override val errors: List<PdlError>?,
+			override val data: ResponseData?,
+			val extensions: Extensions?,
+		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
+
+		data class ResponseData(
+			val hentPerson: HentAdressebeskyttelse
+		)
+
+		data class HentAdressebeskyttelse(
+			val adressebeskyttelse: List<Adressebeskyttelse>
 		)
 
 	}
@@ -117,7 +161,8 @@ object PdlQueries {
 
 		data class Response(
 			override val errors: List<PdlError>?,
-			override val data: ResponseData?
+			override val data: ResponseData?,
+			val extensions: Extensions?,
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
