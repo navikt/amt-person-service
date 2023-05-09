@@ -8,6 +8,12 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.slf4j.LoggerFactory
 import java.util.*
 
+private val requestBodyCache = mutableMapOf<RecordedRequest, String>()
+
+fun RecordedRequest.getBodyAsString(): String {
+	return requestBodyCache.getOrPut(this) { this.body.readUtf8() }
+}
+
 abstract class MockHttpServer(
 	private val name: String
 ) {
@@ -30,7 +36,7 @@ abstract class MockHttpServer(
 						?: throw IllegalStateException(
 							"$name: Mock has no handler for $request\n" +
 								"	Headers: \n${printHeaders(request.headers)}\n" +
-								"	Body: ${request.body.readUtf8()}"
+								"	Body: ${request.getBodyAsString()}"
 						)
 
 					response.count = response.count + 1
