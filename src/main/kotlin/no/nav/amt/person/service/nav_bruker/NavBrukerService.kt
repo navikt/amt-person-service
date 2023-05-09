@@ -41,6 +41,10 @@ class NavBrukerService(
 	}
 
 	private fun opprettNavBruker(personIdent: String): NavBruker {
+		if (personService.erAdressebeskyttet(personIdent)) {
+			throw IllegalStateException("Nav bruker er adreessebeskyttet og kan ikke lagres")
+		}
+
 		val person = personService.hentEllerOpprettPerson(personIdent)
 		val veileder = navAnsattService.hentBrukersVeileder(personIdent)
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personIdent)

@@ -16,6 +16,7 @@ import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class NavBrukerServiceTest {
 	lateinit var service: NavBrukerService
@@ -57,6 +58,7 @@ class NavBrukerServiceTest {
 		val erSkjermet = false
 
 		every { repository.get(person.personIdent) } returns null
+		every { personService.erAdressebeskyttet(person.personIdent) } returns false
 		every { personService.hentEllerOpprettPerson(person.personIdent) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personIdent) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personIdent) } returns navEnhet.toModel()
@@ -72,6 +74,18 @@ class NavBrukerServiceTest {
 		faktiskBruker.telefon shouldBe kontaktinformasjon.telefonnummer
 		faktiskBruker.epost shouldBe kontaktinformasjon.epost
 		faktiskBruker.erSkjermet shouldBe erSkjermet
+	}
+
+	@Test
+	fun `hentEllerOpprettNavBruker - bruker er adressebeskyttet - oppretter ikke bruker`() {
+		val person = TestData.lagPerson()
+
+		every { repository.get(person.personIdent) } returns null
+		every { personService.erAdressebeskyttet(person.personIdent) } returns true
+
+		assertThrows<IllegalStateException> {
+			service.hentEllerOpprettNavBruker(person.personIdent)
+		}
 	}
 
 	@Test

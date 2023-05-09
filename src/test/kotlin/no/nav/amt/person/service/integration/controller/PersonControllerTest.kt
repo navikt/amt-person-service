@@ -15,6 +15,7 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -67,6 +68,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val navEnhet = TestData.lagNavEnhet()
 		val navBruker = TestData.lagNavBruker(navVeileder = navAnsatt, navEnhet = navEnhet)
 
+		mockPdlHttpServer.mockHentAdressebeskyttelse(navBruker.person.personIdent, AdressebeskyttelseGradering.UGRADERT)
 		mockPdlHttpServer.mockHentPerson(navBruker.person.toModel())
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personIdent, navAnsatt.navIdent)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personIdent, navEnhet.enhetId)
@@ -100,6 +102,25 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.navEnhet!!.id shouldBe body.navEnhet!!.id
 		faktiskBruker.navEnhet!!.enhetId shouldBe body.navEnhet!!.enhetId
 		faktiskBruker.navEnhet!!.navn shouldBe body.navEnhet!!.navn
+	}
+
+	@Test
+	fun `hentEllerOpprettNavBruker - nav bruker er adressebeskyttet - skal ha status 500`() {
+		val navBruker = TestData.lagNavBruker()
+
+		mockPdlHttpServer.mockHentAdressebeskyttelse(
+			navBruker.person.personIdent,
+			AdressebeskyttelseGradering.STRENGT_FORTROLIG
+		)
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/nav-bruker",
+			body = """{"personIdent": "${navBruker.person.personIdent}"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 500
 	}
 
 	@Test
