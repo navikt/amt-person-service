@@ -41,7 +41,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val person = TestData.lagPerson()
 		val token = mockOAuthServer.issueAzureAdM2MToken()
 
-		mockPdlHttpServer.mockHentPerson(person.toModel())
+		mockPdlHttpServer.mockHentPerson(person)
 
 		val response = sendRequest(
 			method = "POST",
@@ -68,8 +68,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val navEnhet = TestData.lagNavEnhet()
 		val navBruker = TestData.lagNavBruker(navVeileder = navAnsatt, navEnhet = navEnhet)
 
-		mockPdlHttpServer.mockHentAdressebeskyttelse(navBruker.person.personIdent, AdressebeskyttelseGradering.UGRADERT)
-		mockPdlHttpServer.mockHentPerson(navBruker.person.toModel())
+		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personIdent, navAnsatt.navIdent)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personIdent, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.epost, navBruker.telefon))
@@ -108,9 +107,12 @@ class PersonControllerTest: IntegrationTestBase() {
 	fun `hentEllerOpprettNavBruker - nav bruker er adressebeskyttet - skal ha status 500`() {
 		val navBruker = TestData.lagNavBruker()
 
-		mockPdlHttpServer.mockHentAdressebeskyttelse(
+		mockPdlHttpServer.mockHentPerson(
 			navBruker.person.personIdent,
-			AdressebeskyttelseGradering.STRENGT_FORTROLIG
+			TestData.lagPdlPerson(
+				person = navBruker.person,
+				adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+			)
 		)
 
 		val response = sendRequest(

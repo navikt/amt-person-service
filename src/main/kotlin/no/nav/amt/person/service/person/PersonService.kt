@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
+import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
@@ -28,15 +29,18 @@ class PersonService(
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
+	fun hentEllerOpprettPerson(personIdent: String, personOpplysninger: PdlPerson): Person {
+		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent, personOpplysninger)
+	}
+
 	fun hentPersoner(personIdenter: List<String>): List<Person> {
 		return repository.getPersoner(personIdenter).map { it.toModel() }
 	}
 
+
 	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
 
-	fun erAdressebeskyttet(personIdent: String): Boolean {
-		val gradering = pdlClient.hentAdressebeskyttelse(personIdent)
-
+	fun erAdressebeskyttet(gradering: AdressebeskyttelseGradering?): Boolean {
 		return gradering != null && gradering != AdressebeskyttelseGradering.UGRADERT
 	}
 
@@ -62,6 +66,11 @@ class PersonService(
 
 	private fun opprettPerson(personIdent: String): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
+
+		return opprettPerson(personIdent, pdlPerson)
+	}
+
+	private fun opprettPerson(personIdent: String, pdlPerson: PdlPerson): Person {
 		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe
 
 		val person = Person(

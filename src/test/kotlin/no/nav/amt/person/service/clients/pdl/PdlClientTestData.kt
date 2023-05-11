@@ -106,13 +106,20 @@ object PdlClientTestData {
 		}
 	""".trimIndent()
 
-	val adressebeskyttetResponseMedWarning = """
+	val telefonResponse = """
 		{
 		  "data": {
 		    "hentPerson": {
-				"adressebeskyttelse": [
+				"telefonnummer": [
 					{
-						"gradering": "FORTROLIG"
+						"landskode": "+47",
+						"nummer": "98765432",
+						"prioritet": 2
+					},
+					{
+						"landskode": "+47",
+						"nummer": "12345678",
+						"prioritet": 1
 					}
 				]
 		    }

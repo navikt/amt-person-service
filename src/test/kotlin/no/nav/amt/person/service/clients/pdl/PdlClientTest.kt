@@ -2,14 +2,12 @@ package no.nav.amt.person.service.clients.pdl
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.clients.pdl.PdlClientTestData.adressebeskyttetResponseMedWarning
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.errorPrefix
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.nullError
-import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
-import no.nav.amt.person.service.utils.LogUtils
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -219,32 +217,17 @@ class PdlClientTest {
 	}
 
 	@Test
-	fun `hentAdressebeskyttelse - person har adressebeskyttelse - returnerer gradering`() {
+	fun `hentTelefon - person har telefon - returnerer telefon`() {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
 		)
 
-		server.enqueue(MockResponse().setBody(adressebeskyttetResponseMedWarning))
+		server.enqueue(MockResponse().setBody(telefonResponse))
 
-		val gradering = client.hentAdressebeskyttelse("FNR")
+		val telefon = client.hentTelefon("FNR")
 
-		gradering shouldBe AdressebeskyttelseGradering.FORTROLIG
-	}
-
-	@Test
-	fun `hentAdressebeskyttelse - warnings i respons - skal logge warnings`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-		)
-
-		server.enqueue(MockResponse().setBody(adressebeskyttetResponseMedWarning))
-
-		LogUtils.withLogs { getLogs ->
-			client.hentAdressebeskyttelse("FNR")
-			getLogs().any { it.message.startsWith("Respons fra Pdl inneholder warnings:")} shouldBe true
-		}
+		telefon shouldBe "+47 12345678"
 	}
 
 }

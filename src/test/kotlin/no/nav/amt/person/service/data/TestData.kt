@@ -1,10 +1,13 @@
 package no.nav.amt.person.service.data
 
-import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
+import no.nav.amt.person.service.clients.pdl.PdlPerson
+import no.nav.amt.person.service.clients.pdl.PdlPersonIdent
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.model.IdentType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -81,4 +84,17 @@ object TestData {
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, createdAt, modifiedAt)
 
+	fun lagPdlPerson(
+		person: PersonDbo,
+		telefon: String? = null,
+		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
+		identer: List<PdlPersonIdent> = listOf(PdlPersonIdent(person.personIdent, false, "FOLKEREGISTERET")),
+	) = PdlPerson(
+		fornavn = person.fornavn,
+		mellomnavn = person.mellomnavn,
+		etternavn = person.etternavn,
+		telefonnummer = telefon,
+		adressebeskyttelseGradering = adressebeskyttelseGradering,
+		identer = identer,
+	)
 }

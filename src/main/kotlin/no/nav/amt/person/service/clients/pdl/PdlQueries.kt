@@ -35,11 +35,11 @@ object PdlQueries {
 		val warnings: List<PdlWarning>
 	)
 
-	data class Adressebeskyttelse(
-		val gradering: String
+	data class Telefonnummer(
+		val landskode: String,
+		val nummer: String,
+		val prioritet: Int,
 	)
-
-
 	object HentPerson {
 		val query = """
 			query(${"$"}ident: ID!) {
@@ -95,12 +95,6 @@ object PdlQueries {
 			val etternavn: String,
 		)
 
-		data class Telefonnummer(
-			val landskode: String,
-			val nummer: String,
-			val prioritet: Int,
-		)
-
 		data class HentIdenter(
 			val identer: List<Ident>
 		)
@@ -111,14 +105,19 @@ object PdlQueries {
 			val gruppe: String
 		)
 
+		data class Adressebeskyttelse(
+			val gradering: String
+		)
 	}
 
-	object HentAdressebeskyttelse {
+	object HentTelefon {
 		val query = """
 			query(${"$"}ident: ID!) {
 			  hentPerson(ident: ${"$"}ident) {
-				adressebeskyttelse(historikk: false) {
-				  gradering
+				telefonnummer {
+				  landskode
+				  nummer
+				  prioritet
 				}
 			  },
 			}
@@ -135,11 +134,11 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentPerson: HentAdressebeskyttelse
+			val hentPerson: HentPerson
 		)
 
-		data class HentAdressebeskyttelse(
-			val adressebeskyttelse: List<Adressebeskyttelse>
+		data class HentPerson(
+			val telefonnummer: List<Telefonnummer>
 		)
 
 	}

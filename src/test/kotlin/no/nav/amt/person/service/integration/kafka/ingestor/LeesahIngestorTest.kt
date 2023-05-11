@@ -41,6 +41,7 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		val nyTelefon = "+12345678"
 
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(nyEpost, nyTelefon))
+		mockPdlHttpServer.mockHentTelefon(person.personIdent, null)
 
 		val msg = KafkaMessageCreator.lagPersonhendelseNavn(
 			personIdenter = listOf(person.personIdent),

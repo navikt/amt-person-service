@@ -1,8 +1,9 @@
 package no.nav.amt.person.service.integration.mock.servers
 
+import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.pdl.PdlQueries
-import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
-import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.MockHttpServer
@@ -12,14 +13,10 @@ import okhttp3.mockwebserver.RecordedRequest
 
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
-	fun mockHentPerson(person: Person) {
-		mockHentPerson(person.personIdent, MockPdlBruker(
-			fornavn = person.fornavn,
-			etternavn = person.etternavn,
-			adressebeskyttelse = null,
-		))
+	fun mockHentPerson(person: PersonDbo) {
+		mockHentPerson(person.personIdent, TestData.lagPdlPerson(person))
 	}
-	fun mockHentPerson(brukerFnr: String, mockPdlBruker: MockPdlBruker) {
+	fun mockHentPerson(brukerFnr: String, mockPdlPerson: PdlPerson) {
 		val request = toJsonString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentPerson.query,
@@ -33,7 +30,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				&& req.getBodyAsString() == request
 		}
 
-		addResponseHandler(requestPredicate, createPdlBrukerResponse(brukerFnr, mockPdlBruker))
+		addResponseHandler(requestPredicate, createPdlBrukerResponse(brukerFnr, mockPdlPerson))
 	}
 
 	fun mockHentGjeldendePersonligIdent(ident: String, personIdent: String) {
@@ -53,11 +50,11 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		addResponseHandler(requestPredicate, createHentGjeldendeIdentResponse(personIdent))
 	}
 
-	fun mockHentAdressebeskyttelse(ident: String, gradering: AdressebeskyttelseGradering) {
+	fun mockHentTelefon(ident: String, telefon: String?) {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
-				PdlQueries.HentAdressebeskyttelse.query,
-				PdlQueries.HentAdressebeskyttelse.Variables(ident)
+				PdlQueries.HentTelefon.query,
+				PdlQueries.HentTelefon.Variables(ident)
 			)
 		)
 
@@ -67,7 +64,25 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				&& req.getBodyAsString() == request
 		}
 
-		addResponseHandler(requestPredicate, createPdlAdressebeskyttelseResponse(gradering))
+		addResponseHandler(requestPredicate, createHentTelefonResponse(telefon))
+	}
+
+	private fun createHentTelefonResponse(telefon: String?): MockResponse {
+		val telefonnummer = telefon?.let { listOf(PdlQueries.Telefonnummer("47", it, 1)) } ?: emptyList()
+
+		val body = toJsonString(
+			PdlQueries.HentTelefon.Response(
+				errors = null,
+				data = PdlQueries.HentTelefon.ResponseData(
+					PdlQueries.HentTelefon.HentPerson(
+						telefonnummer = telefonnummer
+					)
+				),
+				extensions = null,
+			)
+		)
+
+		return MockResponse().setResponseCode(200).setBody(body)
 	}
 
 
@@ -87,16 +102,16 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		return MockResponse().setResponseCode(200).setBody(body)
 	}
 
-	private fun createPdlBrukerResponse(personIdent: String, mockPdlBruker: MockPdlBruker): MockResponse {
+	private fun createPdlBrukerResponse(personIdent: String, mockPdlPerson: PdlPerson): MockResponse {
 		val body = toJsonString(
 			PdlQueries.HentPerson.Response(
 				errors = null,
 				data = PdlQueries.HentPerson.ResponseData(
 					PdlQueries.HentPerson.HentPerson(
-						navn = listOf(PdlQueries.HentPerson.Navn(mockPdlBruker.fornavn, null, mockPdlBruker.etternavn)),
-						telefonnummer = listOf(PdlQueries.HentPerson.Telefonnummer("47", "12345678", 1)),
-						adressebeskyttelse = if (mockPdlBruker.adressebeskyttelse != null) {
-							listOf(PdlQueries.Adressebeskyttelse(mockPdlBruker.adressebeskyttelse.name))
+						navn = listOf(PdlQueries.HentPerson.Navn(mockPdlPerson.fornavn, null, mockPdlPerson.etternavn)),
+						telefonnummer = listOf(PdlQueries.Telefonnummer("47", "12345678", 1)),
+						adressebeskyttelse = if (mockPdlPerson.adressebeskyttelseGradering != null) {
+							listOf(PdlQueries.HentPerson.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
 						} else {
 							emptyList()
 						}
@@ -112,27 +127,4 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 			.setBody(body)
 	}
 
-	private fun createPdlAdressebeskyttelseResponse(gradering: AdressebeskyttelseGradering): MockResponse {
-		val body = toJsonString(
-			PdlQueries.HentAdressebeskyttelse.Response(
-				errors = null,
-				data = PdlQueries.HentAdressebeskyttelse.ResponseData(
-					PdlQueries.HentAdressebeskyttelse.HentAdressebeskyttelse(
-						listOf(PdlQueries.Adressebeskyttelse(gradering.name))
-					)
-				),
-				extensions = null,
-			)
-		)
-
-		return MockResponse()
-			.setResponseCode(200)
-			.setBody(body)
-	}
 }
-
-data class MockPdlBruker(
-	val fornavn: String = "Ola",
-	val etternavn: String = "Nordmann",
-	val adressebeskyttelse: AdressebeskyttelseGradering? = null,
-)
