@@ -69,7 +69,7 @@ class NavBrukerServiceTest {
 		every { personService.hentEllerOpprettPerson(person.personIdent, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personIdent) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personIdent) } returns navEnhet.toModel()
-		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns kontaktinformasjon
+		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns Result.success(kontaktinformasjon)
 		every { poaoTilgangClient.erSkjermetPerson(person.personIdent) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 
@@ -119,7 +119,7 @@ class NavBrukerServiceTest {
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
 		every { pdlClient.hentTelefon(bruker.person.personIdent) } returns "pdl-telefon"
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns kontakinformasjon
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 

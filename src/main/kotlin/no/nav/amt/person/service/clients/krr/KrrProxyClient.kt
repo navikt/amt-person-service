@@ -14,7 +14,7 @@ class KrrProxyClient(
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
 
-	fun hentKontaktinformasjon(personIdent: String): Kontaktinformasjon {
+	fun hentKontaktinformasjon(personIdent: String): Result<Kontaktinformasjon> {
 		val request: Request = Request.Builder()
 			.url("$baseUrl/rest/v1/person?inkluderSikkerDigitalPost=false")
 			.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -24,17 +24,17 @@ class KrrProxyClient(
 
 		httpClient.newCall(request).execute().use { response ->
 			if (!response.isSuccessful) {
-				throw RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}")
+				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing")
+			val body = response.body?.string() ?: return Result.failure(RuntimeException("Body i respons fra KRR-proxy"))
 
 			val responseDto = fromJsonString<KontaktinformasjonDto>(body)
 
-			return Kontaktinformasjon(
+			return Result.success(Kontaktinformasjon(
 				epost = responseDto.epostadresse,
 				telefonnummer = responseDto.mobiltelefonnummer,
-			)
+			))
 		}
 	}
 

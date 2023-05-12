@@ -53,7 +53,7 @@ class NavBrukerService(
 		val person = personService.hentEllerOpprettPerson(personIdent, personOpplysninger)
 		val veileder = navAnsattService.hentBrukersVeileder(personIdent)
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personIdent)
-		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personIdent)
+		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personIdent).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personIdent).getOrThrow()
 
 		val navBruker = NavBruker(
@@ -61,8 +61,8 @@ class NavBrukerService(
 			person = person,
 			navVeileder = veileder,
 			navEnhet = navEnhet,
-			telefon = kontaktinformasjon.telefonnummer ?:  personOpplysninger.telefonnummer,
-			epost = kontaktinformasjon.epost,
+			telefon = kontaktinformasjon?.telefonnummer ?:  personOpplysninger.telefonnummer,
+			epost = kontaktinformasjon?.epost,
 			erSkjermet = erSkjermet,
 		)
 
@@ -91,8 +91,8 @@ class NavBrukerService(
 	fun oppdaterKontaktinformasjon(personer: List<Person>) {
 		personer.forEach {person ->
 			repository.finnBrukerId(person.personIdent)?.let { brukerId ->
-				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(person.personIdent)
 				val pdlTelefon = pdlClient.hentTelefon(person.personIdent)
+				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(person.personIdent).getOrThrow()
 
 				repository.oppdaterKontaktinformasjon(
 					navBrukerId = brukerId,

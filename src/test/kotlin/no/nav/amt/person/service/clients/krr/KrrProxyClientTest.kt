@@ -44,7 +44,7 @@ class KrrProxyClientTest {
 			)
 		)
 
-		val kontaktinformasjon = client.hentKontaktinformasjon("12345678900")
+		val kontaktinformasjon = client.hentKontaktinformasjon("12345678900").getOrThrow()
 
 		kontaktinformasjon.epost shouldBe "testbruker@gmail.test"
 		kontaktinformasjon.telefonnummer shouldBe "11111111"
