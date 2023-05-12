@@ -27,7 +27,7 @@ class KrrProxyClient(
 				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
 			}
 
-			val body = response.body?.string() ?: return Result.failure(RuntimeException("Body i respons fra KRR-proxy"))
+			val body = response.body?.string() ?: return Result.failure(RuntimeException("Body manglet i respons fra KRR-proxy"))
 
 			val responseDto = fromJsonString<KontaktinformasjonDto>(body)
 

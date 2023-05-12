@@ -102,10 +102,9 @@ class NavBrukerService(
 			return
 		}
 
-		if (eksisterendeKontaktinfo.telefon == krrKontaktinfo.telefonnummer &&
-			eksisterendeKontaktinfo.epost == krrKontaktinfo.epost) return
-
 		val telefon = krrKontaktinfo.telefonnummer ?: pdlClient.hentTelefon(personIdent)
+
+		if (eksisterendeKontaktinfo.telefon == telefon && eksisterendeKontaktinfo.epost == krrKontaktinfo.epost) return
 
 		repository.oppdaterKontaktinformasjon(eksisterendeKontaktinfo.copy(telefon = telefon, epost = krrKontaktinfo.epost))
 	}

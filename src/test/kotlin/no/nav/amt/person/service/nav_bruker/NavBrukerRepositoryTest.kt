@@ -191,6 +191,17 @@ class NavBrukerRepositoryTest {
 		repository.get(bruker.person.personIdent) shouldBe null
 	}
 
+	@Test
+	fun `finnKontaktinformasjon - bruker finnes - returnerer kontaktinfo`() {
+		val bruker = TestData.lagNavBruker(epost = null)
+		testRepository.insertNavBruker(bruker)
+
+		val kontaktinfo = repository.finnKontaktinformasjon(bruker.person.personIdent)
+		kontaktinfo!!.navBrukerId shouldBe bruker.id
+		kontaktinfo.telefon shouldBe bruker.telefon
+		kontaktinfo.epost shouldBe bruker.epost
+	}
+
 	private fun sammenlign(
 		faktiskBruker: NavBrukerDbo,
 		bruker: NavBrukerDbo,
