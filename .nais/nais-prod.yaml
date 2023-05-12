@@ -43,6 +43,9 @@ spec:
   kafka:
     pool: nav-prod
   accessPolicy:
+    inbound:
+      rules:
+        - application: amt-arrangor
     outbound:
       rules:
         - application: poao-tilgang
