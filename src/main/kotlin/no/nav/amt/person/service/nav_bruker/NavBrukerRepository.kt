@@ -2,6 +2,7 @@ package no.nav.amt.person.service.nav_bruker
 
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerKontaktinfo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
@@ -199,7 +200,7 @@ class NavBrukerRepository(
 		template.update(sql, parameters)
 	}
 
-	fun oppdaterKontaktinformasjon(navBrukerId: UUID, telefon: String?, epost: String?) {
+	fun oppdaterKontaktinformasjon(kontaktinfo: NavBrukerKontaktinfo) {
 		val sql = """
 			update nav_bruker
 			set telefon = :telefon,
@@ -209,9 +210,9 @@ class NavBrukerRepository(
 		""".trimIndent()
 
 		val parameters = sqlParameters(
-			"navBrukerId" to navBrukerId,
-			"telefon" to telefon,
-			"epost" to epost,
+			"navBrukerId" to kontaktinfo.navBrukerId,
+			"telefon" to kontaktinfo.telefon,
+			"epost" to kontaktinfo.epost,
 		)
 
 		template.update(sql, parameters)
@@ -227,4 +228,24 @@ class NavBrukerRepository(
 
 		template.update(sql, parameters)
 	}
+
+	fun finnKontaktinformasjon(personIdent: String): NavBrukerKontaktinfo? {
+		val sql = """
+			select nb.id as "nav_bruker.id",
+				   nb.telefon as "nav_bruker.telefon",
+				   nb.epost as "nav_bruker.epost"
+			from nav_bruker nb join person p on nb.person_id = p.id
+			where p.person_ident = :personIdent
+			""".trimMargin()
+
+		val parameters = sqlParameters("personIdent" to personIdent)
+
+		return template.query(sql, parameters) {rs, _ -> NavBrukerKontaktinfo(
+			navBrukerId = rs.getUUID("nav_bruker.id"),
+			telefon = rs.getString("nav_bruker.telefon"),
+			epost = rs.getString("nav_bruker.epost"),
+		)
+		}.firstOrNull()
+	}
 }
+

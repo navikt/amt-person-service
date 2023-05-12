@@ -90,18 +90,24 @@ class NavBrukerService(
 
 	fun oppdaterKontaktinformasjon(personer: List<Person>) {
 		personer.forEach {person ->
-			repository.finnBrukerId(person.personIdent)?.let { brukerId ->
-				val pdlTelefon = pdlClient.hentTelefon(person.personIdent)
-				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(person.personIdent).getOrThrow()
+			oppdaterKontaktinformasjon(person.personIdent)
+		}
+	}
 
-				repository.oppdaterKontaktinformasjon(
-					navBrukerId = brukerId,
-					telefon = kontaktinformasjon.telefonnummer ?: pdlTelefon,
-					epost = kontaktinformasjon.epost,
-				)
-			}
+	private fun oppdaterKontaktinformasjon(personIdent: String) {
+		val eksisterendeKontaktinfo = repository.finnKontaktinformasjon(personIdent) ?: return
+
+		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personIdent).getOrElse {
+			log.error("Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}")
+			return
 		}
 
+		if (eksisterendeKontaktinfo.telefon == krrKontaktinfo.telefonnummer &&
+			eksisterendeKontaktinfo.epost == krrKontaktinfo.epost) return
+
+		val telefon = krrKontaktinfo.telefonnummer ?: pdlClient.hentTelefon(personIdent)
+
+		repository.oppdaterKontaktinformasjon(eksisterendeKontaktinfo.copy(telefon = telefon, epost = krrKontaktinfo.epost))
 	}
 
 	fun slettBrukere(personer: List<Person>) {
