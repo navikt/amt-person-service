@@ -11,6 +11,7 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
+import no.nav.amt.person.service.person.model.erBeskyttet
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -45,7 +46,7 @@ class NavBrukerService(
 	private fun opprettNavBruker(personIdent: String): NavBruker {
 		val personOpplysninger = pdlClient.hentPerson(personIdent)
 
-		if (personService.erAdressebeskyttet(personOpplysninger.adressebeskyttelseGradering)) {
+		if (personOpplysninger.adressebeskyttelseGradering.erBeskyttet()) {
 			throw IllegalStateException("Nav bruker er adreessebeskyttet og kan ikke lagres")
 		}
 

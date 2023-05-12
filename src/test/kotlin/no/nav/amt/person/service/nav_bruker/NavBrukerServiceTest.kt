@@ -66,7 +66,6 @@ class NavBrukerServiceTest {
 
 		every { repository.get(person.personIdent) } returns null
 		every { pdlClient.hentPerson(person.personIdent) } returns personOpplysninger
-		every { personService.erAdressebeskyttet(any()) } returns false
 		every { personService.hentEllerOpprettPerson(person.personIdent, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personIdent) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personIdent) } returns navEnhet.toModel()
@@ -91,7 +90,6 @@ class NavBrukerServiceTest {
 
 		every { repository.get(person.personIdent) } returns null
 		every { pdlClient.hentPerson(person.personIdent) } returns personOpplysninger
-		every { personService.erAdressebeskyttet(personOpplysninger.adressebeskyttelseGradering) } returns true
 
 		assertThrows<IllegalStateException> {
 			service.hentEllerOpprettNavBruker(person.personIdent)
