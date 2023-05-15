@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.config
 
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock
 import no.nav.common.rest.filter.LogRequestFilter
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder
 import no.nav.common.token_client.client.MachineToMachineTokenClient
@@ -11,8 +12,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @Configuration
+@EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "10m")
 @EnableJwtTokenValidation
 class ApplicationConfig {
 
