@@ -12,6 +12,7 @@ import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.erBeskyttet
+import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -98,7 +99,11 @@ class NavBrukerService(
 		val eksisterendeKontaktinfo = repository.hentKontaktinformasjonHvisBrukerFinnes(personIdent) ?: return
 
 		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personIdent).getOrElse {
-			log.error("Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}")
+			val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
+
+			if (EnvUtils.isDev()) log.info(feilmelding)
+			else log.error(feilmelding)
+
 			return
 		}
 
