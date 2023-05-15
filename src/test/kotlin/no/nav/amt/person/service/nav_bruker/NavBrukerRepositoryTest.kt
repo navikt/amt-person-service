@@ -192,11 +192,11 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
-	fun `finnKontaktinformasjon - bruker finnes - returnerer kontaktinfo`() {
+	fun `hentKontaktinformasjonHvisBrukerFinnes - bruker finnes - returnerer kontaktinfo`() {
 		val bruker = TestData.lagNavBruker(epost = null)
 		testRepository.insertNavBruker(bruker)
 
-		val kontaktinfo = repository.finnKontaktinformasjon(bruker.person.personIdent)
+		val kontaktinfo = repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent)
 		kontaktinfo!!.navBrukerId shouldBe bruker.id
 		kontaktinfo.telefon shouldBe bruker.telefon
 		kontaktinfo.epost shouldBe bruker.epost

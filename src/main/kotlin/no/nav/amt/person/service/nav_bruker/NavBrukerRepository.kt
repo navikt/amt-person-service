@@ -229,7 +229,7 @@ class NavBrukerRepository(
 		template.update(sql, parameters)
 	}
 
-	fun finnKontaktinformasjon(personIdent: String): NavBrukerKontaktinfo? {
+	fun hentKontaktinformasjonHvisBrukerFinnes(personIdent: String): NavBrukerKontaktinfo? {
 		val sql = """
 			select nb.id as "nav_bruker.id",
 				   nb.telefon as "nav_bruker.telefon",

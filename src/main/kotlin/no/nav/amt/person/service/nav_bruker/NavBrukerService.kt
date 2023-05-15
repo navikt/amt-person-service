@@ -95,7 +95,7 @@ class NavBrukerService(
 	}
 
 	private fun oppdaterKontaktinformasjon(personIdent: String) {
-		val eksisterendeKontaktinfo = repository.finnKontaktinformasjon(personIdent) ?: return
+		val eksisterendeKontaktinfo = repository.hentKontaktinformasjonHvisBrukerFinnes(personIdent) ?: return
 
 		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personIdent).getOrElse {
 			log.error("Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}")

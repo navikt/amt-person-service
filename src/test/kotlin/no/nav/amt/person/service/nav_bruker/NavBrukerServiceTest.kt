@@ -101,7 +101,7 @@ class NavBrukerServiceTest {
 	fun `oppdaterKontaktInformasjon - ingen brukere finnes - oppdaterer ikke`() {
 		val personer = listOf(TestData.lagPerson().toModel(), TestData.lagPerson().toModel())
 
-		every { repository.finnKontaktinformasjon(any()) } returns null
+		every { repository.hentKontaktinformasjonHvisBrukerFinnes(any()) } returns null
 
 		service.oppdaterKontaktinformasjon(personer)
 
@@ -119,7 +119,7 @@ class NavBrukerServiceTest {
 			)
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.finnKontaktinformasjon(bruker.person.personIdent) } returns
+		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
 			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
 
@@ -142,7 +142,7 @@ class NavBrukerServiceTest {
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
 		every { pdlClient.hentTelefon(bruker.person.personIdent) } returns pdlTelefon
-		every { repository.finnKontaktinformasjon(bruker.person.personIdent) } returns
+		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
 			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
 
@@ -160,7 +160,7 @@ class NavBrukerServiceTest {
 		val bruker = TestData.lagNavBruker()
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.finnKontaktinformasjon(bruker.person.personIdent) } returns
+		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
 			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.failure(RuntimeException())
 
