@@ -8,18 +8,20 @@ import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerKontaktinfo
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Rolle
+import no.nav.amt.person.service.utils.mockExectuteWithoutResult
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.transaction.support.TransactionTemplate
 
 class NavBrukerServiceTest {
 	lateinit var service: NavBrukerService
@@ -31,6 +33,8 @@ class NavBrukerServiceTest {
 	lateinit var krrProxyClient: KrrProxyClient
 	lateinit var poaoTilgangClient: PoaoTilgangClient
 	lateinit var pdlClient: PdlClient
+	lateinit var kafkaProducerService: KafkaProducerService
+	lateinit var transactionTemplate: TransactionTemplate
 
 	@BeforeEach
 	fun setup() {
@@ -42,6 +46,8 @@ class NavBrukerServiceTest {
 		poaoTilgangClient = mockk()
 		pdlClient = mockk()
 		rolleService = mockk(relaxUnitFun = true)
+		kafkaProducerService = mockk(relaxUnitFun = true)
+		transactionTemplate = mockk()
 
 		service = NavBrukerService(
 			repository = repository,
@@ -52,6 +58,8 @@ class NavBrukerServiceTest {
 			krrProxyClient = krrProxyClient,
 			poaoTilgangClient = poaoTilgangClient,
 			pdlClient = pdlClient,
+			kafkaProducerService = kafkaProducerService,
+			transactionTemplate = transactionTemplate,
 		)
 	}
 
@@ -73,6 +81,7 @@ class NavBrukerServiceTest {
 		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns Result.success(kontaktinformasjon)
 		every { poaoTilgangClient.erSkjermetPerson(person.personIdent) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		mockExectuteWithoutResult(transactionTemplate)
 
 		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personIdent)
 
@@ -101,13 +110,13 @@ class NavBrukerServiceTest {
 	fun `oppdaterKontaktInformasjon - ingen brukere finnes - oppdaterer ikke`() {
 		val personer = listOf(TestData.lagPerson().toModel(), TestData.lagPerson().toModel())
 
-		every { repository.hentKontaktinformasjonHvisBrukerFinnes(any()) } returns null
+		every { repository.get(any<String>()) } returns null
 
 		service.oppdaterKontaktinformasjon(personer)
 
 		verify(exactly = 0) { pdlClient.hentTelefon(any()) }
 		verify(exactly = 0) { krrProxyClient.hentKontaktinformasjon(any()) }
-		verify(exactly = 0) { repository.oppdaterKontaktinformasjon(any()) }
+		verify(exactly = 0) { repository.upsert(any()) }
 	}
 
 	@Test
@@ -119,15 +128,17 @@ class NavBrukerServiceTest {
 			)
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
-			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
+		every { repository.get(bruker.person.personIdent) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
+		mockExectuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
-		verify(exactly = 1) { repository.oppdaterKontaktinformasjon(
-				NavBrukerKontaktinfo(bruker.id, kontakinformasjon.telefonnummer, kontakinformasjon.epost)
+		verify(exactly = 1) { repository.upsert(
+				bruker.copy(telefon = kontakinformasjon.telefonnummer, epost = kontakinformasjon.epost)
+					.toModel()
+					.toUpsert()
 			)
 		}
 	}
@@ -142,16 +153,18 @@ class NavBrukerServiceTest {
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
 		every { pdlClient.hentTelefon(bruker.person.personIdent) } returns pdlTelefon
-		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
-			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
+		every { repository.get(bruker.person.personIdent) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
+		mockExectuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
 		verify(exactly = 1) { pdlClient.hentTelefon(bruker.person.personIdent) }
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
-		verify(exactly = 1) { repository.oppdaterKontaktinformasjon(
-			NavBrukerKontaktinfo(bruker.id, pdlTelefon, kontakinformasjon.epost)
+		verify(exactly = 1) { repository.upsert(
+			bruker.copy(telefon = pdlTelefon, epost = kontakinformasjon.epost)
+				.toModel()
+				.toUpsert()
 		) }
 	}
 
@@ -160,14 +173,13 @@ class NavBrukerServiceTest {
 		val bruker = TestData.lagNavBruker()
 
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.hentKontaktinformasjonHvisBrukerFinnes(bruker.person.personIdent) } returns
-			NavBrukerKontaktinfo(bruker.id, bruker.telefon, bruker.epost)
+		every { repository.get(bruker.person.personIdent) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.failure(RuntimeException())
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
-		verify(exactly = 0) { repository.oppdaterKontaktinformasjon(any()) }
+		verify(exactly = 0) { repository.upsert(any()) }
 	}
 
 }
