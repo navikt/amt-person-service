@@ -12,7 +12,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.junit.AfterClass
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -66,8 +66,6 @@ class IntegrationTestBase {
 		val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
 		val mockOAuthServer = MockOAuthServer()
 
-		val dataSource = SingletonPostgresContainer.getDataSource()
-
 		@JvmStatic
 		@DynamicPropertySource
 		fun startEnvironment(registry: DynamicPropertyRegistry) {
@@ -119,9 +117,9 @@ class IntegrationTestBase {
 		}
 
 		@JvmStatic
-		@AfterClass
+		@AfterAll
 		fun tearDown() {
-			DbTestDataUtils.cleanDatabase(dataSource)
+			DbTestDataUtils.cleanDatabase(SingletonPostgresContainer.getDataSource())
 		}
 
 	}
