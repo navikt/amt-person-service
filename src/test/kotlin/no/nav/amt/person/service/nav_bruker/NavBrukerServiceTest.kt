@@ -15,7 +15,7 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.utils.mockExectuteWithoutResult
+import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +39,7 @@ class NavBrukerServiceTest {
 	@BeforeEach
 	fun setup() {
 		repository = mockk(relaxUnitFun = true)
-		personService = mockk()
+		personService = mockk(relaxUnitFun = true)
 		navAnsattService = mockk()
 		navEnhetService = mockk()
 		krrProxyClient = mockk()
@@ -81,7 +81,7 @@ class NavBrukerServiceTest {
 		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns Result.success(kontaktinformasjon)
 		every { poaoTilgangClient.erSkjermetPerson(person.personIdent) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
-		mockExectuteWithoutResult(transactionTemplate)
+		mockExecuteWithoutResult(transactionTemplate)
 
 		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personIdent)
 
@@ -130,7 +130,7 @@ class NavBrukerServiceTest {
 		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
 		every { repository.get(bruker.person.personIdent) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
-		mockExectuteWithoutResult(transactionTemplate)
+		mockExecuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
@@ -155,7 +155,7 @@ class NavBrukerServiceTest {
 		every { pdlClient.hentTelefon(bruker.person.personIdent) } returns pdlTelefon
 		every { repository.get(bruker.person.personIdent) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
-		mockExectuteWithoutResult(transactionTemplate)
+		mockExecuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
@@ -182,4 +182,33 @@ class NavBrukerServiceTest {
 		verify(exactly = 0) { repository.upsert(any()) }
 	}
 
+	@Test
+	fun `slettBruker - bruker har kun NAV_BRUKER-rolle - sletter bruker og person`() {
+		val bruker = TestData.lagNavBruker()
+
+		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns false
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.slettBruker(bruker.toModel())
+
+		verify { repository.delete(bruker.id) }
+		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
+		verify { personService.slettPerson(bruker.person.toModel()) }
+		verify { kafkaProducerService.publiserSlettNavBruker(bruker.id) }
+	}
+
+	@Test
+	fun `slettBruker - bruker har andre roller - sletter bruker og men ikke person`() {
+		val bruker = TestData.lagNavBruker()
+
+		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns true
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.slettBruker(bruker.toModel())
+
+		verify { repository.delete(bruker.id) }
+		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
+		verify(exactly = 0) { personService.slettPerson(bruker.person.toModel()) }
+		verify { kafkaProducerService.publiserSlettNavBruker(bruker.id) }
+	}
 }

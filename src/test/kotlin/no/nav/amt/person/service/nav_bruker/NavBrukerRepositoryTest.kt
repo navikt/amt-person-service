@@ -137,11 +137,11 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
-	fun `deleteByPersonId - bruker finnes - sletter bruker`() {
+	fun `delete- bruker finnes - sletter bruker`() {
 		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
 
-		repository.deleteByPersonId(bruker.person.id)
+		repository.delete(bruker.id)
 
 		repository.get(bruker.person.personIdent) shouldBe null
 	}

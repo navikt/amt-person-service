@@ -58,7 +58,7 @@ class KafkaProducerServiceTest: IntegrationTestBase() {
 	fun `publiserSlettNavBruker - skal publisere tombstone med riktig key og null value`() {
 		val brukerId = UUID.randomUUID()
 
-		kafkaProducerService.publiserSettNavBruker(brukerId)
+		kafkaProducerService.publiserSlettNavBruker(brukerId)
 
 		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == brukerId.toString() }
 

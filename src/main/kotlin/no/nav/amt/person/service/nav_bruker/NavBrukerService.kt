@@ -84,7 +84,6 @@ class NavBrukerService(
 		}
 	}
 
-
 	fun oppdaterNavEnhet(navBruker: NavBruker, navEnhet: NavEnhet?) {
 		upsert(navBruker.copy(navEnhet = navEnhet))
 	}
@@ -134,18 +133,29 @@ class NavBrukerService(
 
 	fun slettBrukere(personer: List<Person>) {
 		personer.forEach {
-			repository.deleteByPersonId(it.id)
-			rolleService.fjernRolle(it.id, Rolle.NAV_BRUKER)
+			val bruker = repository.get(it.personIdent)?.toModel()
 
-			if (!rolleService.harRolle(it.id, Rolle.ARRANGOR_ANSATT)) {
-				personService.slettPerson(it)
+			if (bruker != null) {
+				slettBruker(bruker)
 			}
-
-			secureLog.info("Slettet navbruker med personident: ${it.personIdent}")
-			log.info("Slettet navbruker med personId: ${it.id}")
-
 		}
 
+	}
+
+	fun slettBruker(bruker: NavBruker) {
+		transactionTemplate.executeWithoutResult {
+			repository.delete(bruker.id)
+			rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER)
+
+			if (!rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT)) {
+				personService.slettPerson(bruker.person)
+			}
+
+			kafkaProducerService.publiserSlettNavBruker(bruker.id)
+		}
+
+		secureLog.info("Slettet navbruker med personident: ${bruker.person.personIdent}")
+		log.info("Slettet navbruker med id: ${bruker.id}")
 	}
 
 }

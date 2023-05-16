@@ -38,7 +38,7 @@ class KafkaProducerService(
 		kafkaProducerClient.sendSync(record)
 	}
 
-	fun publiserSettNavBruker(brukerId: UUID) {
+	fun publiserSlettNavBruker(brukerId: UUID) {
 		val record = ProducerRecord<String, String?>(kafkaTopicProperties.amtNavBrukerTopic, brukerId.toString(), null)
 
 		kafkaProducerClient.sendSync(record)

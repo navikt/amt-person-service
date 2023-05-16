@@ -167,13 +167,13 @@ class NavBrukerRepository(
 		return template.query(sql, parameters) {rs, _ -> rs.getNullableUUID("nav_bruker.id")}.firstOrNull()
 	}
 
-	fun deleteByPersonId(personId: UUID) {
+	fun delete(id: UUID) {
 		val sql = """
 			delete from nav_bruker
-			where person_id = :personId
+			where id = :id
 		""".trimIndent()
 
-		val parameters = sqlParameters("personId" to personId)
+		val parameters = sqlParameters("id" to id)
 
 		template.update(sql, parameters)
 	}
