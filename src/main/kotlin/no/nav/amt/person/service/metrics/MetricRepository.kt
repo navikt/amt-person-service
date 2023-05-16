@@ -12,7 +12,7 @@ class MetricRepository(
 			select (select count(*) from person) as antall_personer,
 				   (select count(*) from nav_bruker) as antall_nav_brukere,
 				   (select count(*) from nav_ansatt) as antall_nav_ansatte,
-				   (select count(*) from nav_enhet) as antall_nav_nav_enheter,
+				   (select count(*) from nav_enhet) as antall_nav_enheter,
 				   (select count(*) from person_rolle where type = 'ARRANGOR_ANSATT') as antall_arrangor_ansatte
 		""".trimIndent()
 
