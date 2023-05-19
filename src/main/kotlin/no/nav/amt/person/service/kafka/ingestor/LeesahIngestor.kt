@@ -60,7 +60,7 @@ class LeesahIngestor(
 		if (personer.isEmpty()) return
 
 		personer.forEach { person ->
-			personService.oppdaterPerson(person.copy(
+			personService.upsert(person.copy(
 				fornavn = navn.fornavn,
 				mellomnavn = navn.mellomnavn,
 				etternavn = navn.etternavn,

@@ -146,23 +146,36 @@ class PersonRepositoryTest {
 	}
 
 	@Test
-	fun `oppdaterIdenter - ny ident - oppdaterer`() {
-		val person = TestData.lagPerson(personIdentType = IdentType.NPID)
-		val nyPersonIdent = TestData.randomIdent()
-		testRepository.insertPerson(person)
-
-		repository.oppdaterIdenter(
-			id = person.id,
-			gjeldendeIdent = nyPersonIdent,
-			gjeldendeIdentType = IdentType.FOLKEREGISTERIDENT,
-			historiskeIdenter = listOf(person.personIdent)
+	fun `upsert - ny ident - oppdaterer person`() {
+		val originalPerson = TestData.lagPerson(
+			createdAt = LocalDateTime.now().minusMonths(6),
+			modifiedAt = LocalDateTime.now().minusMonths(6),
 		)
 
-		val faktiskPerson = repository.get(person.id)
+		testRepository.insertPerson(originalPerson)
 
-		faktiskPerson.personIdent shouldBe nyPersonIdent
-		faktiskPerson.personIdentType shouldBe IdentType.FOLKEREGISTERIDENT
-		faktiskPerson.historiskeIdenter shouldBe listOf(person.personIdent)
+		val oppdatertPerson = Person(
+			id = originalPerson.id,
+			personIdent = "ny ident",
+			personIdentType = originalPerson.personIdentType,
+			fornavn = "Nytt",
+			mellomnavn = "Navn",
+			etternavn = "Med Mer",
+			historiskeIdenter = originalPerson.historiskeIdenter.plus(originalPerson.personIdent)
+		)
+
+		repository.upsert(oppdatertPerson)
+
+		val faktiskPerson = repository.get(originalPerson.id)
+
+		faktiskPerson.id shouldBe originalPerson.id
+		faktiskPerson.personIdent shouldBe  oppdatertPerson.personIdent
+		faktiskPerson.personIdentType shouldBe oppdatertPerson.personIdentType
+		faktiskPerson.historiskeIdenter shouldBe oppdatertPerson.historiskeIdenter
+		faktiskPerson.fornavn shouldBe oppdatertPerson.fornavn
+		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
+		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn
+		faktiskPerson.createdAt shouldBeEqualTo originalPerson.createdAt
 		faktiskPerson.modifiedAt shouldBeCloseTo LocalDateTime.now()
 	}
 

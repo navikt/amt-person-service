@@ -59,10 +59,12 @@ class PersonRepository(
 				:fornavn,
 				:mellomnavn,
 				:etternavn
-			) on conflict(person_ident) do update set
+			) on conflict(id) do update set
 				fornavn = :fornavn,
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
+				person_ident = :personIdent,
+				person_ident_type = :personIdentType,
 				historiske_identer = :historiskeIdenter,
 				modified_at = current_timestamp
 		""".trimIndent()
@@ -95,31 +97,6 @@ class PersonRepository(
 
 		return template.query(sql, parameters, rowMapper)
 
-	}
-
-	fun oppdaterIdenter(
-		id: UUID,
-		gjeldendeIdent: String,
-		gjeldendeIdentType: IdentType,
-		historiskeIdenter: List<String>,
-	) {
-		val sql = """
-			update person
-			set person_ident = :gjeldendeIdent,
-				person_ident_type = :gjeldendeIdentType,
-				historiske_identer = :historiskeIdenter,
-				modified_at = current_timestamp
-			where id = :id
-		""".trimIndent()
-
-		val parameters = sqlParameters(
-			"id" to id,
-			"gjeldendeIdent" to gjeldendeIdent,
-			"gjeldendeIdentType" to gjeldendeIdentType.toString(),
-			"historiskeIdenter" to historiskeIdenter.toTypedArray(),
-		)
-
-		template.update(sql, parameters)
 	}
 
 	fun delete(id: UUID) {

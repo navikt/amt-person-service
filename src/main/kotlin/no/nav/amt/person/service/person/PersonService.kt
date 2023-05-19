@@ -6,13 +6,17 @@ import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
 @Service
 class PersonService(
 	val pdlClient: PdlClient,
 	val repository: PersonRepository,
+	val applicationEventPublisher: ApplicationEventPublisher,
+	val transactionTemplate: TransactionTemplate,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -49,14 +53,22 @@ class PersonService(
 		}
 
 		personer.firstOrNull()?.let { person ->
-			repository.oppdaterIdenter(person.id, gjeldendeIdent, identType, historiskeIdenter)
+			upsert(person.copy(
+				personIdent = gjeldendeIdent,
+				personIdentType = identType,
+				historiskeIdenter = historiskeIdenter
+			).toModel())
 		}
 
 	}
 
-	fun oppdaterPerson(person: Person) {
-		repository.upsert(person)
-		log.info("Oppdaterte person med id: ${person.id}")
+	fun upsert(person: Person) {
+		transactionTemplate.executeWithoutResult {
+			repository.upsert(person)
+			applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
+
+			log.info("Upsertet person med id: ${person.id}")
+		}
 	}
 
 	private fun opprettPerson(personIdent: String): Person {
@@ -78,7 +90,7 @@ class PersonService(
 			etternavn = pdlPerson.etternavn,
 		)
 
-		repository.upsert(person)
+		upsert(person)
 
 		log.info("Opprettet ny person med id ${person.id}")
 

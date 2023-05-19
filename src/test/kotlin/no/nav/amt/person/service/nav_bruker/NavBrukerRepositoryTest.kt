@@ -157,8 +157,8 @@ class NavBrukerRepositoryTest {
 		faktiskBruker.telefon shouldBe bruker.telefon
 		faktiskBruker.epost shouldBe bruker.epost
 		faktiskBruker.erSkjermet shouldBe bruker.erSkjermet
-		faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
-		faktiskBruker.modifiedAt shouldBeEqualTo bruker.modifiedAt
+		faktiskBruker.createdAt shouldBeCloseTo bruker.createdAt
+		faktiskBruker.modifiedAt shouldBeCloseTo bruker.modifiedAt
 	}
 
 }

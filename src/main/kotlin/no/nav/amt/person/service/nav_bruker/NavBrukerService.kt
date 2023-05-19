@@ -9,6 +9,7 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.PersonUpdateEvent
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
@@ -17,6 +18,7 @@ import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
@@ -156,6 +158,13 @@ class NavBrukerService(
 
 		secureLog.info("Slettet navbruker med personident: ${bruker.person.personIdent}")
 		log.info("Slettet navbruker med id: ${bruker.id}")
+	}
+
+	@TransactionalEventListener
+	fun onPersonUpdate(personUpdateEvent: PersonUpdateEvent) {
+		repository.get(personUpdateEvent.person.personIdent)?.let {
+			kafkaProducerService.publiserNavBruker(it.toModel())
+		}
 	}
 
 }
