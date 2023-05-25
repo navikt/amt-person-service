@@ -194,7 +194,7 @@ class NavBrukerServiceTest {
 		verify { repository.delete(bruker.id) }
 		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
 		verify { personService.slettPerson(bruker.person.toModel()) }
-		verify { kafkaProducerService.publiserSlettNavBruker(bruker.id) }
+		verify { kafkaProducerService.publiserSlettNavBruker(bruker.person.id) }
 	}
 
 	@Test
@@ -209,6 +209,6 @@ class NavBrukerServiceTest {
 		verify { repository.delete(bruker.id) }
 		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
 		verify(exactly = 0) { personService.slettPerson(bruker.person.toModel()) }
-		verify { kafkaProducerService.publiserSlettNavBruker(bruker.id) }
+		verify { kafkaProducerService.publiserSlettNavBruker(bruker.person.id) }
 	}
 }

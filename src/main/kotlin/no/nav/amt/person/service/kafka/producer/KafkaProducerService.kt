@@ -23,9 +23,8 @@ class KafkaProducerService(
 		if (!toggleProduce) return
 
 		val navBrukerDto = NavBrukerDtoV1(
-			id = navBruker.id,
+			personId = navBruker.person.id,
 			personIdent = navBruker.person.personIdent,
-			personIdentType = navBruker.person.personIdentType,
 			fornavn = navBruker.person.fornavn,
 			mellomnavn = navBruker.person.mellomnavn,
 			etternavn = navBruker.person.etternavn,
@@ -36,17 +35,17 @@ class KafkaProducerService(
 			erSkjermet = navBruker.erSkjermet,
 		)
 
-		val key = navBruker.id.toString()
+		val key = navBruker.person.id.toString()
 		val value =  JsonUtils.toJsonString(navBrukerDto)
 		val record = ProducerRecord(kafkaTopicProperties.amtNavBrukerTopic, key, value)
 
 		kafkaProducerClient.sendSync(record)
 	}
 
-	fun publiserSlettNavBruker(brukerId: UUID) {
+	fun publiserSlettNavBruker(personId: UUID) {
 		if (!toggleProduce) return
 
-		val record = ProducerRecord<String, String?>(kafkaTopicProperties.amtNavBrukerTopic, brukerId.toString(), null)
+		val record = ProducerRecord<String, String?>(kafkaTopicProperties.amtNavBrukerTopic, personId.toString(), null)
 
 		kafkaProducerClient.sendSync(record)
 	}

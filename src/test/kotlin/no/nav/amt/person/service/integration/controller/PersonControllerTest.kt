@@ -88,10 +88,8 @@ class PersonControllerTest: IntegrationTestBase() {
 		val body = objectMapper.readValue<NavBrukerDto>(response.body!!.string())
 		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personIdent)!!
 
-		faktiskBruker.id shouldBe body.id
-		faktiskBruker.erSkjermet shouldBe body.erSkjermet
+		faktiskBruker.person.id shouldBe body.personId
 		faktiskBruker.person.personIdent shouldBe body.personIdent
-		faktiskBruker.person.personIdentType shouldBe body.personIdentType
 		faktiskBruker.person.fornavn shouldBe body.fornavn
 		faktiskBruker.person.mellomnavn shouldBe body.mellomnavn
 		faktiskBruker.person.etternavn shouldBe body.etternavn
@@ -101,6 +99,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.navEnhet!!.id shouldBe body.navEnhet!!.id
 		faktiskBruker.navEnhet!!.enhetId shouldBe body.navEnhet!!.enhetId
 		faktiskBruker.navEnhet!!.navn shouldBe body.navEnhet!!.navn
+		faktiskBruker.erSkjermet shouldBe body.erSkjermet
 	}
 
 	@Test

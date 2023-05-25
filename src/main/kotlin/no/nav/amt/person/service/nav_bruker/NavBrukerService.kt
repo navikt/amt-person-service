@@ -153,11 +153,11 @@ class NavBrukerService(
 				personService.slettPerson(bruker.person)
 			}
 
-			kafkaProducerService.publiserSlettNavBruker(bruker.id)
+			kafkaProducerService.publiserSlettNavBruker(bruker.person.id)
 		}
 
 		secureLog.info("Slettet navbruker med personident: ${bruker.person.personIdent}")
-		log.info("Slettet navbruker med id: ${bruker.id}")
+		log.info("Slettet navbruker med personId: ${bruker.person.id}")
 	}
 
 	@TransactionalEventListener

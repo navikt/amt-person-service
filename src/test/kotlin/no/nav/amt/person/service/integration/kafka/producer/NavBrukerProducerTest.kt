@@ -36,22 +36,22 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 
 		kafkaProducerService.publiserNavBruker(navBruker)
 
-		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == navBruker.id.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == navBruker.person.id.toString() }
 
 		val forventetValue = brukerTilV1Json(navBruker)
 
-		record.key() shouldBe navBruker.id.toString()
+		record.key() shouldBe navBruker.person.id.toString()
 		record.value() shouldBe forventetValue
 	}
 
 
 	@Test
 	fun `publiserSlettNavBruker - skal publisere tombstone med riktig key og null value`() {
-		val brukerId = UUID.randomUUID()
+		val personId = UUID.randomUUID()
 
-		kafkaProducerService.publiserSlettNavBruker(brukerId)
+		kafkaProducerService.publiserSlettNavBruker(personId)
 
-		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == brukerId.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == personId.toString() }
 
 		record.value() shouldBe null
 	}
@@ -64,7 +64,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "nytt navn")).toModel()
 		personService.upsert(oppdatertBruker.person)
 
-		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.id.toString()}
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.person.id.toString()}
 
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
@@ -77,7 +77,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 		val oppdatertBruker = bruker.copy(navEnhet = null).toModel()
 		navBrukerService.upsert(oppdatertBruker)
 
-		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.id.toString()}
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.person.id.toString()}
 
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
@@ -85,9 +85,8 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 	private fun brukerTilV1Json(navBruker: NavBruker): String {
 		return JsonUtils.toJsonString(
 			NavBrukerDtoV1(
-				id = navBruker.id,
+				personId = navBruker.person.id,
 				personIdent = navBruker.person.personIdent,
-				personIdentType = navBruker.person.personIdentType,
 				fornavn = navBruker.person.fornavn,
 				mellomnavn = navBruker.person.mellomnavn,
 				etternavn = navBruker.person.etternavn,
