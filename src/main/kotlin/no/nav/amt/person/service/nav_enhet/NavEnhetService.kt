@@ -26,15 +26,17 @@ class NavEnhetService(
 
 	fun hentEllerOpprettNavEnhet(enhetId: String) = navEnhetRepository.get(enhetId)?.toModel() ?: opprettEnhet(enhetId)
 
+	fun hentEllerOpprettNavEnhetMedId(enhetId: String, id: UUID) = navEnhetRepository.get(enhetId)?.toModel() ?: opprettEnhet(enhetId, id)
+
 	fun hentNavEnhet(id: UUID) = navEnhetRepository.get(id).toModel()
 
 	fun hentNavEnhet(enhetId: String) = navEnhetRepository.get(enhetId)?.toModel()
 
-	private fun opprettEnhet(enhetId: String): NavEnhet? {
+	private fun opprettEnhet(enhetId: String, id: UUID = UUID.randomUUID()): NavEnhet? {
 		val norgEnhet = norgClient.hentNavEnhet(enhetId) ?: return null
 
 		val enhet = NavEnhet(
-			id = UUID.randomUUID(),
+			id = id,
 			enhetId = enhetId,
 			navn = norgEnhet.navn
 		)
