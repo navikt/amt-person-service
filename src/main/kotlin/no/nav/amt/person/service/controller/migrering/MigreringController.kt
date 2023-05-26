@@ -73,7 +73,7 @@ class MigreringController(
 				migreringRepository.upsert(
 					MigreringDbo(
 						resursId = request.id,
-						endepunkt = "nav-enhet",
+						endepunkt = "nav-ansatt",
 						requestBody = JsonUtils.toJsonString(request),
 						diff = JsonUtils.toJsonString(diffMap),
 						error = null,
