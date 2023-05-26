@@ -1,0 +1,18 @@
+package no.nav.amt.person.service.clients.nom
+
+class NomClientMock : NomClient {
+	override fun hentNavAnsatt(navIdent: String): NomNavAnsatt? {
+		return hentNavAnsatte(listOf(navIdent)).firstOrNull()
+	}
+
+	override fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
+		return navIdenter.map { navIdent ->
+			NomNavAnsatt(
+				navIdent = navIdent,
+				navn = "F_$navIdent E_$navIdent",
+				epost = "F_$navIdent.E_$navIdent@trygdeetaten.no",
+				telefonnummer = "12345678"
+			)
+		}
+	}
+}

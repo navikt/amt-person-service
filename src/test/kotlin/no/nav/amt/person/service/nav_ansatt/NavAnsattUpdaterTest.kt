@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.amt.person.service.clients.nom.NomClient
+import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.utils.LogUtils
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 class NavAnsattUpdaterTest {
 	lateinit var repository: NavAnsattRepository
-	lateinit var nomClient: NomClient
+	lateinit var nomClient: NomClientImpl
 	lateinit var updater: NavAnsattUpdater
 
 	@BeforeEach

@@ -43,7 +43,7 @@ class NavAnsattUpdater(
 		}
 	}
 
-	data class AnsattSomSkalOppdateres (
+	data class AnsattSomSkalOppdateres(
 		val id: UUID,
 		var erOppdatert: Boolean,
 	)

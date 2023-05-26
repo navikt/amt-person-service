@@ -81,6 +81,8 @@ spec:
       value: api://prod-gcp.nom.nom-api/.default
     - name: NOM_URL
       value: https://nom-api.intern.nav.no
+    - name: NOM_MOCK
+      value: "false"
     - name: VEILARBARENA_SCOPE
       value: api://prod-fss.pto.veilarbarena/.default
     - name: VEILARBARENA_URL

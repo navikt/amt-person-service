@@ -14,10 +14,16 @@ class NomConfig {
 	@Value("\${nom.scope}")
 	lateinit var scope: String
 
+	@Value("\${nom.mock:false}")
+	var mock: Boolean = false
+
 	@Bean
 	fun nomClient(machineToMachineTokenClient: MachineToMachineTokenClient) : NomClient {
+		if (mock) {
+			return NomClientMock()
+		}
 
-		return NomClient(
+		return NomClientImpl(
 			url = url,
 			tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) }
 		)

@@ -11,14 +11,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class NomClientTest {
-	private lateinit var client: NomClient
+	private lateinit var client: NomClientImpl
 	private lateinit var server: MockWebServer
 	private val token = "TOKEN"
 
 	@BeforeEach
 	fun setup() {
 		server = MockWebServer()
-		client = NomClient(
+		client = NomClientImpl(
 			url = server.url("").toString().removeSuffix("/"),
 			tokenSupplier = { token },
 		)
