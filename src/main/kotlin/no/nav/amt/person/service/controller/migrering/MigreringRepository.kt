@@ -12,11 +12,12 @@ class MigreringRepository(
 ) {
 	fun upsert(migrering: MigreringDbo) {
 		val sql = """
-			insert into migrering_diff (resurs_id, endepunkt, request_body, diff)
-			values (:resursId, :endepunkt, cast(:requestBody as jsonb), cast(:diff as jsonb))
+			insert into migrering_diff (resurs_id, endepunkt, request_body, diff, error)
+			values (:resursId, :endepunkt, cast(:requestBody as jsonb), cast(:diff as jsonb), :error)
 			on conflict (resurs_id) do update set
 				request_body = cast(:requestBody as jsonb),
 				diff = cast(:diff as jsonb),
+				error = :error,
 				modified_at = current_timestamp
 		""".trimIndent()
 
@@ -24,12 +25,13 @@ class MigreringRepository(
 			"resursId" to migrering.resursId,
 			"endepunkt" to migrering.endepunkt,
 			"requestBody" to migrering.requestBody,
-			"diff" to migrering.diff
+			"diff" to migrering.diff,
+			"error" to migrering.error,
 		)
 		template.update(sql, parameters)
 	}
 
-	fun get(resursId: UUID): MigreringDbo {
+	fun get(resursId: UUID): MigreringDbo? {
 		val sql = """
 			select * from migrering_diff where resurs_id = :resursId
 		""".trimIndent()
@@ -42,8 +44,9 @@ class MigreringRepository(
 				endepunkt = rs.getString("endepunkt"),
 				requestBody = rs.getString("request_body"),
 				diff = rs.getString("diff"),
+				error = rs.getString("error"),
 			)
-		}.first()
+		}.firstOrNull()
 
 	}
 }
@@ -53,4 +56,5 @@ data class MigreringDbo(
 	val endepunkt: String,
 	val requestBody: String,
 	val diff: String?,
+	val error: String?,
 )
