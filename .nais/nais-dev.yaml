@@ -46,6 +46,7 @@ spec:
     inbound:
       rules:
         - application: amt-arrangor
+        - application: amt-tiltak
     outbound:
       rules:
         - application: poao-tilgang
