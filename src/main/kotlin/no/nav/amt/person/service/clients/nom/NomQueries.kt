@@ -12,7 +12,7 @@ object NomQueries {
 				ressurser(where: { navidenter: ${"$"}identer }){
 					code
 					ressurs {
-						navIdent
+						navident
 						visningsnavn
 						fornavn
 						etternavn
@@ -58,7 +58,7 @@ object NomQueries {
 		)
 
 		data class Ressurs(
-			val navIdent: String,
+			val navident: String,
 			val visningsnavn: String?,
 			val fornavn: String?,
 			val etternavn: String?,

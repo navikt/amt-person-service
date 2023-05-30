@@ -14,7 +14,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 	fun addDefaultData() {
 		mockHentNavAnsatt(
 			NomClientResponseInput(
-				navIdent = "NavIdent",
+				navident = "NavIdent",
 				visningsnavn = "Jeg er en test",
 				fornavn = "INTEGRASJON",
 				etternavn = "TEST",
@@ -30,7 +30,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 		val predicate = { req: RecordedRequest ->
 			req.path == "/graphql"
 				&& req.method == "POST"
-				&& containsIdentifier(req, input.navIdent)
+				&& containsIdentifier(req, input.navident)
 		}
 
 
@@ -45,7 +45,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 		}
 
 		val input = NomClientResponseInput(
-			navIdent = ansatt.navIdent,
+			navident = ansatt.navIdent,
 			visningsnavn = ansatt.navn,
 			fornavn = ansatt.navn.split(" ").first(),
 			etternavn = ansatt.navn.split(" ").last(),
@@ -77,7 +77,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 					NomQueries.HentIdenter.RessursResult(
 						code = NomQueries.HentIdenter.ResultCode.OK,
 						ressurs = NomQueries.HentIdenter.Ressurs(
-							navIdent = input.navIdent,
+							navident = input.navident,
 							visningsnavn = input.visningsnavn,
 							fornavn = input.fornavn,
 							etternavn = input.etternavn,
@@ -95,7 +95,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 	}
 
 	data class NomClientResponseInput(
-		val navIdent: String,
+		val navident: String,
 		val visningsnavn: String?,
 		val fornavn: String?,
 		val etternavn: String?,
