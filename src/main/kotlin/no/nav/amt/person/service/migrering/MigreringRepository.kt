@@ -53,18 +53,17 @@ class MigreringRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
-	fun getAll(endepunkt: String, offset: Int, limit: Int = 500): List<MigreringDbo> {
+	fun getAll(endepunkt: String, lastSeenId: UUID?, limit: Int = 500): List<MigreringDbo> {
 		val sql = """
 			select * from migrering_diff
-			where endepunkt = :endepunkt
+			where endepunkt = :endepunkt ${lastSeenId?.let { "and resurs_id > :lastSeenId" } ?: ""}
 			order by resurs_id
-			offset :offset
 			limit :limit
 		""".trimIndent()
 
 		val parameters = sqlParameters(
 			"endepunkt" to endepunkt,
-			"offset" to offset,
+			"lastSeenId" to lastSeenId,
 			"limit" to limit,
 		)
 

@@ -106,11 +106,11 @@ class MigreringController(
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
 
-		var offset = 0
 		var migreringDboer: List<MigreringDbo>
+		var sisteId: UUID? = null
 
 		do {
-			migreringDboer = migreringRepository.getAll("nav-ansatt", offset)
+			migreringDboer = migreringRepository.getAll("nav-ansatt", sisteId)
 
 			migreringDboer.forEach { dbo ->
 				val body = JsonUtils.fromJsonString<MigreringNavAnsatt>(dbo.requestBody)
@@ -119,8 +119,9 @@ class MigreringController(
 				if (diff.isEmpty()) {
 					migreringRepository.delete(body.id)
 				}
+
+				sisteId = dbo.resursId
 			}
-			offset += migreringDboer.size
 		} while (migreringDboer.isNotEmpty())
 	}
 

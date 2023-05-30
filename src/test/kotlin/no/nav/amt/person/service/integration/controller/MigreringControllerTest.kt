@@ -96,7 +96,7 @@ class MigreringControllerTest: IntegrationTestBase() {
 
 		response.code shouldBe 200
 
-		migreringRepository.get(request.id) shouldBe null
+		migreringRepository.getAll("nav-ansatt", null) shouldBe emptyList()
 
 		val opprettetAnsatt = navAnsattService.hentNavAnsatt(request.id)
 
