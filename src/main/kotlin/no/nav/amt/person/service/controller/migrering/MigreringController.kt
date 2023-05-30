@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.controller.migrering
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.controller.auth.Issuer
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
@@ -9,10 +10,15 @@ import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.utils.JsonUtils
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @RestController
@@ -64,34 +70,7 @@ class MigreringController(
 	fun migrerNavAnsatt(
 		@RequestBody request: MigreringNavAnsatt,
 	) {
-		try {
-			val ansatt = navAnsattService.hentEllerOpprettAnsatt(request.navIdent, request.id)
-
-			val diffMap = request.diff(ansatt)
-
-			if (diffMap.isNotEmpty()) {
-				migreringRepository.upsert(
-					MigreringDbo(
-						resursId = request.id,
-						endepunkt = "nav-ansatt",
-						requestBody = JsonUtils.toJsonString(request),
-						diff = JsonUtils.toJsonString(diffMap),
-						error = null,
-					)
-				)
-			}
-		} catch (e: Exception) {
-			migreringRepository.upsert(
-				MigreringDbo(
-					resursId = request.id,
-					endepunkt = "nav-ansatt",
-					requestBody = JsonUtils.toJsonString(request),
-					diff = null,
-					error = e.message
-				)
-			)
-			throw (e)
-		}
+		migrerAnsatt(request)
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -127,6 +106,88 @@ class MigreringController(
 			throw (e)
 		}
 
+	}
+
+	@Unprotected
+	@GetMapping("/nav-ansatt/retry/{id}")
+	fun retryMigrerNavAnsatt(
+		request: HttpServletRequest,
+		@PathVariable("id") id: UUID,
+	) {
+		if (!isInternal(request)) {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+
+		val dbo = migreringRepository.get(id) ?: throw NoSuchElementException()
+		val body = JsonUtils.fromJsonString<MigreringNavAnsatt>(dbo.requestBody)
+		val diff = migrerAnsatt(body)
+
+		if (diff.isEmpty()) {
+			migreringRepository.delete(body.id)
+		}
+	}
+
+	@Unprotected
+	@GetMapping("/nav-ansatt/retry")
+	fun retryMigrerNavAnsatte(request: HttpServletRequest) {
+		if (!isInternal(request)) {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+
+		var offset = 0
+		var migreringDboer: List<MigreringDbo>
+
+		do {
+			migreringDboer = migreringRepository.getAll("nav-ansatt", offset)
+
+			migreringDboer.forEach { dbo ->
+				val body = JsonUtils.fromJsonString<MigreringNavAnsatt>(dbo.requestBody)
+				val diff = migrerAnsatt(body)
+
+				if (diff.isEmpty()) {
+					migreringRepository.delete(body.id)
+				}
+			}
+			offset += migreringDboer.size
+		} while (migreringDboer.isNotEmpty())
+	}
+
+	private fun migrerAnsatt(request: MigreringNavAnsatt): Map<String, DiffProperty> {
+		try {
+			val ansatt = navAnsattService.hentEllerOpprettAnsatt(request.navIdent, request.id)
+
+			val diffMap = request.diff(ansatt)
+
+			if (diffMap.isNotEmpty()) {
+				migreringRepository.upsert(
+					MigreringDbo(
+						resursId = request.id,
+						endepunkt = "nav-ansatt",
+						requestBody = JsonUtils.toJsonString(request),
+						diff = JsonUtils.toJsonString(diffMap),
+						error = null,
+					)
+				)
+			}
+
+			return diffMap
+
+		} catch (e: Exception) {
+			migreringRepository.upsert(
+				MigreringDbo(
+					resursId = request.id,
+					endepunkt = "nav-ansatt",
+					requestBody = JsonUtils.toJsonString(request),
+					diff = null,
+					error = e.message
+				)
+			)
+			throw (e)
+		}
+	}
+
+	private fun isInternal(servlet: HttpServletRequest): Boolean {
+		return servlet.remoteAddr == "127.0.0.1"
 	}
 }
 

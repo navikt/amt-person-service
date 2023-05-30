@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.integration.controller
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.controller.migrering.MigreringDbo
 import no.nav.amt.person.service.controller.migrering.MigreringNavAnsatt
 import no.nav.amt.person.service.controller.migrering.MigreringNavEnhet
 import no.nav.amt.person.service.controller.migrering.MigreringRepository
@@ -76,5 +77,29 @@ class MigreringControllerTest: IntegrationTestBase() {
 		opprettetAnsatt.navn shouldBe request.navn
 		opprettetAnsatt.epost shouldBe request.epost
 		opprettetAnsatt.telefon shouldBe request.telefon
+	}
+
+	@Test
+	fun `retryMigrerAnsatte - feiler ikke - skal opprette ansatt og slette diff`() {
+		val navAnsatt = TestData.lagNavAnsatt()
+		val request = MigreringNavAnsatt(navAnsatt.id,  navAnsatt.navIdent, navAnsatt.navn, navAnsatt.epost, navAnsatt.telefon)
+
+		migreringRepository.upsert(MigreringDbo(navAnsatt.id, "nav-ansatt", JsonUtils.toJsonString(request), null, null))
+
+		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+
+		val response = sendRequest(
+			method = "GET",
+			path = "/api/migrer/nav-ansatt/retry",
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+		)
+
+		response.code shouldBe 200
+
+		migreringRepository.get(request.id) shouldBe null
+
+		val opprettetAnsatt = navAnsattService.hentNavAnsatt(request.id)
+
+		opprettetAnsatt.navIdent shouldBe request.navIdent
 	}
 }
