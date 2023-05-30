@@ -37,7 +37,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "H156147",
+					  "navIdent": "H156147",
 					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
@@ -69,7 +69,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "H156147",
+					  "navIdent": "H156147",
 					  "visningsnavn": null,
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
@@ -101,7 +101,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "H156147",
+					  "navIdent": "H156147",
 					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
@@ -178,7 +178,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "H156147",
+					  "navIdent": "H156147",
 					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
@@ -211,7 +211,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "H156147",
+					  "navIdent": "H156147",
 					  "visningsnavn": "Alias",
 					  "fornavn": "Blaut",
 					  "etternavn": "Slappfisk",
@@ -243,7 +243,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "${veiledere[0].navIdent}",
+					  "navIdent": "${veiledere[0].navIdent}",
 					  "visningsnavn": "${veiledere[0].navn}",
 					  "fornavn": "Fornavn",
 					  "etternavn": "Etternavn",
@@ -254,7 +254,7 @@ class NomClientTest {
 				  },
 				  {
 					"ressurs": {
-					  "navident": "${veiledere[1].navIdent}",
+					  "navIdent": "${veiledere[1].navIdent}",
 					  "visningsnavn": "${veiledere[1].navn}",
 					  "fornavn": "Fornavn",
 					  "etternavn": "Etternavn",
@@ -296,7 +296,7 @@ class NomClientTest {
 				"ressurser": [
 				  {
 					"ressurs": {
-					  "navident": "${veileder.navIdent}",
+					  "navIdent": "${veileder.navIdent}",
 					  "visningsnavn": "${veileder.navn}",
 					  "fornavn": "Fornavn",
 					  "etternavn": "Etternavn",

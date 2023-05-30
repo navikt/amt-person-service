@@ -58,7 +58,7 @@ object NomQueries {
 		)
 
 		data class Ressurs(
-			val navident: String,
+			val navIdent: String,
 			val visningsnavn: String?,
 			val fornavn: String?,
 			val etternavn: String?,
