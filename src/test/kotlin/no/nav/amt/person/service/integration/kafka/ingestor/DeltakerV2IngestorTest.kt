@@ -84,7 +84,7 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 			val migrering = migreringService.hentMigrering(navBruker.id)
 			migrering shouldNotBe null
 
-			migrering!!.diff shouldBe """{"epost": {"amtPerson": "ny@epost", "amtTiltak": "nav_bruker@gmail.com"}, "telefon": {"amtPerson": "4277742", "amtTiltak": "nav_bruker@gmail.com"}}"""
+			migrering!!.diff shouldBe """{"epost": {"amtPerson": "ny@epost", "amtTiltak": "nav_bruker@gmail.com"}, "telefon": {"amtPerson": "4277742", "amtTiltak": "77788999"}}"""
 
 			migrering.error shouldBe null
 			migrering.endepunkt shouldBe "nav-bruker"

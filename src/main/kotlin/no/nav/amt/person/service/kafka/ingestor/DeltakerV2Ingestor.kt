@@ -34,7 +34,7 @@ class DeltakerV2Ingestor(
 			etternavn = deltakerDto.personalia.navn.etternavn,
 			navVeilederId = deltakerDto.navVeileder?.id,
 			navEnhetId = brukerInfo.navEnhetId,
-			telefon = deltakerDto.personalia.kontaktinformasjon.epost,
+			telefon = deltakerDto.personalia.kontaktinformasjon.telefonnummer,
 			epost = deltakerDto.personalia.kontaktinformasjon.epost,
 			erSkjermet = deltakerDto.personalia.skjermet,
 		))
