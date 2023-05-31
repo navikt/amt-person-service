@@ -52,6 +52,7 @@ class IntegrationTestBase {
 		mockPoaoTilgangHttpServer.resetHttpServer()
 		mockVeilarbarenaHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
+		mockAmtTiltakHttpServer.resetHttpServer()
 	}
 
 	companion object {
@@ -65,6 +66,7 @@ class IntegrationTestBase {
 		val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
 		val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
 		val mockOAuthServer = MockOAuthServer()
+		val mockAmtTiltakHttpServer = MockAmtTiltakHttpServer()
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -103,6 +105,10 @@ class IntegrationTestBase {
 			mockVeilarbarenaHttpServer.start()
 			registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
 			registry.add("veilarbarena.scope") { "test.veilarbarena" }
+
+			mockAmtTiltakHttpServer.start()
+			registry.add("amt-tiltak.url") { mockAmtTiltakHttpServer.serverUrl() }
+			registry.add("amt-tilak.scope") { "test.amt-tiltak" }
 
 			mockOAuthServer.start()
 			registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }

@@ -49,6 +49,7 @@ spec:
         - application: amt-tiltak
     outbound:
       rules:
+        - application: amt-tiltak
         - application: poao-tilgang
           namespace: poao
           cluster: dev-gcp
@@ -88,6 +89,10 @@ spec:
       value: api://dev-fss.pto.veilarbarena/.default
     - name: VEILARBARENA_URL
       value: https://veilarbarena.dev-fss-pub.nais.io
+    - name: AMT_TILTAK_SCOPE
+      value: api://prod-gcp.amt.amt-tiltak/.default
+    - name: AMT_TILTAK_URL
+      value: http://amt-tiltak.amt.svc.cluster.local
     - name: ENDRING_PAA_BRUKER_TOPIC
       value: pto.endring-paa-oppfolgingsbruker-v2
     - name: SISTE_TILORDNET_VEILEDER_TOPIC
