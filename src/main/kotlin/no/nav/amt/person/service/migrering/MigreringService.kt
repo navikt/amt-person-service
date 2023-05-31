@@ -3,6 +3,7 @@ package no.nav.amt.person.service.migrering
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class MigreringService(
@@ -38,6 +39,10 @@ class MigreringService(
 			)
 			throw (e)
 		}
+	}
+
+	fun hentMigrering(resursId: UUID): MigreringDbo? {
+		return migreringRepository.get(resursId)
 	}
 
 }

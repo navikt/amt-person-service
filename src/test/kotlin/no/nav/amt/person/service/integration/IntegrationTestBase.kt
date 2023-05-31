@@ -108,7 +108,7 @@ class IntegrationTestBase {
 
 			mockAmtTiltakHttpServer.start()
 			registry.add("amt-tiltak.url") { mockAmtTiltakHttpServer.serverUrl() }
-			registry.add("amt-tilak.scope") { "test.amt-tiltak" }
+			registry.add("amt-tiltak.scope") { "test.amt-tiltak" }
 
 			mockOAuthServer.start()
 			registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }
