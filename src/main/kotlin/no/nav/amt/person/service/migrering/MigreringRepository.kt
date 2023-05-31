@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.controller.migrering
+package no.nav.amt.person.service.migrering
 
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters

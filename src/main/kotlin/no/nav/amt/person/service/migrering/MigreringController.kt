@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.controller.migrering
+package no.nav.amt.person.service.migrering
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.controller.auth.Issuer
@@ -28,6 +28,7 @@ class MigreringController(
 	private val navAnsattService: NavAnsattService,
 	private val navBrukerService: NavBrukerService,
 	private val migreringRepository: MigreringRepository,
+	private val migreringService: MigreringService,
 ) {
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -78,34 +79,7 @@ class MigreringController(
 	fun migrerNavBruker(
 		@RequestBody request: MigreringNavBruker,
 	) {
-		try {
-		    val bruker = navBrukerService.hentEllerOpprettNavBruker(request.personIdent, request.id)
-			val diffMap = request.diff(bruker)
-
-			if (diffMap.isNotEmpty()) {
-				migreringRepository.upsert(
-					MigreringDbo(
-						resursId = request.id,
-						endepunkt = "nav-bruker",
-						requestBody = JsonUtils.toJsonString(request),
-						diff = JsonUtils.toJsonString(diffMap),
-						error = null,
-					)
-				)
-			}
-		} catch (e: Exception) {
-			migreringRepository.upsert(
-				MigreringDbo(
-					resursId = request.id,
-					endepunkt = "nav-bruker",
-					requestBody = JsonUtils.toJsonString(request),
-					diff = null,
-					error = e.message
-				)
-			)
-			throw (e)
-		}
-
+		migreringService.migrerNavBruker(request)
 	}
 
 	@Unprotected

@@ -1,12 +1,12 @@
 package no.nav.amt.person.service.integration.controller
 
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.controller.migrering.MigreringDbo
-import no.nav.amt.person.service.controller.migrering.MigreringNavAnsatt
-import no.nav.amt.person.service.controller.migrering.MigreringNavEnhet
-import no.nav.amt.person.service.controller.migrering.MigreringRepository
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
+import no.nav.amt.person.service.migrering.MigreringDbo
+import no.nav.amt.person.service.migrering.MigreringNavAnsatt
+import no.nav.amt.person.service.migrering.MigreringNavEnhet
+import no.nav.amt.person.service.migrering.MigreringRepository
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.utils.JsonUtils
