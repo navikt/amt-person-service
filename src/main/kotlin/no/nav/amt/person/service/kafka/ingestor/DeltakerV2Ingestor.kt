@@ -27,7 +27,7 @@ class DeltakerV2Ingestor(
 		migreringService.migrerNavBruker(MigreringNavBruker(
 			id = brukerInfo.brukerId,
 			personIdent = deltakerDto.personalia.personident,
-			personIdentType = brukerInfo.personIdentType.name,
+			personIdentType = brukerInfo.personIdentType?.name,
 			historiskeIdenter = brukerInfo.historiskeIdenter,
 			fornavn = deltakerDto.personalia.navn.fornavn,
 			mellomnavn = deltakerDto.personalia.navn.mellomnavn,

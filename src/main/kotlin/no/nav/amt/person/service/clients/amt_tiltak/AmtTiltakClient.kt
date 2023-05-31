@@ -38,6 +38,6 @@ class AmtTiltakClient(
 data class BrukerInfoDto(
 	val brukerId: UUID,
 	val navEnhetId: UUID?,
-	val personIdentType: IdentType,
+	val personIdentType: IdentType?,
 	val historiskeIdenter: List<String>,
 )
