@@ -105,6 +105,8 @@ spec:
       value: pdl.leesah-v1
     - name: DELTAKER_V2_TOPIC
       value: amt.deltaker-v2
+    - name: AMT_NAV_BRUKER_TOPIC
+      value: amt.nav-bruker-personalia-v1
 
   gcp:
     sqlInstances:
