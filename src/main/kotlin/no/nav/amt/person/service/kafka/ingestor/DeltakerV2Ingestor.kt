@@ -3,6 +3,7 @@ package no.nav.amt.person.service.kafka.ingestor
 import no.nav.amt.person.service.clients.amt_tiltak.AmtTiltakClient
 import no.nav.amt.person.service.migrering.MigreringNavBruker
 import no.nav.amt.person.service.migrering.MigreringService
+import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,6 +14,7 @@ import java.util.UUID
 class DeltakerV2Ingestor(
 	private val migreringService: MigreringService,
 	private val amtTiltakClient: AmtTiltakClient,
+	private val brukerService: NavBrukerService,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	fun ingest(key: String, value: String?) {
@@ -20,8 +22,13 @@ class DeltakerV2Ingestor(
 			log.info("Fikk tombstone på key: $key hopper over deltaker")
 			return
 		}
-
 		val deltakerDto = fromJsonString<DeltakerDto>(value)
+
+		if (brukerService.finnBrukerId(deltakerDto.personalia.personident) != null)	 {
+			log.info("Har allerede opprettet bruker for deltaker med id: $key")
+			return
+		}
+
 		val brukerInfo = amtTiltakClient.hentBrukerInfo(deltakerDto.id)
 
 		migreringService.migrerNavBruker(MigreringNavBruker(

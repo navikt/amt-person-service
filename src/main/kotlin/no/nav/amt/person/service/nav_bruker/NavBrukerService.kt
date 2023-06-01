@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.transaction.support.TransactionTemplate
-import java.util.*
+import java.util.UUID
 
 @Service
 class NavBrukerService(
@@ -75,6 +75,7 @@ class NavBrukerService(
 
 		upsert(navBruker)
 		rolleService.opprettRolle(person.id, Rolle.NAV_BRUKER)
+		log.info("Opprettet ny nav bruker med id: $id")
 
 		return navBruker
 	}
