@@ -90,7 +90,7 @@ spec:
     - name: VEILARBARENA_URL
       value: https://veilarbarena.prod-fss-pub.nais.io
     - name: AMT_TILTAK_SCOPE
-      value: api://dev-gcp.amt.amt-tiltak/.default
+      value: api://prod-gcp.amt.amt-tiltak/.default
     - name: AMT_TILTAK_URL
       value: http://amt-tiltak.amt.svc.cluster.local
     - name: ENDRING_PAA_BRUKER_TOPIC
