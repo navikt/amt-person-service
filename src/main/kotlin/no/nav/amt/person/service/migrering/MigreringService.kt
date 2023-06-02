@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.migrering
 
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -9,11 +10,13 @@ import java.util.UUID
 class MigreringService(
 	private val migreringRepository: MigreringRepository,
 	private val navBrukerService: NavBrukerService,
+	private val personService: PersonService,
 ) {
 
 	fun migrerNavBruker(migreringNavBruker: MigreringNavBruker) {
 		try {
-			val bruker = navBrukerService.hentEllerOpprettNavBruker(migreringNavBruker.personIdent, migreringNavBruker.id)
+			personService.hentEllerOpprettPerson(migreringNavBruker.personIdent, migreringNavBruker.id)
+			val bruker = navBrukerService.hentEllerOpprettNavBruker(migreringNavBruker.personIdent)
 			val diffMap = migreringNavBruker.diff(bruker)
 
 			if (diffMap.isNotEmpty()) {

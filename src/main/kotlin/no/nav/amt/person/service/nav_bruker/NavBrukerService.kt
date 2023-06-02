@@ -46,11 +46,11 @@ class NavBrukerService(
 		return repository.get(personIdent)?.toModel()
 	}
 
-	fun hentEllerOpprettNavBruker(personIdent: String, nyBrukerId: UUID = UUID.randomUUID()): NavBruker {
-		return repository.get(personIdent)?.toModel() ?: opprettNavBruker(personIdent, nyBrukerId)
+	fun hentEllerOpprettNavBruker(personIdent: String): NavBruker {
+		return repository.get(personIdent)?.toModel() ?: opprettNavBruker(personIdent)
 	}
 
-	private fun opprettNavBruker(personIdent: String, id: UUID): NavBruker {
+	private fun opprettNavBruker(personIdent: String): NavBruker {
 		val personOpplysninger = pdlClient.hentPerson(personIdent)
 
 		if (personOpplysninger.adressebeskyttelseGradering.erBeskyttet()) {
@@ -64,7 +64,7 @@ class NavBrukerService(
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personIdent).getOrThrow()
 
 		val navBruker = NavBruker(
-			id = id,
+			id = UUID.randomUUID(),
 			person = person,
 			navVeileder = veileder,
 			navEnhet = navEnhet,
@@ -75,7 +75,7 @@ class NavBrukerService(
 
 		upsert(navBruker)
 		rolleService.opprettRolle(person.id, Rolle.NAV_BRUKER)
-		log.info("Opprettet ny nav bruker med id: $id")
+		log.info("Opprettet ny nav bruker med id: ${navBruker.id}")
 
 		return navBruker
 	}

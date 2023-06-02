@@ -5,7 +5,6 @@ import no.nav.amt.person.service.controller.auth.Issuer
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBruker
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.utils.JsonUtils
@@ -26,7 +25,6 @@ import java.util.*
 class MigreringController(
 	private val navEnhetService: NavEnhetService,
 	private val navAnsattService: NavAnsattService,
-	private val navBrukerService: NavBrukerService,
 	private val migreringRepository: MigreringRepository,
 	private val migreringService: MigreringService,
 ) {
@@ -218,6 +216,8 @@ data class MigreringNavBruker(
 
 		val diffMap = mutableMapOf<String, DiffProperty>()
 
+		if (this.id != navBruker.person.id)
+			diffMap["personId"] = DiffProperty(this.id.toString(), navBruker.person.id.toString())
 		if (this.personIdent != navBruker.person.personIdent)
 			diffMap["personIdent"] = DiffProperty(this.personIdent, navBruker.person.personIdent)
 		if (this.personIdentType != null && this.personIdentType.toString() != navBruker.person.personIdentType.toString())

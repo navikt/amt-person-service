@@ -28,7 +28,7 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 	lateinit var migreringService: MigreringService
 
 	@Test
-	fun `ingest - bruker finnes ikke - oppretter med riktig id`() {
+	fun `ingest - bruker finnes ikke - oppretter med riktig personId`() {
 		val navBruker = TestData.lagNavBruker()
 		val deltakerId = UUID.randomUUID()
 		val kontaktinfoDiff = MockKontaktinformasjon("ny@epost", "4277742")
@@ -59,7 +59,7 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 		)
 
 		mockAmtTiltakHttpServer.mockHentBrukerInfo(deltakerId, BrukerInfoDto(
-			navBruker.id,
+			navBruker.person.id,
 			personIdentType = navBruker.person.personIdentType!!,
 			historiskeIdenter = navBruker.person.historiskeIdenter,
 			navEnhetId = navBruker.navEnhet!!.id
@@ -74,14 +74,16 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 		kafkaMessageSender.sendTilDeltakerV2Topic(deltakerId, JsonUtils.toJsonString(msg))
 
 		AsyncUtils.eventually {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
-			faktiskBruker.navEnhet?.id shouldBe navBruker.navEnhet?.id
+			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personIdent)
+			faktiskBruker shouldNotBe null
+
+			faktiskBruker!!.navEnhet?.id shouldBe navBruker.navEnhet?.id
 			faktiskBruker.navVeileder?.id shouldBe navBruker.navVeileder?.id
 
 			faktiskBruker.telefon shouldBe kontaktinfoDiff.mobiltelefonnummer
 			faktiskBruker.epost shouldBe kontaktinfoDiff.epostadresse
 
-			val migrering = migreringService.hentMigrering(navBruker.id)
+			val migrering = migreringService.hentMigrering(navBruker.person.id)
 			migrering shouldNotBe null
 
 			migrering!!.diff shouldBe """{"epost": {"amtPerson": "ny@epost", "amtTiltak": "nav_bruker@gmail.com"}, "telefon": {"amtPerson": "4277742", "amtTiltak": "77788999"}}"""

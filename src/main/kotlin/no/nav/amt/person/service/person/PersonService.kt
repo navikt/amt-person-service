@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
-import java.util.*
+import java.util.UUID
 
 @Service
 class PersonService(
@@ -28,8 +28,8 @@ class PersonService(
 		return repository.get(personIdent)?.toModel()
 	}
 
-	fun hentEllerOpprettPerson(personIdent: String) : Person {
-		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
+	fun hentEllerOpprettPerson(personIdent: String, nyPersonId: UUID = UUID.randomUUID()) : Person {
+		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent, nyPersonId)
 	}
 
 	fun hentEllerOpprettPerson(personIdent: String, personOpplysninger: PdlPerson): Person {
@@ -71,17 +71,17 @@ class PersonService(
 		}
 	}
 
-	private fun opprettPerson(personIdent: String): Person {
+	private fun opprettPerson(personIdent: String, nyPersonId: UUID): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 
-		return opprettPerson(personIdent, pdlPerson)
+		return opprettPerson(personIdent, pdlPerson, nyPersonId)
 	}
 
-	private fun opprettPerson(personIdent: String, pdlPerson: PdlPerson): Person {
+	private fun opprettPerson(personIdent: String, pdlPerson: PdlPerson, nyPersonId: UUID = UUID.randomUUID()): Person {
 		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe
 
 		val person = Person(
-			id = UUID.randomUUID(),
+			id = nyPersonId,
 			personIdent = personIdent,
 			personIdentType = IdentType.valueOf(personIdentType),
 			historiskeIdenter = pdlPerson.identer.filter { it.ident != personIdent }.map { it.ident },
