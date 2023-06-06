@@ -9,9 +9,7 @@ import no.nav.amt.person.service.controller.request.NavEnhetRequest
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
-import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.person.RolleService
-import no.nav.amt.person.service.person.model.Rolle
+import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.*
 
@@ -19,11 +17,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api")
 class PersonController (
-	private val personService: PersonService,
 	private val navAnsattService: NavAnsattService,
 	private val navBrukerService: NavBrukerService,
 	private val navEnhetService: NavEnhetService,
-	private val rolleService: RolleService,
+	private val arrangorAnsattService: ArrangorAnsattService,
 ) {
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -47,8 +44,9 @@ class PersonController (
 	fun hentEllerOpprettArrangorAnsatt(
 		@RequestBody request: ArrangorAnsattRequest,
 	): ArrangorAnsattDto {
-		val person = personService.hentEllerOpprettPerson(request.personIdent)
-		rolleService.opprettRolle(person.id, Rolle.ARRANGOR_ANSATT)
+
+		val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personIdent)
+
 		return person.toArrangorAnsattDto()
 	}
 

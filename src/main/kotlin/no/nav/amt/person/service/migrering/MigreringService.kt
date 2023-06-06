@@ -15,7 +15,7 @@ class MigreringService(
 
 	fun migrerNavBruker(migreringNavBruker: MigreringNavBruker) {
 		try {
-			personService.hentEllerOpprettPerson(migreringNavBruker.personIdent, migreringNavBruker.id)
+			personService.opprettPersonMedId(migreringNavBruker.personIdent, migreringNavBruker.id)
 			val bruker = navBrukerService.hentEllerOpprettNavBruker(migreringNavBruker.personIdent)
 			val diffMap = migreringNavBruker.diff(bruker)
 

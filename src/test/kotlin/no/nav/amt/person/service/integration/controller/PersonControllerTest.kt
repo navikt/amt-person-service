@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.amt_tiltak.BrukerInfoDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.controller.dto.NavAnsattDto
 import no.nav.amt.person.service.controller.dto.NavBrukerDto
@@ -19,6 +20,7 @@ import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 
 class PersonControllerTest: IntegrationTestBase() {
 
@@ -37,10 +39,11 @@ class PersonControllerTest: IntegrationTestBase() {
 	lateinit var navEnhetService: NavEnhetService
 
 	@Test
-	fun `hentEllerOpprettArrangorAnsatt - ansatt finnes ikke - skal ha status 200 og retrurnere riktig response`() {
+	fun `hentEllerOpprettArrangorAnsatt - ansatt finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val person = TestData.lagPerson()
 		val token = mockOAuthServer.issueAzureAdM2MToken()
 
+		mockAmtTiltakHttpServer.mockHentBrukerId(person.personIdent, null)
 		mockPdlHttpServer.mockHentPerson(person)
 
 		val response = sendRequest(
@@ -63,7 +66,69 @@ class PersonControllerTest: IntegrationTestBase() {
 	}
 
 	@Test
-	fun `hentEllerOpprettNavBruker - nav bruker finnes ikke - skal ha status 200 og retrurnere riktig response`() {
+	fun `hentEllerOpprettArrangorAnsatt - ansatt er har bruker i amt-tiltak - skal ha status 200 og returnere riktig response`() {
+		val person = TestData.lagPerson()
+		val brukerId = UUID.randomUUID()
+
+		mockAmtTiltakHttpServer.mockHentBrukerId(person.personIdent, BrukerInfoDto(
+			brukerId,
+			UUID.randomUUID(),
+			person.personIdentType,
+			person.historiskeIdenter,
+		))
+
+		mockPdlHttpServer.mockHentPerson(person)
+		val token = mockOAuthServer.issueAzureAdM2MToken()
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/arrangor-ansatt",
+			body = """{"personIdent": "${person.personIdent}"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer $token")
+		)
+
+		response.code shouldBe 200
+
+		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
+		val faktiskPerson = personService.hentPerson(person.personIdent)!!
+
+		faktiskPerson.id shouldBe brukerId
+		faktiskPerson.personIdent shouldBe body.personIdent
+		faktiskPerson.fornavn shouldBe body.fornavn
+		faktiskPerson.mellomnavn shouldBe body.mellomnavn
+		faktiskPerson.etternavn shouldBe body.etternavn
+	}
+
+	@Test
+	fun `hentEllerOpprettArrangorAnsatt - ansatt er navBruker - skal ha status 200 og returnere riktig response`() {
+		val person = TestData.lagPerson()
+		val navBruker = TestData.lagNavBruker(person = person)
+		testDataRepository.insertNavBruker(navBruker)
+
+		val token = mockOAuthServer.issueAzureAdM2MToken()
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/arrangor-ansatt",
+			body = """{"personIdent": "${person.personIdent}"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer $token")
+		)
+
+		response.code shouldBe 200
+
+		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
+		val faktiskPerson = personService.hentPerson(person.personIdent)!!
+
+		faktiskPerson.id shouldBe body.id
+		faktiskPerson.personIdent shouldBe body.personIdent
+		faktiskPerson.fornavn shouldBe body.fornavn
+		faktiskPerson.mellomnavn shouldBe body.mellomnavn
+		faktiskPerson.etternavn shouldBe body.etternavn
+	}
+
+
+	@Test
+	fun `hentEllerOpprettNavBruker - nav bruker finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
 		val navEnhet = TestData.lagNavEnhet()
 		val navBruker = TestData.lagNavBruker(navVeileder = navAnsatt, navEnhet = navEnhet)
@@ -125,7 +190,7 @@ class PersonControllerTest: IntegrationTestBase() {
 	}
 
 	@Test
-	fun `hentEllerOpprettNavAnsatt - nav ansatt finnes ikke - skal ha status 200 og retrurnere riktig response`() {
+	fun `hentEllerOpprettNavAnsatt - nav ansatt finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
 
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
@@ -150,7 +215,7 @@ class PersonControllerTest: IntegrationTestBase() {
 	}
 
 	@Test
-	fun `hentEllerOpprettNavEnhet - nav enhet finnes ikke - skal ha status 200 og retrurnere riktig response`() {
+	fun `hentEllerOpprettNavEnhet - nav enhet finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val navEnhet = TestData.lagNavEnhet()
 
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())

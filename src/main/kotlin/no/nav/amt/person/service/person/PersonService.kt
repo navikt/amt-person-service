@@ -28,8 +28,12 @@ class PersonService(
 		return repository.get(personIdent)?.toModel()
 	}
 
-	fun hentEllerOpprettPerson(personIdent: String, nyPersonId: UUID = UUID.randomUUID()) : Person {
-		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent, nyPersonId)
+	fun opprettPersonMedId(personIdent: String, nyPersonId: UUID) : Person {
+		return opprettPerson(personIdent, nyPersonId)
+	}
+
+	fun hentEllerOpprettPerson(personIdent: String) : Person {
+		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
 
 	fun hentEllerOpprettPerson(personIdent: String, personOpplysninger: PdlPerson): Person {
@@ -71,7 +75,7 @@ class PersonService(
 		}
 	}
 
-	private fun opprettPerson(personIdent: String, nyPersonId: UUID): Person {
+	private fun opprettPerson(personIdent: String, nyPersonId: UUID = UUID.randomUUID()): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 
 		return opprettPerson(personIdent, pdlPerson, nyPersonId)

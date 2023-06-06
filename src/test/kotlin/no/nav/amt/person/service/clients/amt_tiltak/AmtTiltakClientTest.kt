@@ -48,4 +48,27 @@ class AmtTiltakClientTest {
 		request.method shouldBe "GET"
 		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
 	}
+
+	@Test
+	fun `hentBrukerId - bruker finnes - returnerer brukerId`() {
+		val brukerId = UUID.randomUUID()
+		val navEnhetId = UUID.randomUUID()
+
+		val response = MockResponse().setBody("""{
+				"brukerId": "$brukerId",
+				"navEnhetId": "$navEnhetId",
+				"personIdentType": "FOLKEREGISTERIDENT",
+				"historiskeIdenter": []
+			}""".trimMargin())
+
+		server.enqueue(response)
+
+		client.hentBrukerId("fnr")!! shouldBe brukerId
+
+		val request = server.takeRequest()
+
+		request.path shouldBe "/api/tiltaksarrangor/deltaker/bruker-info"
+		request.method shouldBe "POST"
+		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
+	}
 }
