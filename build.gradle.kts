@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-	val kotlinVersion = "1.8.21"
+	val kotlinVersion = "1.8.22"
 
 	id("org.springframework.boot") version "3.1.0"
 	id("io.spring.dependency-management") version "1.1.0"
@@ -26,14 +26,14 @@ val commonVersion = "3.2023.05.02_06.50-0576b4e09008"
 val okhttp3Version = "4.11.0"
 val kotestVersion = "5.6.2"
 val poaoTilgangVersion = "2023.05.02_09.15-64228b754508"
-val testcontainersVersion = "1.18.1"
+val testcontainersVersion = "1.18.3"
 val tokenSupportVersion = "3.1.0"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
-val shedlockVersion = "5.3.0"
+val shedlockVersion = "5.4.0"
 val confluentVersion = "7.3.3"
-val flywayVersion = "9.19.1"
-val jacksonVersion = "2.15.1"
+val flywayVersion = "9.19.3"
+val jacksonVersion = "2.15.2"
 val micrometerVersion = "1.11.0"
 val postgresVersion = "42.6.0"
 val mockOauth2ServerVersion = "0.5.8"
