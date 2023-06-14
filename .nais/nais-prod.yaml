@@ -25,7 +25,7 @@ spec:
     failureThreshold: 30
     periodSeconds: 5
   replicas:
-    min: 4
+    min: 2
     max: 4
     cpuThresholdPercentage: 75
   resources:
