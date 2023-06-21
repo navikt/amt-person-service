@@ -47,6 +47,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-logging")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 
+	implementation("org.springframework.retry:spring-retry")
+	implementation("org.springframework:spring-aspects")
+
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")

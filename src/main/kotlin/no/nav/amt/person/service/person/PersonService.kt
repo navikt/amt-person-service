@@ -7,6 +7,7 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
@@ -32,6 +33,7 @@ class PersonService(
 		return opprettPerson(personIdent, nyPersonId)
 	}
 
+	@Retryable(maxAttempts = 2)
 	fun hentEllerOpprettPerson(personIdent: String) : Person {
 		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
 	}
