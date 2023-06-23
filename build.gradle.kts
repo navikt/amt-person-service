@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	val kotlinVersion = "1.8.22"
 
-	id("org.springframework.boot") version "3.1.0"
+	id("org.springframework.boot") version "3.1.1"
 	id("io.spring.dependency-management") version "1.1.0"
 	id("com.github.davidmc24.gradle.plugin.avro") version "1.7.1"
 	kotlin("plugin.serialization") version kotlinVersion
@@ -30,7 +30,7 @@ val testcontainersVersion = "1.18.3"
 val tokenSupportVersion = "3.1.0"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
-val shedlockVersion = "5.4.0"
+val shedlockVersion = "5.5.0"
 val confluentVersion = "7.3.3"
 val flywayVersion = "9.19.4"
 val jacksonVersion = "2.15.2"
