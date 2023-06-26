@@ -110,5 +110,21 @@ class PersonRepository(
 		template.update(sql, parameters)
 	}
 
+	fun getAll(offset: Int, limit: Int = 500): List<PersonDbo> {
+		val sql = """
+			select * from person
+			order by id
+			limit :limit
+			offset :offset
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"offset" to offset,
+			"limit" to limit,
+		)
+
+		return template.query(sql, parameters, rowMapper)
+	}
+
 }
 
