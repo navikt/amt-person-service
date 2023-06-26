@@ -14,7 +14,7 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 class NavBrukerProducerTest: IntegrationTestBase() {
 
@@ -61,7 +61,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 		val bruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(bruker)
 
-		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "nytt navn")).toModel()
+		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn")).toModel()
 		personService.upsert(oppdatertBruker.person)
 
 		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.person.id.toString()}

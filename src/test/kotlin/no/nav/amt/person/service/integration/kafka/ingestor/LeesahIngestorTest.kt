@@ -11,6 +11,7 @@ import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.AsyncUtils
+import no.nav.amt.person.service.utils.titlecase
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,9 +58,9 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			val faktiskPerson = personService.hentPerson(person.id)
 
-			faktiskPerson.fornavn shouldBe nyttFornavn
-			faktiskPerson.mellomnavn shouldBe nyttMellomnavn
-			faktiskPerson.etternavn shouldBe nyttEtternavn
+			faktiskPerson.fornavn shouldBe nyttFornavn.titlecase()
+			faktiskPerson.mellomnavn shouldBe nyttMellomnavn.titlecase()
+			faktiskPerson.etternavn shouldBe nyttEtternavn.titlecase()
 
 			val faktiskNavBruker = navBrukerService.hentNavBruker(navBruker.id)
 			faktiskNavBruker.epost shouldBe nyEpost

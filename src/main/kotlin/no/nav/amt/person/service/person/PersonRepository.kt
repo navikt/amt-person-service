@@ -5,10 +5,11 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
+import no.nav.amt.person.service.utils.titlecase
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class PersonRepository(
@@ -74,9 +75,9 @@ class PersonRepository(
 			"personIdent" to person.personIdent,
 			"personIdentType" to person.personIdentType.toString(),
 			"historiskeIdenter" to person.historiskeIdenter.toTypedArray(),
-			"fornavn" to person.fornavn,
-			"mellomnavn" to person.mellomnavn,
-			"etternavn" to person.etternavn
+			"fornavn" to person.fornavn.titlecase(),
+			"mellomnavn" to person.mellomnavn?.titlecase(),
+			"etternavn" to person.etternavn.titlecase(),
 		)
 
 		template.update(sql, parameters)
