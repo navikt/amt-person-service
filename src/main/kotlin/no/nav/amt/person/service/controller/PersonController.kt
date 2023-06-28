@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.controller
 
+import no.nav.amt.person.service.controller.auth.AuthService
 import no.nav.amt.person.service.controller.auth.Issuer
 import no.nav.amt.person.service.controller.dto.*
 import no.nav.amt.person.service.controller.request.ArrangorAnsattRequest
@@ -21,6 +22,7 @@ class PersonController (
 	private val navBrukerService: NavBrukerService,
 	private val navEnhetService: NavEnhetService,
 	private val arrangorAnsattService: ArrangorAnsattService,
+	private val authService: AuthService,
 ) {
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -28,6 +30,7 @@ class PersonController (
 	fun hentEllerOpprettNavBruker(
 		@RequestBody request: NavBrukerRequest
 	): NavBrukerDto {
+		authService.verifyRequestIsMachineToMachine()
 		return navBrukerService.hentEllerOpprettNavBruker(request.personIdent).toDto()
 	}
 
@@ -36,6 +39,7 @@ class PersonController (
 	fun hentEllerOpprettNavAnsatt(
 		@RequestBody request: NavAnsattRequest
 	): NavAnsattDto {
+		authService.verifyRequestIsMachineToMachine()
 		return navAnsattService.hentEllerOpprettAnsatt(request.navIdent).toDto()
 	}
 
@@ -44,7 +48,7 @@ class PersonController (
 	fun hentEllerOpprettArrangorAnsatt(
 		@RequestBody request: ArrangorAnsattRequest,
 	): ArrangorAnsattDto {
-
+		authService.verifyRequestIsMachineToMachine()
 		val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personIdent)
 
 		return person.toArrangorAnsattDto()
@@ -55,6 +59,7 @@ class PersonController (
 	fun hentEllerOpprettNavEnhet(
 		@RequestBody request: NavEnhetRequest
 	): NavEnhetDto {
+		authService.verifyRequestIsMachineToMachine()
 		return navEnhetService.hentEllerOpprettNavEnhet(request.enhetId)?.toDto()
 			?: throw NoSuchElementException("Klarte ikke å hente Nav enhet med enhet id: ${request.enhetId}")
 	}
