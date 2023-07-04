@@ -47,6 +47,7 @@ fun hentPerson(id: UUID): Person {
 		return repository.getPersoner(personIdenter).map { it.toModel() }
 	}
 
+	fun hentIdenter(personIdent: String) = pdlClient.hentIdenter(personIdent)
 
 	fun hentGjeldendeIdent(personIdent: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personIdent)).getOrThrow()
 

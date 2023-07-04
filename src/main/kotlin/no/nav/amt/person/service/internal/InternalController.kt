@@ -42,12 +42,12 @@ class InternalController(
 	}
 
 	@Unprotected
-	@PostMapping("/person/navn-casing")
-	fun opprettPerson(
+	@PostMapping("/person/identer")
+	fun oppdaterPersonidenter(
 		servlet: HttpServletRequest,
 	) {
 		if (isInternal(servlet)) {
-			JobRunner.run("oppdater_navn_casing", personUpdater::oppdaterPersonNavnCasing)
+			JobRunner.runAsync("oppdater_personidenter", personUpdater::oppdaterPersonidenter)
 		}
 	}
 
