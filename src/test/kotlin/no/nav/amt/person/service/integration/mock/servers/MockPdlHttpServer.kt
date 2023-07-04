@@ -4,6 +4,8 @@ import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.pdl.PdlQueries
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.MockHttpServer
@@ -16,13 +18,14 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 	fun mockHentPerson(person: PersonDbo) {
 		mockHentPerson(person.personIdent, TestData.lagPdlPerson(person))
 	}
+
 	fun mockHentPerson(brukerFnr: String, mockPdlPerson: PdlPerson) {
 		val request = toJsonString(
-				GraphqlUtils.GraphqlQuery(
-					PdlQueries.HentPerson.query,
-					PdlQueries.HentPerson.Variables(brukerFnr)
-				)
+			GraphqlUtils.GraphqlQuery(
+				PdlQueries.HentPerson.query,
+				PdlQueries.HentPerson.Variables(brukerFnr)
 			)
+		)
 
 		val requestPredicate = { req: RecordedRequest ->
 			req.path == "/graphql"
@@ -33,11 +36,11 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		addResponseHandler(requestPredicate, createPdlBrukerResponse(brukerFnr, mockPdlPerson))
 	}
 
-	fun mockHentGjeldendePersonligIdent(ident: String, personIdent: String) {
+	fun mockHentIdenter(ident: String, personident: String) {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
-				PdlQueries.HentGjeldendeIdent.query,
-				PdlQueries.HentGjeldendeIdent.Variables(ident)
+				PdlQueries.HentIdenter.query,
+				PdlQueries.HentIdenter.Variables(ident)
 			)
 		)
 
@@ -47,7 +50,10 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				&& req.getBodyAsString() == request
 		}
 
-		addResponseHandler(requestPredicate, createHentGjeldendeIdentResponse(personIdent))
+		addResponseHandler(
+			requestPredicate,
+			createHentIdenterResponse(Personident(personident, false, IdentType.FOLKEREGISTERIDENT))
+		)
 	}
 
 	fun mockHentTelefon(ident: String, telefon: String?) {
@@ -86,13 +92,13 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 	}
 
 
-	private fun createHentGjeldendeIdentResponse(personIdent: String): MockResponse {
+	private fun createHentIdenterResponse(ident: Personident): MockResponse {
 		val body = toJsonString(
-			PdlQueries.HentGjeldendeIdent.Response(
+			PdlQueries.HentIdenter.Response(
 				errors = null,
-				data = PdlQueries.HentGjeldendeIdent.ResponseData(
-					PdlQueries.HentGjeldendeIdent.HentIdenter(
-						identer = listOf(PdlQueries.HentGjeldendeIdent.Ident(ident = personIdent))
+				data = PdlQueries.HentIdenter.ResponseData(
+					PdlQueries.HentIdenter.HentIdenter(
+						identer = listOf(PdlQueries.HentIdenter.Ident(ident.ident, ident.historisk, ident.type.name))
 					)
 				),
 				extensions = null,

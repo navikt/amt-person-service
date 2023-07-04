@@ -2,8 +2,8 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
+import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
@@ -34,7 +34,7 @@ class TildeltVeilederIngestorTest : IntegrationTestBase() {
 		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
 
 
-		mockPdlHttpServer.mockHentGjeldendePersonligIdent(msg.aktorId, navBruker.person.personIdent)
+		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personIdent)
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
@@ -58,7 +58,7 @@ class TildeltVeilederIngestorTest : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
 		val msg = KafkaMessageCreator.lagTildeltVeilederMsg()
-		mockPdlHttpServer.mockHentGjeldendePersonligIdent(msg.aktorId, "ukjent ident")
+		mockPdlHttpServer.mockHentIdenter(msg.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
 
 		LogUtils.withLogs { getLogs ->

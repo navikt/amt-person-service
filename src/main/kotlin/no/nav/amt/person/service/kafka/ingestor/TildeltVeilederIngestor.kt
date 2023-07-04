@@ -21,7 +21,7 @@ class TildeltVeilederIngestor(
 		val sisteTildeltVeileder = fromJsonString<SisteTildeltVeilederDto>(value)
 
 		val gjeldendeIdent = personService.hentGjeldendeIdent(sisteTildeltVeileder.aktorId)
-		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent)
+		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
 			log.info("Tildelt veileder endret. NavBruker finnes ikke, hopper over kafka melding")

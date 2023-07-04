@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.clients.pdl.PdlPersonIdent
+import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
@@ -9,7 +9,7 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 object TestData {
 
@@ -88,7 +88,7 @@ object TestData {
 		person: PersonDbo,
 		telefon: String? = null,
 		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
-		identer: List<PdlPersonIdent> = listOf(PdlPersonIdent(person.personIdent, false, "FOLKEREGISTERET")),
+		identer: List<Personident> = listOf(Personident(person.personIdent, false, IdentType.FOLKEREGISTERIDENT)),
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,

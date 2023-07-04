@@ -8,6 +8,9 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.nullError
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
+import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Personident
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -47,7 +50,7 @@ class PdlClientTest {
 		pdlPerson.telefonnummer shouldBe "+47 12345678"
 
 		val ident = pdlPerson.identer.first()
-		ident.gruppe shouldBe "FOLKEREGISTERIDENT"
+		ident.type shouldBe IdentType.FOLKEREGISTERIDENT
 		ident.historisk shouldBe false
 		ident.ident shouldBe "29119826819"
 
@@ -101,11 +104,14 @@ class PdlClientTest {
 	}
 
 	@Test
-	fun `hentGjeldendePersonligIdent skal lage riktig request og parse response`() {
+	fun `hentIdenter skal lage riktig request og parse response`() {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
 		)
+
+		val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
+		val personident2 = Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT)
 
 		server.enqueue(
 			MockResponse().setBody(
@@ -116,7 +122,14 @@ class PdlClientTest {
 							"hentIdenter": {
 							  "identer": [
 								{
-								  "ident": "12345678900"
+								  "ident": "${personident1.ident}",
+								  "historisk": ${personident1.historisk},
+								  "gruppe": "${personident1.type.name}"
+								},
+								{
+								  "ident": "${personident2.ident}",
+								  "historisk": ${personident2.historisk},
+								  "gruppe": "${personident2.type.name}"
 								}
 							  ]
 							}
@@ -126,9 +139,9 @@ class PdlClientTest {
 			)
 		)
 
-		val gjeldendeIdent = client.hentGjeldendePersonligIdent("112233445566")
+		val identer = client.hentIdenter(personident2.ident)
 
-		gjeldendeIdent shouldBe "12345678900"
+		identer shouldBe listOf(personident1, personident2)
 
 		val request = server.takeRequest()
 
@@ -140,8 +153,8 @@ class PdlClientTest {
 		val expectedJson =
 			"""
 				{
-					"query": "${PdlQueries.HentGjeldendeIdent.query.replace("\n", "\\n").replace("\t", "\\t")}",
-					"variables": { "ident": "112233445566" }
+					"query": "${PdlQueries.HentIdenter.query.replace("\n", "\\n").replace("\t", "\\t")}",
+					"variables": { "ident": "${personident2.ident}" }
 				}
 			""".trimIndent()
 
@@ -150,7 +163,7 @@ class PdlClientTest {
 	}
 
 	@Test
-	fun `hentGjeldendePersonligIdent skal kaste exception hvis data mangler`() {
+	fun `hentIdenter skal kaste exception hvis data mangler`() {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
@@ -168,7 +181,7 @@ class PdlClientTest {
 		)
 
 		val exception = assertThrows<RuntimeException> {
-			client.hentGjeldendePersonligIdent("112233445566")
+			client.hentIdenter("112233445566")
 		}
 
 		exception.message shouldBe "PDL respons inneholder ikke data"

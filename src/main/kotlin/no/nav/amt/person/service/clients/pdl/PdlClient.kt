@@ -1,6 +1,8 @@
 package no.nav.amt.person.service.clients.pdl
 
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
@@ -56,11 +58,11 @@ class PdlClient(
 		}
 	}
 
-	fun hentGjeldendePersonligIdent(ident: String): String {
+	fun hentIdenter(ident: String): List<Personident> {
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
-				PdlQueries.HentGjeldendeIdent.query,
-				PdlQueries.HentGjeldendeIdent.Variables(ident)
+				PdlQueries.HentIdenter.query,
+				PdlQueries.HentIdenter.Variables(ident)
 			)
 		)
 
@@ -73,7 +75,7 @@ class PdlClient(
 
 			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
 
-			val gqlResponse = fromJsonString<PdlQueries.HentGjeldendeIdent.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentIdenter.Response>(body)
 
 			logPdlWarnings(gqlResponse.extensions?.warnings)
 
@@ -81,7 +83,7 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			return hentGjeldendeIdent(gqlResponse.data)
+			return gqlResponse.data.hentIdenter.identer.map { Personident(it.ident, it.historisk, IdentType.valueOf(it.gruppe)) }
 		}
 	}
 
@@ -136,7 +138,7 @@ class PdlClient(
 			etternavn = navn.etternavn,
 			telefonnummer = telefonnummer,
 			adressebeskyttelseGradering = diskresjonskode,
-			identer = response.hentIdenter.identer.map { PdlPersonIdent(it.ident, it.historisk, it.gruppe) }
+			identer = response.hentIdenter.identer.map { Personident(it.ident, it.historisk, IdentType.valueOf(it.gruppe)) }
 		)
 
 	}
@@ -179,15 +181,6 @@ class PdlClient(
 		}
 
 		log.warn(stringBuilder.toString())
-	}
-
-	private fun hentGjeldendeIdent(response: PdlQueries.HentGjeldendeIdent.ResponseData): String {
-		if (response.hentIdenter == null) {
-			throw IllegalStateException("Bruker finnes ikke i PDL")
-		}
-
-		return response.hentIdenter.identer.firstOrNull()?.ident
-			?: throw RuntimeException("Bruker har ikke en gjeldende ident")
 	}
 
 }

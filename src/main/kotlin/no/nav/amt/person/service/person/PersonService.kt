@@ -3,8 +3,9 @@ package no.nav.amt.person.service.person
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.config.SecureLog.secureLog
-import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.retry.annotation.Retryable
@@ -21,7 +22,7 @@ class PersonService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentPerson(id: UUID): Person {
+fun hentPerson(id: UUID): Person {
 		return repository.get(id).toModel()
 	}
 
@@ -39,7 +40,7 @@ class PersonService(
 	}
 
 	fun hentEllerOpprettPerson(personIdent: String, personOpplysninger: PdlPerson): Person {
-		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent, personOpplysninger)
+		return repository.get(personIdent)?.toModel() ?: opprettPerson(personOpplysninger)
 	}
 
 	fun hentPersoner(personIdenter: List<String>): List<Person> {
@@ -47,22 +48,24 @@ class PersonService(
 	}
 
 
-	fun hentGjeldendeIdent(personIdent: String) = pdlClient.hentGjeldendePersonligIdent(personIdent)
+	fun hentGjeldendeIdent(personIdent: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personIdent)).getOrThrow()
 
-	fun oppdaterPersonIdent(gjeldendeIdent: String, identType: IdentType, historiskeIdenter: List<String>) {
-		val personer = repository.getPersoner(historiskeIdenter.plus(gjeldendeIdent))
+	fun oppdaterPersonIdent(identer: List<Personident>) {
+		val personer = repository.getPersoner(identer.map { it.ident })
 
 		if(personer.size > 1) {
-			secureLog.error("Vi har flere personer knyttet til ident: $gjeldendeIdent, historiske identer:$historiskeIdenter")
-			log.error("Vi har flere personer knyttet til samme person")
-			throw IllegalStateException("Vi har flere personer knyttet til samme person")
+			secureLog.error("Vi har flere personer knyttet til identer: $identer")
+			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")
+			throw IllegalStateException("Vi har flere personer knyttet til samme identer")
 		}
+
+		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
 			upsert(person.copy(
-				personIdent = gjeldendeIdent,
-				personIdentType = identType,
-				historiskeIdenter = historiskeIdenter
+				personIdent = gjeldendeIdent.ident,
+				personIdentType = gjeldendeIdent.type,
+				historiskeIdenter = identer.filter { it != gjeldendeIdent }.map { it.ident }
 			).toModel())
 		}
 
@@ -80,17 +83,17 @@ class PersonService(
 	private fun opprettPerson(personIdent: String, nyPersonId: UUID = UUID.randomUUID()): Person {
 		val pdlPerson =	pdlClient.hentPerson(personIdent)
 
-		return opprettPerson(personIdent, pdlPerson, nyPersonId)
+		return opprettPerson(pdlPerson, nyPersonId)
 	}
 
-	private fun opprettPerson(personIdent: String, pdlPerson: PdlPerson, nyPersonId: UUID = UUID.randomUUID()): Person {
-		val personIdentType = pdlPerson.identer.first { it.ident == personIdent }.gruppe
+	private fun opprettPerson(pdlPerson: PdlPerson, nyPersonId: UUID = UUID.randomUUID()): Person {
+		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
 
 		val person = Person(
 			id = nyPersonId,
-			personIdent = personIdent,
-			personIdentType = IdentType.valueOf(personIdentType),
-			historiskeIdenter = pdlPerson.identer.filter { it.ident != personIdent }.map { it.ident },
+			personIdent = gjeldendeIdent.ident,
+			personIdentType = gjeldendeIdent.type,
+			historiskeIdenter = pdlPerson.identer.filter { it.ident != gjeldendeIdent.ident }.map { it.ident },
 			fornavn = pdlPerson.fornavn,
 			mellomnavn = pdlPerson.mellomnavn,
 			etternavn = pdlPerson.etternavn,
@@ -109,5 +112,6 @@ class PersonService(
 		secureLog.info("Slettet person med ident: ${person.personIdent}")
 		log.info("Slettet person med id: ${person.id}")
 	}
+
 
 }

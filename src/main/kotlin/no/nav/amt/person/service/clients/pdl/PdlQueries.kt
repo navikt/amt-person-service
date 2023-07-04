@@ -58,7 +58,7 @@ object PdlQueries {
 				  gradering
 				}
 			  },
-			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, NPID], historikk:true) {
+			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, AKTORID, NPID], historikk:true) {
 			  	identer {
 			  		ident,
 			  		historisk,
@@ -143,14 +143,16 @@ object PdlQueries {
 
 	}
 
-	object HentGjeldendeIdent {
+	object HentIdenter {
 		val query = """
 			query(${"$"}ident: ID!) {
-				hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT], historikk: false) {
-					identer {
-						ident
-					}
-				}
+			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, AKTORID, NPID], historikk:true) {
+			  	identer {
+			  		ident,
+			  		historisk,
+			  		gruppe
+			  	}
+		      }
 			}
 		""".trimIndent()
 
@@ -165,7 +167,7 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentIdenter: HentIdenter?,
+			val hentIdenter: HentIdenter,
 		)
 
 		data class HentIdenter(
@@ -174,6 +176,8 @@ object PdlQueries {
 
 		data class Ident(
 			val ident: String,
+			val historisk: Boolean,
+			val gruppe: String,
 		)
 	}
 

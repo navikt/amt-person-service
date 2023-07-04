@@ -6,9 +6,9 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.clients.pdl.PdlPersonIdent
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,8 +49,8 @@ class PersonServiceTest {
 			telefonnummer = "81549300",
 			adressebeskyttelseGradering = null,
 			identer = listOf(
-				PdlPersonIdent(ident = personIdent, historisk = false, gruppe = identType.toString()),
-				PdlPersonIdent(ident = TestData.randomIdent(), historisk = true, gruppe = identType.toString()),
+				Personident(ident = personIdent, historisk = false, type = identType),
+				Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
 			)
 		)
 
@@ -69,15 +69,18 @@ class PersonServiceTest {
 
 	@Test
 	fun `oppdaterPersonIdent - flere personer knyttet til samme ident - kaster exception`() {
-		val nyIdent = TestData.randomIdent()
-		val historiskeIdenter = listOf(TestData.randomIdent(), TestData.randomIdent())
+		val identer = listOf(
+			Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT),
+			Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+			Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+		)
 
-		every { repository.getPersoner(historiskeIdenter.plus(nyIdent)) } returns
-			historiskeIdenter.map { TestData.lagPerson(personIdent = it) }
+		every { repository.getPersoner(identer.map { it.ident }) } returns
+			identer.map { TestData.lagPerson(personIdent = it.ident) }
 		mockExecuteWithoutResult(transactionTemplate)
 
 		assertThrows<IllegalStateException> {
-			service.oppdaterPersonIdent(nyIdent, IdentType.FOLKEREGISTERIDENT, historiskeIdenter)
+			service.oppdaterPersonIdent(identer)
 		}
 
 	}
