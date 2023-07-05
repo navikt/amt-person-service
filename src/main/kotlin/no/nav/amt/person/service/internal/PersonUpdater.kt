@@ -15,8 +15,8 @@ class PersonUpdater(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun oppdaterPersonidenter() {
-		var offset = 0
+	fun oppdaterPersonidenter(startOffset: Int = 0) {
+		var offset = startOffset
 		var personer: List<PersonDbo>
 
 		do {

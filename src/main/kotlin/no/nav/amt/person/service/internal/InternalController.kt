@@ -9,6 +9,7 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -45,11 +46,15 @@ class InternalController(
 	@PostMapping("/person/identer")
 	fun oppdaterPersonidenter(
 		servlet: HttpServletRequest,
+		@RequestParam(value = "offset", required = false) offset: Int?,
 	) {
 		if (isInternal(servlet)) {
-			JobRunner.runAsync("oppdater_personidenter", personUpdater::oppdaterPersonidenter)
+			JobRunner.runAsync("oppdater_personidenter") {
+				personUpdater.oppdaterPersonidenter(offset ?: 0)
+			}
 		}
 	}
+
 
 	private fun isInternal(servlet: HttpServletRequest): Boolean {
 		return servlet.remoteAddr == "127.0.0.1"
