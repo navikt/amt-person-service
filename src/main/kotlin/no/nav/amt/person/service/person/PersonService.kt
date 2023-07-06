@@ -55,7 +55,6 @@ fun hentPerson(id: UUID): Person {
 		val personer = repository.getPersoner(identer.map { it.ident })
 
 		if(personer.size > 1) {
-			secureLog.error("Vi har flere personer knyttet til identer: $identer")
 			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")
 			throw IllegalStateException("Vi har flere personer knyttet til samme identer")
 		}

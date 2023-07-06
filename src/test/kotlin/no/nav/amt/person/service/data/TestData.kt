@@ -1,13 +1,13 @@
 package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Personident
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -97,4 +97,10 @@ object TestData {
 		adressebeskyttelseGradering = adressebeskyttelseGradering,
 		identer = identer,
 	)
+
+	fun lagPersonident(
+		ident: String = randomIdent(),
+		historisk: Boolean = false,
+		type: IdentType = IdentType.FOLKEREGISTERIDENT,
+	) = Personident(ident, historisk, type)
 }
