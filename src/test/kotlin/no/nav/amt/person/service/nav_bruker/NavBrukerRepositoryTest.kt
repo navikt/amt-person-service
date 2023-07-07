@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class NavBrukerRepositoryTest {
 
@@ -54,6 +54,18 @@ class NavBrukerRepositoryTest {
 		testRepository.insertNavBruker(bruker)
 
 		val faktiskBruker = repository.get(bruker.person.personIdent)!!
+
+		sammenlign(faktiskBruker, bruker)
+	}
+
+	@Test
+	fun `get(personIdent) - søk med historisk ident, bruker finnes - returnerer bruker`() {
+		val bruker = TestData.lagNavBruker(
+			person = TestData.lagPerson(historiskeIdenter = listOf(TestData.randomIdent()))
+		)
+		testRepository.insertNavBruker(bruker)
+
+		val faktiskBruker = repository.get(bruker.person.historiskeIdenter.first())!!
 
 		sammenlign(faktiskBruker, bruker)
 	}
@@ -134,6 +146,16 @@ class NavBrukerRepositoryTest {
 		testRepository.insertNavBruker(bruker)
 
 		repository.finnBrukerId(bruker.person.personIdent) shouldBe bruker.id
+	}
+
+	@Test
+	fun `finnBrukerId - søk med historisk ident, bruker finnes - returnerer id`() {
+		val bruker = TestData.lagNavBruker(
+			person = TestData.lagPerson(historiskeIdenter = listOf(TestData.randomIdent()))
+		)
+		testRepository.insertNavBruker(bruker)
+
+		repository.finnBrukerId(bruker.person.historiskeIdenter.first()) shouldBe bruker.id
 	}
 
 	@Test

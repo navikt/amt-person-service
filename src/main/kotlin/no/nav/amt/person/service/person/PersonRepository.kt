@@ -35,9 +35,12 @@ class PersonRepository(
 		return template.query(sql, parameters, rowMapper).first()
 	}
 
-	fun get(personIdent: String): PersonDbo? {
-		val sql = "select * from person where person_ident = :personIdent"
-		val parameters = sqlParameters("personIdent" to personIdent)
+	fun get(personident: String): PersonDbo? {
+		val sql = """
+			select * from person
+			where person_ident = :personident or :personident = any(historiske_identer)
+		""".trimMargin()
+		val parameters = sqlParameters("personident" to personident)
 
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
@@ -54,8 +57,8 @@ class PersonRepository(
 				etternavn
 			) values (
 				:id,
-				:personIdent,
-				:personIdentType,
+				:personident,
+				:personidentType,
 				:historiskeIdenter,
 				:fornavn,
 				:mellomnavn,
@@ -64,16 +67,16 @@ class PersonRepository(
 				fornavn = :fornavn,
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
-				person_ident = :personIdent,
-				person_ident_type = :personIdentType,
+				person_ident = :personident,
+				person_ident_type = :personidentType,
 				historiske_identer = :historiskeIdenter,
 				modified_at = current_timestamp
 		""".trimIndent()
 
 		val parameters = sqlParameters(
 			"id" to person.id,
-			"personIdent" to person.personIdent,
-			"personIdentType" to person.personIdentType.toString(),
+			"personident" to person.personIdent,
+			"personidentType" to person.personIdentType.toString(),
 			"historiskeIdenter" to person.historiskeIdenter.toTypedArray(),
 			"fornavn" to person.fornavn.titlecase(),
 			"mellomnavn" to person.mellomnavn?.titlecase(),
@@ -89,11 +92,12 @@ class PersonRepository(
 		val sql = """
 			select *
 			from person
-			where person_ident in (:identer)
+			where person_ident = any(:identer)
+				or historiske_identer && cast(:identer as text[])
 		""".trimIndent()
 
 		val parameters = sqlParameters(
-			"identer" to identer,
+			"identer" to identer.toTypedArray(),
 		)
 
 		return template.query(sql, parameters, rowMapper)

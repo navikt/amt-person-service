@@ -12,7 +12,7 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class NavBrukerRepository(
@@ -69,9 +69,11 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper).first()
 	}
 
-	fun	get(personIdent: String): NavBrukerDbo? {
-		val sql = selectNavBrukerQuery("where person.person_ident = :personIdent")
-		val parameters = sqlParameters("personIdent" to personIdent)
+	fun	get(personident: String): NavBrukerDbo? {
+		val sql = selectNavBrukerQuery(
+			"where person.person_ident = :personident or :personident = any(person.historiske_identer)"
+		)
+		val parameters = sqlParameters("personident" to personident)
 
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
@@ -155,14 +157,14 @@ class NavBrukerRepository(
 		""".trimIndent()
 	}
 
-	fun finnBrukerId(personIdent: String): UUID? {
+	fun finnBrukerId(personident: String): UUID? {
 		val sql = """
 			select nb.id as "nav_bruker.id"
 			from nav_bruker nb join person p on nb.person_id = p.id
-			where p.person_ident = :personIdent
+			where p.person_ident = :personident or :personident = any(p.historiske_identer)
 			""".trimMargin()
 
-		val parameters = sqlParameters("personIdent" to personIdent)
+		val parameters = sqlParameters("personident" to personident)
 
 		return template.query(sql, parameters) {rs, _ -> rs.getNullableUUID("nav_bruker.id")}.firstOrNull()
 	}

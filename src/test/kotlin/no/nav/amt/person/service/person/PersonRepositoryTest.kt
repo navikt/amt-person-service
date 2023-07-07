@@ -2,6 +2,7 @@ package no.nav.amt.person.service.person
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.person.model.IdentType
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class PersonRepositoryTest {
 
@@ -81,8 +82,22 @@ class PersonRepositoryTest {
 	}
 
 	@Test
+	fun `getPersoner - person med historisk ident - returnerer liste`() {
+		val historiskIdent = TestData.randomIdent()
+		val person = TestData.lagPerson(historiskeIdenter = listOf(historiskIdent))
+
+		testRepository.insertPerson(person)
+
+		val faktiskPerson = repository.getPersoner(listOf(historiskIdent)).first()
+
+		faktiskPerson.id shouldBe  person.id
+		faktiskPerson.historiskeIdenter.contains(historiskIdent) shouldBe true
+		faktiskPerson.personIdent shouldNotBe historiskIdent
+	}
+
+	@Test
 	fun `getPersoner - ingen person med ident - returnerer tom liste`() {
-		repository.getPersoner(listOf(TestData.randomIdent())) shouldBe emptyList()
+		repository.getPersoner(listOf(TestData.randomIdent(), TestData.randomIdent())) shouldBe emptyList()
 	}
 
 
