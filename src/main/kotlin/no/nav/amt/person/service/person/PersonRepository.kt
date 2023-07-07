@@ -25,7 +25,7 @@ class PersonRepository(
 			mellomnavn = rs.getString("mellomnavn"),
 			etternavn = rs.getString("etternavn"),
 			createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-			modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime()
+			modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
 		)
 	}
 	fun get(id: UUID): PersonDbo {
@@ -105,11 +105,18 @@ class PersonRepository(
 	}
 
 	fun delete(id: UUID) {
+		val parameters = sqlParameters("id" to id)
+
+		val identSql = """
+			delete from personident where person_id = :id
+		""".trimIndent()
+
+		template.update(identSql, parameters)
+
 		val sql = """
 			delete from person where id = :id
 		""".trimIndent()
 
-		val parameters = sqlParameters("id" to id)
 
 		template.update(sql, parameters)
 	}

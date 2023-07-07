@@ -17,6 +17,7 @@ import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.model.IdentType
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -165,6 +166,11 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.navEnhet!!.enhetId shouldBe body.navEnhet!!.enhetId
 		faktiskBruker.navEnhet!!.navn shouldBe body.navEnhet!!.navn
 		faktiskBruker.erSkjermet shouldBe body.erSkjermet
+
+		val ident = personService.hentIdenter(faktiskBruker.person.id).first()
+		ident.ident shouldBe body.personIdent
+		ident.type shouldBe IdentType.FOLKEREGISTERIDENT
+		ident.historisk shouldBe false
 	}
 
 	@Test

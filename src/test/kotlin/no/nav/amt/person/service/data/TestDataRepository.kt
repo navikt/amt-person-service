@@ -4,13 +4,14 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class TestDataRepository(
@@ -57,6 +58,36 @@ class TestDataRepository(
 				"modifiedAt" to person.modifiedAt,
 			)
 		)
+
+		insertPersonidenter(person.id, listOf(
+			TestData.lagPersonident(person.personIdent),
+		))
+	}
+
+	fun insertPersonidenter(personId: UUID, identer: List<PersonidentDbo>) {
+		val sql = """
+			insert into personident(
+				ident,
+				person_id,
+				type,
+				historisk
+			) values (
+				:ident,
+				:personId,
+				:type,
+				:historisk
+			)
+		""".trimIndent()
+
+		val parameters = identer.map {
+			sqlParameters(
+				"ident" to it.ident,
+				"personId" to personId,
+				"historisk" to it.historisk,
+				"type" to it.type.name,
+			)
+		}
+		template.batchUpdate(sql, parameters.toTypedArray())
 	}
 
 	fun insertNavEnhet(enhet: NavEnhetDbo) {

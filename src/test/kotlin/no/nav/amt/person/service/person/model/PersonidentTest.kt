@@ -13,9 +13,9 @@ class PersonidentTest {
 			TestData.lagPersonident(historisk = true, type = IdentType.FOLKEREGISTERIDENT),
 			TestData.lagPersonident(historisk = false, type = IdentType.NPID),
 			TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
-		)
+		).map { it.toModel() }
 
-		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent
+		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent.toModel()
 	}
 
 	@Test
@@ -24,16 +24,16 @@ class PersonidentTest {
 		val identer = listOf(
 			TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
 			forventetIdent,
-		)
+		).map { it.toModel() }
 
-		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent
+		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent.toModel()
 	}
 
 	@Test
 	fun `finnGjeldendeIdent - kun aktorid - returner failure`() {
 		val identer = listOf(
 			TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
-		)
+		).map { it.toModel() }
 
 		finnGjeldendeIdent(identer).isFailure shouldBe true
 	}

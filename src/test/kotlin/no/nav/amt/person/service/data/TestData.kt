@@ -5,6 +5,7 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
@@ -100,7 +101,10 @@ object TestData {
 
 	fun lagPersonident(
 		ident: String = randomIdent(),
+		personId: UUID = UUID.randomUUID(),
 		historisk: Boolean = false,
 		type: IdentType = IdentType.FOLKEREGISTERIDENT,
-	) = Personident(ident, historisk, type)
+		modifiedAt: LocalDateTime = LocalDateTime.now(),
+		createdAt: LocalDateTime = LocalDateTime.now()
+	) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
 }

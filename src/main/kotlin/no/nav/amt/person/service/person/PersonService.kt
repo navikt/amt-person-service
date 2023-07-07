@@ -17,6 +17,7 @@ import java.util.UUID
 class PersonService(
 	val pdlClient: PdlClient,
 	val repository: PersonRepository,
+	val personidentRepository: PersonidentRepository,
 	val applicationEventPublisher: ApplicationEventPublisher,
 	val transactionTemplate: TransactionTemplate,
 ) {
@@ -47,6 +48,8 @@ fun hentPerson(id: UUID): Person {
 		return repository.getPersoner(personIdenter).map { it.toModel() }
 	}
 
+	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
+
 	fun hentIdenter(personIdent: String) = pdlClient.hentIdenter(personIdent)
 
 	fun hentGjeldendeIdent(personIdent: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personIdent)).getOrThrow()
@@ -65,8 +68,9 @@ fun hentPerson(id: UUID): Person {
 			upsert(person.copy(
 				personIdent = gjeldendeIdent.ident,
 				personIdentType = gjeldendeIdent.type,
-				historiskeIdenter = identer.filter { it != gjeldendeIdent }.map { it.ident }
+				historiskeIdenter = identer.filter { it != gjeldendeIdent }.map { it.ident },
 			).toModel())
+			personidentRepository.upsert(person.id, identer)
 		}
 
 	}
@@ -100,6 +104,7 @@ fun hentPerson(id: UUID): Person {
 		)
 
 		upsert(person)
+		personidentRepository.upsert(person.id, pdlPerson.identer)
 
 		log.info("Opprettet ny person med id ${person.id}")
 

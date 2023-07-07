@@ -20,6 +20,7 @@ class PersonServiceTest {
 
 	lateinit var pdlClient: PdlClient
 	lateinit var repository: PersonRepository
+	lateinit var personidentRepository: PersonidentRepository
 	lateinit var service: PersonService
 	lateinit var applicationEventPublisher: ApplicationEventPublisher
 	lateinit var transactionTemplate: TransactionTemplate
@@ -28,11 +29,13 @@ class PersonServiceTest {
 	fun setup() {
 		pdlClient = mockk(relaxUnitFun = true)
 		repository = mockk(relaxUnitFun = true)
+		personidentRepository = mockk(relaxUnitFun = true)
 		applicationEventPublisher = mockk(relaxUnitFun = true)
 		transactionTemplate = mockk()
 		service = PersonService(
 			pdlClient = pdlClient,
 			repository = repository,
+			personidentRepository = personidentRepository,
 			applicationEventPublisher = applicationEventPublisher,
 			transactionTemplate = transactionTemplate
 		)
