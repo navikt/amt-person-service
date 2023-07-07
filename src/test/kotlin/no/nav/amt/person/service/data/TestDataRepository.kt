@@ -59,9 +59,9 @@ class TestDataRepository(
 			)
 		)
 
-		insertPersonidenter(person.id, listOf(
-			TestData.lagPersonident(person.personIdent),
-		))
+		insertPersonidenter(person.id, person.historiskeIdenter.map {
+			TestData.lagPersonident(it, historisk = true)
+		}.plus(TestData.lagPersonident(person.personIdent)))
 	}
 
 	fun insertPersonidenter(personId: UUID, identer: List<PersonidentDbo>) {

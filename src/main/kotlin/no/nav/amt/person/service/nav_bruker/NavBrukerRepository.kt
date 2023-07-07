@@ -71,7 +71,7 @@ class NavBrukerRepository(
 
 	fun	get(personident: String): NavBrukerDbo? {
 		val sql = selectNavBrukerQuery(
-			"where person.person_ident = :personident or :personident = any(person.historiske_identer)"
+			"where personident.ident = :personident"
 		)
 		val parameters = sqlParameters("personident" to personident)
 
@@ -153,6 +153,7 @@ class NavBrukerRepository(
 					 left join person on nav_bruker.person_id = person.id
 					 left join nav_ansatt on nav_bruker.nav_veileder_id = nav_ansatt.id
 					 left join nav_enhet on nav_bruker.nav_enhet_id = nav_enhet.id
+					 left join personident on nav_bruker.person_id = personident.person_id
 			$where
 		""".trimIndent()
 	}
@@ -160,8 +161,8 @@ class NavBrukerRepository(
 	fun finnBrukerId(personident: String): UUID? {
 		val sql = """
 			select nb.id as "nav_bruker.id"
-			from nav_bruker nb join person p on nb.person_id = p.id
-			where p.person_ident = :personident or :personident = any(p.historiske_identer)
+			from nav_bruker nb join person p on nb.person_id = p.id join personident ident on p.id = ident.person_id
+			where ident.ident = :personident
 			""".trimMargin()
 
 		val parameters = sqlParameters("personident" to personident)

@@ -37,8 +37,8 @@ class PersonRepository(
 
 	fun get(personident: String): PersonDbo? {
 		val sql = """
-			select * from person
-			where person_ident = :personident or :personident = any(historiske_identer)
+			select * from person join personident ident on person.id = ident.person_id
+			where ident.ident = :personident
 		""".trimMargin()
 		val parameters = sqlParameters("personident" to personident)
 
@@ -91,13 +91,12 @@ class PersonRepository(
 
 		val sql = """
 			select *
-			from person
-			where person_ident = any(:identer)
-				or historiske_identer && cast(:identer as text[])
+			from person join personident ident on person.id = ident.person_id
+			where ident.ident in (:identer)
 		""".trimIndent()
 
 		val parameters = sqlParameters(
-			"identer" to identer.toTypedArray(),
+			"identer" to identer,
 		)
 
 		return template.query(sql, parameters, rowMapper)
