@@ -47,6 +47,8 @@ class PersonidentRepository(
 	}
 
 	fun upsert(personId: UUID, identer: List<Personident>) {
+		if (identer.isEmpty()) return
+
 		val sql = """
 			insert into personident(
 				ident,

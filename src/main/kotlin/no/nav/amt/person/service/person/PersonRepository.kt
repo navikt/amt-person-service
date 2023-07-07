@@ -99,7 +99,7 @@ class PersonRepository(
 			"identer" to identer,
 		)
 
-		return template.query(sql, parameters, rowMapper)
+		return template.query(sql, parameters, rowMapper).distinct()
 
 	}
 

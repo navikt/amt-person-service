@@ -88,7 +88,11 @@ class PersonRepositoryTest {
 
 		testRepository.insertPerson(person)
 
-		val faktiskPerson = repository.getPersoner(listOf(historiskIdent)).first()
+		val personer = repository.getPersoner(listOf(historiskIdent, person.personIdent))
+
+		personer shouldHaveSize 1
+
+		val faktiskPerson = personer.first()
 
 		faktiskPerson.id shouldBe  person.id
 		faktiskPerson.historiskeIdenter.contains(historiskIdent) shouldBe true

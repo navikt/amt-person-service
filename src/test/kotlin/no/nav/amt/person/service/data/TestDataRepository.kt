@@ -15,7 +15,7 @@ import java.util.UUID
 
 @Component
 class TestDataRepository(
-	private val template: NamedParameterJdbcTemplate
+	private val template: NamedParameterJdbcTemplate,
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -59,9 +59,12 @@ class TestDataRepository(
 			)
 		)
 
-		insertPersonidenter(person.id, person.historiskeIdenter.map {
-			TestData.lagPersonident(it, historisk = true)
-		}.plus(TestData.lagPersonident(person.personIdent)))
+		insertPersonidenter(
+			person.id,
+			person.historiskeIdenter.map {
+				TestData.lagPersonident(it, historisk = true)
+			}.plus(TestData.lagPersonident(person.personIdent))
+		)
 	}
 
 	fun insertPersonidenter(personId: UUID, identer: List<PersonidentDbo>) {
