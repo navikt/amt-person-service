@@ -34,7 +34,7 @@ val shedlockVersion = "5.5.0"
 val confluentVersion = "7.3.3"
 val flywayVersion = "9.19.4"
 val jacksonVersion = "2.15.2"
-val micrometerVersion = "1.11.1"
+val micrometerVersion = "1.11.2"
 val postgresVersion = "42.6.0"
 val mockOauth2ServerVersion = "0.5.9"
 
