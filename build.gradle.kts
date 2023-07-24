@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-	val kotlinVersion = "1.8.22"
+	val kotlinVersion = "1.9.0"
 
-	id("org.springframework.boot") version "3.1.1"
-	id("io.spring.dependency-management") version "1.1.0"
-	id("com.github.davidmc24.gradle.plugin.avro") version "1.7.1"
+	id("org.springframework.boot") version "3.1.2"
+	id("io.spring.dependency-management") version "1.1.2"
+	id("com.github.davidmc24.gradle.plugin.avro") version "1.8.0"
 	kotlin("plugin.serialization") version kotlinVersion
 	kotlin("jvm") version kotlinVersion
 	kotlin("plugin.spring") version kotlinVersion
@@ -30,13 +30,13 @@ val testcontainersVersion = "1.18.3"
 val tokenSupportVersion = "3.1.0"
 val mockkVersion = "1.13.5"
 val lang3Version = "3.12.0"
-val shedlockVersion = "5.5.0"
+val shedlockVersion = "5.6.0"
 val confluentVersion = "7.3.3"
 val flywayVersion = "9.19.4"
 val jacksonVersion = "2.15.2"
-val micrometerVersion = "1.11.1"
+val micrometerVersion = "1.11.2"
 val postgresVersion = "42.6.0"
-val mockOauth2ServerVersion = "0.5.9"
+val mockOauth2ServerVersion = "1.0.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
