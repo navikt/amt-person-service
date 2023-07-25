@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -42,8 +43,12 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			val faktiskPerson = personService.hentPerson(nyttFnr)
 
-			faktiskPerson!!.historiskeIdenter.contains(person.personIdent) shouldBe true
-			faktiskPerson.personIdentType shouldBe IdentType.FOLKEREGISTERIDENT
+			val identer = personService.hentIdenter(faktiskPerson!!.id)
+
+			identer.find { it.ident == person.personIdent }!!.let {
+				it.historisk shouldBe true
+				it.type shouldBe IdentType.FOLKEREGISTERIDENT
+			}
 		}
 
 	}
@@ -54,11 +59,11 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 		testDataRepository.insertPerson(person)
 
 		val nyttFnr = TestData.randomIdent()
-		val nyNpid = TestData.randomIdent()
+		val aktorId = TestData.randomIdent()
 
 		val msg = Aktor(
 			listOf(
-				Identifikator(nyNpid, Type.NPID, true),
+				Identifikator(aktorId, Type.AKTORID, true),
 				Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
 				Identifikator(person.personIdent, Type.FOLKEREGISTERIDENT, false),
 			)
@@ -71,9 +76,13 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			val faktiskPerson = personService.hentPerson(nyttFnr)
 
-			faktiskPerson!!.historiskeIdenter.contains(person.personIdent) shouldBe true
-			faktiskPerson.historiskeIdenter.contains(nyNpid) shouldBe true
-			faktiskPerson.personIdentType shouldBe IdentType.FOLKEREGISTERIDENT
+			faktiskPerson!!.personIdent shouldBe nyttFnr
+
+			val identer = personService.hentIdenter(faktiskPerson.id)
+
+			identer shouldHaveSize 3
+
+			identer.find { it.ident == person.personIdent }!!.historisk shouldBe true
 		}
 
 	}

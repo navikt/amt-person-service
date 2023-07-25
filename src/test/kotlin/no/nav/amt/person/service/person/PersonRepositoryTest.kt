@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
-import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
@@ -42,8 +41,6 @@ class PersonRepositoryTest {
 
 		faktiskPerson.id shouldBe person.id
 		faktiskPerson.personIdent shouldBe  person.personIdent
-		faktiskPerson.personIdentType shouldBe person.personIdentType
-		faktiskPerson.historiskeIdenter shouldBe person.historiskeIdenter
 		faktiskPerson.fornavn shouldBe person.fornavn
 		faktiskPerson.mellomnavn shouldBe person.mellomnavn
 		faktiskPerson.etternavn shouldBe person.etternavn
@@ -83,20 +80,20 @@ class PersonRepositoryTest {
 
 	@Test
 	fun `getPersoner - person med historisk ident - returnerer liste`() {
-		val historiskIdent = TestData.randomIdent()
-		val person = TestData.lagPerson(historiskeIdenter = listOf(historiskIdent))
+		val person = TestData.lagPerson()
+		val historiskIdent = TestData.lagPersonident(personId = person.id, historisk = true)
 
 		testRepository.insertPerson(person)
+		testRepository.insertPersonidenter(listOf(historiskIdent))
 
-		val personer = repository.getPersoner(listOf(historiskIdent, person.personIdent))
+		val personer = repository.getPersoner(listOf(historiskIdent.ident, person.personIdent))
 
 		personer shouldHaveSize 1
 
 		val faktiskPerson = personer.first()
 
 		faktiskPerson.id shouldBe  person.id
-		faktiskPerson.historiskeIdenter.contains(historiskIdent) shouldBe true
-		faktiskPerson.personIdent shouldNotBe historiskIdent
+		faktiskPerson.personIdent shouldNotBe historiskIdent.ident
 	}
 
 	@Test
@@ -110,8 +107,6 @@ class PersonRepositoryTest {
 		val person = Person(
 			id = UUID.randomUUID(),
 			personIdent = TestData.randomIdent(),
-			personIdentType = IdentType.FOLKEREGISTERIDENT,
-			historiskeIdenter = listOf(TestData.randomIdent()),
 			fornavn = "Fornavn",
 			mellomnavn = "Mellomnavn",
 			etternavn = "Etternavn",
@@ -123,8 +118,6 @@ class PersonRepositoryTest {
 
 		faktiskPerson.id shouldBe person.id
 		faktiskPerson.personIdent shouldBe  person.personIdent
-		faktiskPerson.personIdentType shouldBe person.personIdentType
-		faktiskPerson.historiskeIdenter shouldBe person.historiskeIdenter
 		faktiskPerson.fornavn shouldBe person.fornavn
 		faktiskPerson.mellomnavn shouldBe person.mellomnavn
 		faktiskPerson.etternavn shouldBe person.etternavn
@@ -142,11 +135,9 @@ class PersonRepositoryTest {
 		val oppdatertPerson = Person(
 				id = originalPerson.id,
 				personIdent = originalPerson.personIdent,
-				personIdentType = originalPerson.personIdentType,
 				fornavn = "Nytt",
 				mellomnavn = "Navn",
 				etternavn = "Med Mer",
-				historiskeIdenter = originalPerson.historiskeIdenter.plus(TestData.randomIdent())
 			)
 
 		repository.upsert(oppdatertPerson)
@@ -155,8 +146,6 @@ class PersonRepositoryTest {
 
 		faktiskPerson.id shouldBe originalPerson.id
 		faktiskPerson.personIdent shouldBe  originalPerson.personIdent
-		faktiskPerson.personIdentType shouldBe originalPerson.personIdentType
-		faktiskPerson.historiskeIdenter shouldBe oppdatertPerson.historiskeIdenter
 		faktiskPerson.fornavn shouldBe oppdatertPerson.fornavn
 		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
 		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn
@@ -176,11 +165,9 @@ class PersonRepositoryTest {
 		val oppdatertPerson = Person(
 			id = originalPerson.id,
 			personIdent = "ny ident",
-			personIdentType = originalPerson.personIdentType,
 			fornavn = "Nytt",
 			mellomnavn = "Navn",
 			etternavn = "Med Mer",
-			historiskeIdenter = originalPerson.historiskeIdenter.plus(originalPerson.personIdent)
 		)
 
 		repository.upsert(oppdatertPerson)
@@ -189,8 +176,6 @@ class PersonRepositoryTest {
 
 		faktiskPerson.id shouldBe originalPerson.id
 		faktiskPerson.personIdent shouldBe  oppdatertPerson.personIdent
-		faktiskPerson.personIdentType shouldBe oppdatertPerson.personIdentType
-		faktiskPerson.historiskeIdenter shouldBe oppdatertPerson.historiskeIdenter
 		faktiskPerson.fornavn shouldBe oppdatertPerson.fornavn
 		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
 		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn

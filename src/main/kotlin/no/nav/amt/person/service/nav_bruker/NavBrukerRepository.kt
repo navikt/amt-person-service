@@ -5,7 +5,6 @@ import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.utils.getNullableUUID
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -25,8 +24,6 @@ class NavBrukerRepository(
 			person = PersonDbo(
 				id = rs.getUUID("nav_bruker.person_id"),
 				personIdent = rs.getString("person.person_ident"),
-				personIdentType = rs.getString("person.person_ident_type")?.let { IdentType.valueOf(it) },
-				historiskeIdenter = (rs.getArray("person.historiske_identer").array as Array<String>).asList(),
 				fornavn = rs.getString("person.fornavn"),
 				mellomnavn = rs.getString("person.mellomnavn"),
 				etternavn = rs.getString("person.etternavn"),
@@ -135,8 +132,6 @@ class NavBrukerRepository(
 				   person.fornavn as "person.fornavn",
 				   person.mellomnavn as "person.mellomnavn",
 				   person.etternavn as "person.etternavn",
-				   person.historiske_identer as "person.historiske_identer",
-				   person.person_ident_type as "person.person_ident_type",
 				   person.created_at as "person.created_at",
 				   person.modified_at as "person.modified_at",
 				   nav_ansatt.nav_ident as "nav_ansatt.nav_ident",

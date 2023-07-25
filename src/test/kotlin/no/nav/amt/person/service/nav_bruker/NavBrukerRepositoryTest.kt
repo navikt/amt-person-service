@@ -60,12 +60,13 @@ class NavBrukerRepositoryTest {
 
 	@Test
 	fun `get(personIdent) - søk med historisk ident, bruker finnes - returnerer bruker`() {
-		val bruker = TestData.lagNavBruker(
-			person = TestData.lagPerson(historiskeIdenter = listOf(TestData.randomIdent()))
-		)
+		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
 
-		val faktiskBruker = repository.get(bruker.person.historiskeIdenter.first())!!
+		val historiskIdent = TestData.lagPersonident(personId = bruker.person.id, historisk = true)
+		testRepository.insertPersonidenter(listOf(historiskIdent))
+
+		val faktiskBruker = repository.get(historiskIdent.ident)!!
 
 		sammenlign(faktiskBruker, bruker)
 	}
@@ -150,12 +151,12 @@ class NavBrukerRepositoryTest {
 
 	@Test
 	fun `finnBrukerId - søk med historisk ident, bruker finnes - returnerer id`() {
-		val bruker = TestData.lagNavBruker(
-			person = TestData.lagPerson(historiskeIdenter = listOf(TestData.randomIdent()))
-		)
+		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
+		val historiskIdent = TestData.lagPersonident(personId = bruker.person.id, historisk = true)
+		testRepository.insertPersonidenter(listOf(historiskIdent))
 
-		repository.finnBrukerId(bruker.person.historiskeIdenter.first()) shouldBe bruker.id
+		repository.finnBrukerId(historiskIdent.ident) shouldBe bruker.id
 	}
 
 	@Test

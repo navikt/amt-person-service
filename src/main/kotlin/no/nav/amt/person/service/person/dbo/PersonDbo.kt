@@ -1,18 +1,15 @@
 package no.nav.amt.person.service.person.dbo
 
-import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class PersonDbo(
 	val id: UUID,
 	val personIdent: String,
-	val personIdentType: IdentType?,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
-	val historiskeIdenter: List<String>,
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime,
 ) {
@@ -20,11 +17,9 @@ data class PersonDbo(
 		return Person(
 			id,
 			personIdent,
-			personIdentType,
 			fornavn,
 			mellomnavn,
 			etternavn,
-			historiskeIdenter
 		)
 	}
 }

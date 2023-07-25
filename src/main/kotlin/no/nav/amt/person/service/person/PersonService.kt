@@ -67,8 +67,6 @@ fun hentPerson(id: UUID): Person {
 		personer.firstOrNull()?.let { person ->
 			upsert(person.copy(
 				personIdent = gjeldendeIdent.ident,
-				personIdentType = gjeldendeIdent.type,
-				historiskeIdenter = identer.filter { it != gjeldendeIdent }.map { it.ident },
 			).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
@@ -96,8 +94,6 @@ fun hentPerson(id: UUID): Person {
 		val person = Person(
 			id = nyPersonId,
 			personIdent = gjeldendeIdent.ident,
-			personIdentType = gjeldendeIdent.type,
-			historiskeIdenter = pdlPerson.identer.filter { it.ident != gjeldendeIdent.ident }.map { it.ident },
 			fornavn = pdlPerson.fornavn,
 			mellomnavn = pdlPerson.mellomnavn,
 			etternavn = pdlPerson.etternavn,

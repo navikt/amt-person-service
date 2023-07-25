@@ -221,8 +221,6 @@ data class MigreringNavBruker(
 			diffMap["personId"] = DiffProperty(this.id.toString(), navBruker.person.id.toString())
 		if (this.personIdent != navBruker.person.personIdent)
 			diffMap["personIdent"] = DiffProperty(this.personIdent, navBruker.person.personIdent)
-		if (this.personIdentType != null && this.personIdentType.toString() != navBruker.person.personIdentType.toString())
-			diffMap["personIdentType"] = DiffProperty(this.personIdentType.toString(), navBruker.person.personIdentType.toString())
 		if (this.fornavn != navBruker.person.fornavn)
 			diffMap["fornavn"] = DiffProperty(this.fornavn, navBruker.person.fornavn)
 		if (this.mellomnavn != navBruker.person.mellomnavn)

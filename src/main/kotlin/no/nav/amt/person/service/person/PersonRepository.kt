@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -19,8 +18,6 @@ class PersonRepository(
 		PersonDbo(
 			id = rs.getUUID("id"),
 			personIdent = rs.getString("person_ident"),
-			personIdentType = rs.getString("person_ident_type")?.let { IdentType.valueOf(it)},
-			historiskeIdenter = (rs.getArray("historiske_identer").array as Array<String>).asList(),
 			fornavn = rs.getString("fornavn"),
 			mellomnavn = rs.getString("mellomnavn"),
 			etternavn = rs.getString("etternavn"),
@@ -50,16 +47,12 @@ class PersonRepository(
 			insert into person(
 				id,
 				person_ident,
-				person_ident_type,
-				historiske_identer,
 				fornavn,
 				mellomnavn,
 				etternavn
 			) values (
 				:id,
 				:personident,
-				:personidentType,
-				:historiskeIdenter,
 				:fornavn,
 				:mellomnavn,
 				:etternavn
@@ -68,16 +61,12 @@ class PersonRepository(
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
 				person_ident = :personident,
-				person_ident_type = :personidentType,
-				historiske_identer = :historiskeIdenter,
 				modified_at = current_timestamp
 		""".trimIndent()
 
 		val parameters = sqlParameters(
 			"id" to person.id,
 			"personident" to person.personIdent,
-			"personidentType" to person.personIdentType.toString(),
-			"historiskeIdenter" to person.historiskeIdenter.toTypedArray(),
 			"fornavn" to person.fornavn.titlecase(),
 			"mellomnavn" to person.mellomnavn?.titlecase(),
 			"etternavn" to person.etternavn.titlecase(),

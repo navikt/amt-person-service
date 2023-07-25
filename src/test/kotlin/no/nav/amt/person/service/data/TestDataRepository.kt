@@ -25,8 +25,6 @@ class TestDataRepository(
 			insert into person(
 				id,
 				person_ident,
-				person_ident_type,
-				historiske_identer,
 				fornavn,
 				mellomnavn,
 				etternavn,
@@ -35,8 +33,6 @@ class TestDataRepository(
 			) values (
 				:id,
 				:personIdent,
-				:personIdentType,
-				:historiskeIdenter,
 				:fornavn,
 				:mellomnavn,
 				:etternavn,
@@ -49,8 +45,6 @@ class TestDataRepository(
 			sql, sqlParameters(
 				"id" to person.id,
 				"personIdent" to person.personIdent,
-				"personIdentType" to person.personIdentType.toString(),
-				"historiskeIdenter" to person.historiskeIdenter.toTypedArray(),
 				"fornavn" to person.fornavn,
 				"mellomnavn" to person.mellomnavn,
 				"etternavn" to person.etternavn,
@@ -60,14 +54,11 @@ class TestDataRepository(
 		)
 
 		insertPersonidenter(
-			person.id,
-			person.historiskeIdenter.map {
-				TestData.lagPersonident(it, historisk = true)
-			}.plus(TestData.lagPersonident(person.personIdent))
+			listOf(TestData.lagPersonident(person.personIdent, person.id))
 		)
 	}
 
-	fun insertPersonidenter(personId: UUID, identer: List<PersonidentDbo>) {
+	fun insertPersonidenter(identer: List<PersonidentDbo>) {
 		val sql = """
 			insert into personident(
 				ident,
@@ -85,7 +76,7 @@ class TestDataRepository(
 		val parameters = identer.map {
 			sqlParameters(
 				"ident" to it.ident,
-				"personId" to personId,
+				"personId" to it.personId,
 				"historisk" to it.historisk,
 				"type" to it.type.name,
 			)

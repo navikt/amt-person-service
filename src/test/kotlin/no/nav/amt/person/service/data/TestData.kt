@@ -27,21 +27,17 @@ object TestData {
 	fun lagPerson(
 		id: UUID = UUID.randomUUID(),
 		personIdent: String = randomIdent(),
-		personIdentType: IdentType? = IdentType.FOLKEREGISTERIDENT,
 		fornavn: String = "Fornavn",
 		mellomnavn: String? = null,
 		etternavn: String = "Etternavn",
-		historiskeIdenter: List<String> = emptyList(),
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = PersonDbo(
 			id,
 			personIdent,
-			personIdentType,
 			fornavn,
 			mellomnavn,
 			etternavn,
-			historiskeIdenter,
 			createdAt,
 			modifiedAt
 	)

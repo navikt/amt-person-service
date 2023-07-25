@@ -10,6 +10,7 @@ import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.kafka.ingestor.DeltakerDto
 import no.nav.amt.person.service.migrering.MigreringService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.utils.AsyncUtils
 import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
@@ -60,9 +61,9 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 
 		mockAmtTiltakHttpServer.mockHentBrukerInfo(deltakerId, BrukerInfoDto(
 			navBruker.person.id,
-			personIdentType = navBruker.person.personIdentType!!,
-			historiskeIdenter = navBruker.person.historiskeIdenter,
-			navEnhetId = navBruker.navEnhet!!.id
+			navBruker.navEnhet!!.id,
+			IdentType.FOLKEREGISTERIDENT,
+			emptyList(),
 		))
 
 		mockPdlHttpServer.mockHentPerson(navBruker.person)

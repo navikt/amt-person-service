@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.person
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -63,11 +62,9 @@ class PersonServiceTest {
 
 		val person = service.hentEllerOpprettPerson(personIdent)
 		person.personIdent shouldBe personIdent
-		person.personIdentType shouldBe identType
 		person.fornavn shouldBe pdlPerson.fornavn
 		person.mellomnavn shouldBe pdlPerson.mellomnavn
 		person.etternavn shouldBe pdlPerson.etternavn
-		person.historiskeIdenter shouldHaveSize 1
 	}
 
 	@Test

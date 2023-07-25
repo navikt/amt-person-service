@@ -74,8 +74,8 @@ class PersonControllerTest: IntegrationTestBase() {
 		mockAmtTiltakHttpServer.mockHentBrukerId(person.personIdent, BrukerInfoDto(
 			brukerId,
 			UUID.randomUUID(),
-			person.personIdentType,
-			person.historiskeIdenter,
+			IdentType.FOLKEREGISTERIDENT,
+			emptyList(),
 		))
 
 		mockPdlHttpServer.mockHentPerson(person)
