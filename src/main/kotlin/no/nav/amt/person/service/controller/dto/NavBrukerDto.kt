@@ -2,11 +2,11 @@ package no.nav.amt.person.service.controller.dto
 
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_enhet.NavEnhet
-import java.util.*
+import java.util.UUID
 
 data class NavBrukerDto (
 	val personId: UUID,
-	val personIdent: String,
+	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
@@ -19,7 +19,7 @@ data class NavBrukerDto (
 
 fun NavBruker.toDto() = NavBrukerDto(
 	personId = this.person.id,
-	personIdent = this.person.personIdent,
+	personident = this.person.personident,
 	fornavn = this.person.fornavn,
 	mellomnavn = this.person.mellomnavn,
 	etternavn = this.person.etternavn,

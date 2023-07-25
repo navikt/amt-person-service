@@ -49,17 +49,17 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
-	fun `get(personIdent) - bruker finnes - returnerer bruker`() {
+	fun `get(personident) - bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
 
-		val faktiskBruker = repository.get(bruker.person.personIdent)!!
+		val faktiskBruker = repository.get(bruker.person.personident)!!
 
 		sammenlign(faktiskBruker, bruker)
 	}
 
 	@Test
-	fun `get(personIdent) - søk med historisk ident, bruker finnes - returnerer bruker`() {
+	fun `get(personident) - søk med historisk ident, bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
 
@@ -72,7 +72,7 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
-	fun `get(personIdent) - bruker finnes ikke - returnerer null`() {
+	fun `get(personident) - bruker finnes ikke - returnerer null`() {
 		repository.get("FNR") shouldBe null
 	}
 
@@ -146,7 +146,7 @@ class NavBrukerRepositoryTest {
 		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)
 
-		repository.finnBrukerId(bruker.person.personIdent) shouldBe bruker.id
+		repository.finnBrukerId(bruker.person.personident) shouldBe bruker.id
 	}
 
 	@Test
@@ -166,7 +166,7 @@ class NavBrukerRepositoryTest {
 
 		repository.delete(bruker.id)
 
-		repository.get(bruker.person.personIdent) shouldBe null
+		repository.get(bruker.person.personident) shouldBe null
 	}
 
 	private fun sammenlign(

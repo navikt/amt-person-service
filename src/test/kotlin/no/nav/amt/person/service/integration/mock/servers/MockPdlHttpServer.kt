@@ -16,7 +16,7 @@ import okhttp3.mockwebserver.RecordedRequest
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
 	fun mockHentPerson(person: PersonDbo) {
-		mockHentPerson(person.personIdent, TestData.lagPdlPerson(person))
+		mockHentPerson(person.personident, TestData.lagPdlPerson(person))
 	}
 
 	fun mockHentPerson(brukerFnr: String, mockPdlPerson: PdlPerson) {
@@ -108,7 +108,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		return MockResponse().setResponseCode(200).setBody(body)
 	}
 
-	private fun createPdlBrukerResponse(personIdent: String, mockPdlPerson: PdlPerson): MockResponse {
+	private fun createPdlBrukerResponse(personident: String, mockPdlPerson: PdlPerson): MockResponse {
 		val body = toJsonString(
 			PdlQueries.HentPerson.Response(
 				errors = null,
@@ -122,7 +122,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 							emptyList()
 						}
 					),
-					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident(personIdent, false, "FOLKEREGISTERIDENT")))
+					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident(personident, false, "FOLKEREGISTERIDENT")))
 				),
 				extensions = null,
 			)

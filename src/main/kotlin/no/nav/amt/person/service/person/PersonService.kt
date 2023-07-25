@@ -27,32 +27,32 @@ fun hentPerson(id: UUID): Person {
 		return repository.get(id).toModel()
 	}
 
-	fun hentPerson(personIdent: String): Person? {
-		return repository.get(personIdent)?.toModel()
+	fun hentPerson(personident: String): Person? {
+		return repository.get(personident)?.toModel()
 	}
 
-	fun opprettPersonMedId(personIdent: String, nyPersonId: UUID) : Person {
-		return opprettPerson(personIdent, nyPersonId)
+	fun opprettPersonMedId(personident: String, nyPersonId: UUID) : Person {
+		return opprettPerson(personident, nyPersonId)
 	}
 
 	@Retryable(maxAttempts = 2)
-	fun hentEllerOpprettPerson(personIdent: String) : Person {
-		return repository.get(personIdent)?.toModel() ?: opprettPerson(personIdent)
+	fun hentEllerOpprettPerson(personident: String) : Person {
+		return repository.get(personident)?.toModel() ?: opprettPerson(personident)
 	}
 
-	fun hentEllerOpprettPerson(personIdent: String, personOpplysninger: PdlPerson): Person {
-		return repository.get(personIdent)?.toModel() ?: opprettPerson(personOpplysninger)
+	fun hentEllerOpprettPerson(personident: String, personOpplysninger: PdlPerson): Person {
+		return repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
 	}
 
-	fun hentPersoner(personIdenter: List<String>): List<Person> {
-		return repository.getPersoner(personIdenter).map { it.toModel() }
+	fun hentPersoner(personidenter: List<String>): List<Person> {
+		return repository.getPersoner(personidenter).map { it.toModel() }
 	}
 
 	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
 
-	fun hentIdenter(personIdent: String) = pdlClient.hentIdenter(personIdent)
+	fun hentIdenter(personident: String) = pdlClient.hentIdenter(personident)
 
-	fun hentGjeldendeIdent(personIdent: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personIdent)).getOrThrow()
+	fun hentGjeldendeIdent(personident: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personident)).getOrThrow()
 
 	fun oppdaterPersonIdent(identer: List<Personident>) {
 		val personer = repository.getPersoner(identer.map { it.ident })
@@ -66,7 +66,7 @@ fun hentPerson(id: UUID): Person {
 
 		personer.firstOrNull()?.let { person ->
 			upsert(person.copy(
-				personIdent = gjeldendeIdent.ident,
+				personident = gjeldendeIdent.ident,
 			).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
@@ -82,8 +82,8 @@ fun hentPerson(id: UUID): Person {
 		}
 	}
 
-	private fun opprettPerson(personIdent: String, nyPersonId: UUID = UUID.randomUUID()): Person {
-		val pdlPerson =	pdlClient.hentPerson(personIdent)
+	private fun opprettPerson(personident: String, nyPersonId: UUID = UUID.randomUUID()): Person {
+		val pdlPerson =	pdlClient.hentPerson(personident)
 
 		return opprettPerson(pdlPerson, nyPersonId)
 	}
@@ -93,7 +93,7 @@ fun hentPerson(id: UUID): Person {
 
 		val person = Person(
 			id = nyPersonId,
-			personIdent = gjeldendeIdent.ident,
+			personident = gjeldendeIdent.ident,
 			fornavn = pdlPerson.fornavn,
 			mellomnavn = pdlPerson.mellomnavn,
 			etternavn = pdlPerson.etternavn,
@@ -110,7 +110,7 @@ fun hentPerson(id: UUID): Person {
 	fun slettPerson(person: Person) {
 		repository.delete(person.id)
 
-		secureLog.info("Slettet person med ident: ${person.personIdent}")
+		secureLog.info("Slettet person med ident: ${person.personident}")
 		log.info("Slettet person med id: ${person.id}")
 	}
 

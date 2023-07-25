@@ -65,11 +65,11 @@ class KafkaMessageSender(
 		)
 	}
 
-	fun sendTilSkjermetPersonTopic(personIdent: String, erSkjermet: Boolean) {
+	fun sendTilSkjermetPersonTopic(personident: String, erSkjermet: Boolean) {
 		kafkaProducer.send(
 			ProducerRecord(
 				skjermedePersonerTopic,
-				personIdent,
+				personident,
 				erSkjermet.toString(),
 			)
 		)

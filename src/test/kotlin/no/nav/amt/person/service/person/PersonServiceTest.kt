@@ -42,7 +42,7 @@ class PersonServiceTest {
 
 	@Test
 	fun `hentEllerOpprettPerson - personen finnes ikke - opprettes og returnere person`() {
-		val personIdent = TestData.randomIdent()
+		val personident = TestData.randomIdent()
 		val identType = IdentType.FOLKEREGISTERIDENT
 		val pdlPerson = PdlPerson(
 			fornavn = "Fornavn",
@@ -51,17 +51,17 @@ class PersonServiceTest {
 			telefonnummer = "81549300",
 			adressebeskyttelseGradering = null,
 			identer = listOf(
-				Personident(ident = personIdent, historisk = false, type = identType),
+				Personident(ident = personident, historisk = false, type = identType),
 				Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
 			)
 		)
 
-		every { pdlClient.hentPerson(personIdent) } returns pdlPerson
-		every { repository.get(personIdent) } returns null
+		every { pdlClient.hentPerson(personident) } returns pdlPerson
+		every { repository.get(personident) } returns null
 		mockExecuteWithoutResult(transactionTemplate)
 
-		val person = service.hentEllerOpprettPerson(personIdent)
-		person.personIdent shouldBe personIdent
+		val person = service.hentEllerOpprettPerson(personident)
+		person.personident shouldBe personident
 		person.fornavn shouldBe pdlPerson.fornavn
 		person.mellomnavn shouldBe pdlPerson.mellomnavn
 		person.etternavn shouldBe pdlPerson.etternavn
@@ -76,7 +76,7 @@ class PersonServiceTest {
 		)
 
 		every { repository.getPersoner(identer.map { it.ident }) } returns
-			identer.map { TestData.lagPerson(personIdent = it.ident) }
+			identer.map { TestData.lagPerson(personident = it.ident) }
 		mockExecuteWithoutResult(transactionTemplate)
 
 		assertThrows<IllegalStateException> {

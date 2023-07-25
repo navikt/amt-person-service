@@ -1,11 +1,13 @@
 package no.nav.amt.person.service.controller.dto
 
 import no.nav.amt.person.service.person.model.Person
-import java.util.*
+import java.util.UUID
 
 data class ArrangorAnsattDto (
 	val id: UUID,
 	val personIdent: String,
+	// dobbelt opp for å være bakoverkompatibel til amt-arrangor er oppdatert
+	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
@@ -13,7 +15,8 @@ data class ArrangorAnsattDto (
 
 fun Person.toArrangorAnsattDto() = ArrangorAnsattDto(
 	id = id,
-	personIdent = personIdent,
+	personIdent = personident,
+	personident = personident,
 	fornavn = fornavn,
 	mellomnavn = mellomnavn,
 	etternavn = etternavn,

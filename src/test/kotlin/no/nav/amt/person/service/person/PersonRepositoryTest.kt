@@ -40,7 +40,7 @@ class PersonRepositoryTest {
 		val faktiskPerson = repository.get(person.id)
 
 		faktiskPerson.id shouldBe person.id
-		faktiskPerson.personIdent shouldBe  person.personIdent
+		faktiskPerson.personident shouldBe  person.personident
 		faktiskPerson.fornavn shouldBe person.fornavn
 		faktiskPerson.mellomnavn shouldBe person.mellomnavn
 		faktiskPerson.etternavn shouldBe person.etternavn
@@ -56,7 +56,7 @@ class PersonRepositoryTest {
 	}
 
 	@Test
-	fun `get(personIdent) - person finnes ikke - returnerer null`() {
+	fun `get(personident) - person finnes ikke - returnerer null`() {
 		repository.get(TestData.randomIdent()) shouldBe null
 	}
 
@@ -68,8 +68,8 @@ class PersonRepositoryTest {
 		testRepository.insertPerson(person2)
 
 		val personer = repository.getPersoner(listOf(
-			person1.personIdent,
-			person2.personIdent,
+			person1.personident,
+			person2.personident,
 			TestData.randomIdent()
 		))
 
@@ -86,14 +86,14 @@ class PersonRepositoryTest {
 		testRepository.insertPerson(person)
 		testRepository.insertPersonidenter(listOf(historiskIdent))
 
-		val personer = repository.getPersoner(listOf(historiskIdent.ident, person.personIdent))
+		val personer = repository.getPersoner(listOf(historiskIdent.ident, person.personident))
 
 		personer shouldHaveSize 1
 
 		val faktiskPerson = personer.first()
 
 		faktiskPerson.id shouldBe  person.id
-		faktiskPerson.personIdent shouldNotBe historiskIdent.ident
+		faktiskPerson.personident shouldNotBe historiskIdent.ident
 	}
 
 	@Test
@@ -106,7 +106,7 @@ class PersonRepositoryTest {
 	fun `upsert - ny person - inserter person`() {
 		val person = Person(
 			id = UUID.randomUUID(),
-			personIdent = TestData.randomIdent(),
+			personident = TestData.randomIdent(),
 			fornavn = "Fornavn",
 			mellomnavn = "Mellomnavn",
 			etternavn = "Etternavn",
@@ -117,7 +117,7 @@ class PersonRepositoryTest {
 		val faktiskPerson = repository.get(person.id)
 
 		faktiskPerson.id shouldBe person.id
-		faktiskPerson.personIdent shouldBe  person.personIdent
+		faktiskPerson.personident shouldBe  person.personident
 		faktiskPerson.fornavn shouldBe person.fornavn
 		faktiskPerson.mellomnavn shouldBe person.mellomnavn
 		faktiskPerson.etternavn shouldBe person.etternavn
@@ -134,7 +134,7 @@ class PersonRepositoryTest {
 
 		val oppdatertPerson = Person(
 				id = originalPerson.id,
-				personIdent = originalPerson.personIdent,
+				personident = originalPerson.personident,
 				fornavn = "Nytt",
 				mellomnavn = "Navn",
 				etternavn = "Med Mer",
@@ -145,7 +145,7 @@ class PersonRepositoryTest {
 		val faktiskPerson = repository.get(originalPerson.id)
 
 		faktiskPerson.id shouldBe originalPerson.id
-		faktiskPerson.personIdent shouldBe  originalPerson.personIdent
+		faktiskPerson.personident shouldBe  originalPerson.personident
 		faktiskPerson.fornavn shouldBe oppdatertPerson.fornavn
 		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
 		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn
@@ -164,7 +164,7 @@ class PersonRepositoryTest {
 
 		val oppdatertPerson = Person(
 			id = originalPerson.id,
-			personIdent = "ny ident",
+			personident = "ny ident",
 			fornavn = "Nytt",
 			mellomnavn = "Navn",
 			etternavn = "Med Mer",
@@ -175,7 +175,7 @@ class PersonRepositoryTest {
 		val faktiskPerson = repository.get(originalPerson.id)
 
 		faktiskPerson.id shouldBe originalPerson.id
-		faktiskPerson.personIdent shouldBe  oppdatertPerson.personIdent
+		faktiskPerson.personident shouldBe  oppdatertPerson.personident
 		faktiskPerson.fornavn shouldBe oppdatertPerson.fornavn
 		faktiskPerson.mellomnavn shouldBe oppdatertPerson.mellomnavn
 		faktiskPerson.etternavn shouldBe oppdatertPerson.etternavn
@@ -190,7 +190,7 @@ class PersonRepositoryTest {
 
 		repository.delete(person.id)
 
-		repository.get(person.personIdent) shouldBe null
+		repository.get(person.personident) shouldBe null
 	}
 
 }

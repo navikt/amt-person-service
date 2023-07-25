@@ -34,11 +34,11 @@ class AmtTiltakClient(
 		}
 
 	}
-	fun hentBrukerId(personIdent: String): UUID? {
+	fun hentBrukerId(personident: String): UUID? {
 		val request = Request.Builder()
 			.url("$baseUrl/api/tiltaksarrangor/deltaker/bruker-info")
 			.header("Authorization", "Bearer ${tokenProvider.get()}")
-			.post("""{"personident": "$personIdent"}""".toRequestBody("application/json".toMediaType()))
+			.post("""{"personident": "$personident"}""".toRequestBody("application/json".toMediaType()))
 			.build()
 
 		httpClient.newCall(request).execute().use {response ->

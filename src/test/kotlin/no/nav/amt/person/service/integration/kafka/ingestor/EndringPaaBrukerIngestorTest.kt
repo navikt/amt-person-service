@@ -2,8 +2,8 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
+import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.AsyncUtils
@@ -24,7 +24,7 @@ class EndringPaaBrukerIngestorTest : IntegrationTestBase() {
 		val navBruker = TestData.lagNavBruker(navEnhet = null)
 
 		val msg = KafkaMessageCreator.lagEndringPaaBrukerMsg(
-			fodselsnummer = navBruker.person.personIdent,
+			fodselsnummer = navBruker.person.personident,
 			oppfolgingsenhet = navEnhet.enhetId,
 		)
 

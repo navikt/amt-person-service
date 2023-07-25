@@ -9,7 +9,7 @@ import no.nav.amt.person.service.utils.JsonUtils
 import no.nav.common.kafka.producer.KafkaProducerClient
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class KafkaProducerService(
@@ -24,7 +24,7 @@ class KafkaProducerService(
 
 		val navBrukerDto = NavBrukerDtoV1(
 			personId = navBruker.person.id,
-			personIdent = navBruker.person.personIdent,
+			personident = navBruker.person.personident,
 			fornavn = navBruker.person.fornavn,
 			mellomnavn = navBruker.person.mellomnavn,
 			etternavn = navBruker.person.etternavn,

@@ -26,7 +26,7 @@ object TestData {
 
 	fun lagPerson(
 		id: UUID = UUID.randomUUID(),
-		personIdent: String = randomIdent(),
+		personident: String = randomIdent(),
 		fornavn: String = "Fornavn",
 		mellomnavn: String? = null,
 		etternavn: String = "Etternavn",
@@ -34,7 +34,7 @@ object TestData {
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = PersonDbo(
 			id,
-			personIdent,
+			personident,
 			fornavn,
 			mellomnavn,
 			etternavn,
@@ -82,10 +82,10 @@ object TestData {
 	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, createdAt, modifiedAt)
 
 	fun lagPdlPerson(
-		person: PersonDbo,
-		telefon: String? = null,
-		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
-		identer: List<Personident> = listOf(Personident(person.personIdent, false, IdentType.FOLKEREGISTERIDENT)),
+        person: PersonDbo,
+        telefon: String? = null,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
+        identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,

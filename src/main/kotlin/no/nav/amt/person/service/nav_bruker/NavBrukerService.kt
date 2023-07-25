@@ -42,26 +42,26 @@ class NavBrukerService(
 		return repository.get(id).toModel()
 	}
 
-	fun hentNavBruker(personIdent: String): NavBruker? {
-		return repository.get(personIdent)?.toModel()
+	fun hentNavBruker(personident: String): NavBruker? {
+		return repository.get(personident)?.toModel()
 	}
 
-	fun hentEllerOpprettNavBruker(personIdent: String): NavBruker {
-		return repository.get(personIdent)?.toModel() ?: opprettNavBruker(personIdent)
+	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
+		return repository.get(personident)?.toModel() ?: opprettNavBruker(personident)
 	}
 
-	private fun opprettNavBruker(personIdent: String): NavBruker {
-		val personOpplysninger = pdlClient.hentPerson(personIdent)
+	private fun opprettNavBruker(personident: String): NavBruker {
+		val personOpplysninger = pdlClient.hentPerson(personident)
 
 		if (personOpplysninger.adressebeskyttelseGradering.erBeskyttet()) {
 			throw IllegalStateException("Nav bruker er adreessebeskyttet og kan ikke lagres")
 		}
 
-		val person = personService.hentEllerOpprettPerson(personIdent, personOpplysninger)
-		val veileder = navAnsattService.hentBrukersVeileder(personIdent)
-		val navEnhet = navEnhetService.hentNavEnhetForBruker(personIdent)
-		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personIdent).getOrNull()
-		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personIdent).getOrThrow()
+		val person = personService.hentEllerOpprettPerson(personident, personOpplysninger)
+		val veileder = navAnsattService.hentBrukersVeileder(personident)
+		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
+		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
+		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -111,14 +111,14 @@ class NavBrukerService(
 
 	fun oppdaterKontaktinformasjon(personer: List<Person>) {
 		personer.forEach {person ->
-			oppdaterKontaktinformasjon(person.personIdent)
+			oppdaterKontaktinformasjon(person.personident)
 		}
 	}
 
-	private fun oppdaterKontaktinformasjon(personIdent: String) {
-		val bruker = repository.get(personIdent)?.toModel() ?: return
+	private fun oppdaterKontaktinformasjon(personident: String) {
+		val bruker = repository.get(personident)?.toModel() ?: return
 
-		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personIdent).getOrElse {
+		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
 			val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
 
 			if (EnvUtils.isDev()) log.info(feilmelding)
@@ -127,7 +127,7 @@ class NavBrukerService(
 			return
 		}
 
-		val telefon = krrKontaktinfo.telefonnummer ?: pdlClient.hentTelefon(personIdent)
+		val telefon = krrKontaktinfo.telefonnummer ?: pdlClient.hentTelefon(personident)
 
 		if (bruker.telefon == telefon && bruker.epost == krrKontaktinfo.epost) return
 
@@ -136,7 +136,7 @@ class NavBrukerService(
 
 	fun slettBrukere(personer: List<Person>) {
 		personer.forEach {
-			val bruker = repository.get(it.personIdent)?.toModel()
+			val bruker = repository.get(it.personident)?.toModel()
 
 			if (bruker != null) {
 				slettBruker(bruker)
@@ -157,13 +157,13 @@ class NavBrukerService(
 			kafkaProducerService.publiserSlettNavBruker(bruker.person.id)
 		}
 
-		secureLog.info("Slettet navbruker med personident: ${bruker.person.personIdent}")
+		secureLog.info("Slettet navbruker med personident: ${bruker.person.personident}")
 		log.info("Slettet navbruker med personId: ${bruker.person.id}")
 	}
 
 	@TransactionalEventListener
 	fun onPersonUpdate(personUpdateEvent: PersonUpdateEvent) {
-		repository.get(personUpdateEvent.person.personIdent)?.let {
+		repository.get(personUpdateEvent.person.personident)?.let {
 			kafkaProducerService.publiserNavBruker(it.toModel())
 		}
 	}

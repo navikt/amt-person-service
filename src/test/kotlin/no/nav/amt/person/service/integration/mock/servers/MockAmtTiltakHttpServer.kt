@@ -18,7 +18,7 @@ class MockAmtTiltakHttpServer : MockHttpServer(name = "AmtTiltakHttpServer") {
 		addResponseHandler("/api/tiltaksarrangor/deltaker/$deltakerId/bruker-info", response)
 	}
 
-	fun mockHentBrukerId(personIdent: String, brukerInfo: BrukerInfoDto?) {
+	fun mockHentBrukerId(personident: String, brukerInfo: BrukerInfoDto?) {
 		val response = if (brukerInfo == null) {
 			MockResponse()
 				.setResponseCode(404)
@@ -32,7 +32,7 @@ class MockAmtTiltakHttpServer : MockHttpServer(name = "AmtTiltakHttpServer") {
 		val requestPredicate = { req: RecordedRequest ->
 			req.path == "/api/tiltaksarrangor/deltaker/bruker-info"
 				&& req.method == "POST"
-				&& req.getBodyAsString() == """{"personident": "$personIdent"}"""
+				&& req.getBodyAsString() == """{"personident": "$personident"}"""
 		}
 
 		addResponseHandler(requestPredicate, response)

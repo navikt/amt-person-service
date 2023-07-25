@@ -44,23 +44,23 @@ class PersonControllerTest: IntegrationTestBase() {
 		val person = TestData.lagPerson()
 		val token = mockOAuthServer.issueAzureAdM2MToken()
 
-		mockAmtTiltakHttpServer.mockHentBrukerId(person.personIdent, null)
+		mockAmtTiltakHttpServer.mockHentBrukerId(person.personident, null)
 		mockPdlHttpServer.mockHentPerson(person)
 
 		val response = sendRequest(
 			method = "POST",
 			path = "/api/arrangor-ansatt",
-			body = """{"personIdent": "${person.personIdent}"}""".toJsonRequestBody(),
+			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
 			headers = mapOf("Authorization" to "Bearer $token")
 		)
 
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
-		val faktiskPerson = personService.hentPerson(person.personIdent)!!
+		val faktiskPerson = personService.hentPerson(person.personident)!!
 
 		faktiskPerson.id shouldBe body.id
-		faktiskPerson.personIdent shouldBe body.personIdent
+		faktiskPerson.personident shouldBe body.personident
 		faktiskPerson.fornavn shouldBe body.fornavn
 		faktiskPerson.mellomnavn shouldBe body.mellomnavn
 		faktiskPerson.etternavn shouldBe body.etternavn
@@ -71,7 +71,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val person = TestData.lagPerson()
 		val brukerId = UUID.randomUUID()
 
-		mockAmtTiltakHttpServer.mockHentBrukerId(person.personIdent, BrukerInfoDto(
+		mockAmtTiltakHttpServer.mockHentBrukerId(person.personident, BrukerInfoDto(
 			brukerId,
 			UUID.randomUUID(),
 			IdentType.FOLKEREGISTERIDENT,
@@ -84,17 +84,17 @@ class PersonControllerTest: IntegrationTestBase() {
 		val response = sendRequest(
 			method = "POST",
 			path = "/api/arrangor-ansatt",
-			body = """{"personIdent": "${person.personIdent}"}""".toJsonRequestBody(),
+			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
 			headers = mapOf("Authorization" to "Bearer $token")
 		)
 
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
-		val faktiskPerson = personService.hentPerson(person.personIdent)!!
+		val faktiskPerson = personService.hentPerson(person.personident)!!
 
 		faktiskPerson.id shouldBe brukerId
-		faktiskPerson.personIdent shouldBe body.personIdent
+		faktiskPerson.personident shouldBe body.personident
 		faktiskPerson.fornavn shouldBe body.fornavn
 		faktiskPerson.mellomnavn shouldBe body.mellomnavn
 		faktiskPerson.etternavn shouldBe body.etternavn
@@ -111,17 +111,17 @@ class PersonControllerTest: IntegrationTestBase() {
 		val response = sendRequest(
 			method = "POST",
 			path = "/api/arrangor-ansatt",
-			body = """{"personIdent": "${person.personIdent}"}""".toJsonRequestBody(),
+			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
 			headers = mapOf("Authorization" to "Bearer $token")
 		)
 
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
-		val faktiskPerson = personService.hentPerson(person.personIdent)!!
+		val faktiskPerson = personService.hentPerson(person.personident)!!
 
 		faktiskPerson.id shouldBe body.id
-		faktiskPerson.personIdent shouldBe body.personIdent
+		faktiskPerson.personident shouldBe body.personident
 		faktiskPerson.fornavn shouldBe body.fornavn
 		faktiskPerson.mellomnavn shouldBe body.mellomnavn
 		faktiskPerson.etternavn shouldBe body.etternavn
@@ -135,27 +135,27 @@ class PersonControllerTest: IntegrationTestBase() {
 		val navBruker = TestData.lagNavBruker(navVeileder = navAnsatt, navEnhet = navEnhet)
 
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
-		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personIdent, navAnsatt.navIdent)
-		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personIdent, navEnhet.enhetId)
+		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
+		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.epost, navBruker.telefon))
-		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personIdent to false))
+		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
 
 		val response = sendRequest(
 			method = "POST",
 			path = "/api/nav-bruker",
-			body = """{"personIdent": "${navBruker.person.personIdent}"}""".toJsonRequestBody(),
+			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
 			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
 		)
 
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<NavBrukerDto>(response.body!!.string())
-		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personIdent)!!
+		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)!!
 
 		faktiskBruker.person.id shouldBe body.personId
-		faktiskBruker.person.personIdent shouldBe body.personIdent
+		faktiskBruker.person.personident shouldBe body.personident
 		faktiskBruker.person.fornavn shouldBe body.fornavn
 		faktiskBruker.person.mellomnavn shouldBe body.mellomnavn
 		faktiskBruker.person.etternavn shouldBe body.etternavn
@@ -168,7 +168,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.erSkjermet shouldBe body.erSkjermet
 
 		val ident = personService.hentIdenter(faktiskBruker.person.id).first()
-		ident.ident shouldBe body.personIdent
+		ident.ident shouldBe body.personident
 		ident.type shouldBe IdentType.FOLKEREGISTERIDENT
 		ident.historisk shouldBe false
 	}
@@ -178,7 +178,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val navBruker = TestData.lagNavBruker()
 
 		mockPdlHttpServer.mockHentPerson(
-			navBruker.person.personIdent,
+			navBruker.person.personident,
 			TestData.lagPdlPerson(
 				person = navBruker.person,
 				adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
@@ -188,7 +188,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		val response = sendRequest(
 			method = "POST",
 			path = "/api/nav-bruker",
-			body = """{"personIdent": "${navBruker.person.personIdent}"}""".toJsonRequestBody(),
+			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
 			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
 		)
 

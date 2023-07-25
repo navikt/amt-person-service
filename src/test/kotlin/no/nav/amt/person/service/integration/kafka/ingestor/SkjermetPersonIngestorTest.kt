@@ -22,7 +22,7 @@ class SkjermetPersonIngestorTest: IntegrationTestBase() {
 		val bruker = TestData.lagNavBruker(erSkjermet = false)
 		testDataRepository.insertNavBruker(bruker)
 
-		kafkaMessageSender.sendTilSkjermetPersonTopic(bruker.person.personIdent, true)
+		kafkaMessageSender.sendTilSkjermetPersonTopic(bruker.person.personident, true)
 
 		AsyncUtils.eventually {
 			val faktiskBruker = navBrukerService.hentNavBruker(bruker.id)

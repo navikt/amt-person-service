@@ -73,17 +73,17 @@ class NavBrukerServiceTest {
 		val kontaktinformasjon = Kontaktinformasjon("navbruker@gmail.com", "99900111")
 		val erSkjermet = false
 
-		every { repository.get(person.personIdent) } returns null
-		every { pdlClient.hentPerson(person.personIdent) } returns personOpplysninger
-		every { personService.hentEllerOpprettPerson(person.personIdent, personOpplysninger) } returns person.toModel()
-		every { navAnsattService.hentBrukersVeileder(person.personIdent) } returns veileder.toModel()
-		every { navEnhetService.hentNavEnhetForBruker(person.personIdent) } returns navEnhet.toModel()
-		every { krrProxyClient.hentKontaktinformasjon(person.personIdent) } returns Result.success(kontaktinformasjon)
-		every { poaoTilgangClient.erSkjermetPerson(person.personIdent) } returns ApiResult(result = erSkjermet, throwable = null)
+		every { repository.get(person.personident) } returns null
+		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
+		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
+		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
+		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
+		every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
+		every { poaoTilgangClient.erSkjermetPerson(person.personident) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 		mockExecuteWithoutResult(transactionTemplate)
 
-		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personIdent)
+		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personident)
 
 		faktiskBruker.person.id shouldBe person.id
 		faktiskBruker.navVeileder?.id shouldBe veileder.id
@@ -98,11 +98,11 @@ class NavBrukerServiceTest {
 		val person = TestData.lagPerson()
 		val personOpplysninger = TestData.lagPdlPerson(person, adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-		every { repository.get(person.personIdent) } returns null
-		every { pdlClient.hentPerson(person.personIdent) } returns personOpplysninger
+		every { repository.get(person.personident) } returns null
+		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 
 		assertThrows<IllegalStateException> {
-			service.hentEllerOpprettNavBruker(person.personIdent)
+			service.hentEllerOpprettNavBruker(person.personident)
 		}
 	}
 
@@ -127,14 +127,14 @@ class NavBrukerServiceTest {
 				"krr-telefon",
 			)
 
-		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.get(bruker.person.personIdent) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
+		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(kontakinformasjon)
 		mockExecuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
 		verify(exactly = 1) { repository.upsert(
 				bruker.copy(telefon = kontakinformasjon.telefonnummer, epost = kontakinformasjon.epost)
 					.toModel()
@@ -151,16 +151,16 @@ class NavBrukerServiceTest {
 		)
 		val pdlTelefon = "pdl-telefon"
 
-		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { pdlClient.hentTelefon(bruker.person.personIdent) } returns pdlTelefon
-		every { repository.get(bruker.person.personIdent) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.success(kontakinformasjon)
+		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
+		every { pdlClient.hentTelefon(bruker.person.personident) } returns pdlTelefon
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(kontakinformasjon)
 		mockExecuteWithoutResult(transactionTemplate)
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
-		verify(exactly = 1) { pdlClient.hentTelefon(bruker.person.personIdent) }
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
+		verify(exactly = 1) { pdlClient.hentTelefon(bruker.person.personident) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
 		verify(exactly = 1) { repository.upsert(
 			bruker.copy(telefon = pdlTelefon, epost = kontakinformasjon.epost)
 				.toModel()
@@ -172,13 +172,13 @@ class NavBrukerServiceTest {
 	fun `oppdaterKontaktInformasjon - krr feiler - oppdaterer ikke`() {
 		val bruker = TestData.lagNavBruker()
 
-		every { repository.finnBrukerId(bruker.person.personIdent) } returns bruker.id
-		every { repository.get(bruker.person.personIdent) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) } returns Result.failure(RuntimeException())
+		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.failure(RuntimeException())
 
 		service.oppdaterKontaktinformasjon(listOf(bruker.person.toModel()))
 
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personIdent) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
 		verify(exactly = 0) { repository.upsert(any()) }
 	}
 

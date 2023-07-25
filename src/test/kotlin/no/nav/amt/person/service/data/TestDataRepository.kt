@@ -32,7 +32,7 @@ class TestDataRepository(
 				modified_at
 			) values (
 				:id,
-				:personIdent,
+				:personident,
 				:fornavn,
 				:mellomnavn,
 				:etternavn,
@@ -44,7 +44,7 @@ class TestDataRepository(
 		template.update(
 			sql, sqlParameters(
 				"id" to person.id,
-				"personIdent" to person.personIdent,
+				"personident" to person.personident,
 				"fornavn" to person.fornavn,
 				"mellomnavn" to person.mellomnavn,
 				"etternavn" to person.etternavn,
@@ -54,7 +54,7 @@ class TestDataRepository(
 		)
 
 		insertPersonidenter(
-			listOf(TestData.lagPersonident(person.personIdent, person.id))
+			listOf(TestData.lagPersonident(person.personident, person.id))
 		)
 	}
 

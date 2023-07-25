@@ -11,7 +11,7 @@ import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import no.nav.person.pdl.leesah.navn.Navn
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 object KafkaMessageCreator {
 	fun lagEndringPaaBrukerMsg(
@@ -33,22 +33,22 @@ object KafkaMessageCreator {
 	)
 
 	fun lagPersonhendelseAdressebeskyttelse(
-		personIdenter: List<String>,
+		personidenter: List<String>,
 		gradering: Gradering,
 	) = lagPersonhendelse(
-		personIdenter = personIdenter,
+		personidenter = personidenter,
 		navn = null,
 		adressebeskyttelse = Adressebeskyttelse(gradering),
 		opplysningsType = OpplysningsType.ADRESSEBESKYTTELSE_V1,
 	)
 
 	fun lagPersonhendelseNavn(
-		personIdenter: List<String>,
-		fornavn: String,
-		mellomnavn: String?,
-		etternavn: String,
+        personidenter: List<String>,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
 	) = lagPersonhendelse(
-		personIdenter = personIdenter,
+		personidenter = personidenter,
 		navn = Navn(
 			/* fornavn = */ fornavn,
 			/* mellomnavn = */ mellomnavn,
@@ -62,13 +62,13 @@ object KafkaMessageCreator {
 	)
 
 	private fun lagPersonhendelse(
-		personIdenter: List<String>,
+		personidenter: List<String>,
 		navn: Navn?,
 		adressebeskyttelse: Adressebeskyttelse?,
 		opplysningsType: OpplysningsType
 	) = Personhendelse(
 			/* hendelseId = */ UUID.randomUUID().toString(),
-			/* personidenter = */ personIdenter,
+			/* personidenter = */ personidenter,
 			/* master = */ "FREG",
 			/* opprettet = */ ZonedDateTime.now().toInstant(),
 			/* opplysningstype = */ opplysningsType.toString(),

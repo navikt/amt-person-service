@@ -32,7 +32,7 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 		val msg = Aktor(
 			listOf(
 				Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
-				Identifikator(person.personIdent, Type.FOLKEREGISTERIDENT, false),
+				Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
 			)
 		)
 
@@ -45,7 +45,7 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 
 			val identer = personService.hentIdenter(faktiskPerson!!.id)
 
-			identer.find { it.ident == person.personIdent }!!.let {
+			identer.find { it.ident == person.personident }!!.let {
 				it.historisk shouldBe true
 				it.type shouldBe IdentType.FOLKEREGISTERIDENT
 			}
@@ -65,7 +65,7 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 			listOf(
 				Identifikator(aktorId, Type.AKTORID, true),
 				Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
-				Identifikator(person.personIdent, Type.FOLKEREGISTERIDENT, false),
+				Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
 			)
 		)
 
@@ -76,13 +76,13 @@ class AktorV2IngestorTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			val faktiskPerson = personService.hentPerson(nyttFnr)
 
-			faktiskPerson!!.personIdent shouldBe nyttFnr
+			faktiskPerson!!.personident shouldBe nyttFnr
 
 			val identer = personService.hentIdenter(faktiskPerson.id)
 
 			identer shouldHaveSize 3
 
-			identer.find { it.ident == person.personIdent }!!.historisk shouldBe true
+			identer.find { it.ident == person.personident }!!.historisk shouldBe true
 		}
 
 	}

@@ -42,10 +42,10 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		val nyTelefon = "+12345678"
 
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(nyEpost, nyTelefon))
-		mockPdlHttpServer.mockHentTelefon(person.personIdent, null)
+		mockPdlHttpServer.mockHentTelefon(person.personident, null)
 
 		val msg = KafkaMessageCreator.lagPersonhendelseNavn(
-			personIdenter = listOf(person.personIdent),
+			personidenter = listOf(person.personident),
 			fornavn = nyttFornavn,
 			mellomnavn = nyttMellomnavn,
 			etternavn = nyttEtternavn,
@@ -74,7 +74,7 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		testDataRepository.insertNavBruker(navBruker)
 
 		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
-			personIdenter = listOf(navBruker.person.personIdent),
+			personidenter = listOf(navBruker.person.personident),
 			gradering = Gradering.STRENGT_FORTROLIG,
 		)
 
@@ -83,8 +83,8 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		AsyncUtils.eventually {
-			navBrukerService.hentNavBruker(navBruker.person.personIdent) shouldBe null
-			personService.hentPerson(navBruker.person.personIdent) shouldBe null
+			navBrukerService.hentNavBruker(navBruker.person.personident) shouldBe null
+			personService.hentPerson(navBruker.person.personident) shouldBe null
 		}
 
 	}
@@ -96,7 +96,7 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		testDataRepository.insertRolle(navBruker.person.id, Rolle.ARRANGOR_ANSATT)
 
 		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
-			personIdenter = listOf(navBruker.person.personIdent),
+			personidenter = listOf(navBruker.person.personident),
 			gradering = Gradering.STRENGT_FORTROLIG,
 		)
 
@@ -105,8 +105,8 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		AsyncUtils.eventually {
-			navBrukerService.hentNavBruker(navBruker.person.personIdent) shouldBe null
-			personService.hentPerson(navBruker.person.personIdent) shouldNotBe null
+			navBrukerService.hentNavBruker(navBruker.person.personident) shouldBe null
+			personService.hentPerson(navBruker.person.personident) shouldNotBe null
 		}
 
 	}

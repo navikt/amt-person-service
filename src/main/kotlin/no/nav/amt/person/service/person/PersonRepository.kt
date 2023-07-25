@@ -17,7 +17,7 @@ class PersonRepository(
 	private val rowMapper = RowMapper { rs, _ ->
 		PersonDbo(
 			id = rs.getUUID("id"),
-			personIdent = rs.getString("person_ident"),
+			personident = rs.getString("person_ident"),
 			fornavn = rs.getString("fornavn"),
 			mellomnavn = rs.getString("mellomnavn"),
 			etternavn = rs.getString("etternavn"),
@@ -66,7 +66,7 @@ class PersonRepository(
 
 		val parameters = sqlParameters(
 			"id" to person.id,
-			"personident" to person.personIdent,
+			"personident" to person.personident,
 			"fornavn" to person.fornavn.titlecase(),
 			"mellomnavn" to person.mellomnavn?.titlecase(),
 			"etternavn" to person.etternavn.titlecase(),

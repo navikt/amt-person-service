@@ -14,12 +14,12 @@ class KrrProxyClient(
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
 
-	fun hentKontaktinformasjon(personIdent: String): Result<Kontaktinformasjon> {
+	fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> {
 		val request: Request = Request.Builder()
 			.url("$baseUrl/rest/v1/person?inkluderSikkerDigitalPost=false")
 			.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 			.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider.get())
-			.header("Nav-Personident", personIdent)
+			.header("Nav-Personident", personident)
 			.build()
 
 		httpClient.newCall(request).execute().use { response ->

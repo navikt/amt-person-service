@@ -1,10 +1,10 @@
 package no.nav.amt.person.service.kafka.producer.dto
 
-import java.util.*
+import java.util.UUID
 
 data class NavBrukerDtoV1 (
 	val personId: UUID,
-	val personIdent: String,
+	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,

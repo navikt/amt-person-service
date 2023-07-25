@@ -31,7 +31,7 @@ class PersonController (
 		@RequestBody request: NavBrukerRequest
 	): NavBrukerDto {
 		authService.verifyRequestIsMachineToMachine()
-		return navBrukerService.hentEllerOpprettNavBruker(request.personIdent).toDto()
+		return navBrukerService.hentEllerOpprettNavBruker(request.personident).toDto()
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -49,7 +49,9 @@ class PersonController (
 		@RequestBody request: ArrangorAnsattRequest,
 	): ArrangorAnsattDto {
 		authService.verifyRequestIsMachineToMachine()
-		val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personIdent)
+		val person = request.personident?.let {
+			arrangorAnsattService.hentEllerOpprettAnsatt(it)
+		} ?: arrangorAnsattService.hentEllerOpprettAnsatt(request.personIdent!!)
 
 		return person.toArrangorAnsattDto()
 	}

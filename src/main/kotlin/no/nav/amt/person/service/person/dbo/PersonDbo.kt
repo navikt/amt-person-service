@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class PersonDbo(
 	val id: UUID,
-	val personIdent: String,
+	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
@@ -16,7 +16,7 @@ data class PersonDbo(
 	fun toModel(): Person {
 		return Person(
 			id,
-			personIdent,
+			personident,
 			fornavn,
 			mellomnavn,
 			etternavn,

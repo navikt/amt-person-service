@@ -23,12 +23,12 @@ class PersonUpdater(
 			personer = personRepository.getAll(offset)
 
 			personer.forEach {
-				val identer = personService.hentIdenter(it.personIdent)
+				val identer = personService.hentIdenter(it.personident)
 
 				personService.oppdaterPersonIdent(identer)
 
 				finnGjeldendeIdent(identer).onSuccess { ident ->
-					if (ident.ident != it.personIdent) {
+					if (ident.ident != it.personident) {
 						log.info("Ny gjeldende ident for person ${it.id}")
 					}
 				}

@@ -4,7 +4,7 @@ import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class NavEnhetService(
@@ -13,13 +13,13 @@ class NavEnhetService(
 	private val veilarbarenaClient: VeilarbarenaClient
 ) {
 
-	fun hentNavEnhetForBruker(personIdent: String): NavEnhet? {
-		val oppfolgingsenhetId = veilarbarenaClient.hentBrukerOppfolgingsenhetId(personIdent) ?: return null
+	fun hentNavEnhetForBruker(personident: String): NavEnhet? {
+		val oppfolgingsenhetId = veilarbarenaClient.hentBrukerOppfolgingsenhetId(personident) ?: return null
 
 		return hentEllerOpprettNavEnhet(oppfolgingsenhetId)
 			.also {
 				if (it == null) {
-					secureLog.warn("Bruker med personIdent=$personIdent har enhetId=$oppfolgingsenhetId som ikke finnes i norg")
+					secureLog.warn("Bruker med personident=$personident har enhetId=$oppfolgingsenhetId som ikke finnes i norg")
 				}
 			}
 	}

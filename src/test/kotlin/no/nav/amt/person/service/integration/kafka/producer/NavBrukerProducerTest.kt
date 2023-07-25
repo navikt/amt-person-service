@@ -86,7 +86,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 		return JsonUtils.toJsonString(
 			NavBrukerDtoV1(
 				personId = navBruker.person.id,
-				personIdent = navBruker.person.personIdent,
+				personident = navBruker.person.personident,
 				fornavn = navBruker.person.fornavn,
 				mellomnavn = navBruker.person.mellomnavn,
 				etternavn = navBruker.person.etternavn,

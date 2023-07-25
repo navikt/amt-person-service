@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class Person(
 	val id: UUID,
-	val personIdent: String,
+	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,

@@ -40,7 +40,7 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 		val msg = DeltakerDto(
 			id = deltakerId,
 			personalia = DeltakerDto.DeltakerPersonaliaDto(
-				navBruker.person.personIdent,
+				navBruker.person.personident,
 				DeltakerDto.DeltakerPersonaliaDto.NavnDto(
 					navBruker.person.fornavn,
 					navBruker.person.mellomnavn,
@@ -68,14 +68,14 @@ class DeltakerV2IngestorTest : IntegrationTestBase() {
 
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(kontaktinfoDiff)
-		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personIdent to navBruker.erSkjermet))
-		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personIdent, navBruker.navVeileder!!.navIdent)
-		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personIdent, navBruker.navEnhet!!.enhetId)
+		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to navBruker.erSkjermet))
+		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navBruker.navVeileder!!.navIdent)
+		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navBruker.navEnhet!!.enhetId)
 
 		kafkaMessageSender.sendTilDeltakerV2Topic(deltakerId, JsonUtils.toJsonString(msg))
 
 		AsyncUtils.eventually {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personIdent)
+			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
 			faktiskBruker shouldNotBe null
 
 			faktiskBruker!!.navEnhet?.id shouldBe navBruker.navEnhet?.id

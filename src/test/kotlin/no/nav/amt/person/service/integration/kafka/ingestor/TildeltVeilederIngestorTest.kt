@@ -34,7 +34,7 @@ class TildeltVeilederIngestorTest : IntegrationTestBase() {
 		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
 
 
-		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personIdent)
+		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())

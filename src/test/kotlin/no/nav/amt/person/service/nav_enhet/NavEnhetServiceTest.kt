@@ -32,13 +32,13 @@ class NavEnhetServiceTest {
 	@Test
 	fun `hentNavEnhetForBruker - enhet finnes ikke - skal opprette enhet`() {
 		val enhet = TestData.lagNavEnhet()
-		val personIdent = "FNR"
+		val personident = "FNR"
 
-		every { veilarbarenaClient.hentBrukerOppfolgingsenhetId(personIdent) } returns enhet.enhetId
+		every { veilarbarenaClient.hentBrukerOppfolgingsenhetId(personident) } returns enhet.enhetId
 		every { navEnhetRepository.get(enhet.enhetId) } returns null
 		every { norgClient.hentNavEnhet(enhet.enhetId) } returns NorgNavEnhet(enhet.enhetId, enhet.navn)
 
-		val faktiskEnhet = service.hentNavEnhetForBruker(personIdent)!!
+		val faktiskEnhet = service.hentNavEnhetForBruker(personident)!!
 
 		faktiskEnhet.enhetId shouldBe enhet.enhetId
 		faktiskEnhet.navn shouldBe enhet.navn

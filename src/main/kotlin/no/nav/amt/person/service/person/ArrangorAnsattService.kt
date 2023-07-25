@@ -11,15 +11,15 @@ class ArrangorAnsattService(
 	private val rolleService: RolleService,
 	private val amtTiltakClient: AmtTiltakClient,
 ) {
-	fun hentEllerOpprettAnsatt(personIdent: String): Person {
-		var person = personService.hentPerson(personIdent)
+	fun hentEllerOpprettAnsatt(personident: String): Person {
+		var person = personService.hentPerson(personident)
 
 		if (person == null) {
-			val brukerId = amtTiltakClient.hentBrukerId(personIdent)
+			val brukerId = amtTiltakClient.hentBrukerId(personident)
 			person = if (brukerId != null) {
-				personService.opprettPersonMedId(personIdent, brukerId)
+				personService.opprettPersonMedId(personident, brukerId)
 			} else {
-				personService.hentEllerOpprettPerson(personIdent)
+				personService.hentEllerOpprettPerson(personident)
 			}
 		}
 

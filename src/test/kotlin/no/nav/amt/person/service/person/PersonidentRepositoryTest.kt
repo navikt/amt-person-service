@@ -51,7 +51,7 @@ class PersonidentRepositoryTest {
 		testRepository.insertPerson(person)
 
 		val identer = listOf(
-			TestData.lagPersonident(person.personIdent, historisk = true),
+			TestData.lagPersonident(person.personident, historisk = true),
 			TestData.lagPersonident(TestData.randomIdent(), historisk = false),
 		)
 

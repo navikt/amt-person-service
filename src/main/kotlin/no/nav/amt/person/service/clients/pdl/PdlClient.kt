@@ -27,11 +27,11 @@ class PdlClient(
 
 	private val behandlingsnummer = "B446" // https://behandlingskatalog.nais.adeo.no/process/team/5345bce7-e076-4b37-8bf4-49030901a4c3/b3003849-c4bb-4c60-a4cb-e07ce6025623
 
-	fun hentPerson(personIdent: String): PdlPerson {
+	fun hentPerson(personident: String): PdlPerson {
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentPerson.query,
-				PdlQueries.HentPerson.Variables(personIdent)
+				PdlQueries.HentPerson.Variables(personident)
 			)
 		)
 
