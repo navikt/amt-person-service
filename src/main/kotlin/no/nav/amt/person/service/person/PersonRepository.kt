@@ -17,7 +17,7 @@ class PersonRepository(
 	private val rowMapper = RowMapper { rs, _ ->
 		PersonDbo(
 			id = rs.getUUID("id"),
-			personident = rs.getString("person_ident"),
+			personident = rs.getString("personident"),
 			fornavn = rs.getString("fornavn"),
 			mellomnavn = rs.getString("mellomnavn"),
 			etternavn = rs.getString("etternavn"),
@@ -46,7 +46,7 @@ class PersonRepository(
 		val sql = """
 			insert into person(
 				id,
-				person_ident,
+				personident,
 				fornavn,
 				mellomnavn,
 				etternavn
@@ -60,7 +60,7 @@ class PersonRepository(
 				fornavn = :fornavn,
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
-				person_ident = :personident,
+				personident = :personident,
 				modified_at = current_timestamp
 		""".trimIndent()
 

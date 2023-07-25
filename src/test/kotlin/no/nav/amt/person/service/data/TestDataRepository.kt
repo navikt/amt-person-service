@@ -24,7 +24,7 @@ class TestDataRepository(
 		val sql = """
 			insert into person(
 				id,
-				person_ident,
+				personident,
 				fornavn,
 				mellomnavn,
 				etternavn,
