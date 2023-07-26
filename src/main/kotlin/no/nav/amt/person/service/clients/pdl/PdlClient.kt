@@ -117,6 +117,37 @@ class PdlClient(
 		}
 	}
 
+	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
+		val requestBody = toJsonString(
+			GraphqlUtils.GraphqlQuery(
+				PdlQueries.HentAdressebeskyttelse.query,
+				PdlQueries.HentAdressebeskyttelse.Variables(personident)
+			)
+		)
+
+		val request = createGraphqlRequest(requestBody)
+
+		httpClient.newCall(request).execute().use { response ->
+			if (!response.isSuccessful) {
+				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
+			}
+
+			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
+
+			val gqlResponse = fromJsonString<PdlQueries.HentAdressebeskyttelse.Response>(body)
+
+			throwPdlApiErrors(gqlResponse)
+			logPdlWarnings(gqlResponse.extensions?.warnings)
+
+			if (gqlResponse.data == null) {
+				throw RuntimeException("PDL respons inneholder ikke data")
+			}
+
+			return getDiskresjonskode(gqlResponse.data.hentPerson.adressebeskyttelse)
+		}
+
+	}
+
 	private fun createGraphqlRequest(jsonPayload: String): Request {
 		return Request.Builder()
 			.url("$baseUrl/graphql")
@@ -149,7 +180,7 @@ class PdlClient(
 		return "${prioritertNummer.landskode} ${prioritertNummer.nummer}"
 	}
 
-	private fun getDiskresjonskode(adressebeskyttelse: List<PdlQueries.HentPerson.Adressebeskyttelse>): AdressebeskyttelseGradering? {
+	private fun getDiskresjonskode(adressebeskyttelse: List<PdlQueries.Adressebeskyttelse>): AdressebeskyttelseGradering? {
 		return when(adressebeskyttelse.firstOrNull()?.gradering) {
 			"STRENGT_FORTROLIG_UTLAND" -> AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
 			"STRENGT_FORTROLIG" -> AdressebeskyttelseGradering.STRENGT_FORTROLIG

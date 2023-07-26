@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.clients.amt_tiltak.BrukerInfoDto
+import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.controller.dto.NavAnsattDto
 import no.nav.amt.person.service.controller.dto.NavBrukerDto
@@ -241,6 +242,44 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskNavEnhet.id shouldBe body.id
 		faktiskNavEnhet.enhetId shouldBe body.enhetId
 		faktiskNavEnhet.navn shouldBe body.navn
+	}
+
+	@Test
+	fun `hentAdressebeskyttelse - person er beskyttet - skal ha status 200 og returnere riktig response`() {
+		val personident = TestData.randomIdent()
+		val gradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+
+		mockPdlHttpServer.mockHentAdressebeskyttelse(personident, gradering)
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/person/adressebeskyttelse",
+			body = """{"personident": "$personident"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 200
+
+		objectMapper.readValue<AdressebeskyttelseDto>(response.body!!.string()).gradering shouldBe gradering
+	}
+
+	@Test
+	fun `hentAdressebeskyttelse - person er ikke beskyttet - skal ha status 200 og returnere riktig response`() {
+		val personident = TestData.randomIdent()
+		val gradering = null
+
+		mockPdlHttpServer.mockHentAdressebeskyttelse(personident, gradering)
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/person/adressebeskyttelse",
+			body = """{"personident": "$personident"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 200
+
+		objectMapper.readValue<AdressebeskyttelseDto>(response.body!!.string()).gradering shouldBe gradering
 	}
 
 	@Test

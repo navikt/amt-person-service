@@ -3,6 +3,7 @@ package no.nav.amt.person.service.person
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.config.SecureLog.secureLog
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.finnGjeldendeIdent
@@ -114,5 +115,8 @@ fun hentPerson(id: UUID): Person {
 		log.info("Slettet person med id: ${person.id}")
 	}
 
+	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
+		return pdlClient.hentAdressebeskyttelse(personident)
+	}
 
 }

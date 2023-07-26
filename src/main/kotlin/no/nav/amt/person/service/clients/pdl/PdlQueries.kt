@@ -105,9 +105,40 @@ object PdlQueries {
 			val gruppe: String
 		)
 
-		data class Adressebeskyttelse(
-			val gradering: String
+	}
+
+	data class Adressebeskyttelse(
+		val gradering: String
+	)
+	object HentAdressebeskyttelse {
+		val query = """
+			query(${"$"}ident: ID!) {
+			  hentPerson(ident: ${"$"}ident) {
+				adressebeskyttelse(historikk: false) {
+				  gradering
+				}
+			  }
+			}
+		""".trimIndent()
+
+		data class Variables(
+			val ident: String,
 		)
+
+		data class Response(
+			override val errors: List<PdlError>?,
+			override val data: ResponseData?,
+			val extensions: Extensions?,
+		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
+
+		data class ResponseData(
+			val hentPerson: HentPerson,
+		)
+
+		data class HentPerson(
+			val adressebeskyttelse: List<Adressebeskyttelse>
+		)
+
 	}
 
 	object HentTelefon {
