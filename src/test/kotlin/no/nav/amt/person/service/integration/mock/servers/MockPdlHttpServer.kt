@@ -24,7 +24,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentPerson.query,
-				PdlQueries.HentPerson.Variables(brukerFnr)
+				PdlQueries.Variables(brukerFnr)
 			)
 		)
 
@@ -41,7 +41,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentIdenter.query,
-				PdlQueries.HentIdenter.Variables(ident)
+				PdlQueries.Variables(ident)
 			)
 		)
 
@@ -61,7 +61,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentTelefon.query,
-				PdlQueries.HentTelefon.Variables(ident)
+				PdlQueries.Variables(ident)
 			)
 		)
 
@@ -78,7 +78,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		val request = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentAdressebeskyttelse.query,
-				PdlQueries.HentAdressebeskyttelse.Variables(ident)
+				PdlQueries.Variables(ident)
 			)
 		)
 
@@ -98,7 +98,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				data = PdlQueries.HentAdressebeskyttelse.ResponseData(
 					PdlQueries.HentAdressebeskyttelse.HentPerson(
 						adressebeskyttelse = if (gradering != null) {
-							listOf(PdlQueries.Adressebeskyttelse(gradering = gradering.toString()))
+							listOf(PdlQueries.Attribute.Adressebeskyttelse(gradering = gradering.toString()))
 						} else {
 							emptyList()
 						}
@@ -112,7 +112,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 	}
 
 	private fun createHentTelefonResponse(telefon: String?): MockResponse {
-		val telefonnummer = telefon?.let { listOf(PdlQueries.Telefonnummer("47", it, 1)) } ?: emptyList()
+		val telefonnummer = telefon?.let { listOf(PdlQueries.Attribute.Telefonnummer("47", it, 1)) } ?: emptyList()
 
 		val body = toJsonString(
 			PdlQueries.HentTelefon.Response(
@@ -136,7 +136,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				errors = null,
 				data = PdlQueries.HentIdenter.ResponseData(
 					PdlQueries.HentIdenter.HentIdenter(
-						identer = listOf(PdlQueries.HentIdenter.Ident(ident.ident, ident.historisk, ident.type.name))
+						identer = listOf(PdlQueries.Attribute.Ident(ident.ident, ident.historisk, ident.type.name))
 					)
 				),
 				extensions = null,
@@ -152,15 +152,15 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				errors = null,
 				data = PdlQueries.HentPerson.ResponseData(
 					PdlQueries.HentPerson.HentPerson(
-						navn = listOf(PdlQueries.HentPerson.Navn(mockPdlPerson.fornavn, null, mockPdlPerson.etternavn)),
-						telefonnummer = listOf(PdlQueries.Telefonnummer("47", "12345678", 1)),
+						navn = listOf(PdlQueries.Attribute.Navn(mockPdlPerson.fornavn, null, mockPdlPerson.etternavn)),
+						telefonnummer = listOf(PdlQueries.Attribute.Telefonnummer("47", "12345678", 1)),
 						adressebeskyttelse = if (mockPdlPerson.adressebeskyttelseGradering != null) {
-							listOf(PdlQueries.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
+							listOf(PdlQueries.Attribute.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
 						} else {
 							emptyList()
 						}
 					),
-					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.HentPerson.Ident(personident, false, "FOLKEREGISTERIDENT")))
+					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.Attribute.Ident(personident, false, "FOLKEREGISTERIDENT")))
 				),
 				extensions = null,
 			)

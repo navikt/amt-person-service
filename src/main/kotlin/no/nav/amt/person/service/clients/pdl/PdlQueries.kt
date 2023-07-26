@@ -35,11 +35,6 @@ object PdlQueries {
 		val warnings: List<PdlWarning>
 	)
 
-	data class Telefonnummer(
-		val landskode: String,
-		val nummer: String,
-		val prioritet: Int,
-	)
 	object HentPerson {
 		val query = """
 			query(${"$"}ident: ID!) {
@@ -68,10 +63,6 @@ object PdlQueries {
 			}
 		""".trimIndent()
 
-		data class Variables(
-			val ident: String,
-		)
-
 		data class Response(
 			override val errors: List<PdlError>?,
 			override val data: ResponseData?,
@@ -84,32 +75,17 @@ object PdlQueries {
 		)
 
 		data class HentPerson(
-			val navn: List<Navn>,
-			val telefonnummer: List<Telefonnummer>,
-			val adressebeskyttelse: List<Adressebeskyttelse>
-		)
-
-		data class Navn(
-			val fornavn: String,
-			val mellomnavn: String?,
-			val etternavn: String,
+			val navn: List<Attribute.Navn>,
+			val telefonnummer: List<Attribute.Telefonnummer>,
+			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>
 		)
 
 		data class HentIdenter(
-			val identer: List<Ident>
-		)
-
-		data class Ident(
-			val ident: String,
-			val historisk: Boolean,
-			val gruppe: String
+			val identer: List<Attribute.Ident>,
 		)
 
 	}
 
-	data class Adressebeskyttelse(
-		val gradering: String
-	)
 	object HentAdressebeskyttelse {
 		val query = """
 			query(${"$"}ident: ID!) {
@@ -120,10 +96,6 @@ object PdlQueries {
 			  }
 			}
 		""".trimIndent()
-
-		data class Variables(
-			val ident: String,
-		)
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -136,7 +108,7 @@ object PdlQueries {
 		)
 
 		data class HentPerson(
-			val adressebeskyttelse: List<Adressebeskyttelse>
+			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>
 		)
 
 	}
@@ -154,10 +126,6 @@ object PdlQueries {
 			}
 		""".trimIndent()
 
-		data class Variables(
-			val ident: String,
-		)
-
 		data class Response(
 			override val errors: List<PdlError>?,
 			override val data: ResponseData?,
@@ -169,7 +137,7 @@ object PdlQueries {
 		)
 
 		data class HentPerson(
-			val telefonnummer: List<Telefonnummer>
+			val telefonnummer: List<Attribute.Telefonnummer>
 		)
 
 	}
@@ -187,10 +155,6 @@ object PdlQueries {
 			}
 		""".trimIndent()
 
-		data class Variables(
-			val ident: String,
-		)
-
 		data class Response(
 			override val errors: List<PdlError>?,
 			override val data: ResponseData?,
@@ -200,16 +164,39 @@ object PdlQueries {
 		data class ResponseData(
 			val hentIdenter: HentIdenter,
 		)
-
 		data class HentIdenter(
-			val identer: List<Ident>,
+			val identer: List<Attribute.Ident>,
 		)
+
+	}
+
+	object Attribute {
+		data class Adressebeskyttelse(
+			val gradering: String
+		)
+
+		data class Navn(
+			val fornavn: String,
+			val mellomnavn: String?,
+			val etternavn: String,
+		)
+
 
 		data class Ident(
 			val ident: String,
 			val historisk: Boolean,
 			val gruppe: String,
 		)
+		data class Telefonnummer(
+			val landskode: String,
+			val nummer: String,
+			val prioritet: Int,
+		)
+
 	}
+
+	data class Variables(
+		val ident: String,
+	)
 
 }

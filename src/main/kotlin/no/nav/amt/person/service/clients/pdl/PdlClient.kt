@@ -31,7 +31,7 @@ class PdlClient(
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentPerson.query,
-				PdlQueries.HentPerson.Variables(personident)
+				PdlQueries.Variables(personident)
 			)
 		)
 
@@ -62,7 +62,7 @@ class PdlClient(
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentIdenter.query,
-				PdlQueries.HentIdenter.Variables(ident)
+				PdlQueries.Variables(ident)
 			)
 		)
 
@@ -91,7 +91,7 @@ class PdlClient(
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentTelefon.query,
-				PdlQueries.HentTelefon.Variables(ident)
+				PdlQueries.Variables(ident)
 			)
 		)
 
@@ -121,7 +121,7 @@ class PdlClient(
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
 				PdlQueries.HentAdressebeskyttelse.query,
-				PdlQueries.HentAdressebeskyttelse.Variables(personident)
+				PdlQueries.Variables(personident)
 			)
 		)
 
@@ -174,13 +174,13 @@ class PdlClient(
 
 	}
 
-	private fun getTelefonnummer(telefonnummere: List<PdlQueries.Telefonnummer>): String? {
+	private fun getTelefonnummer(telefonnummere: List<PdlQueries.Attribute.Telefonnummer>): String? {
 		val prioritertNummer = telefonnummere.minByOrNull { it.prioritet } ?: return null
 
 		return "${prioritertNummer.landskode} ${prioritertNummer.nummer}"
 	}
 
-	private fun getDiskresjonskode(adressebeskyttelse: List<PdlQueries.Adressebeskyttelse>): AdressebeskyttelseGradering? {
+	private fun getDiskresjonskode(adressebeskyttelse: List<PdlQueries.Attribute.Adressebeskyttelse>): AdressebeskyttelseGradering? {
 		return when(adressebeskyttelse.firstOrNull()?.gradering) {
 			"STRENGT_FORTROLIG_UTLAND" -> AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
 			"STRENGT_FORTROLIG" -> AdressebeskyttelseGradering.STRENGT_FORTROLIG
