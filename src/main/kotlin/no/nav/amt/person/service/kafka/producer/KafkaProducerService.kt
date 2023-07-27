@@ -4,7 +4,6 @@ import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import no.nav.amt.person.service.nav_bruker.NavBruker
-import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.amt.person.service.utils.JsonUtils
 import no.nav.common.kafka.producer.KafkaProducerClient
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -17,10 +16,7 @@ class KafkaProducerService(
 	private val kafkaProducerClient: KafkaProducerClient<String, String>,
 ) {
 
-	private val toggleProduce = !EnvUtils.isProd()
-
 	fun publiserNavBruker(navBruker: NavBruker) {
-		if (!toggleProduce) return
 
 		val navBrukerDto = NavBrukerDtoV1(
 			personId = navBruker.person.id,
@@ -43,7 +39,6 @@ class KafkaProducerService(
 	}
 
 	fun publiserSlettNavBruker(personId: UUID) {
-		if (!toggleProduce) return
 
 		val record = ProducerRecord<String, String?>(kafkaTopicProperties.amtNavBrukerTopic, personId.toString(), null)
 
