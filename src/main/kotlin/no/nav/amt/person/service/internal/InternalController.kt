@@ -1,16 +1,25 @@
 package no.nav.amt.person.service.internal
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
+import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.EnvUtils.isDev
 import no.nav.common.job.JobRunner
 import no.nav.security.token.support.core.api.Unprotected
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
+import java.time.Duration
+import java.time.Instant
 
 @RestController
 @RequestMapping("/internal")
@@ -18,7 +27,10 @@ class InternalController(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 	private val personUpdater: PersonUpdater,
+	private val navBrukerRepository: NavBrukerRepository,
+	private val kafkaProducerService: KafkaProducerService
 ) {
+	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
 	@Unprotected
 	@PostMapping("/person/{dollyIdent}")
@@ -55,6 +67,41 @@ class InternalController(
 		}
 	}
 
+	@Unprotected
+	@GetMapping("/nav-brukere/republiser")
+	fun republiserNavBrukere(
+		servlet: HttpServletRequest,
+		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
+		if (isInternal(servlet)) {
+			JobRunner.runAsync("republiser-nav-brukere") {
+				republiserAlleNavBrukere(startFromOffset?:0, batchSize?:500)
+			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	private fun republiserAlleNavBrukere(startFromOffset: Int, batchSize: Int) {
+		var currentOffset = startFromOffset
+		var data: List<NavBrukerDbo>
+
+		val start = Instant.now()
+		var totalHandled = 0
+
+		do {
+			data = navBrukerRepository.getAll(currentOffset, batchSize)
+			data.forEach { kafkaProducerService.publiserNavBruker(it.toModel()) }
+			totalHandled += data.size
+			currentOffset += batchSize
+		} while (data.isNotEmpty())
+
+		val duration = Duration.between(start, Instant.now())
+
+		if (totalHandled > 0)
+			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
+
+	}
 
 	private fun isInternal(servlet: HttpServletRequest): Boolean {
 		return servlet.remoteAddr == "127.0.0.1"

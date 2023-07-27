@@ -10,6 +10,7 @@ import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
 import org.junit.AfterClass
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -29,6 +30,11 @@ class NavBrukerRepositoryTest {
 		fun tearDown() {
 			DbTestDataUtils.cleanDatabase(dataSource)
 		}
+	}
+
+	@AfterEach
+	fun after() {
+		DbTestDataUtils.cleanDatabase(dataSource)
 	}
 
 	@Test
@@ -74,6 +80,25 @@ class NavBrukerRepositoryTest {
 	@Test
 	fun `get(personident) - bruker finnes ikke - returnerer null`() {
 		repository.get("FNR") shouldBe null
+	}
+
+	@Test
+	fun `getAll - bruker finnes - returnerer bruker`() {
+		val bruker1 = TestData.lagNavBruker()
+		val bruker2 = TestData.lagNavBruker()
+		val bruker3 = TestData.lagNavBruker()
+
+		testRepository.insertNavBruker(bruker1)
+		testRepository.insertNavBruker(bruker2)
+		testRepository.insertNavBruker(bruker3)
+
+		val brukere = repository.getAll(0, 2)
+
+		brukere.size shouldBe 2
+
+		sammenlign(brukere[0], bruker1)
+		sammenlign(brukere[1], bruker2)
+
 	}
 
 	@Test

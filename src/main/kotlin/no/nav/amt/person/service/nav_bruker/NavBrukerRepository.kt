@@ -68,13 +68,26 @@ class NavBrukerRepository(
 
 	fun	get(personident: String): NavBrukerDbo? {
 		val sql = selectNavBrukerQuery(
-			"where personident.ident = :personident"
+			"""
+				left join personident on nav_bruker.person_id = personident.person_id
+				where personident.ident = :personident
+			""".trimIndent()
 		)
 		val parameters = sqlParameters("personident" to personident)
 
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
+	fun	getAll(offset: Int, limit: Int): List<NavBrukerDbo> {
+		val sql = selectNavBrukerQuery("""
+			ORDER BY nav_bruker.modified_at asc
+			OFFSET :offset
+			LIMIT :limit
+			""")
+		val parameters = sqlParameters("offset" to offset, "limit" to limit)
+
+		return template.query(sql, parameters, rowMapper)
+	}
 	fun upsert(bruker: NavBrukerUpsert) {
 		val sql = """
 			insert into nav_bruker(
@@ -148,7 +161,6 @@ class NavBrukerRepository(
 					 left join person on nav_bruker.person_id = person.id
 					 left join nav_ansatt on nav_bruker.nav_veileder_id = nav_ansatt.id
 					 left join nav_enhet on nav_bruker.nav_enhet_id = nav_enhet.id
-					 left join personident on nav_bruker.person_id = personident.person_id
 			$where
 		""".trimIndent()
 	}
