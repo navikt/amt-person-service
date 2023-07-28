@@ -4,7 +4,7 @@ import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
  class NavAnsattService(
@@ -46,9 +46,7 @@ import java.util.*
 				telefon = nyNavAnsatt.telefonnummer,
 			)
 
-		navAnsattRepository.upsert(ansatt)
-
-		return ansatt
+		return navAnsattRepository.upsert(ansatt).toModel()
 	}
 
 

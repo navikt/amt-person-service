@@ -5,7 +5,7 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class NavAnsattRepository(
@@ -53,7 +53,7 @@ class NavAnsattRepository(
 	}
 
 
-	fun upsert(navAnsatt: NavAnsatt) {
+	fun upsert(navAnsatt: NavAnsatt): NavAnsattDbo {
 		val parameters = sqlParameters(
 			"id" to navAnsatt.id,
 			"navIdent" to navAnsatt.navIdent,
@@ -62,7 +62,7 @@ class NavAnsattRepository(
 			"epost" to navAnsatt.epost,
 		)
 
-		template.update(upsertSql, parameters)
+		return template.query("$upsertSql returning *", parameters, rowMapper).first()
 	}
 
 	fun upsertMany(ansatte: List<NavAnsatt>) {

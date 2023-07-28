@@ -30,7 +30,7 @@ class NavAnsattServiceTest {
 
 	@Test
 	fun `hentHellerOpprettAnsatt - ansatt finnes ikke - oppretter og returnerer ansatt`() {
-		val ansatt = TestData.lagNavAnsatt().toModel()
+		val ansatt = TestData.lagNavAnsatt()
 
 		every { navAnsattRepository.get(ansatt.navIdent) } returns null
 		every { nomClient.hentNavAnsatt(ansatt.navIdent) } returns NomNavAnsatt(
@@ -39,6 +39,7 @@ class NavAnsattServiceTest {
 			telefonnummer = ansatt.telefon,
 			epost = ansatt.epost,
 		)
+		every { navAnsattRepository.upsert(any()) } returns ansatt
 
 		val faktiskAnsatt = service.hentEllerOpprettAnsatt(ansatt.navIdent)
 
