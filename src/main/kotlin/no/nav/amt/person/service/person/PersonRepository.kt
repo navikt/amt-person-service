@@ -4,7 +4,6 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
-import no.nav.amt.person.service.utils.titlecase
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
@@ -67,9 +66,9 @@ class PersonRepository(
 		val parameters = sqlParameters(
 			"id" to person.id,
 			"personident" to person.personident,
-			"fornavn" to person.fornavn.titlecase(),
-			"mellomnavn" to person.mellomnavn?.titlecase(),
-			"etternavn" to person.etternavn.titlecase(),
+			"fornavn" to person.fornavn,
+			"mellomnavn" to person.mellomnavn,
+			"etternavn" to person.etternavn,
 		)
 
 		template.update(sql, parameters)
