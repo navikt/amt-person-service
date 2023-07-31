@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.clients.amt_tiltak.BrukerInfoDto
 import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.controller.dto.NavAnsattDto
@@ -22,7 +21,6 @@ import no.nav.amt.person.service.person.model.IdentType
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.UUID
 
 class PersonControllerTest: IntegrationTestBase() {
 
@@ -45,7 +43,6 @@ class PersonControllerTest: IntegrationTestBase() {
 		val person = TestData.lagPerson()
 		val token = mockOAuthServer.issueAzureAdM2MToken()
 
-		mockAmtTiltakHttpServer.mockHentBrukerId(person.personident, null)
 		mockPdlHttpServer.mockHentPerson(person)
 
 		val response = sendRequest(
@@ -61,40 +58,6 @@ class PersonControllerTest: IntegrationTestBase() {
 		val faktiskPerson = personService.hentPerson(person.personident)!!
 
 		faktiskPerson.id shouldBe body.id
-		faktiskPerson.personident shouldBe body.personident
-		faktiskPerson.fornavn shouldBe body.fornavn
-		faktiskPerson.mellomnavn shouldBe body.mellomnavn
-		faktiskPerson.etternavn shouldBe body.etternavn
-	}
-
-	@Test
-	fun `hentEllerOpprettArrangorAnsatt - ansatt er har bruker i amt-tiltak - skal ha status 200 og returnere riktig response`() {
-		val person = TestData.lagPerson()
-		val brukerId = UUID.randomUUID()
-
-		mockAmtTiltakHttpServer.mockHentBrukerId(person.personident, BrukerInfoDto(
-			brukerId,
-			UUID.randomUUID(),
-			IdentType.FOLKEREGISTERIDENT,
-			emptyList(),
-		))
-
-		mockPdlHttpServer.mockHentPerson(person)
-		val token = mockOAuthServer.issueAzureAdM2MToken()
-
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/arrangor-ansatt",
-			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer $token")
-		)
-
-		response.code shouldBe 200
-
-		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body!!.string())
-		val faktiskPerson = personService.hentPerson(person.personident)!!
-
-		faktiskPerson.id shouldBe brukerId
 		faktiskPerson.personident shouldBe body.personident
 		faktiskPerson.fornavn shouldBe body.fornavn
 		faktiskPerson.mellomnavn shouldBe body.mellomnavn
