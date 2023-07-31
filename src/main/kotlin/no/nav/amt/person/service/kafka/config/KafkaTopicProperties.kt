@@ -9,7 +9,6 @@ data class KafkaTopicProperties(
 	val aktorV2Topic: String,
 	val skjermedePersonerTopic: String,
 	val leesahTopic: String,
-	val deltakerV2Topic: String,
 
 	// Producer topics:
 	val amtNavBrukerTopic: String,

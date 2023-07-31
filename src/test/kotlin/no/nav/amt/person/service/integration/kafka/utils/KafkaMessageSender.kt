@@ -30,20 +30,8 @@ class KafkaMessageSender(
 	private val skjermedePersonerTopic: String,
 	@Value("\${app.env.leesahTopic}")
 	private val leesahTopic: String,
-	@Value("\${app.env.deltakerV2Topic}")
-	private val deltakerV2Topic: String,
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
-
-	fun sendTilDeltakerV2Topic(key: UUID, jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				deltakerV2Topic,
-				key.toString(),
-				jsonString,
-			)
-		)
-	}
 
 	fun sendTilEndringPaaBrukerTopic(jsonString: String) {
 		kafkaProducer.send(
