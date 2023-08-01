@@ -1,12 +1,19 @@
 package no.nav.amt.person.service.person.model
 
+import no.nav.amt.person.service.utils.titlecase
 import java.util.UUID
 
 data class Person(
 	val id: UUID,
 	val personident: String,
-	val fornavn: String,
-	val mellomnavn: String?,
-	val etternavn: String,
-)
+	var fornavn: String,
+	var mellomnavn: String?,
+	var etternavn: String,
+) {
+	init {
+		fornavn = fornavn.titlecase()
+		mellomnavn = mellomnavn?.titlecase()
+		etternavn = etternavn.titlecase()
+	}
+}
 
