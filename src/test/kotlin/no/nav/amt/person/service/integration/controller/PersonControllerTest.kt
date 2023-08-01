@@ -245,6 +245,29 @@ class PersonControllerTest: IntegrationTestBase() {
 		objectMapper.readValue<AdressebeskyttelseDto>(response.body!!.string()).gradering shouldBe gradering
 	}
 
+
+	@Test
+	fun `hentNavAnsatt - nav ansatt finnes - skal ha status 200 og returnere riktig response`() {
+		val navAnsatt = TestData.lagNavAnsatt()
+		testDataRepository.insertNavAnsatt(navAnsatt)
+
+		val response = sendRequest(
+			method = "GET",
+			path = "/api/nav-ansatt/${navAnsatt.id}",
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 200
+
+		val body = objectMapper.readValue<NavAnsattDto>(response.body!!.string())
+
+		navAnsatt.id shouldBe body.id
+		navAnsatt.navIdent shouldBe body.navIdent
+		navAnsatt.navn shouldBe body.navn
+		navAnsatt.telefon shouldBe body.telefon
+		navAnsatt.epost shouldBe body.epost
+	}
+
 	@Test
 	internal fun `skal teste token autentisering`() {
 		val requestBuilders = listOf(

@@ -15,6 +15,7 @@ import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.*
+import java.util.UUID
 
 
 @RestController
@@ -45,6 +46,16 @@ class PersonController (
 		authService.verifyRequestIsMachineToMachine()
 		return navAnsattService.hentEllerOpprettAnsatt(request.navIdent).toDto()
 	}
+
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+	@GetMapping("/nav-ansatt/{id}")
+	fun hentNavAnsatt(
+		@PathVariable id: UUID
+	): NavAnsattDto {
+		authService.verifyRequestIsMachineToMachine()
+		return navAnsattService.hentNavAnsatt(id).toDto()
+	}
+
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/arrangor-ansatt")
