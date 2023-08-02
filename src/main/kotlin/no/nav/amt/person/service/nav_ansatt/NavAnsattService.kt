@@ -23,7 +23,7 @@ import java.util.UUID
 		return navAnsattRepository.get(navIdent)?.toModel()
 	}
 
-	fun hentEllerOpprettAnsatt(navIdent: String, nyAnsattId: UUID = UUID.randomUUID()): NavAnsatt {
+	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
 		val navAnsatt = navAnsattRepository.get(navIdent)
 
 		if (navAnsatt != null)
@@ -39,7 +39,7 @@ import java.util.UUID
 		log.info("Oppretter ny nav ansatt for nav ident $navIdent")
 
 		val ansatt = NavAnsatt(
-				id = nyAnsattId,
+				id = UUID.randomUUID(),
 				navIdent = nyNavAnsatt.navIdent,
 				navn = nyNavAnsatt.navn,
 				epost = nyNavAnsatt.epost,
