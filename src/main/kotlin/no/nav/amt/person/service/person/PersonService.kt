@@ -32,10 +32,6 @@ fun hentPerson(id: UUID): Person {
 		return repository.get(personident)?.toModel()
 	}
 
-	fun opprettPersonMedId(personident: String, nyPersonId: UUID) : Person {
-		return opprettPerson(personident, nyPersonId)
-	}
-
 	@Retryable(maxAttempts = 2)
 	fun hentEllerOpprettPerson(personident: String) : Person {
 		return repository.get(personident)?.toModel() ?: opprettPerson(personident)
@@ -83,17 +79,17 @@ fun hentPerson(id: UUID): Person {
 		}
 	}
 
-	private fun opprettPerson(personident: String, nyPersonId: UUID = UUID.randomUUID()): Person {
+	private fun opprettPerson(personident: String): Person {
 		val pdlPerson =	pdlClient.hentPerson(personident)
 
-		return opprettPerson(pdlPerson, nyPersonId)
+		return opprettPerson(pdlPerson)
 	}
 
-	private fun opprettPerson(pdlPerson: PdlPerson, nyPersonId: UUID = UUID.randomUUID()): Person {
+	private fun opprettPerson(pdlPerson: PdlPerson): Person {
 		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
 
 		val person = Person(
-			id = nyPersonId,
+			id = UUID.randomUUID(),
 			personident = gjeldendeIdent.ident,
 			fornavn = pdlPerson.fornavn,
 			mellomnavn = pdlPerson.mellomnavn,
