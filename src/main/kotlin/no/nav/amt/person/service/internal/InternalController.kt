@@ -3,6 +3,7 @@ package no.nav.amt.person.service.internal
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
+import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/internal")
@@ -31,9 +33,9 @@ class InternalController(
 	private val navBrukerService: NavBrukerService,
 	private val personUpdater: PersonUpdater,
 	private val navBrukerRepository: NavBrukerRepository,
-	private val kafkaProducerService: KafkaProducerService,
 	private val arrangorAnsattService: ArrangorAnsattService,
 	private val navAnsattService: NavAnsattService,
+	private val kafkaProducerService: KafkaProducerService
 ) {
 	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
@@ -80,7 +82,7 @@ class InternalController(
 		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-nav-brukere") {
-				republiserAlleNavBrukere(startFromOffset?:0, batchSize?:500)
+				batchHandterNavBrukere(startFromOffset?:0, batchSize?:500) { kafkaProducerService.publiserNavBruker(it) }
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -142,6 +144,24 @@ class InternalController(
 		}
 	}
 
+	@Unprotected
+	@GetMapping("/nav-brukere/synkroniser-krr")
+	fun synkroniserKrr(
+		servlet: HttpServletRequest,
+		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
+		if (isInternal(servlet)) {
+			JobRunner.runAsync("synkroniser-krr-nav-brukere") {
+				val offset = startFromOffset?:0
+				val limit = batchSize?:1000
+				val brukere = navBrukerService.get(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
+				navBrukerService.syncKontaktinfoBulk(brukere.map { it.person.personident }.toSet())
+			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
 	private fun republiserAlleNavAnsatte() {
 		val ansatte = navAnsattService.getAll()
 		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
@@ -160,16 +180,16 @@ class InternalController(
 		} while (ansatte.isNotEmpty())
 	}
 
-	private fun republiserAlleNavBrukere(startFromOffset: Int, batchSize: Int) {
+	private fun batchHandterNavBrukere(startFromOffset: Int, batchSize: Int, action: (navBruker: NavBruker) -> Unit) {
 		var currentOffset = startFromOffset
-		var data: List<NavBrukerDbo>
+		var data: List<NavBruker>
 
 		val start = Instant.now()
 		var totalHandled = 0
 
 		do {
-			data = navBrukerRepository.getAll(currentOffset, batchSize)
-			data.forEach { kafkaProducerService.publiserNavBruker(it.toModel()) }
+			data = navBrukerService.get(currentOffset, batchSize)
+			data.forEach { action(it) }
 			totalHandled += data.size
 			currentOffset += batchSize
 		} while (data.isNotEmpty())

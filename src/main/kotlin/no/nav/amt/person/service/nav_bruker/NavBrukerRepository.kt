@@ -13,6 +13,7 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Component
@@ -89,13 +90,15 @@ class NavBrukerRepository(
 	}
 
 
-	fun	getAll(offset: Int, limit: Int): List<NavBrukerDbo> {
+	fun	getAll(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<NavBrukerDbo> {
 		val sql = selectNavBrukerQuery("""
-			ORDER BY nav_bruker.modified_at asc
+			LEFT JOIN synchronization on nav_bruker.id = synchronization.row_id
+			WHERE (synchronization.last_sync is null OR synchronization.last_sync < :notSyncedSince)
+			ORDER BY synchronization.last_sync asc nulls first, nav_bruker.modified_at
 			OFFSET :offset
 			LIMIT :limit
 			""")
-		val parameters = sqlParameters("offset" to offset, "limit" to limit)
+		val parameters = sqlParameters("offset" to offset, "limit" to limit, "notSyncedSince" to notSyncedSince)
 
 		return template.query(sql, parameters, rowMapper)
 	}

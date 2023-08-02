@@ -15,6 +15,7 @@ class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
 }
 
 data class MockKontaktinformasjon(
+	val personident: String,
 	val epostadresse: String?,
 	val mobiltelefonnummer: String?,
 )

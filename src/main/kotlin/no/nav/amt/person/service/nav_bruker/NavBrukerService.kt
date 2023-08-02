@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.nav_bruker
 
+import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.config.SecureLog.secureLog
@@ -14,12 +15,16 @@ import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.erBeskyttet
+import no.nav.amt.person.service.synchronization.DataProvider
+import no.nav.amt.person.service.synchronization.SynchronizationRepository
+import no.nav.amt.person.service.synchronization.SynchronizationUpsert
 import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -34,9 +39,14 @@ class NavBrukerService(
 	private val pdlClient: PdlClient,
 	private val kafkaProducerService: KafkaProducerService,
 	private val transactionTemplate: TransactionTemplate,
+	private val synchronizationRepository: SynchronizationRepository
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
+
+	fun get(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<NavBruker> {
+		return repository.getAll(offset, limit, notSyncedSince).map { it.toModel() }
+	}
 
 	fun hentNavBruker(id: UUID): NavBruker {
 		return repository.get(id).toModel()
@@ -113,9 +123,19 @@ class NavBrukerService(
 		}
 	}
 
-	fun oppdaterKontaktinformasjon(personer: List<Person>) {
-		personer.forEach {person ->
-			oppdaterKontaktinformasjon(person.personident)
+	fun syncKontaktinfoBulk(personident: Set<String>) {
+		val personerChunks = personident.chunked(500) // maksgrense på 500 hos krr
+
+		personerChunks.forEach { personChunk ->
+			val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personChunk.toSet()).getOrElse {
+				val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
+
+				if (EnvUtils.isDev()) log.info(feilmelding)
+				else log.error(feilmelding)
+				return
+			}
+
+			krrKontaktinfo.personer.forEach { (personident, krrKontaktinfo) -> oppdaterKontaktinfo(personident, krrKontaktinfo) }
 		}
 	}
 
@@ -125,9 +145,15 @@ class NavBrukerService(
 		}
 	}
 
-	private fun oppdaterKontaktinformasjon(personident: String) {
-		val bruker = repository.get(personident)?.toModel() ?: return
 
+	// Kan slettes når syncKontaktinfoBulk er testet
+	fun syncKontaktinfo(personer: List<Person>) {
+		personer.forEach { person ->
+			syncKontaktinfo(person.personident)
+		}
+	}
+	private fun syncKontaktinfo(personident: String) {
+		repository.get(personident)?: return
 		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
 			val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
 
@@ -137,11 +163,7 @@ class NavBrukerService(
 			return
 		}
 
-		val telefon = krrKontaktinfo.telefonnummer ?: pdlClient.hentTelefon(personident)
-
-		if (bruker.telefon == telefon && bruker.epost == krrKontaktinfo.epost) return
-
-		upsert(bruker.copy(telefon = telefon, epost = krrKontaktinfo.epost))
+		oppdaterKontaktinfo(personident, krrKontaktinfo)
 	}
 
 	private fun oppdaterAdresse(personident: String) {
@@ -185,6 +207,7 @@ class NavBrukerService(
 
 			kafkaProducerService.publiserSlettNavBruker(bruker.person.id)
 		}
+		synchronizationRepository.delete(bruker.id)
 
 		secureLog.info("Slettet navbruker med personident: ${bruker.person.personident}")
 		log.info("Slettet navbruker med personId: ${bruker.person.id}")
@@ -195,6 +218,22 @@ class NavBrukerService(
 		repository.get(personUpdateEvent.person.personident)?.let {
 			kafkaProducerService.publiserNavBruker(it.toModel())
 		}
+	}
+
+	private fun oppdaterKontaktinfo(personident: String, kontaktinformasjon: Kontaktinformasjon) {
+		val bruker = repository.get(personident)?.toModel() ?: return
+
+		synchronizationRepository.upsert(SynchronizationUpsert(
+			dataProvider = DataProvider.KRR,
+			tableName = "nav_bruker",
+			rowId = bruker.id
+		))
+
+		val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(personident)
+
+		if (bruker.telefon == telefon && bruker.epost == kontaktinformasjon.epost) return
+
+		upsert(bruker.copy(telefon = telefon, epost = kontaktinformasjon.epost))
 	}
 
 }

@@ -102,7 +102,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
-		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.epost, navBruker.telefon))
+		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
