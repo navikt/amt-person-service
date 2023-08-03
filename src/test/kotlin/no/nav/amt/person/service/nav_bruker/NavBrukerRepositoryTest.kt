@@ -83,6 +83,22 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
+	fun `getByPersonId(uuid) - bruker finnes - returnerer bruker`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+
+		val faktiskBruker = repository.getByPersonId(bruker.person.id)!!
+
+		sammenlign(faktiskBruker, bruker)
+	}
+
+	@Test
+	fun `getByPersonId(uuid) - bruker finnes ikke - returnerer null`() {
+		repository.getByPersonId(UUID.randomUUID()) shouldBe null
+	}
+
+
+	@Test
 	fun `getAll - bruker finnes - returnerer bruker`() {
 		val bruker1 = TestData.lagNavBruker()
 		val bruker2 = TestData.lagNavBruker()

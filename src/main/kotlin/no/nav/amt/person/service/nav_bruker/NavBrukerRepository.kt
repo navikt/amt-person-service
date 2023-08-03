@@ -78,6 +78,14 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
+	fun getByPersonId(personId: UUID): NavBrukerDbo? {
+		val sql = selectNavBrukerQuery("where person_id = :personId")
+		val parameters = sqlParameters("personId" to personId)
+
+		return template.query(sql, parameters, rowMapper).firstOrNull()
+	}
+
+
 	fun	getAll(offset: Int, limit: Int): List<NavBrukerDbo> {
 		val sql = selectNavBrukerQuery("""
 			ORDER BY nav_bruker.modified_at asc
@@ -88,6 +96,7 @@ class NavBrukerRepository(
 
 		return template.query(sql, parameters, rowMapper)
 	}
+
 	fun upsert(bruker: NavBrukerUpsert) {
 		val sql = """
 			insert into nav_bruker(
@@ -106,7 +115,7 @@ class NavBrukerRepository(
 				:telefon,
 				:epost,
 				:erSkjermet
-			) on conflict(id) do update set
+			) on conflict(person_id) do update set
 				nav_veileder_id = :navVeilederId,
 				nav_enhet_id = :navEnhetId,
 				telefon = :telefon,

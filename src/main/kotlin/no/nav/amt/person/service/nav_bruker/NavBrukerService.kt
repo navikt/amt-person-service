@@ -77,7 +77,10 @@ class NavBrukerService(
 		rolleService.opprettRolle(person.id, Rolle.NAV_BRUKER)
 		log.info("Opprettet ny nav bruker med id: ${navBruker.id}")
 
-		return navBruker
+		return repository.getByPersonId(person.id)?.toModel()
+			?: throw IllegalStateException(
+				"Fant ikke nav-bruker for person ${person.id}, skulle ha opprettet bruker ${navBruker.id}"
+			)
 	}
 
 	fun upsert(navBruker: NavBruker) {

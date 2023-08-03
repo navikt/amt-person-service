@@ -65,13 +65,14 @@ class NavBrukerServiceTest {
 
 	@Test
 	fun `hentEllerOpprettNavBruker - bruker finnes ikke - oppretter og returnerer ny bruker`() {
-		val person = TestData.lagPerson()
+		val navBruker = TestData.lagNavBruker()
+		val person = navBruker.person
 		val personOpplysninger = TestData.lagPdlPerson(person = person)
 
-		val veileder =  TestData.lagNavAnsatt()
-		val navEnhet = TestData.lagNavEnhet()
-		val kontaktinformasjon = Kontaktinformasjon("navbruker@gmail.com", "99900111")
-		val erSkjermet = false
+		val veileder =  navBruker.navVeileder!!
+		val navEnhet = navBruker.navEnhet!!
+		val kontaktinformasjon = Kontaktinformasjon(navBruker.epost, navBruker.telefon)
+		val erSkjermet = navBruker.erSkjermet
 
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
@@ -81,6 +82,7 @@ class NavBrukerServiceTest {
 		every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
 		every { poaoTilgangClient.erSkjermetPerson(person.personident) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { repository.getByPersonId(person.id) } returns navBruker
 		mockExecuteWithoutResult(transactionTemplate)
 
 		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personident)

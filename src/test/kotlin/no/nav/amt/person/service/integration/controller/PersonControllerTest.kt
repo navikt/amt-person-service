@@ -13,6 +13,7 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
+import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
@@ -118,23 +119,32 @@ class PersonControllerTest: IntegrationTestBase() {
 		val body = objectMapper.readValue<NavBrukerDto>(response.body!!.string())
 		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)!!
 
-		faktiskBruker.person.id shouldBe body.personId
-		faktiskBruker.person.personident shouldBe body.personident
-		faktiskBruker.person.fornavn shouldBe body.fornavn
-		faktiskBruker.person.mellomnavn shouldBe body.mellomnavn
-		faktiskBruker.person.etternavn shouldBe body.etternavn
-		faktiskBruker.telefon shouldBe body.telefon
-		faktiskBruker.epost shouldBe body.epost
-		faktiskBruker.navVeileder!!.id shouldBe body.navVeilederId
-		faktiskBruker.navEnhet!!.id shouldBe body.navEnhet!!.id
-		faktiskBruker.navEnhet!!.enhetId shouldBe body.navEnhet!!.enhetId
-		faktiskBruker.navEnhet!!.navn shouldBe body.navEnhet!!.navn
-		faktiskBruker.erSkjermet shouldBe body.erSkjermet
+		sammenlign(faktiskBruker, body)
 
 		val ident = personService.hentIdenter(faktiskBruker.person.id).first()
 		ident.ident shouldBe body.personident
 		ident.type shouldBe IdentType.FOLKEREGISTERIDENT
 		ident.historisk shouldBe false
+	}
+
+	@Test
+	fun `hentEllerOpprettNavBruker - nav bruker finnes - skal ha status 200 og returnere riktig response`() {
+		val navBruker = TestData.lagNavBruker()
+		testDataRepository.insertNavBruker(navBruker)
+
+		val response = sendRequest(
+			method = "POST",
+			path = "/api/nav-bruker",
+			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 200
+
+		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body!!.string())
+		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)!!
+
+		sammenlign(faktiskBruker, navBrukerDto)
 	}
 
 	@Test
@@ -290,6 +300,26 @@ class PersonControllerTest: IntegrationTestBase() {
 			).execute()
 			feilTokenResponse.code shouldBe 401
 		}
+	}
+
+	private fun sammenlign(
+		faktiskBruker: NavBruker,
+		brukerDto: NavBrukerDto,
+	) {
+		faktiskBruker.person.id shouldBe brukerDto.personId
+		faktiskBruker.person.personident shouldBe brukerDto.personident
+		faktiskBruker.person.fornavn shouldBe brukerDto.fornavn
+		faktiskBruker.person.mellomnavn shouldBe brukerDto.mellomnavn
+		faktiskBruker.person.etternavn shouldBe brukerDto.etternavn
+		faktiskBruker.telefon shouldBe brukerDto.telefon
+		faktiskBruker.epost shouldBe brukerDto.epost
+		faktiskBruker.navVeileder?.id shouldBe brukerDto.navVeilederId
+		faktiskBruker.navEnhet?.id shouldBe brukerDto.navEnhet?.id
+		faktiskBruker.navEnhet?.enhetId shouldBe brukerDto.navEnhet?.enhetId
+		faktiskBruker.navEnhet?.navn shouldBe brukerDto.navEnhet?.navn
+		faktiskBruker.telefon shouldBe brukerDto.telefon
+		faktiskBruker.epost shouldBe brukerDto.epost
+		faktiskBruker.erSkjermet shouldBe brukerDto.erSkjermet
 	}
 
 }
