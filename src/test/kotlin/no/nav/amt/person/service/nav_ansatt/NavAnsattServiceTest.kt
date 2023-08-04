@@ -7,6 +7,7 @@ import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -15,16 +16,19 @@ class NavAnsattServiceTest {
 	lateinit var nomClient: NomClientImpl
 	lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
 	lateinit var service: NavAnsattService
+	lateinit var kafkaProducerService: KafkaProducerService
 
 	@BeforeEach
 	fun setup() {
 		navAnsattRepository = mockk(relaxUnitFun = true)
 		nomClient = mockk()
 		veilarboppfolgingClient = mockk()
+		kafkaProducerService = mockk(relaxUnitFun = true)
 		service = NavAnsattService(
 			navAnsattRepository = navAnsattRepository,
 			nomClient = nomClient,
 			veilarboppfolgingClient = veilarboppfolgingClient,
+			kafkaProducerService = kafkaProducerService,
 		)
 	}
 

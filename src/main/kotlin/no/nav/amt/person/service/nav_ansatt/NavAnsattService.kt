@@ -2,15 +2,17 @@ package no.nav.amt.person.service.nav_ansatt
 
 import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
- class NavAnsattService(
+class NavAnsattService(
 	private val navAnsattRepository: NavAnsattRepository,
 	private val nomClient: NomClient,
 	private val veilarboppfolgingClient: VeilarboppfolgingClient,
+	private val kafkaProducerService: KafkaProducerService,
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -22,6 +24,13 @@ import java.util.UUID
 	fun hentNavAnsatt(navIdent: String): NavAnsatt? {
 		return navAnsattRepository.get(navIdent)?.toModel()
 	}
+
+	fun upsert(navAnsatt: NavAnsatt): NavAnsatt {
+		val ansatt = navAnsattRepository.upsert(navAnsatt).toModel()
+		kafkaProducerService.publiserNavAnsatt(ansatt)
+		return ansatt
+	}
+
 
 	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
 		val navAnsatt = navAnsattRepository.get(navIdent)
@@ -39,14 +48,14 @@ import java.util.UUID
 		log.info("Oppretter ny nav ansatt for nav ident $navIdent")
 
 		val ansatt = NavAnsatt(
-				id = UUID.randomUUID(),
-				navIdent = nyNavAnsatt.navIdent,
-				navn = nyNavAnsatt.navn,
-				epost = nyNavAnsatt.epost,
-				telefon = nyNavAnsatt.telefonnummer,
-			)
+			id = UUID.randomUUID(),
+			navIdent = nyNavAnsatt.navIdent,
+			navn = nyNavAnsatt.navn,
+			epost = nyNavAnsatt.epost,
+			telefon = nyNavAnsatt.telefonnummer,
+		)
 
-		return navAnsattRepository.upsert(ansatt).toModel()
+		return upsert(ansatt)
 	}
 
 

@@ -2,8 +2,10 @@ package no.nav.amt.person.service.kafka.producer
 
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.dto.ArrangorAnsattDtoV1
+import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
+import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
@@ -62,4 +64,18 @@ class KafkaProducerService(
 		kafkaProducerClient.sendSync(ProducerRecord(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic, key, value))
 	}
 
+	fun publiserNavAnsatt(ansatt: NavAnsatt) {
+		val key = ansatt.id.toString()
+		val value = toJsonString(
+			NavAnsattDtoV1(
+				id = ansatt.id,
+				navident = ansatt.navIdent,
+				navn = ansatt.navn,
+				telefon = ansatt.telefon,
+				epost = ansatt.epost,
+			)
+		)
+
+		kafkaProducerClient.sendSync(ProducerRecord(kafkaTopicProperties.amtNavAnsattPersonaliaTopic, key, value))
+	}
 }
