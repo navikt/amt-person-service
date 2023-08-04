@@ -12,4 +12,5 @@ data class KafkaTopicProperties(
 
 	// Producer topics:
 	val amtNavBrukerTopic: String,
+	val amtArrangorAnsattPersonaliaTopic: String,
 )

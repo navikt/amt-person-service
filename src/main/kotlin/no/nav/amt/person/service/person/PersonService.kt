@@ -2,7 +2,6 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
@@ -24,7 +23,7 @@ class PersonService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-fun hentPerson(id: UUID): Person {
+	fun hentPerson(id: UUID): Person {
 		return repository.get(id).toModel()
 	}
 
@@ -33,7 +32,7 @@ fun hentPerson(id: UUID): Person {
 	}
 
 	@Retryable(maxAttempts = 2)
-	fun hentEllerOpprettPerson(personident: String) : Person {
+	fun hentEllerOpprettPerson(personident: String): Person {
 		return repository.get(personident)?.toModel() ?: opprettPerson(personident)
 	}
 
@@ -54,7 +53,7 @@ fun hentPerson(id: UUID): Person {
 	fun oppdaterPersonIdent(identer: List<Personident>) {
 		val personer = repository.getPersoner(identer.map { it.ident })
 
-		if(personer.size > 1) {
+		if (personer.size > 1) {
 			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")
 			throw IllegalStateException("Vi har flere personer knyttet til samme identer")
 		}
@@ -62,9 +61,7 @@ fun hentPerson(id: UUID): Person {
 		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
-			upsert(person.copy(
-				personident = gjeldendeIdent.ident,
-			).toModel())
+			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
 
@@ -80,7 +77,7 @@ fun hentPerson(id: UUID): Person {
 	}
 
 	private fun opprettPerson(personident: String): Person {
-		val pdlPerson =	pdlClient.hentPerson(personident)
+		val pdlPerson = pdlClient.hentPerson(personident)
 
 		return opprettPerson(pdlPerson)
 	}
@@ -107,7 +104,6 @@ fun hentPerson(id: UUID): Person {
 	fun slettPerson(person: Person) {
 		repository.delete(person.id)
 
-		secureLog.info("Slettet person med ident: ${person.personident}")
 		log.info("Slettet person med id: ${person.id}")
 	}
 

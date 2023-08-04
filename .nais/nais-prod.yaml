@@ -100,6 +100,8 @@ spec:
       value: pdl.leesah-v1
     - name: AMT_NAV_BRUKER_TOPIC
       value: amt.nav-bruker-personalia-v1
+    - name: AMT_ARRANGOR_ANSATT_PERSONALIA_TOPIC
+      value: amt.arrangor-ansatt-personalia-v1
 
   gcp:
     sqlInstances:
