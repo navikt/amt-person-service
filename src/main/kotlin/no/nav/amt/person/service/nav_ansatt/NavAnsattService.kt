@@ -64,4 +64,6 @@ class NavAnsattService(
 			hentEllerOpprettAnsatt(it)
 		}
 
+	fun getAll() = navAnsattRepository.getAll().map { it.toModel() }
+
 }

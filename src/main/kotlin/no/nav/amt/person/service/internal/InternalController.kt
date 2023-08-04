@@ -2,6 +2,7 @@ package no.nav.amt.person.service.internal
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
+import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
@@ -32,6 +33,7 @@ class InternalController(
 	private val navBrukerRepository: NavBrukerRepository,
 	private val kafkaProducerService: KafkaProducerService,
 	private val arrangorAnsattService: ArrangorAnsattService,
+	private val navAnsattService: NavAnsattService,
 ) {
 	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
@@ -98,6 +100,24 @@ class InternalController(
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
+	}
+
+	@Unprotected
+	@GetMapping("/nav-ansatte/republiser")
+	fun republiserNavAnsatte(servlet: HttpServletRequest) {
+		if (isInternal(servlet)) {
+			JobRunner.runAsync("republiser-nav-ansatte") {
+				republiserAlleNavAnsatte()
+			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	private fun republiserAlleNavAnsatte() {
+		val ansatte = navAnsattService.getAll()
+		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
+		log.info("Publiserte ${ansatte.size} navansatte")
 	}
 
 	private fun republiserAlleArrangorAnsatte(startFromOffset: Int, batchSize: Int) {
