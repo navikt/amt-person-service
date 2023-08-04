@@ -63,9 +63,7 @@ class PersonController (
 		@RequestBody request: ArrangorAnsattRequest,
 	): ArrangorAnsattDto {
 		authService.verifyRequestIsMachineToMachine()
-		val person = request.personident?.let {
-			arrangorAnsattService.hentEllerOpprettAnsatt(it)
-		} ?: arrangorAnsattService.hentEllerOpprettAnsatt(request.personIdent!!)
+		val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personident)
 
 		return person.toArrangorAnsattDto()
 	}

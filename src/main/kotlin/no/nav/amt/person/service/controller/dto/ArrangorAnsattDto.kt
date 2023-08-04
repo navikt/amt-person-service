@@ -5,8 +5,6 @@ import java.util.UUID
 
 data class ArrangorAnsattDto (
 	val id: UUID,
-	val personIdent: String,
-	// dobbelt opp for å være bakoverkompatibel til amt-arrangor er oppdatert
 	val personident: String,
 	val fornavn: String,
 	val mellomnavn: String?,
@@ -15,7 +13,6 @@ data class ArrangorAnsattDto (
 
 fun Person.toArrangorAnsattDto() = ArrangorAnsattDto(
 	id = id,
-	personIdent = personident,
 	personident = personident,
 	fornavn = fornavn,
 	mellomnavn = mellomnavn,
