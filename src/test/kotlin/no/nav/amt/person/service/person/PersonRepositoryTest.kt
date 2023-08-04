@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
@@ -191,6 +192,25 @@ class PersonRepositoryTest {
 		repository.delete(person.id)
 
 		repository.get(person.personident) shouldBe null
+	}
+
+	@Test
+	fun `getAllWithRolle - arrangoransatt og nav-bruker finnes - returner kunn de med riktig rolle`() {
+		val antallNavBrukere = 7
+		val antallArrangorAnsatte = 3
+
+		repeat(antallNavBrukere) { testRepository.insertNavBruker(TestData.lagNavBruker()) }
+		repeat(antallArrangorAnsatte) {
+			val person = TestData.lagPerson()
+			testRepository.insertPerson(person)
+			testRepository.insertRolle(person.id, Rolle.ARRANGOR_ANSATT)
+		}
+
+		val navBrukere = repository.getAllWithRolle(0, rolle = Rolle.NAV_BRUKER)
+		navBrukere shouldHaveSize antallNavBrukere
+
+		val arrangorAnsatte = repository.getAllWithRolle(0, rolle = Rolle.ARRANGOR_ANSATT)
+		arrangorAnsatte shouldHaveSize antallArrangorAnsatte
 	}
 
 }

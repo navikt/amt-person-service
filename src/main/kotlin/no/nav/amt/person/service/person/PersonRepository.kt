@@ -2,6 +2,7 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
@@ -123,6 +124,25 @@ class PersonRepository(
 
 		return template.query(sql, parameters, rowMapper)
 	}
+
+	fun getAllWithRolle(offset: Int, limit: Int = 500, rolle: Rolle): List<PersonDbo> {
+		val sql = """
+			select person.* from person join person_rolle pr on person.id = pr.person_id
+			where pr.type = :rolle
+			order by person.id
+			limit :limit
+			offset :offset
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"offset" to offset,
+			"limit" to limit,
+			"rolle" to rolle.name,
+		)
+
+		return template.query(sql, parameters, rowMapper)
+	}
+
 
 }
 

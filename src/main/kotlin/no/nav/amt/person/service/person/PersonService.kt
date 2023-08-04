@@ -5,6 +5,7 @@ import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -110,5 +111,10 @@ class PersonService(
 	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
 		return pdlClient.hentAdressebeskyttelse(personident)
 	}
+
+	fun hentAlleMedRolle(offset: Int, limit: Int = 500, rolle: Rolle) =
+		repository.getAllWithRolle(offset, limit, rolle)
+			.map { it.toModel() }
+
 
 }

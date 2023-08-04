@@ -27,4 +27,7 @@ class ArrangorAnsattService(
 			kafkaProducerService.publiserArrangorAnsatt(person)
 		}
 	}
+
+	fun getAll(offset: Int, batchSize: Int) = personService.hentAlleMedRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
+
 }
