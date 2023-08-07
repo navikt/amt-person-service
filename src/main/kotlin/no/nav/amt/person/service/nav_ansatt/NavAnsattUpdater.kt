@@ -21,21 +21,7 @@ class NavAnsattUpdater(
 			val nomResultat = nomClient.hentNavAnsatte(ansatte.keys.toList())
 
 			val oppdaterteAnsatte = nomResultat.mapNotNull { nomAnsatt ->
-
-				val ansatt = ansatte[nomAnsatt.navIdent] ?: return@mapNotNull null
-				ansatt.erSjekket = true
-
-				return@mapNotNull if (ansatt.lagretAnsatt.skalOppdateres(nomAnsatt)) {
-					NavAnsatt(
-						id = ansatt.lagretAnsatt.id,
-						navIdent = nomAnsatt.navIdent,
-						navn = nomAnsatt.navn,
-						epost = nomAnsatt.epost,
-						telefon = nomAnsatt.telefonnummer,
-					)
-				} else {
-					null
-				}
+				ansatte[nomAnsatt.navIdent]?.let { finnOppdatering(it, nomAnsatt) }
 			}
 
 			navAnsattService.upsertMany(oppdaterteAnsatte)
@@ -45,6 +31,25 @@ class NavAnsattUpdater(
 					log.warn("Fant ikke nav ansatt med ident=${navIdent} id=${ansatt.lagretAnsatt.id} i NOM")
 				}
 			}
+		}
+	}
+
+	private fun finnOppdatering(
+		ansatt: AnsattSomSkalOppdateres,
+		nomAnsatt: NomNavAnsatt,
+	): NavAnsatt? {
+		ansatt.erSjekket = true
+
+		return if (ansatt.lagretAnsatt.skalOppdateres(nomAnsatt)) {
+			NavAnsatt(
+				id = ansatt.lagretAnsatt.id,
+				navIdent = nomAnsatt.navIdent,
+				navn = nomAnsatt.navn,
+				epost = nomAnsatt.epost,
+				telefon = nomAnsatt.telefonnummer,
+			)
+		} else {
+			null
 		}
 	}
 
