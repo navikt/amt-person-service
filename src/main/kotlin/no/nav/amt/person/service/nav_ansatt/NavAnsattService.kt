@@ -31,6 +31,11 @@ class NavAnsattService(
 		return ansatt
 	}
 
+	fun upsertMany(ansatte: List<NavAnsatt>) {
+		navAnsattRepository.upsertMany(ansatte)
+		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
+	}
+
 
 	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
 		val navAnsatt = navAnsattRepository.get(navIdent)

@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class NavAnsattUpdater(
-	private val repository: NavAnsattRepository,
+	private val navAnsattService: NavAnsattService,
 	private val nomClient: NomClient,
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun oppdaterAlle(batchSize: Int = 100) {
-		val ansattBatcher = repository.getAll().chunked(batchSize)
+		val ansattBatcher = navAnsattService.getAll().chunked(batchSize)
 
 		ansattBatcher.forEach { batch ->
-			val ansatte = batch.associate { it.navIdent to AnsattSomSkalOppdateres(it.toModel(), false) }
+			val ansatte = batch.associate { it.navIdent to AnsattSomSkalOppdateres(it, false) }
 			val nomResultat = nomClient.hentNavAnsatte(ansatte.keys.toList())
 
 			val oppdaterteAnsatte = nomResultat.mapNotNull { nomAnsatt ->
@@ -38,7 +38,7 @@ class NavAnsattUpdater(
 				}
 			}
 
-			repository.upsertMany(oppdaterteAnsatte)
+			navAnsattService.upsertMany(oppdaterteAnsatte)
 
 			ansatte.forEach { (navIdent, ansatt) ->
 				if (!ansatt.erSjekket) {
