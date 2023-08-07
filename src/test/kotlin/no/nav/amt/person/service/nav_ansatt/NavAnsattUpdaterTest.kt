@@ -51,8 +51,47 @@ class NavAnsattUpdaterTest {
 			} shouldBe true
 
 		}
+	}
 
-		verify(exactly = 1) { repository.upsertMany(listOf(ansatt1.toModel())) }
+	@Test
+	fun `oppdaterAlle - ansatt er ikke endret - oppdaterer ikke`() {
+		val ansatt = TestData.lagNavAnsatt()
+
+		every { repository.getAll() } returns listOf(ansatt)
+		every { nomClient.hentNavAnsatte(listOf(ansatt.navIdent)) } returns listOf(
+			NomNavAnsatt(
+				navIdent = ansatt.navIdent,
+				navn = ansatt.navn,
+				telefonnummer = ansatt.telefon,
+				epost = ansatt.epost,
+			)
+		)
+
+		updater.oppdaterAlle()
+
+		verify(exactly = 0) { repository.upsertMany(listOf(ansatt.toModel())) }
+	}
+
+	@Test
+	fun `oppdaterAlle - ansatt er endret - oppdaterer ansatt`() {
+		val ansatt = TestData.lagNavAnsatt()
+		val oppdatertAnsatt = ansatt.toModel().copy(navn = "Foo Bar")
+
+		every { repository.getAll() } returns listOf(ansatt)
+		every { nomClient.hentNavAnsatte(listOf(ansatt.navIdent)) } returns listOf(
+			NomNavAnsatt(
+				navIdent = oppdatertAnsatt.navIdent,
+				navn = oppdatertAnsatt.navn,
+				telefonnummer = oppdatertAnsatt.telefon,
+				epost = oppdatertAnsatt.epost,
+			)
+		)
+
+		updater.oppdaterAlle()
+
+		verify(exactly = 1) {
+			repository.upsertMany(listOf(oppdatertAnsatt))
+		}
 	}
 
 }
