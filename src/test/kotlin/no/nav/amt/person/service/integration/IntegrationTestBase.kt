@@ -108,6 +108,8 @@ class IntegrationTestBase {
 			registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }
 			registry.add("no.nav.security.jwt.issuer.azuread.accepted-audience") { "test-aud" }
 
+			registry.add("kodeverk.url") { "http://kodeverk" }
+
 			val container = SingletonPostgresContainer.getContainer()
 
 			registry.add("spring.datasource.url") { container.jdbcUrl }
