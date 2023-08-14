@@ -18,7 +18,7 @@ class PoststedRepository(
 		return namedParameterJdbcTemplate.query(
 			"""
 				SELECT poststed
-				FROM postinformasjon
+				FROM postnummer
 				where postnummer = :postnummer;
             """,
 			mapOf("postnummer" to postnummer)
@@ -27,24 +27,24 @@ class PoststedRepository(
 		}.firstOrNull()
 	}
 
-	fun oppdaterPoststed(oppdatertPostinformasjon: List<PostInformasjon>, sporingsId: UUID) {
-		val postinfoFraDb = getAllePoststeder()
-		if (postinfoFraDb.size == oppdatertPostinformasjon.size && postinfoFraDb.toHashSet() == oppdatertPostinformasjon.toHashSet()) {
+	fun oppdaterPoststed(oppdatertePostnummer: List<Postnummer>, sporingsId: UUID) {
+		val postnummerFraDb = getAllePoststeder()
+		if (postnummerFraDb.size == oppdatertePostnummer.size && postnummerFraDb.toHashSet() == oppdatertePostnummer.toHashSet()) {
 			log.info("Ingen endringer for $sporingsId, avslutter...")
 			return
 		}
 
-		val oppdatertPostinformasjonMap: HashMap<String, PostInformasjon> =
-			HashMap(oppdatertPostinformasjon.associateBy { it.postnummer })
-		val postinfoFraDbMap: HashMap<String, PostInformasjon> = HashMap(postinfoFraDb.associateBy { it.postnummer })
+		val oppdatertePostnummerMap: HashMap<String, Postnummer> =
+			HashMap(oppdatertePostnummer.associateBy { it.postnummer })
+		val postnummerFraDbMap: HashMap<String, Postnummer> = HashMap(postnummerFraDb.associateBy { it.postnummer })
 
-		val slettesfraDb = postinfoFraDbMap.filter { oppdatertPostinformasjonMap[it.key] == null }.keys
-		val oppdateresIDb = oppdatertPostinformasjonMap.filter { postinfoFraDbMap[it.key] != it.value }
+		val slettesfraDb = postnummerFraDbMap.filter { oppdatertePostnummerMap[it.key] == null }.keys
+		val oppdateresIDb = oppdatertePostnummerMap.filter { postnummerFraDbMap[it.key] != it.value }
 
 		slettesfraDb.forEach {
 			namedParameterJdbcTemplate.update(
 				"""
-					DELETE FROM postinformasjon
+					DELETE FROM postnummer
 					where postnummer = :postnummer;
 					""",
 				mapOf("postnummer" to it)
@@ -53,7 +53,7 @@ class PoststedRepository(
 		oppdateresIDb.forEach {
 			namedParameterJdbcTemplate.update(
 				"""
-					INSERT INTO postinformasjon(postnummer, poststed)
+					INSERT INTO postnummer(postnummer, poststed)
 					VALUES (:postnummer, :poststed)
 					ON CONFLICT (postnummer) DO UPDATE SET poststed = :poststed;
 					""",
@@ -65,21 +65,21 @@ class PoststedRepository(
 		}
 	}
 
-	fun getAllePoststeder(): List<PostInformasjon> {
+	fun getAllePoststeder(): List<Postnummer> {
 		return namedParameterJdbcTemplate.query(
 			"""
 				SELECT postnummer,
 				poststed
-				FROM postinformasjon;
+				FROM postnummer;
 				""",
 		) { resultSet, _ ->
-			resultSet.toPostInformasjon()
+			resultSet.toPostnummer()
 		}
 	}
 }
 
-private fun ResultSet.toPostInformasjon(): PostInformasjon =
-	PostInformasjon(
+private fun ResultSet.toPostnummer(): Postnummer =
+	Postnummer(
 		postnummer = getString("postnummer"),
 		poststed = getString("poststed")
 	)

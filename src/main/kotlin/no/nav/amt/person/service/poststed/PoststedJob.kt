@@ -19,8 +19,8 @@ class PoststedJob(
 	fun run() {
 		val sporingsId = UUID.randomUUID()
 		log.info("Oppdaterer database med postnummer og poststed, $sporingsId")
-		val postInformasjonListe = kodeverkClient.hentKodeverk(sporingsId)
-		poststedRepository.oppdaterPoststed(postInformasjonListe, sporingsId)
+		val postnummerListe = kodeverkClient.hentKodeverk(sporingsId)
+		poststedRepository.oppdaterPoststed(postnummerListe, sporingsId)
 		log.info("Ferdig med å oppdatere poststed i database, $sporingsId")
 	}
 }

@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.poststed
 
-data class PostInformasjon(
+data class Postnummer(
     val postnummer: String,
     val poststed: String
 )

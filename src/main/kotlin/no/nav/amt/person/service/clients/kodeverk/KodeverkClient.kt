@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.clients.kodeverk
 
-import no.nav.amt.person.service.poststed.PostInformasjon
+import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -21,7 +21,7 @@ class KodeverkClient(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Retryable
-	fun hentKodeverk(callId: UUID): List<PostInformasjon> {
+	fun hentKodeverk(callId: UUID): List<Postnummer> {
 		val request = Request.Builder()
 			.url("$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb")
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -39,11 +39,11 @@ class KodeverkClient(
 					fromJsonString<GetKodeverkKoderBetydningerResponse>(it)
 				} ?: throw RuntimeException("Tom respons fra kodeverk")
 
-				return kodeverkRespons.toPostInformasjonListe()
+				return kodeverkRespons.toPostnummerListe()
 			}
 		} catch (e: Exception) {
-			log.error("Noe gikk galt ved henting av postinformasjon fra kodeverk: ${e.message}", e)
-			throw RuntimeException("Noe gikk galt ved henting av postinformasjon fra kodeverk")
+			log.error("Noe gikk galt ved henting av postnummer fra kodeverk: ${e.message}", e)
+			throw RuntimeException("Noe gikk galt ved henting av postnummer fra kodeverk")
 		}
 	}
 }
@@ -51,9 +51,9 @@ class KodeverkClient(
 data class GetKodeverkKoderBetydningerResponse(
 	val betydninger: Map<String, List<Betydning>>
 ) {
-	fun toPostInformasjonListe(): List<PostInformasjon> {
+	fun toPostnummerListe(): List<Postnummer> {
 		return betydninger.map {
-			PostInformasjon(
+			Postnummer(
 				postnummer = it.key,
 				poststed = it.value.first().beskrivelser["nb"]?.term
 					?: throw RuntimeException("Kode ${it.key} mangler term")

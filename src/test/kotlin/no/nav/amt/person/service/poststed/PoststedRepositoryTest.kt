@@ -16,20 +16,20 @@ class PoststedRepositoryTest {
 
 	@BeforeEach
 	fun before() {
-		lagrePostinformasjonForTest(
+		lagrePostnummerForTest(
 			listOf(
-				PostInformasjon("0484", "OSLO"),
-				PostInformasjon("5341", "STRAUME"),
-				PostInformasjon("5365", "TURØY"),
-				PostInformasjon("5449", "BØMLO"),
-				PostInformasjon("9609", "NORDRE SEILAND")
+				Postnummer("0484", "OSLO"),
+				Postnummer("5341", "STRAUME"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("5449", "BØMLO"),
+				Postnummer("9609", "NORDRE SEILAND")
 			)
 		)
 	}
 
 	@AfterEach
 	fun after() {
-		jdbcTemplate.update("DELETE FROM postinformasjon", MapSqlParameterSource())
+		jdbcTemplate.update("DELETE FROM postnummer", MapSqlParameterSource())
 	}
 
 	@Test
@@ -57,10 +57,10 @@ class PoststedRepositoryTest {
 	fun `oppdaterPoststed - postnummer finnes i db men ikke i oppdatert liste - sletter poststed`() {
 		poststedRepository.oppdaterPoststed(
 			listOf(
-				PostInformasjon("0484", "OSLO"),
-				PostInformasjon("5365", "TURØY"),
-				PostInformasjon("5449", "BØMLO"),
-				PostInformasjon("9609", "NORDRE SEILAND")
+				Postnummer("0484", "OSLO"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("5449", "BØMLO"),
+				Postnummer("9609", "NORDRE SEILAND")
 			),
 			UUID.randomUUID()
 		)
@@ -75,12 +75,12 @@ class PoststedRepositoryTest {
 	fun `oppdaterPoststed - postnummer finnes i oppdatert liste men ikke i db - legger til poststed`() {
 		poststedRepository.oppdaterPoststed(
 			listOf(
-				PostInformasjon("0484", "OSLO"),
-				PostInformasjon("0502", "OSLO"),
-				PostInformasjon("5341", "STRAUME"),
-				PostInformasjon("5365", "TURØY"),
-				PostInformasjon("5449", "BØMLO"),
-				PostInformasjon("9609", "NORDRE SEILAND")
+				Postnummer("0484", "OSLO"),
+				Postnummer("0502", "OSLO"),
+				Postnummer("5341", "STRAUME"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("5449", "BØMLO"),
+				Postnummer("9609", "NORDRE SEILAND")
 			),
 			UUID.randomUUID()
 		)
@@ -95,11 +95,11 @@ class PoststedRepositoryTest {
 	fun `oppdaterPoststed - flere endringer - sletter 1 poststed, lagrer 1 poststed, bytter navn for 1 poststed`() {
 		poststedRepository.oppdaterPoststed(
 			listOf(
-				PostInformasjon("0484", "OSLO"),
-				PostInformasjon("0502", "OSLO"),
-				PostInformasjon("5341", "STRAUME"),
-				PostInformasjon("5365", "TURØY"),
-				PostInformasjon("9609", "SENJA")
+				Postnummer("0484", "OSLO"),
+				Postnummer("0502", "OSLO"),
+				Postnummer("5341", "STRAUME"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("9609", "SENJA")
 			),
 			UUID.randomUUID()
 		)
@@ -118,11 +118,11 @@ class PoststedRepositoryTest {
 
 		poststedRepository.oppdaterPoststed(
 			listOf(
-				PostInformasjon("0484", "OSLO"),
-				PostInformasjon("5341", "STRAUME"),
-				PostInformasjon("5365", "TURØY"),
-				PostInformasjon("5449", "BØMLO"),
-				PostInformasjon("9609", "NORDRE SEILAND")
+				Postnummer("0484", "OSLO"),
+				Postnummer("5341", "STRAUME"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("5449", "BØMLO"),
+				Postnummer("9609", "NORDRE SEILAND")
 			),
 			UUID.randomUUID()
 		)
@@ -131,11 +131,11 @@ class PoststedRepositoryTest {
 		allePoststederOppdatert shouldBe allePoststeder
 	}
 
-	private fun lagrePostinformasjonForTest(postinformasjon: List<PostInformasjon>) {
-		postinformasjon.forEach {
+	private fun lagrePostnummerForTest(postnummer: List<Postnummer>) {
+		postnummer.forEach {
 			jdbcTemplate.update(
 				"""
-            INSERT INTO postinformasjon(postnummer, poststed)
+            INSERT INTO postnummer(postnummer, poststed)
             VALUES (:postnummer, :poststed);
         """,
 				mapOf(
