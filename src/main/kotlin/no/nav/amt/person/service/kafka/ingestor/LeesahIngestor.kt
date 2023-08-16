@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service
 enum class  OpplysningsType {
 	NAVN_V1,
 	ADRESSEBESKYTTELSE_V1,
+	KONTAKTADRESSE_V1,
+	BOSTEDSADRESSE_V1
 }
 
 @Service
@@ -28,6 +30,8 @@ class LeesahIngestor(
 			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
+			OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 		}
 	}
 
@@ -67,6 +71,14 @@ class LeesahIngestor(
 			))
 		}
 		navBrukerService.oppdaterKontaktinformasjon(personer)
+	}
+
+	private fun handterAdresse(personidenter: List<String>) {
+		val personer = personService.hentPersoner(personidenter)
+
+		if (personer.isEmpty()) return
+
+		navBrukerService.oppdaterAdresse(personer)
 	}
 
 	private fun erAddressebeskyttet(gradering: Gradering?): Boolean {

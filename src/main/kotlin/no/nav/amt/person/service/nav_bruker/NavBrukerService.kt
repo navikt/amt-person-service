@@ -119,6 +119,12 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterAdresse(personer: List<Person>) {
+		personer.forEach {person ->
+			oppdaterAdresse(person.personident)
+		}
+	}
+
 	private fun oppdaterKontaktinformasjon(personident: String) {
 		val bruker = repository.get(personident)?.toModel() ?: return
 
@@ -136,6 +142,25 @@ class NavBrukerService(
 		if (bruker.telefon == telefon && bruker.epost == krrKontaktinfo.epost) return
 
 		upsert(bruker.copy(telefon = telefon, epost = krrKontaktinfo.epost))
+	}
+
+	private fun oppdaterAdresse(personident: String) {
+		val bruker = repository.get(personident)?.toModel() ?: return
+
+		val personOpplysninger = try {
+			pdlClient.hentPerson(personident)
+		} catch (e: Exception) {
+			val feilmelding = "Klarte ikke hente person fra PDL ved oppdatert adresse: ${e.message}"
+
+			if (EnvUtils.isDev()) log.info(feilmelding)
+			else log.error(feilmelding)
+
+			return
+		}
+
+		if (bruker.adresse == personOpplysninger.adresse) return
+
+		upsert(bruker.copy(adresse = personOpplysninger.adresse))
 	}
 
 	fun slettBrukere(personer: List<Person>) {
