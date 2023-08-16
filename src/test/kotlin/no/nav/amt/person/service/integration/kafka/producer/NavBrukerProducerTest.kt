@@ -95,6 +95,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 				telefon = navBruker.telefon,
 				epost = navBruker.epost,
 				erSkjermet = navBruker.erSkjermet,
+				adresse = navBruker.adresse
 			)
 		)
 	}

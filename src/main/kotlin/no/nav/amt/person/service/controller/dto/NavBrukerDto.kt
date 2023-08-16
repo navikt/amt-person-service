@@ -2,6 +2,7 @@ package no.nav.amt.person.service.controller.dto
 
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_enhet.NavEnhet
+import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
 
 data class NavBrukerDto (
@@ -15,6 +16,7 @@ data class NavBrukerDto (
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
+	val adresse: Adresse?
 )
 
 fun NavBruker.toDto() = NavBrukerDto(
@@ -28,4 +30,5 @@ fun NavBruker.toDto() = NavBrukerDto(
 	telefon = this.telefon,
 	epost = this.epost,
 	erSkjermet = this.erSkjermet,
+	adresse = this.adresse
 )

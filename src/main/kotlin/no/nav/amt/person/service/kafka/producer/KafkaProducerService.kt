@@ -33,6 +33,7 @@ class KafkaProducerService(
 			telefon = navBruker.telefon,
 			epost = navBruker.epost,
 			erSkjermet = navBruker.erSkjermet,
+			adresse = navBruker.adresse
 		)
 
 		val key = navBruker.person.id.toString()
