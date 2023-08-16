@@ -4,7 +4,7 @@ import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class RolleRepository(
@@ -14,6 +14,7 @@ class RolleRepository(
 		val sql = """
 			insert into person_rolle(id, person_id, type)
 			values(:id, :personId, :rolle)
+			on conflict (person_id, type) do nothing
 		""".trimIndent()
 
 		val parameters = sqlParameters(
