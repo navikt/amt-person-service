@@ -8,8 +8,12 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.model.Bostedsadresse
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.person.model.Kontaktadresse
+import no.nav.amt.person.service.person.model.Matrikkeladresse
 import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.person.model.Vegadresse
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -88,7 +92,7 @@ object TestData {
         telefon: String? = null,
         adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
         identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
-		adresse: Adresse? = null
+		adresse: Adresse? = lagAdresse()
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,
@@ -107,4 +111,30 @@ object TestData {
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 		createdAt: LocalDateTime = LocalDateTime.now()
 	) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
+
+	private fun lagAdresse(): Adresse =
+		Adresse(
+			bostedsadresse = Bostedsadresse(
+				coAdressenavn = "C/O Gutterommet",
+				vegadresse = null,
+				matrikkeladresse = Matrikkeladresse(
+					tilleggsnavn = "Gården",
+					postnummer = "0484",
+					poststed = "OSLO"
+				)
+			),
+			oppholdsadresse = null,
+			kontaktadresse = Kontaktadresse(
+				coAdressenavn = null,
+				vegadresse = Vegadresse(
+					husnummer = "1",
+					husbokstav = null,
+					adressenavn = "Gate",
+					tilleggsnavn = null,
+					postnummer = "1234",
+					poststed = "MOSS"
+				),
+				postboksadresse = null
+			)
+		)
 }
