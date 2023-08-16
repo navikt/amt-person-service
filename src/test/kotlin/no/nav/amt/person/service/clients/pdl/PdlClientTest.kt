@@ -11,25 +11,45 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.poststed.Postnummer
+import no.nav.amt.person.service.poststed.PoststedRepository
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import java.util.UUID
 
 class PdlClientTest {
 	private lateinit var serverUrl: String
 	private lateinit var server: MockWebServer
+	private val dataSource = SingletonPostgresContainer.getDataSource()
+	private val jdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+	private val poststedRepository = PoststedRepository(jdbcTemplate)
 
 	@BeforeEach
 	fun setup() {
 		server = MockWebServer()
 		serverUrl = server.url("").toString().removeSuffix("/")
+
+		poststedRepository.oppdaterPoststed(
+			listOf(
+				Postnummer("0484", "OSLO"),
+				Postnummer("5341", "STRAUME"),
+				Postnummer("5365", "TURØY"),
+				Postnummer("5449", "BØMLO"),
+				Postnummer("9609", "NORDRE SEILAND")
+			), UUID.randomUUID()
+		)
 	}
 
 	@AfterEach
 	fun cleanup() {
+		jdbcTemplate.update("DELETE FROM postnummer", MapSqlParameterSource())
 		server.shutdown()
 	}
 
@@ -38,6 +58,7 @@ class PdlClientTest {
 		val connector = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(MockResponse().setBody(gyldigRespons))
@@ -48,6 +69,13 @@ class PdlClientTest {
 		pdlPerson.mellomnavn shouldBe "Test"
 		pdlPerson.etternavn shouldBe "Testersen"
 		pdlPerson.telefonnummer shouldBe "+47 12345678"
+		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.tilleggsnavn shouldBe "Storgården"
+		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.postnummer shouldBe "0484"
+		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.poststed shouldBe "OSLO"
+		pdlPerson.adresse?.oppholdsadresse shouldBe null
+		pdlPerson.adresse?.kontaktadresse?.postboksadresse?.postboks shouldBe "Postboks 1234"
+		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.postnummer shouldBe "0484"
+		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.poststed shouldBe "OSLO"
 
 		val ident = pdlPerson.identer.first()
 		ident.type shouldBe IdentType.FOLKEREGISTERIDENT
@@ -78,6 +106,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(
@@ -108,6 +137,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
@@ -167,6 +197,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(
@@ -199,6 +230,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(MockResponse().setBody(minimalFeilRespons))
@@ -216,6 +248,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(MockResponse().setBody(flereFeilRespons))
@@ -234,6 +267,7 @@ class PdlClientTest {
 		val client = PdlClient(
 			serverUrl,
 			{ "TOKEN" },
+			poststedRepository = poststedRepository
 		)
 
 		server.enqueue(MockResponse().setBody(telefonResponse))

@@ -51,6 +51,48 @@ object PdlQueries {
 				}
 				adressebeskyttelse(historikk: false) {
 				  gradering
+				},
+				bostedsadresse(historikk: false) {
+				  coAdressenavn
+				  vegadresse {
+					husnummer
+					husbokstav
+					adressenavn
+					tilleggsnavn
+					postnummer
+				  }
+				  matrikkeladresse {
+				 	tilleggsnavn
+				 	postnummer
+				  }
+				}
+				oppholdsadresse(historikk: false) {
+				  coAdressenavn
+				  vegadresse {
+				  	husnummer
+				  	husbokstav
+				  	adressenavn
+				  	tilleggsnavn
+				  	postnummer
+				  }
+				  matrikkeladresse {
+				  	tilleggsnavn
+				  	postnummer
+				  }
+				}
+				kontaktadresse(historikk: false) {
+				  coAdressenavn
+				  vegadresse {
+					husnummer
+					husbokstav
+					adressenavn
+					tilleggsnavn
+					postnummer
+				  }
+				  postboksadresse {
+				 	postboks
+				 	postnummer
+				  }
 				}
 			  },
 			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, AKTORID, NPID], historikk:true) {
@@ -77,7 +119,10 @@ object PdlQueries {
 		data class HentPerson(
 			val navn: List<Attribute.Navn>,
 			val telefonnummer: List<Attribute.Telefonnummer>,
-			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>
+			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>,
+			val bostedsadresse: List<Attribute.Bostedsadresse>,
+			val oppholdsadresse: List<Attribute.Oppholdsadresse>,
+			val kontaktadresse: List<Attribute.Kontaktadresse>
 		)
 
 		data class HentIdenter(
@@ -193,6 +238,41 @@ object PdlQueries {
 			val prioritet: Int,
 		)
 
+		data class Bostedsadresse(
+			val coAdressenavn: String?,
+			val vegadresse: Vegadresse?,
+			val matrikkeladresse: Matrikkeladresse?
+		)
+
+		data class Oppholdsadresse(
+			val coAdressenavn: String?,
+			val vegadresse: Vegadresse?,
+			val matrikkeladresse: Matrikkeladresse?
+		)
+
+		data class Kontaktadresse(
+			val coAdressenavn: String?,
+			val vegadresse: Vegadresse?,
+			val postboksadresse: Postboksadresse?
+		)
+
+		data class Vegadresse(
+			val husnummer: String?,
+			val husbokstav: String?,
+			val adressenavn: String?,
+			val tilleggsnavn: String?,
+			val postnummer: String?
+		)
+
+		data class Matrikkeladresse(
+			val tilleggsnavn: String?,
+			val postnummer: String?
+		)
+
+		data class Postboksadresse(
+			val postboks: String,
+			val postnummer: String?
+		)
 	}
 
 	data class Variables(

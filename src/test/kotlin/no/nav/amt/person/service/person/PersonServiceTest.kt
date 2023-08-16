@@ -53,7 +53,8 @@ class PersonServiceTest {
 			identer = listOf(
 				Personident(ident = personident, historisk = false, type = identType),
 				Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
-			)
+			),
+			adresse = null
 		)
 
 		every { pdlClient.hentPerson(personident) } returns pdlPerson

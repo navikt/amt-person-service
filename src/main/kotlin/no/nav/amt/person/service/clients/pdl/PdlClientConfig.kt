@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.pdl
 
+import no.nav.amt.person.service.poststed.PoststedRepository
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -15,10 +16,11 @@ class PdlClientConfig {
 	lateinit var scope: String
 
 	@Bean
-	fun pdlClient(machineToMachineTokenClient: MachineToMachineTokenClient): PdlClient {
+	fun pdlClient(machineToMachineTokenClient: MachineToMachineTokenClient, poststedRepository: PoststedRepository): PdlClient {
 		return PdlClient(
 			baseUrl = url,
 			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+			poststedRepository = poststedRepository
 		)
 	}
 

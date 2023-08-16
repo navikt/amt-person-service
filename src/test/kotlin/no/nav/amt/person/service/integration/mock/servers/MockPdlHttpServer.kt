@@ -158,7 +158,31 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 							listOf(PdlQueries.Attribute.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
 						} else {
 							emptyList()
-						}
+						},
+						bostedsadresse = listOf(
+							PdlQueries.Attribute.Bostedsadresse(
+								coAdressenavn = "C/O Mamma",
+								vegadresse = PdlQueries.Attribute.Vegadresse(
+									husnummer = "7",
+									husbokstav = null,
+									adressenavn = "Gateveien",
+									tilleggsnavn = "Gården",
+									postnummer = "0484"
+								),
+								matrikkeladresse = null
+							)
+						),
+						oppholdsadresse = emptyList(),
+						kontaktadresse = listOf(
+							PdlQueries.Attribute.Kontaktadresse(
+								coAdressenavn = null,
+								vegadresse = null,
+								postboksadresse = PdlQueries.Attribute.Postboksadresse(
+									postboks = "Postboks 1234",
+									postnummer = "0484"
+								)
+							)
+						)
 					),
 					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.Attribute.Ident(personident, false, "FOLKEREGISTERIDENT")))
 				),

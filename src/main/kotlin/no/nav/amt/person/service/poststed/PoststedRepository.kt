@@ -76,6 +76,22 @@ class PoststedRepository(
 			resultSet.toPostnummer()
 		}
 	}
+
+	fun getPoststeder(postnummer: List<String>): List<Postnummer> {
+		if (postnummer.isEmpty()) {
+			return emptyList()
+		}
+		return namedParameterJdbcTemplate.query(
+			"""
+				SELECT postnummer,
+				poststed
+				FROM postnummer WHERE postnummer in (:postnummer);
+				""",
+			mapOf("postnummer" to postnummer)
+		) { resultSet, _ ->
+			resultSet.toPostnummer()
+		}
+	}
 }
 
 private fun ResultSet.toPostnummer(): Postnummer =

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.pdl
 
+import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 
@@ -9,5 +10,6 @@ data class PdlPerson(
 	val etternavn: String,
 	val telefonnummer: String?,
 	val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
-	val identer: List<Personident>
+	val identer: List<Personident>,
+	val adresse: Adresse?
 )

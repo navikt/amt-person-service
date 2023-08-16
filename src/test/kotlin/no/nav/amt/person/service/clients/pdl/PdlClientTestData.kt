@@ -91,6 +91,23 @@ object PdlClientTestData {
 						{
 							"gradering": "FORTROLIG"
 						}
+					],
+					"bostedsadresse": [
+						{
+							"matrikkeladresse": {
+								"tilleggsnavn": "Storgården",
+								"postnummer": "0484"
+							}
+						}
+					],
+					"oppholdsadresse": [],
+					"kontaktadresse": [
+						{
+							"postboksadresse": {
+								"postboks": "Postboks 1234",
+								"postnummer": "0484"
+							}
+						}
 					]
 				},
 				"hentIdenter": {

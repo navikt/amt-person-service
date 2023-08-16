@@ -6,6 +6,7 @@ import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
+import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
@@ -86,6 +87,7 @@ object TestData {
         telefon: String? = null,
         adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
         identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
+		adresse: Adresse? = null
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,
@@ -93,6 +95,7 @@ object TestData {
 		telefonnummer = telefon,
 		adressebeskyttelseGradering = adressebeskyttelseGradering,
 		identer = identer,
+		adresse = adresse
 	)
 
 	fun lagPersonident(
