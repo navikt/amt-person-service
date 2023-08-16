@@ -5,6 +5,9 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
+import no.nav.amt.person.service.person.model.Adresse
+import no.nav.amt.person.service.person.model.Kontaktadresse
+import no.nav.amt.person.service.person.model.Vegadresse
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
@@ -132,7 +135,8 @@ class NavBrukerRepositoryTest {
 			bruker.navEnhet?.id,
 			bruker.telefon,
 			bruker.epost,
-			bruker.erSkjermet
+			bruker.erSkjermet,
+			bruker.adresse
 		))
 
 		val faktiskBruker = repository.get(bruker.id)
@@ -158,7 +162,23 @@ class NavBrukerRepositoryTest {
 			navEnhetId = null,
 			telefon = "ny telefon",
 			epost = "ny@epost.no",
-			erSkjermet = true
+			erSkjermet = true,
+			adresse = Adresse(
+				bostedsadresse = null,
+				oppholdsadresse = null,
+				kontaktadresse = Kontaktadresse(
+					coAdressenavn = null,
+					vegadresse = Vegadresse(
+						husnummer = "1",
+						husbokstav = null,
+						adressenavn = "Gate",
+						tilleggsnavn = null,
+						postnummer = "1234",
+						poststed = "MOSS"
+					),
+					postboksadresse = null
+				)
+			)
 		)
 
 		repository.upsert(upsert)
@@ -171,6 +191,11 @@ class NavBrukerRepositoryTest {
 
 		faktiskBruker.telefon shouldBe upsert.telefon
 		faktiskBruker.epost shouldBe upsert.epost
+
+		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.husnummer shouldBe "1"
+		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.adressenavn shouldBe "Gate"
+		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.postnummer shouldBe "1234"
+		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.poststed shouldBe "MOSS"
 
 		faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
 		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()

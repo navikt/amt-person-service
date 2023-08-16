@@ -1,10 +1,18 @@
 package no.nav.amt.person.service.person.model
 
+import no.nav.amt.person.service.utils.JsonUtils.objectMapper
+import org.postgresql.util.PGobject
+
 data class Adresse(
 	val bostedsadresse: Bostedsadresse?,
 	val oppholdsadresse: Oppholdsadresse?,
 	val kontaktadresse: Kontaktadresse?
-)
+) {
+	fun toPGObject() = PGobject().also {
+		it.type = "json"
+		it.value = objectMapper.writeValueAsString(this)
+	}
+}
 
 data class Bostedsadresse(
 	val coAdressenavn: String?,

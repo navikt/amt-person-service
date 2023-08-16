@@ -71,6 +71,7 @@ class NavBrukerService(
 			telefon = kontaktinformasjon?.telefonnummer ?:  personOpplysninger.telefonnummer,
 			epost = kontaktinformasjon?.epost,
 			erSkjermet = erSkjermet,
+			adresse = personOpplysninger.adresse
 		)
 
 		upsert(navBruker)

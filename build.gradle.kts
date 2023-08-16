@@ -55,6 +55,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
 	implementation("org.flywaydb:flyway-core:$flywayVersion")
+	implementation("org.postgresql:postgresql")
 
 	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
 	implementation("com.github.navikt.common-java-modules:log:$commonVersion")

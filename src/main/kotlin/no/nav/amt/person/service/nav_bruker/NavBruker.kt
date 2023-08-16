@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_bruker
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.nav_enhet.NavEnhet
+import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Person
 import java.util.*
 
@@ -14,6 +15,7 @@ data class NavBruker(
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
+	val adresse: Adresse?
 ) {
 	fun toUpsert(
 		id: UUID = this.id,
@@ -23,6 +25,7 @@ data class NavBruker(
 		telefon: String? = this.telefon,
 		epost: String? = this.epost,
 		erSkjermet: Boolean = this.erSkjermet,
+		adresse: Adresse? = this.adresse
 	) = NavBrukerUpsert(
 		id = id,
 		personId = personId,
@@ -31,6 +34,7 @@ data class NavBruker(
 		telefon = telefon,
 		epost = epost,
 		erSkjermet = erSkjermet,
+		adresse = adresse
 	)
 
 }

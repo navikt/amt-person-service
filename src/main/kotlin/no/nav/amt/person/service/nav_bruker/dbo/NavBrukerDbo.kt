@@ -4,6 +4,7 @@ import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.Adresse
 import java.time.LocalDateTime
 import java.util.*
 
@@ -15,6 +16,7 @@ data class NavBrukerDbo(
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
+	val adresse: Adresse?,
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime
 ) {
@@ -26,5 +28,6 @@ data class NavBrukerDbo(
 		telefon,
 		epost,
 		erSkjermet,
+		adresse
 	)
 }

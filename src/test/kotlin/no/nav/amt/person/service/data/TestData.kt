@@ -78,9 +78,10 @@ object TestData {
 		telefon: String? = "77788999",
 		epost: String? = "nav_bruker@gmail.com",
 		erSkjermet: Boolean = false,
+		adresse: Adresse? = null,
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
-	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, createdAt, modifiedAt)
+	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, adresse, createdAt, modifiedAt)
 
 	fun lagPdlPerson(
         person: PersonDbo,

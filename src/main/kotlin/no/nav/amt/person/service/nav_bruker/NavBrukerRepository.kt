@@ -5,6 +5,8 @@ import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.Adresse
+import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.getNullableUUID
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -54,6 +56,7 @@ class NavBrukerRepository(
 			telefon = rs.getString("nav_bruker.telefon"),
 			epost = rs.getString("nav_bruker.epost"),
 			erSkjermet = rs.getBoolean("nav_bruker.er_skjermet"),
+			adresse = rs.getString("nav_bruker.adresse")?.let { fromJsonString<Adresse>(it) },
 			createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
 			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime()
 		)
@@ -106,7 +109,8 @@ class NavBrukerRepository(
 				nav_enhet_id,
 				telefon,
 				epost,
-				er_skjermet
+				er_skjermet,
+				adresse
 			) values (
 				:id,
 				:personId,
@@ -114,13 +118,15 @@ class NavBrukerRepository(
 				:navEnhetId,
 				:telefon,
 				:epost,
-				:erSkjermet
+				:erSkjermet,
+				:adresse
 			) on conflict(person_id) do update set
 				nav_veileder_id = :navVeilederId,
 				nav_enhet_id = :navEnhetId,
 				telefon = :telefon,
 				epost = :epost,
 				er_skjermet = :erSkjermet,
+				adresse = :adresse,
 				modified_at = current_timestamp
 				where nav_bruker.id = :id
 		""".trimIndent()
@@ -133,6 +139,7 @@ class NavBrukerRepository(
 			"telefon" to bruker.telefon,
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
+			"adresse" to bruker.adresse?.toPGObject()
 		)
 
 		template.update(sql, parameters)
@@ -148,6 +155,7 @@ class NavBrukerRepository(
 				   nav_bruker.telefon as "nav_bruker.telefon",
 				   nav_bruker.epost as "nav_bruker.epost",
 				   nav_bruker.er_skjermet as "nav_bruker.er_skjermet",
+				   nav_bruker.adresse as "nav_bruker.adresse",
 				   nav_bruker.created_at as "nav_bruker.created_at",
 				   nav_bruker.modified_at as "nav_bruker.modified_at",
 				   person.personident as "person.personident",
