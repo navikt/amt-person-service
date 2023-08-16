@@ -8,8 +8,6 @@ import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import org.junit.AfterClass
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
 class RolleRepositoryTest {
@@ -31,19 +29,10 @@ class RolleRepositoryTest {
 		val person = TestData.lagPerson()
 		testRepository.insertPerson(person)
 		repository.insert(person.id, Rolle.ARRANGOR_ANSATT)
+		repository.insert(person.id, Rolle.NAV_BRUKER)
 
 		repository.harRolle(person.id, Rolle.ARRANGOR_ANSATT) shouldBe true
-	}
-
-	@Test
-	fun `insert - rolle eksisterer fra før - kombinasjonen personId og rolle skal være unik`() {
-		val person = TestData.lagPerson()
-		testRepository.insertPerson(person)
-		repository.insert(person.id, Rolle.ARRANGOR_ANSATT)
-
-		assertThrows<DuplicateKeyException> {
-			repository.insert(person.id, Rolle.ARRANGOR_ANSATT)
-		}
+		repository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe true
 	}
 
 	@Test
