@@ -75,7 +75,6 @@ class NavBrukerService(
 		)
 
 		upsert(navBruker)
-		rolleService.opprettRolle(person.id, Rolle.NAV_BRUKER)
 		log.info("Opprettet ny nav bruker med id: ${navBruker.id}")
 
 		return repository.getByPersonId(person.id)?.toModel()
@@ -87,6 +86,7 @@ class NavBrukerService(
 	fun upsert(navBruker: NavBruker) {
 		transactionTemplate.executeWithoutResult {
 			repository.upsert(navBruker.toUpsert())
+			rolleService.opprettRolle(navBruker.person.id, Rolle.NAV_BRUKER)
 			kafkaProducerService.publiserNavBruker(navBruker)
 		}
 	}

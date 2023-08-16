@@ -2,15 +2,13 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.model.Rolle
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class RolleService(
 	private val rolleRepository: RolleRepository,
 ) {
 	fun opprettRolle(personId: UUID, rolle: Rolle) {
-		if (rolleRepository.harRolle(personId, rolle)) return
-
 		rolleRepository.insert(personId, rolle)
 	}
 
