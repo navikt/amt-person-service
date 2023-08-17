@@ -88,6 +88,19 @@ class InternalController(
 	}
 
 	@Unprotected
+	@GetMapping("/nav-brukere/republiser/{dollyIdent}")
+	fun republiserNavBruker(
+		servlet: HttpServletRequest,
+		@PathVariable("dollyIdent") dollyIdent: String
+	) {
+		if (isDev() && isInternal(servlet)) {
+			republiserNavBruker(dollyIdent)
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
 	@GetMapping("/arrangor-ansatte/republiser")
 	fun republiserArrangorAnsatte(
 		servlet: HttpServletRequest,
@@ -151,6 +164,11 @@ class InternalController(
 		if (totalHandled > 0)
 			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
 
+	}
+
+	private fun republiserNavBruker(personident: String) {
+		val bruker = navBrukerRepository.get(personident) ?: throw RuntimeException("Fant ikke bruker")
+		kafkaProducerService.publiserNavBruker(bruker.toModel())
 	}
 
 	private fun isInternal(servlet: HttpServletRequest): Boolean {
