@@ -28,7 +28,7 @@ object PdlQueries {
 		val query: String?,
 		val id: String,
 		val message: String,
-		val details: String?
+		val details: Any?
 	)
 
 	data class Extensions(
