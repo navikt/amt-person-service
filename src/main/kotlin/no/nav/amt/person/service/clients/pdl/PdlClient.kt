@@ -60,6 +60,8 @@ class PdlClient(
 
 			logPdlWarnings(gqlResponse.extensions?.warnings)
 
+			log.info("Hentet perosn for personident $personident, respons: $body")
+
 			if (gqlResponse.data == null) {
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
