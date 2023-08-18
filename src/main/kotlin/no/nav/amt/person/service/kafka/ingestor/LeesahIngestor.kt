@@ -74,11 +74,11 @@ class LeesahIngestor(
 	}
 
 	private fun handterAdresse(personidenter: List<String>) {
-		val personer = personService.hentPersoner(personidenter)
+		val lagredePersonidenter = personService.hentPersoner(personidenter).map { it.personident }
 
-		if (personer.isEmpty()) return
+		if (lagredePersonidenter.isEmpty()) return
 
-		navBrukerService.oppdaterAdresse(personer)
+		navBrukerService.oppdaterAdresse(lagredePersonidenter)
 	}
 
 	private fun erAddressebeskyttet(gradering: Gradering?): Boolean {

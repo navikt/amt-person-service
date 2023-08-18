@@ -119,9 +119,9 @@ class NavBrukerService(
 		}
 	}
 
-	fun oppdaterAdresse(personer: List<Person>) {
-		personer.forEach {person ->
-			oppdaterAdresse(person.personident)
+	fun oppdaterAdresse(personidenter: List<String>) {
+		personidenter.forEach {
+			oppdaterAdresse(it)
 		}
 	}
 

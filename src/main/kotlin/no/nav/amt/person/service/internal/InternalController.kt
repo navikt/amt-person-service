@@ -88,6 +88,21 @@ class InternalController(
 	}
 
 	@Unprotected
+	@GetMapping("/nav-brukere/oppdater-adr-republiser")
+	fun oppdaterOgRepubliserNavBrukere(
+		servlet: HttpServletRequest,
+		@RequestParam(value = "offset", required = false) offset: Int?
+	) {
+		if (isInternal(servlet)) {
+			JobRunner.runAsync("oppdater-adr-republiser-nav-brukere") {
+				oppdaterAdresseOgRepubliserAlleNavBrukere(startOffset = offset ?: 0)
+			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
 	@GetMapping("/nav-brukere/republiser/{dollyIdent}")
 	fun republiserNavBruker(
 		servlet: HttpServletRequest,
@@ -164,6 +179,20 @@ class InternalController(
 		if (totalHandled > 0)
 			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
 
+	}
+
+	private fun oppdaterAdresseOgRepubliserAlleNavBrukere(startOffset: Int = 0) {
+		var offset = startOffset
+		var navbrukere: List<NavBrukerDbo>
+
+		do {
+			navbrukere = navBrukerRepository.getAll(offset, 500)
+			val personidenter = navbrukere.map { it.person.personident }
+			navBrukerService.oppdaterAdresse(personidenter)
+
+			log.info("Oppdaterte persondata for personer fra offset $offset til ${offset + navbrukere.size}")
+			offset += navbrukere.size
+		} while (navbrukere.isNotEmpty())
 	}
 
 	private fun republiserNavBruker(personident: String) {
