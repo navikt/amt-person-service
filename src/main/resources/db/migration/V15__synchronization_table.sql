@@ -1,4 +1,4 @@
-create table if not exists synchronization
+create table synchronization
 (
     id                 uuid primary key,
     data_provider      varchar           not null,
