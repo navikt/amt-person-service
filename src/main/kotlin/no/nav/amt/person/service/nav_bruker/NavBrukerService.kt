@@ -132,7 +132,10 @@ class NavBrukerService(
 				return
 			}
 
-			krrKontaktinfo.personer.forEach { (personident, krrKontaktinfo) -> oppdaterKontaktinfo(personident, krrKontaktinfo) }
+			krrKontaktinfo.personer.forEach {
+					val telefon = it.value.telefonnummer ?: pdlClient.hentTelefon(it.key)
+					oppdaterKontaktinfo(it.key, it.value.copy(telefonnummer = telefon))
+			}
 		}
 	}
 
@@ -197,14 +200,13 @@ class NavBrukerService(
 
 	private fun oppdaterKontaktinfo(personident: String, kontaktinformasjon: Kontaktinformasjon) {
 		val bruker = repository.get(personident)?.toModel() ?: return
-		val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(personident)
 
-		if (bruker.telefon == telefon && bruker.epost == kontaktinformasjon.epost) {
+		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
 			upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()))
 			return
 		}
 
-		upsert(bruker.copy(telefon = telefon, epost = kontaktinformasjon.epost, sisteKrrSync = LocalDateTime.now()))
+		upsert(bruker.copy(telefon = kontaktinformasjon.telefonnummer, epost = kontaktinformasjon.epost, sisteKrrSync = LocalDateTime.now()))
 	}
 
 }
