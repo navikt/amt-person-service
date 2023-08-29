@@ -18,7 +18,7 @@ class NavBrukerUpdateJob(
 	}
 
 	private fun oppdaterBrukere() {
-		val brukere = navBrukerService.get(offset = 0, limit = 1000, notSyncedSince = LocalDateTime.now().minusDays(3))
+		val brukere = navBrukerService.get(offset = 0, limit = 10000, notSyncedSince = LocalDateTime.now().minusDays(3))
 		navBrukerService.syncKontaktinfoBulk(brukere.map { it.person.personident }.toSet())
 	}
 }

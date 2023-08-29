@@ -153,7 +153,7 @@ class InternalController(
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("synkroniser-krr-nav-brukere") {
 				val offset = startFromOffset?:0
-				val limit = batchSize?:1000
+				val limit = batchSize?:5000
 				val brukere = navBrukerService.get(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
 				navBrukerService.syncKontaktinfoBulk(brukere.map { it.person.personident }.toSet())
 			}

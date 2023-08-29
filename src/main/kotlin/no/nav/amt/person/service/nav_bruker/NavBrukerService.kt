@@ -202,7 +202,7 @@ class NavBrukerService(
 		val bruker = repository.get(personident)?.toModel() ?: return
 
 		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
-			upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()))
+			repository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
 			return
 		}
 
