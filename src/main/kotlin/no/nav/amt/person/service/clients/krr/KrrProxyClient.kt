@@ -51,7 +51,7 @@ class KrrProxyClient(
 		val requestBody = toJsonString(PostPersonerRequest(personidenter))
 
 		val request: Request = Request.Builder()
-			.url("$baseUrl/rest/v1/person?inkluderSikkerDigitalPost=false")
+			.url("$baseUrl/rest/v1/personer?inkluderSikkerDigitalPost=false")
 			.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 			.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider.get())
 			.post(requestBody.toRequestBody(mediaTypeJson))
