@@ -15,9 +15,6 @@ import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.erBeskyttet
-import no.nav.amt.person.service.synchronization.DataProvider
-import no.nav.amt.person.service.synchronization.SynchronizationRepository
-import no.nav.amt.person.service.synchronization.SynchronizationUpsert
 import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
@@ -39,7 +36,6 @@ class NavBrukerService(
 	private val pdlClient: PdlClient,
 	private val kafkaProducerService: KafkaProducerService,
 	private val transactionTemplate: TransactionTemplate,
-	private val synchronizationRepository: SynchronizationRepository
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -81,7 +77,8 @@ class NavBrukerService(
 			telefon = kontaktinformasjon?.telefonnummer ?:  personOpplysninger.telefonnummer,
 			epost = kontaktinformasjon?.epost,
 			erSkjermet = erSkjermet,
-			adresse = personOpplysninger.adresse
+			adresse = personOpplysninger.adresse,
+			sisteKrrSync = LocalDateTime.now()
 		)
 
 		upsert(navBruker)
@@ -145,27 +142,6 @@ class NavBrukerService(
 		}
 	}
 
-
-	// Kan slettes når syncKontaktinfoBulk er testet
-	fun syncKontaktinfo(personer: List<Person>) {
-		personer.forEach { person ->
-			syncKontaktinfo(person.personident)
-		}
-	}
-	private fun syncKontaktinfo(personident: String) {
-		repository.get(personident)?: return
-		val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
-			val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
-
-			if (EnvUtils.isDev()) log.info(feilmelding)
-			else log.error(feilmelding)
-
-			return
-		}
-
-		oppdaterKontaktinfo(personident, krrKontaktinfo)
-	}
-
 	private fun oppdaterAdresse(personident: String) {
 		val bruker = repository.get(personident)?.toModel() ?: return
 
@@ -207,7 +183,6 @@ class NavBrukerService(
 
 			kafkaProducerService.publiserSlettNavBruker(bruker.person.id)
 		}
-		synchronizationRepository.delete(bruker.id)
 
 		secureLog.info("Slettet navbruker med personident: ${bruker.person.personident}")
 		log.info("Slettet navbruker med personId: ${bruker.person.id}")
@@ -222,18 +197,14 @@ class NavBrukerService(
 
 	private fun oppdaterKontaktinfo(personident: String, kontaktinformasjon: Kontaktinformasjon) {
 		val bruker = repository.get(personident)?.toModel() ?: return
-
-		synchronizationRepository.upsert(SynchronizationUpsert(
-			dataProvider = DataProvider.KRR,
-			tableName = "nav_bruker",
-			rowId = bruker.id
-		))
-
 		val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(personident)
 
-		if (bruker.telefon == telefon && bruker.epost == kontaktinformasjon.epost) return
+		if (bruker.telefon == telefon && bruker.epost == kontaktinformasjon.epost) {
+			upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()))
+			return
+		}
 
-		upsert(bruker.copy(telefon = telefon, epost = kontaktinformasjon.epost))
+		upsert(bruker.copy(telefon = telefon, epost = kontaktinformasjon.epost, sisteKrrSync = LocalDateTime.now()))
 	}
 
 }

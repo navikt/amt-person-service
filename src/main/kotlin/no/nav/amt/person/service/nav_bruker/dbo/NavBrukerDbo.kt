@@ -17,6 +17,7 @@ data class NavBrukerDbo(
 	val epost: String?,
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
+	val sisteKrrSync: LocalDateTime?,
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime
 ) {
@@ -28,6 +29,7 @@ data class NavBrukerDbo(
 		telefon,
 		epost,
 		erSkjermet,
-		adresse
+		adresse,
+		sisteKrrSync
 	)
 }

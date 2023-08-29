@@ -6,7 +6,6 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.Rolle
@@ -28,7 +27,7 @@ class LeesahIngestorTest : IntegrationTestBase() {
 	lateinit var navBrukerService: NavBrukerService
 
 	@Test
-	internal fun `Ingest - nav bruker finnes - oppdaterer navn og kontakinformasjon`() {
+	internal fun `Ingest - nav bruker finnes - oppdaterer navn`() {
 		val person = TestData.lagPerson()
 		val navBruker = TestData.lagNavBruker(person = person)
 
@@ -38,10 +37,6 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		val nyttMellomnavn = "NYTT MELLOMNAVN"
 		val nyttEtternavn = "NYTT ETTERNAVN"
 
-		val nyEpost = "ny@epost.no"
-		val nyTelefon = "+12345678"
-
-		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(person.personident, nyEpost, nyTelefon))
 		mockPdlHttpServer.mockHentTelefon(person.personident, null)
 
 		val msg = KafkaMessageCreator.lagPersonhendelseNavn(
@@ -61,10 +56,6 @@ class LeesahIngestorTest : IntegrationTestBase() {
 			faktiskPerson.fornavn shouldBe nyttFornavn.titlecase()
 			faktiskPerson.mellomnavn shouldBe nyttMellomnavn.titlecase()
 			faktiskPerson.etternavn shouldBe nyttEtternavn.titlecase()
-
-			val faktiskNavBruker = navBrukerService.hentNavBruker(navBruker.id)
-			faktiskNavBruker.epost shouldBe nyEpost
-			faktiskNavBruker.telefon shouldBe nyTelefon
 		}
 
 	}

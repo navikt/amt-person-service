@@ -5,6 +5,7 @@ import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Person
+import java.time.LocalDateTime
 import java.util.*
 
 data class NavBruker(
@@ -15,26 +16,19 @@ data class NavBruker(
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
-	val adresse: Adresse?
+	val adresse: Adresse?,
+	val sisteKrrSync: LocalDateTime?
 ) {
-	fun toUpsert(
-		id: UUID = this.id,
-		personId: UUID = this.person.id,
-		navVeilederId: UUID? = this.navVeileder?.id,
-		navEnhetId: UUID? = this.navEnhet?.id,
-		telefon: String? = this.telefon,
-		epost: String? = this.epost,
-		erSkjermet: Boolean = this.erSkjermet,
-		adresse: Adresse? = this.adresse
-	) = NavBrukerUpsert(
-		id = id,
-		personId = personId,
-		navVeilederId = navVeilederId,
-		navEnhetId = navEnhetId,
-		telefon = telefon,
-		epost = epost,
-		erSkjermet = erSkjermet,
-		adresse = adresse
+	fun toUpsert() = NavBrukerUpsert(
+		id = this.id,
+		personId = this.person.id,
+		navVeilederId = this.navVeileder?.id,
+		navEnhetId = this.navEnhet?.id,
+		telefon = this.telefon,
+		epost = this.epost,
+		erSkjermet = this.erSkjermet,
+		adresse = this.adresse,
+		sisteKrrSync = this.sisteKrrSync
 	)
 
 }

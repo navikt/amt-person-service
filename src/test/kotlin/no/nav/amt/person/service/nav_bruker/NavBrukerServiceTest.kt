@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
+import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.data.TestData
@@ -15,9 +16,6 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.synchronization.DataProvider
-import no.nav.amt.person.service.synchronization.SynchronizationRepository
-import no.nav.amt.person.service.synchronization.SynchronizationUpsert
 import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
@@ -25,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.LocalDateTime
 
 class NavBrukerServiceTest {
 	lateinit var service: NavBrukerService
@@ -38,7 +37,6 @@ class NavBrukerServiceTest {
 	lateinit var pdlClient: PdlClient
 	lateinit var kafkaProducerService: KafkaProducerService
 	lateinit var transactionTemplate: TransactionTemplate
-	lateinit var synchronizationRepository: SynchronizationRepository
 
 	@BeforeEach
 	fun setup() {
@@ -52,7 +50,6 @@ class NavBrukerServiceTest {
 		rolleService = mockk(relaxUnitFun = true)
 		kafkaProducerService = mockk(relaxUnitFun = true)
 		transactionTemplate = mockk()
-		synchronizationRepository = mockk()
 
 		service = NavBrukerService(
 			repository = repository,
@@ -65,7 +62,6 @@ class NavBrukerServiceTest {
 			pdlClient = pdlClient,
 			kafkaProducerService = kafkaProducerService,
 			transactionTemplate = transactionTemplate,
-			synchronizationRepository = synchronizationRepository
 		)
 	}
 
@@ -89,7 +85,6 @@ class NavBrukerServiceTest {
 		every { poaoTilgangClient.erSkjermetPerson(person.personident) } returns ApiResult(result = erSkjermet, throwable = null)
 		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 		every { repository.getByPersonId(person.id) } returns navBruker
-		every { synchronizationRepository.upsert(SynchronizationUpsert(DataProvider.KRR, "nav_bruker", person.id)) } returns Unit
 		mockExecuteWithoutResult(transactionTemplate)
 
 		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personident)
@@ -116,82 +111,101 @@ class NavBrukerServiceTest {
 	}
 
 	@Test
-	fun `oppdaterKontaktInformasjon - ingen brukere finnes - oppdaterer ikke`() {
-		val personer = listOf(TestData.lagPerson().toModel(), TestData.lagPerson().toModel())
-
-		every { repository.get(any<String>()) } returns null
-
-		service.syncKontaktinfo(personer)
-
-		verify(exactly = 0) { pdlClient.hentTelefon(any()) }
-		verify(exactly = 0) { krrProxyClient.hentKontaktinformasjon(any<String>()) }
-		verify(exactly = 0) { repository.upsert(any()) }
-	}
-
-	@Test
-	fun `oppdaterKontaktInformasjon - telefon er registrert i krr - oppdaterer bruker med telefon fra krr`() {
+	fun `syncKontaktinfoBulk - telefon er registrert i krr - oppdaterer bruker med telefon fra krr`() {
 		val bruker = TestData.lagNavBruker()
-		val kontakinformasjon = Kontaktinformasjon(
-				"ny epost",
-				"krr-telefon",
-			)
+		val kontaktinfo = Kontaktinformasjon(
+			"ny epost",
+			"krr-telefon",
+		)
+		val kontakinfoForPersoner = KontaktinformasjonForPersoner(mapOf(bruker.person.personident to kontaktinfo))
 
 		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
 		every { repository.get(bruker.person.personident) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(kontakinformasjon)
-		every { synchronizationRepository.upsert(SynchronizationUpsert(DataProvider.KRR, "nav_bruker", bruker.id)) } returns Unit
+		every { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) } returns Result.success(kontakinfoForPersoner)
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.syncKontaktinfo(listOf(bruker.person.toModel()))
+		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
 
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
-		verify(exactly = 1) { repository.upsert(
-				bruker.copy(telefon = kontakinformasjon.telefonnummer, epost = kontakinformasjon.epost)
-					.toModel()
-					.toUpsert()
-			)
-		}
+		val expectedData = bruker.copy(
+			telefon = kontaktinfo.telefonnummer,
+			epost = kontaktinfo.epost,
+			sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+		)
+			.toModel()
+			.toUpsert()
+
+
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) }
+		verify(exactly = 1) { repository.upsert( match {
+			expectedData.id == it.id &&
+				expectedData.personId == it.personId &&
+				expectedData.navEnhetId == it.navEnhetId &&
+				expectedData.navVeilederId == it.navVeilederId &&
+				expectedData.telefon == it.telefon &&
+				expectedData.epost == it.epost &&
+				expectedData.erSkjermet == it.erSkjermet &&
+				expectedData.adresse == it.adresse &&
+				expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+
+		})}
 	}
+
 	@Test
-	fun `oppdaterKontaktInformasjon - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
+	fun `syncKontaktinfoBulk - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
 		val bruker = TestData.lagNavBruker()
-		val kontakinformasjon = Kontaktinformasjon(
+		val krrKontaktinfo = Kontaktinformasjon(
 			"ny epost",
 			null,
 		)
+		val kontakinfoForPersoner = KontaktinformasjonForPersoner(mapOf(bruker.person.personident to krrKontaktinfo))
+
 		val pdlTelefon = "pdl-telefon"
 
 		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
 		every { pdlClient.hentTelefon(bruker.person.personident) } returns pdlTelefon
 		every { repository.get(bruker.person.personident) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(kontakinformasjon)
-		every { synchronizationRepository.upsert(SynchronizationUpsert(DataProvider.KRR, "nav_bruker", bruker.id)) } returns Unit
+		every { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) } returns Result.success(kontakinfoForPersoner)
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.syncKontaktinfo(listOf(bruker.person.toModel()))
+		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
+
+		val expectedData = bruker.copy(
+			telefon = pdlTelefon,
+			epost = krrKontaktinfo.epost,
+			sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+		)
+			.toModel()
+			.toUpsert()
 
 		verify(exactly = 1) { pdlClient.hentTelefon(bruker.person.personident) }
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
-		verify(exactly = 1) { repository.upsert(
-			bruker.copy(telefon = pdlTelefon, epost = kontakinformasjon.epost)
-				.toModel()
-				.toUpsert()
-		) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) }
+		verify(exactly = 1) { repository.upsert(match {
+			expectedData.id == it.id &&
+				expectedData.personId == it.personId &&
+				expectedData.navEnhetId == it.navEnhetId &&
+				expectedData.navVeilederId == it.navVeilederId &&
+				expectedData.telefon == it.telefon &&
+				expectedData.epost == it.epost &&
+				expectedData.erSkjermet == it.erSkjermet &&
+				expectedData.adresse == it.adresse &&
+				expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+
+		}) }
 	}
 
 	@Test
-	fun `oppdaterKontaktInformasjon - krr feiler - oppdaterer ikke`() {
+	fun `syncKontaktinfoBulk - krr feiler - oppdaterer ikke`() {
 		val bruker = TestData.lagNavBruker()
 
 		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
 		every { repository.get(bruker.person.personident) } returns bruker
-		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.failure(RuntimeException())
+		every { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) } returns Result.failure(RuntimeException())
 
-		service.syncKontaktinfo(listOf(bruker.person.toModel()))
+		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
 
-		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) }
 		verify(exactly = 0) { repository.upsert(any()) }
 	}
 
@@ -200,7 +214,6 @@ class NavBrukerServiceTest {
 		val bruker = TestData.lagNavBruker()
 
 		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns false
-		every { synchronizationRepository.delete(bruker.id) } returns Unit
 
 		mockExecuteWithoutResult(transactionTemplate)
 
@@ -217,7 +230,6 @@ class NavBrukerServiceTest {
 		val bruker = TestData.lagNavBruker()
 
 		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns true
-		every { synchronizationRepository.delete(bruker.id) } returns Unit
 		mockExecuteWithoutResult(transactionTemplate)
 
 		service.slettBruker(bruker.toModel())

@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.nav_bruker.dbo
 
 import no.nav.amt.person.service.person.model.Adresse
+import java.time.LocalDateTime
 import java.util.*
 
 data class NavBrukerUpsert(
@@ -11,5 +12,6 @@ data class NavBrukerUpsert(
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
-	val adresse: Adresse?
+	val adresse: Adresse?,
+	val sisteKrrSync: LocalDateTime? = null
 )

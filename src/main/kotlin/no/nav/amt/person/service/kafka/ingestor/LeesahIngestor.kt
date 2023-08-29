@@ -70,7 +70,6 @@ class LeesahIngestor(
 				etternavn = navn.etternavn,
 			))
 		}
-		navBrukerService.syncKontaktinfo(personer)
 	}
 
 	private fun handterAdresse(personidenter: List<String>) {

@@ -122,9 +122,8 @@ class NavBrukerRepositoryTest {
 
 	@Test
 	fun `getAll - bruker er nylig synkronisert - returnerer ikke bruker`() {
-		val bruker1 = TestData.lagNavBruker()
+		val bruker1 = TestData.lagNavBruker(sisteKrrSync = LocalDateTime.now().minusDays(1))
 		testRepository.insertNavBruker(bruker1)
-		testRepository.insertNavBrukerSynced(bruker1.id, LocalDateTime.now().minusDays(1))
 
 		val brukere = repository.getAll(0, 1, LocalDateTime.now().minusDays(2))
 

@@ -6,13 +6,11 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.synchronization.DataProvider
 import no.nav.amt.person.service.utils.sqlParameters
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Component
@@ -152,20 +150,6 @@ class TestDataRepository(
 		template.update(sql, parameters)
 	}
 
-	fun insertNavBrukerSynced(navBrukerRowId: UUID, syncTime: LocalDateTime) {
-		val sql = """
-			insert into synchronization(id, data_provider, table_name, row_id, last_sync)
-			values(:id, :data_provider, :table_name, :row_id, :last_sync)
-		""".trimIndent()
-		val parameters = sqlParameters(
-			"id" to UUID.randomUUID(),
-			"data_provider" to DataProvider.KRR.name,
-			"table_name" to "nav_bruker",
-			"row_id" to navBrukerRowId,
-			"last_sync" to syncTime
-		)
-		template.update(sql, parameters)
-	}
 	fun insertNavBruker(bruker: NavBrukerDbo) {
 		try {
 			insertPerson(bruker.person)
@@ -198,6 +182,7 @@ class TestDataRepository(
 				telefon,
 				epost,
 				er_skjermet,
+				siste_krr_sync,
 				created_at,
 				modified_at
 			) values (
@@ -208,6 +193,7 @@ class TestDataRepository(
 				:telefon,
 				:epost,
 				:erSkjermet,
+				:sisteKrrSync,
 				:createdAt,
 				:modifiedAt
 			)
@@ -221,6 +207,7 @@ class TestDataRepository(
 			"telefon" to bruker.telefon,
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
+			"sisteKrrSync" to bruker.sisteKrrSync,
 			"createdAt" to bruker.createdAt,
 			"modifiedAt" to bruker.modifiedAt
 		)
