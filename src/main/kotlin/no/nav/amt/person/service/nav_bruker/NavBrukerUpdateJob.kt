@@ -12,7 +12,7 @@ class NavBrukerUpdateJob(
 ) {
 
 	//@Scheduled(cron = "@midnight")
-	@Scheduled(cron = "* */10 * * * *")
+	@Scheduled(cron = "0 */10 * * * *")
 	@SchedulerLock(name = "navBrukerUpdater", lockAtMostFor = "60m")
 	fun update() {
 		JobRunner.run("oppdater_nav_brukere") { oppdaterBrukere() }
