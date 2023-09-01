@@ -103,6 +103,21 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper)
 	}
 
+	fun	getPersonidenter(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<String> {
+		val sql = """
+			SELECT person.personident AS "person.personident"
+			FROM nav_bruker
+					 INNER JOIN person ON nav_bruker.person_id = person.id
+			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
+			ORDER BY siste_krr_sync asc nulls first, nav_bruker.modified_at
+			OFFSET :offset
+			LIMIT :limit
+			"""
+		val parameters = sqlParameters("offset" to offset, "limit" to limit, "notSyncedSince" to notSyncedSince)
+
+		return template.query(sql, parameters) { rs, _ -> rs.getString("person.personident") }
+	}
+
 	fun upsert(bruker: NavBrukerUpsert) {
 		val sql = """
 			insert into nav_bruker(

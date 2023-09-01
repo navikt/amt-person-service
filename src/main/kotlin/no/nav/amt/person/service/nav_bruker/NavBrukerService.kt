@@ -44,6 +44,10 @@ class NavBrukerService(
 		return repository.getAll(offset, limit, notSyncedSince).map { it.toModel() }
 	}
 
+	fun getPersonidenter(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<String> {
+		return repository.getPersonidenter(offset, limit, notSyncedSince).distinct()
+	}
+
 	fun hentNavBruker(id: UUID): NavBruker {
 		return repository.get(id).toModel()
 	}
@@ -120,7 +124,7 @@ class NavBrukerService(
 		}
 	}
 
-	fun syncKontaktinfoBulk(personident: Set<String>) {
+	fun syncKontaktinfoBulk(personident: List<String>) {
 		val personerChunks = personident.chunked(500) // maksgrense på 500 hos krr
 
 		personerChunks.forEach { personChunk ->

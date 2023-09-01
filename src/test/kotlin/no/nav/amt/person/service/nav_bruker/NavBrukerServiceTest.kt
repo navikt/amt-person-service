@@ -125,7 +125,7 @@ class NavBrukerServiceTest {
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
+		service.syncKontaktinfoBulk(listOf(bruker.person.personident))
 
 		val expectedData = bruker.copy(
 			telefon = kontaktinfo.telefonnummer,
@@ -169,7 +169,7 @@ class NavBrukerServiceTest {
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
+		service.syncKontaktinfoBulk(listOf(bruker.person.personident))
 
 		val expectedData = bruker.copy(
 			telefon = pdlTelefon,
@@ -203,7 +203,7 @@ class NavBrukerServiceTest {
 		every { repository.get(bruker.person.personident) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) } returns Result.failure(RuntimeException())
 
-		service.syncKontaktinfoBulk(setOf(bruker.person.personident))
+		service.syncKontaktinfoBulk(listOf(bruker.person.personident))
 
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) }
 		verify(exactly = 0) { repository.upsert(any()) }
