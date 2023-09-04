@@ -211,7 +211,7 @@ class NavBrukerServiceTest {
 	}
 
 	@Test
-	fun `oppdaterKontaktinformasjon - bruker sist oppdatert for fire uker siden - oppdaterer bruker`() {
+	fun `oppdaterKontaktinformasjon - bruker har ny kontaktinfo - oppdaterer bruker`() {
 		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
 		val kontaktinfo = Kontaktinformasjon(
 			"ny epost",
@@ -223,7 +223,7 @@ class NavBrukerServiceTest {
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+		service.oppdaterKontaktinformasjon(bruker.toModel())
 
 		val expectedData = bruker.copy(
 			telefon = kontaktinfo.telefonnummer,
@@ -250,20 +250,6 @@ class NavBrukerServiceTest {
 	}
 
 	@Test
-	fun `oppdaterKontaktinformasjon - bruker sist oppdatert for fire dager siden - oppdaterer ikke bruker`() {
-		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusDays(4))
-
-		every { repository.get(bruker.person.personident) } returns bruker
-
-		mockExecuteWithoutResult(transactionTemplate)
-
-		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
-
-		verify(exactly = 0) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
-		verify(exactly = 0) { repository.upsert(any()) }
-	}
-
-	@Test
 	fun `oppdaterKontaktinformasjon - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
 		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
 		val krrKontaktinfo = Kontaktinformasjon(
@@ -279,7 +265,7 @@ class NavBrukerServiceTest {
 
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+		service.oppdaterKontaktinformasjon(bruker.toModel())
 
 		val expectedData = bruker.copy(
 			telefon = pdlTelefon,
@@ -312,7 +298,7 @@ class NavBrukerServiceTest {
 		every { repository.get(bruker.person.personident) } returns bruker
 		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.failure(RuntimeException())
 
-		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+		service.oppdaterKontaktinformasjon(bruker.toModel())
 
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
 		verify(exactly = 0) { repository.upsert(any()) }

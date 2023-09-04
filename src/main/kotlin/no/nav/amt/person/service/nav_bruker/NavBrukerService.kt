@@ -117,27 +117,19 @@ class NavBrukerService(
 		}
 	}
 
-	fun oppdaterKontaktinformasjon(personident: String, deltakerId: UUID) {
-		val bruker = repository.get(personident)?.toModel()
-		if (bruker == null) {
-			log.warn("Fant ikke bruker for deltaker med id $deltakerId")
-			return
-		} else {
-			if (bruker.sisteKrrSync == null || bruker.sisteKrrSync.isBefore(LocalDateTime.now().minusDays(14))) {
-				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
-					val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy for deltaker $deltakerId: ${it.message}"
-					if (EnvUtils.isDev()) {
-						log.info(feilmelding)
-					}
-					else {
-						log.error(feilmelding)
-					}
-					return
-				}
-				val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(personident)
-				oppdaterKontaktinfo(bruker, kontaktinformasjon.copy(telefonnummer = telefon))
+	fun oppdaterKontaktinformasjon(bruker: NavBruker) {
+		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
+			val feilmelding =
+				"Klarte ikke hente kontaktinformasjon fra KRR-Proxy for bruker ${bruker.id}: ${it.message}"
+			if (EnvUtils.isDev()) {
+				log.info(feilmelding)
+			} else {
+				log.error(feilmelding)
 			}
+			return
 		}
+		val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(bruker.person.personident)
+		oppdaterKontaktinfo(bruker, kontaktinformasjon.copy(telefonnummer = telefon))
 	}
 
 	fun settSkjermet(brukerId: UUID, erSkjermet: Boolean) {
