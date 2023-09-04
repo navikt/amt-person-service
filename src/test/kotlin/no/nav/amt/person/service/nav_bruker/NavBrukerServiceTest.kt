@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
+import java.util.UUID
 
 class NavBrukerServiceTest {
 	lateinit var service: NavBrukerService
@@ -206,6 +207,114 @@ class NavBrukerServiceTest {
 		service.syncKontaktinfoBulk(listOf(bruker.person.personident))
 
 		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(bruker.person.personident)) }
+		verify(exactly = 0) { repository.upsert(any()) }
+	}
+
+	@Test
+	fun `oppdaterKontaktinformasjon - bruker sist oppdatert for fire uker siden - oppdaterer bruker`() {
+		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
+		val kontaktinfo = Kontaktinformasjon(
+			"ny epost",
+			"krr-telefon",
+		)
+
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(kontaktinfo)
+
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+
+		val expectedData = bruker.copy(
+			telefon = kontaktinfo.telefonnummer,
+			epost = kontaktinfo.epost,
+			sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+		)
+			.toModel()
+			.toUpsert()
+
+
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
+		verify(exactly = 1) { repository.upsert( match {
+			expectedData.id == it.id &&
+				expectedData.personId == it.personId &&
+				expectedData.navEnhetId == it.navEnhetId &&
+				expectedData.navVeilederId == it.navVeilederId &&
+				expectedData.telefon == it.telefon &&
+				expectedData.epost == it.epost &&
+				expectedData.erSkjermet == it.erSkjermet &&
+				expectedData.adresse == it.adresse &&
+				expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+
+		})}
+	}
+
+	@Test
+	fun `oppdaterKontaktinformasjon - bruker sist oppdatert for fire dager siden - oppdaterer ikke bruker`() {
+		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusDays(4))
+
+		every { repository.get(bruker.person.personident) } returns bruker
+
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+
+		verify(exactly = 0) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
+		verify(exactly = 0) { repository.upsert(any()) }
+	}
+
+	@Test
+	fun `oppdaterKontaktinformasjon - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
+		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
+		val krrKontaktinfo = Kontaktinformasjon(
+			"ny epost",
+			null,
+		)
+
+		val pdlTelefon = "pdl-telefon"
+
+		every { pdlClient.hentTelefon(bruker.person.personident) } returns pdlTelefon
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.success(krrKontaktinfo)
+
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+
+		val expectedData = bruker.copy(
+			telefon = pdlTelefon,
+			epost = krrKontaktinfo.epost,
+			sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+		)
+			.toModel()
+			.toUpsert()
+
+		verify(exactly = 1) { pdlClient.hentTelefon(bruker.person.personident) }
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
+		verify(exactly = 1) { repository.upsert(match {
+			expectedData.id == it.id &&
+				expectedData.personId == it.personId &&
+				expectedData.navEnhetId == it.navEnhetId &&
+				expectedData.navVeilederId == it.navVeilederId &&
+				expectedData.telefon == it.telefon &&
+				expectedData.epost == it.epost &&
+				expectedData.erSkjermet == it.erSkjermet &&
+				expectedData.adresse == it.adresse &&
+				expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+
+		}) }
+	}
+
+	@Test
+	fun `oppdaterKontaktinformasjon - krr feiler - oppdaterer ikke`() {
+		val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
+
+		every { repository.get(bruker.person.personident) } returns bruker
+		every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns Result.failure(RuntimeException())
+
+		service.oppdaterKontaktinformasjon(bruker.person.personident, UUID.randomUUID())
+
+		verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) }
 		verify(exactly = 0) { repository.upsert(any()) }
 	}
 

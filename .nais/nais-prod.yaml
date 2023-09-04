@@ -107,6 +107,8 @@ spec:
       value: amt.arrangor-ansatt-personalia-v1
     - name: AMT_NAV_ANSATT_PERSONALIA_TOPIC
       value: amt.nav-ansatt-personalia-v1
+    - name: DELTAKER_V2_TOPIC
+      value: amt.deltaker-v2
 
   gcp:
     sqlInstances:

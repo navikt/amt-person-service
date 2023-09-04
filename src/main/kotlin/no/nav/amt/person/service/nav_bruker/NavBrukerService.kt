@@ -117,6 +117,29 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterKontaktinformasjon(personident: String, deltakerId: UUID) {
+		val bruker = repository.get(personident)?.toModel()
+		if (bruker == null) {
+			log.warn("Fant ikke bruker for deltaker med id $deltakerId")
+			return
+		} else {
+			if (bruker.sisteKrrSync == null || bruker.sisteKrrSync.isBefore(LocalDateTime.now().minusDays(14))) {
+				val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
+					val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy for deltaker $deltakerId: ${it.message}"
+					if (EnvUtils.isDev()) {
+						log.info(feilmelding)
+					}
+					else {
+						log.error(feilmelding)
+					}
+					return
+				}
+				val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(personident)
+				oppdaterKontaktinfo(bruker, kontaktinformasjon.copy(telefonnummer = telefon))
+			}
+		}
+	}
+
 	fun settSkjermet(brukerId: UUID, erSkjermet: Boolean) {
 		val bruker = repository.get(brukerId).toModel()
 		if (bruker.erSkjermet != erSkjermet) {
@@ -136,9 +159,10 @@ class NavBrukerService(
 				return
 			}
 
-			krrKontaktinfo.personer.forEach {
+			krrKontaktinfo.personer.forEach kontaktinfoPersoner@ {
 					val telefon = it.value.telefonnummer ?: pdlClient.hentTelefon(it.key)
-					oppdaterKontaktinfo(it.key, it.value.copy(telefonnummer = telefon))
+					val bruker = repository.get(it.key)?.toModel() ?: return@kontaktinfoPersoner
+					oppdaterKontaktinfo(bruker, it.value.copy(telefonnummer = telefon))
 			}
 		}
 	}
@@ -202,9 +226,7 @@ class NavBrukerService(
 		}
 	}
 
-	private fun oppdaterKontaktinfo(personident: String, kontaktinformasjon: Kontaktinformasjon) {
-		val bruker = repository.get(personident)?.toModel() ?: return
-
+	private fun oppdaterKontaktinfo(bruker: NavBruker, kontaktinformasjon: Kontaktinformasjon) {
 		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
 			repository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
 			return
