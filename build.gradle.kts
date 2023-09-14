@@ -18,11 +18,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
+	maven { setUrl("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
 	maven { setUrl("https://jitpack.io") }
 	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2023.05.02_06.50-0576b4e09008"
+val commonVersion = "3.2023.09.13_04.55-a8ff452fbd94"
 val okhttp3Version = "4.11.0"
 val kotestVersion = "5.7.2"
 val poaoTilgangVersion = "2023.05.02_09.15-64228b754508"
@@ -58,11 +59,11 @@ dependencies {
 	implementation("org.postgresql:postgresql")
 
 	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
-	implementation("com.github.navikt.common-java-modules:log:$commonVersion")
-	implementation("com.github.navikt.common-java-modules:token-client:$commonVersion")
-	implementation("com.github.navikt.common-java-modules:rest:$commonVersion")
-	implementation("com.github.navikt.common-java-modules:job:$commonVersion")
-	implementation("com.github.navikt.common-java-modules:kafka:$commonVersion")
+	implementation("no.nav.common:log:$commonVersion")
+	implementation("no.nav.common:token-client:$commonVersion")
+	implementation("no.nav.common:rest:$commonVersion")
+	implementation("no.nav.common:job:$commonVersion")
+	implementation("no.nav.common:kafka:$commonVersion")
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
