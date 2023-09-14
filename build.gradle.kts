@@ -36,7 +36,7 @@ val flywayVersion = "9.22.1"
 val jacksonVersion = "2.15.2"
 val micrometerVersion = "1.11.4"
 val postgresVersion = "42.6.0"
-val mockOauth2ServerVersion = "1.0.0"
+val mockOauth2ServerVersion = "2.0.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
