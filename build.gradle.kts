@@ -19,14 +19,13 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
 	mavenCentral()
 	maven { setUrl("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
-	maven { setUrl("https://jitpack.io") }
 	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
 val commonVersion = "3.2023.09.13_04.55-a8ff452fbd94"
 val okhttp3Version = "4.11.0"
 val kotestVersion = "5.7.2"
-val poaoTilgangVersion = "2023.05.02_09.15-64228b754508"
+val poaoTilgangVersion = "2023.09.25_09.26-72043f243cad"
 val testcontainersVersion = "1.19.0"
 val tokenSupportVersion = "3.1.5"
 val mockkVersion = "1.13.8"
@@ -67,7 +66,7 @@ dependencies {
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
-	implementation("com.github.navikt.poao-tilgang:client:$poaoTilgangVersion")
+	implementation("no.nav.poao-tilgang:client:$poaoTilgangVersion")
 
 	implementation("org.apache.commons:commons-lang3:$lang3Version")
 
