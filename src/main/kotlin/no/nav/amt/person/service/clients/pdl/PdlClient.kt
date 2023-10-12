@@ -68,7 +68,7 @@ class PdlClient(
 			try {
 				return toPdlBruker(gqlResponse.data)
 			} catch (e: Exception) {
-				log.warn("Respons: ${objectMapper.writeValueAsString(response)}, personident $personident")
+				log.warn("Respons: ${objectMapper.writeValueAsString(gqlResponse)}, fødselsdato ${personident.slice(0..5)} og resten ${personident.slice(6..10)}")
 				throw e
 			}
 		}
