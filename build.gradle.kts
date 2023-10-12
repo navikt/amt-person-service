@@ -32,6 +32,7 @@ val mockkVersion = "1.13.8"
 val lang3Version = "3.13.0"
 val shedlockVersion = "5.8.0"
 val confluentVersion = "7.3.3"
+val avroVersion = "1.11.3"
 val flywayVersion = "9.22.2"
 val jacksonVersion = "2.15.2"
 val micrometerVersion = "1.11.5"
@@ -46,6 +47,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-logging")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.yaml:snakeyaml:2.2")//overstyrer sårbar dependency
 
 	implementation("org.springframework.retry:spring-retry")
 	implementation("org.springframework:spring-aspects")
@@ -54,6 +56,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
+	implementation("com.squareup.okio:okio:3.6.0")//overstyrer sårbar dependency
 	implementation("org.flywaydb:flyway-core:$flywayVersion")
 	implementation("org.postgresql:postgresql")
 
@@ -62,9 +65,12 @@ dependencies {
 	implementation("no.nav.common:token-client:$commonVersion")
 	implementation("no.nav.common:rest:$commonVersion")
 	implementation("no.nav.common:job:$commonVersion")
-	implementation("no.nav.common:kafka:$commonVersion")
+	implementation("no.nav.common:kafka:$commonVersion") {
+		exclude("org.xerial.snappy", "snappy-java")
+	}
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
+	implementation("org.apache.avro:avro:$avroVersion")
 
 	implementation("no.nav.poao-tilgang:client:$poaoTilgangVersion")
 
