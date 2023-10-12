@@ -15,7 +15,6 @@ import no.nav.amt.person.service.poststed.PoststedRepository
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.objectMapper
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.MediaType.Companion.toMediaType
@@ -65,12 +64,7 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			try {
-				return toPdlBruker(gqlResponse.data)
-			} catch (e: Exception) {
-				log.warn("Respons: ${objectMapper.writeValueAsString(response)}, personident $personident")
-				throw e
-			}
+			return toPdlBruker(gqlResponse.data)
 		}
 	}
 
