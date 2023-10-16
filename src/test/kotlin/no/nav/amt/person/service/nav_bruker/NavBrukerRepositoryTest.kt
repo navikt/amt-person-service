@@ -140,14 +140,15 @@ class NavBrukerRepositoryTest {
 		testRepository.insertNavEnhet(bruker.navEnhet!!)
 
 		repository.upsert(NavBrukerUpsert(
-			bruker.id,
-			bruker.person.id,
-			bruker.navVeileder?.id,
-			bruker.navEnhet?.id,
-			bruker.telefon,
-			bruker.epost,
-			bruker.erSkjermet,
-			bruker.adresse
+			id = bruker.id,
+			personId = bruker.person.id,
+			navVeilederId = bruker.navVeileder?.id,
+			navEnhetId = bruker.navEnhet?.id,
+			telefon = bruker.telefon,
+			epost = bruker.epost,
+			erSkjermet = bruker.erSkjermet,
+			adresse = bruker.adresse,
+			adressebeskyttelse = bruker.adressebeskyttelse
 		))
 
 		val faktiskBruker = repository.get(bruker.id)
@@ -189,7 +190,8 @@ class NavBrukerRepositoryTest {
 					),
 					postboksadresse = null
 				)
-			)
+			),
+			adressebeskyttelse = null
 		)
 
 		repository.upsert(upsert)
@@ -259,6 +261,7 @@ class NavBrukerRepositoryTest {
 		faktiskBruker.erSkjermet shouldBe bruker.erSkjermet
 		faktiskBruker.createdAt shouldBeCloseTo bruker.createdAt
 		faktiskBruker.modifiedAt shouldBeCloseTo bruker.modifiedAt
+		faktiskBruker.adressebeskyttelse shouldBe bruker.adressebeskyttelse
 	}
 
 }

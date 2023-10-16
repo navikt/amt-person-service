@@ -6,7 +6,7 @@ import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Person
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class NavBruker(
 	val id: UUID,
@@ -17,7 +17,8 @@ data class NavBruker(
 	val epost: String?,
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
-	val sisteKrrSync: LocalDateTime?
+	val sisteKrrSync: LocalDateTime?,
+	val adressebeskyttelse: Adressebeskyttelse?
 ) {
 	fun toUpsert() = NavBrukerUpsert(
 		id = this.id,
@@ -28,9 +29,13 @@ data class NavBruker(
 		epost = this.epost,
 		erSkjermet = this.erSkjermet,
 		adresse = this.adresse,
-		sisteKrrSync = this.sisteKrrSync
+		sisteKrrSync = this.sisteKrrSync,
+		adressebeskyttelse = this.adressebeskyttelse
 	)
-
 }
 
-
+enum class Adressebeskyttelse {
+	STRENGT_FORTROLIG,
+	FORTROLIG,
+	STRENGT_FORTROLIG_UTLAND
+}

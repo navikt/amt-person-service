@@ -60,7 +60,8 @@ class NavBrukerRepository(
 			adresse = rs.getString("nav_bruker.adresse")?.let { fromJsonString<Adresse>(it) },
 			sisteKrrSync = rs.getTimestamp("siste_krr_sync")?.toLocalDateTime(),
 			createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
-			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime()
+			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
+			adressebeskyttelse = rs.getString("nav_bruker.adressebeskyttelse")?.let { Adressebeskyttelse.valueOf(it) }
 		)
 	}
 
@@ -129,7 +130,8 @@ class NavBrukerRepository(
 				epost,
 				er_skjermet,
 				adresse,
-				siste_krr_sync
+				siste_krr_sync,
+				adressebeskyttelse
 			) values (
 				:id,
 				:personId,
@@ -139,7 +141,8 @@ class NavBrukerRepository(
 				:epost,
 				:erSkjermet,
 				:adresse,
-				:sisteKrrSync
+				:sisteKrrSync,
+				:adressebeskyttelse
 			) on conflict(person_id) do update set
 				nav_veileder_id = :navVeilederId,
 				nav_enhet_id = :navEnhetId,
@@ -148,6 +151,7 @@ class NavBrukerRepository(
 				er_skjermet = :erSkjermet,
 				adresse = :adresse,
 				siste_krr_sync = :sisteKrrSync,
+				adressebeskyttelse = :adressebeskyttelse,
 				modified_at = current_timestamp
 				where nav_bruker.id = :id
 		""".trimIndent()
@@ -161,7 +165,8 @@ class NavBrukerRepository(
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
 			"adresse" to bruker.adresse?.toPGObject(),
-			"sisteKrrSync" to bruker.sisteKrrSync
+			"sisteKrrSync" to bruker.sisteKrrSync,
+			"adressebeskyttelse" to bruker.adressebeskyttelse?.name
 		)
 
 		template.update(sql, parameters)
@@ -178,6 +183,7 @@ class NavBrukerRepository(
 				   nav_bruker.epost as "nav_bruker.epost",
 				   nav_bruker.er_skjermet as "nav_bruker.er_skjermet",
 				   nav_bruker.adresse as "nav_bruker.adresse",
+				   nav_bruker.adressebeskyttelse as "nav_bruker.adressebeskyttelse",
 				   nav_bruker.siste_krr_sync,
 				   nav_bruker.created_at as "nav_bruker.created_at",
 				   nav_bruker.modified_at as "nav_bruker.modified_at",

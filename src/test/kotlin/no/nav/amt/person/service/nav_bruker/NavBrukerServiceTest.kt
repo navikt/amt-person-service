@@ -96,19 +96,40 @@ class NavBrukerServiceTest {
 		faktiskBruker.telefon shouldBe kontaktinformasjon.telefonnummer
 		faktiskBruker.epost shouldBe kontaktinformasjon.epost
 		faktiskBruker.erSkjermet shouldBe erSkjermet
+		faktiskBruker.adressebeskyttelse shouldBe null
 	}
 
 	@Test
-	fun `hentEllerOpprettNavBruker - bruker er adressebeskyttet - oppretter ikke bruker`() {
-		val person = TestData.lagPerson()
+	fun `hentEllerOpprettNavBruker - bruker er adressebeskyttet - oppretter bruker`() {
+		val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+		val person = navBruker.person
 		val personOpplysninger = TestData.lagPdlPerson(person, adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+		val veileder =  navBruker.navVeileder!!
+		val navEnhet = navBruker.navEnhet!!
+		val kontaktinformasjon = Kontaktinformasjon(navBruker.epost, navBruker.telefon)
+		val erSkjermet = navBruker.erSkjermet
 
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
+		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
+		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
+		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
+		every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
+		every { poaoTilgangClient.erSkjermetPerson(person.personident) } returns ApiResult(result = erSkjermet, throwable = null)
+		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { repository.getByPersonId(person.id) } returns navBruker
+		mockExecuteWithoutResult(transactionTemplate)
 
-		assertThrows<IllegalStateException> {
-			service.hentEllerOpprettNavBruker(person.personident)
-		}
+		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personident)
+
+		faktiskBruker.person.id shouldBe person.id
+		faktiskBruker.navVeileder?.id shouldBe veileder.id
+		faktiskBruker.navEnhet?.id shouldBe navEnhet.id
+		faktiskBruker.telefon shouldBe kontaktinformasjon.telefonnummer
+		faktiskBruker.epost shouldBe kontaktinformasjon.epost
+		faktiskBruker.erSkjermet shouldBe erSkjermet
+		faktiskBruker.adresse shouldBe null
+		faktiskBruker.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
 	}
 
 	@Test

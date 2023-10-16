@@ -63,15 +63,12 @@ class NavBrukerService(
 	private fun opprettNavBruker(personident: String): NavBruker {
 		val personOpplysninger = pdlClient.hentPerson(personident)
 
-		if (personOpplysninger.adressebeskyttelseGradering.erBeskyttet()) {
-			throw IllegalStateException("Nav bruker er adreessebeskyttet og kan ikke lagres")
-		}
-
 		val person = personService.hentEllerOpprettPerson(personident, personOpplysninger)
 		val veileder = navAnsattService.hentBrukersVeileder(personident)
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
+		val adressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -81,8 +78,13 @@ class NavBrukerService(
 			telefon = kontaktinformasjon?.telefonnummer ?:  personOpplysninger.telefonnummer,
 			epost = kontaktinformasjon?.epost,
 			erSkjermet = erSkjermet,
-			adresse = personOpplysninger.adresse,
-			sisteKrrSync = LocalDateTime.now()
+			adresse = if (adressebeskyttelse == null) {
+				personOpplysninger.adresse
+			} else {
+				null
+			},
+			sisteKrrSync = LocalDateTime.now(),
+			adressebeskyttelse = adressebeskyttelse
 		)
 
 		upsert(navBruker)

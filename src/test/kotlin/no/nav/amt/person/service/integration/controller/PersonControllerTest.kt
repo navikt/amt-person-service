@@ -148,8 +148,10 @@ class PersonControllerTest: IntegrationTestBase() {
 	}
 
 	@Test
-	fun `hentEllerOpprettNavBruker - nav bruker er adressebeskyttet - skal ha status 500`() {
-		val navBruker = TestData.lagNavBruker()
+	fun `hentEllerOpprettNavBruker - nav bruker er adressebeskyttet - skal ha status 200 og returnere riktig response`() {
+		val navAnsatt = TestData.lagNavAnsatt()
+		val navEnhet = TestData.lagNavEnhet()
+		val navBruker = TestData.lagNavBruker(navVeileder = navAnsatt, navEnhet = navEnhet)
 
 		mockPdlHttpServer.mockHentPerson(
 			navBruker.person.personident,
@@ -158,6 +160,12 @@ class PersonControllerTest: IntegrationTestBase() {
 				adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
 			)
 		)
+		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
+		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
+		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
+		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
+		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
 
 		val response = sendRequest(
 			method = "POST",
@@ -166,7 +174,12 @@ class PersonControllerTest: IntegrationTestBase() {
 			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
 		)
 
-		response.code shouldBe 500
+		response.code shouldBe 200
+
+		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body!!.string())
+		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)!!
+
+		sammenlign(faktiskBruker, navBrukerDto)
 	}
 
 	@Test
@@ -320,6 +333,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.telefon shouldBe brukerDto.telefon
 		faktiskBruker.epost shouldBe brukerDto.epost
 		faktiskBruker.erSkjermet shouldBe brukerDto.erSkjermet
+		faktiskBruker.adressebeskyttelse shouldBe brukerDto.adressebeskyttelse
 	}
 
 }
