@@ -8,6 +8,7 @@ import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
+import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
@@ -32,7 +33,7 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 
 	@Test
 	fun `publiserNavBruker - skal publisere bruker med riktig key og value`() {
-		val navBruker = TestData.lagNavBruker().toModel()
+		val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG).toModel()
 
 		kafkaProducerService.publiserNavBruker(navBruker)
 
