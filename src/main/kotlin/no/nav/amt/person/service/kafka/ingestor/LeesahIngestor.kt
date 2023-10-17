@@ -1,11 +1,9 @@
 package no.nav.amt.person.service.kafka.ingestor
 
-import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse
-import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import no.nav.person.pdl.leesah.navn.Navn
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -41,15 +39,12 @@ class LeesahIngestor(
 			return
 		}
 
-		val personer = personService.hentPersoner(personidenter)
+		val lagredePersonidenter = personService.hentPersoner(personidenter).map { it.personident }
 
-		if (personer.isEmpty()) return
+		if (lagredePersonidenter.isEmpty()) return
 
-		if (erAddressebeskyttet(adressebeskyttelse.gradering)) {
-			secureLog.info("Sletter addressebeskyttet personer med personidenter")
-			// Sletter ikke arrangøransatte med adressebeskyttelse foreløpig, fordi vi ikke har
-			// funksjonalitet for å håndtere dette i resten av systemet, og det er litt uklart om det er noe vi skal gjøre noe med.
-			navBrukerService.slettBrukere(personer)
+		personidenter.forEach {
+			navBrukerService.oppdaterAdressebeskyttelse(it)
 		}
 	}
 
@@ -78,9 +73,5 @@ class LeesahIngestor(
 		if (lagredePersonidenter.isEmpty()) return
 
 		navBrukerService.oppdaterAdresse(lagredePersonidenter)
-	}
-
-	private fun erAddressebeskyttet(gradering: Gradering?): Boolean {
-		return gradering != null && gradering != Gradering.UGRADERT
 	}
 }

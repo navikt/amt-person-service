@@ -1,14 +1,14 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
+import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.person.model.Rolle
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.utils.AsyncUtils
 import no.nav.amt.person.service.utils.titlecase
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
@@ -60,9 +60,11 @@ class LeesahIngestorTest : IntegrationTestBase() {
 
 	}
 	@Test
-	internal fun `Ingest - person får adressebeskyttelse - sletter nav bruker og person`() {
+	internal fun `Ingest - person får adressebeskyttelse - oppdaterer navbruker`() {
 		val navBruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(navBruker)
+
+		mockPdlHttpServer.mockHentPerson(navBruker.person.personident, TestData.lagPdlPerson(navBruker.person, adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG))
 
 		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
 			personidenter = listOf(navBruker.person.personident),
@@ -74,33 +76,10 @@ class LeesahIngestorTest : IntegrationTestBase() {
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		AsyncUtils.eventually {
-			navBrukerService.hentNavBruker(navBruker.person.personident) shouldBe null
-			personService.hentPerson(navBruker.person.personident) shouldBe null
+			val oppdatertNavBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
+
+			oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
 		}
 
 	}
-
-	@Test
-	internal fun `Ingest - arrangor ansatt får adressebeskyttelse - sletter nav bruker men ikke person`() {
-		val navBruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(navBruker)
-		testDataRepository.insertRolle(navBruker.person.id, Rolle.ARRANGOR_ANSATT)
-
-		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
-			personidenter = listOf(navBruker.person.personident),
-			gradering = Gradering.STRENGT_FORTROLIG,
-		)
-
-		mockSchemaRegistryHttpServer.registerSchema(1, "leesah-topic", msg.schema)
-
-		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
-
-		AsyncUtils.eventually {
-			navBrukerService.hentNavBruker(navBruker.person.personident) shouldBe null
-			personService.hentPerson(navBruker.person.personident) shouldNotBe null
-		}
-
-	}
-
-
 }

@@ -161,6 +161,27 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterAdressebeskyttelse(personident: String) {
+		val bruker = repository.get(personident)?.toModel() ?: return
+
+		val personOpplysninger = try {
+			pdlClient.hentPerson(personident)
+		} catch (e: Exception) {
+			val feilmelding = "Klarte ikke hente person fra PDL ved oppdatert adressebeskyttelse: ${e.message}"
+
+			if (EnvUtils.isDev()) log.info(feilmelding)
+			else log.error(feilmelding)
+
+			return
+		}
+
+		val oppdatertAdressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
+
+		if (bruker.adressebeskyttelse == oppdatertAdressebeskyttelse) return
+
+		upsert(bruker.copy(adressebeskyttelse = oppdatertAdressebeskyttelse))
+	}
+
 	fun oppdaterAdresse(personidenter: List<String>) {
 		personidenter.forEach {
 			oppdaterAdresse(it)
@@ -184,17 +205,6 @@ class NavBrukerService(
 		if (bruker.adresse == personOpplysninger.adresse) return
 
 		upsert(bruker.copy(adresse = personOpplysninger.adresse))
-	}
-
-	fun slettBrukere(personer: List<Person>) {
-		personer.forEach {
-			val bruker = repository.get(it.personident)?.toModel()
-
-			if (bruker != null) {
-				slettBruker(bruker)
-			}
-		}
-
 	}
 
 	fun slettBruker(bruker: NavBruker) {
