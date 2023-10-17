@@ -115,7 +115,7 @@ object TestData {
 		createdAt: LocalDateTime = LocalDateTime.now()
 	) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
 
-	private fun lagAdresse(): Adresse =
+	fun lagAdresse(): Adresse =
 		Adresse(
 			bostedsadresse = Bostedsadresse(
 				coAdressenavn = "C/O Gutterommet",

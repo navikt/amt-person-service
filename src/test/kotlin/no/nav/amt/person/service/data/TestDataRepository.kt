@@ -183,6 +183,8 @@ class TestDataRepository(
 				epost,
 				er_skjermet,
 				siste_krr_sync,
+				adresse,
+				adressebeskyttelse,
 				created_at,
 				modified_at
 			) values (
@@ -194,6 +196,8 @@ class TestDataRepository(
 				:epost,
 				:erSkjermet,
 				:sisteKrrSync,
+				:adresse,
+				:adressebeskyttelse,
 				:createdAt,
 				:modifiedAt
 			)
@@ -208,6 +212,8 @@ class TestDataRepository(
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
 			"sisteKrrSync" to bruker.sisteKrrSync,
+			"adresse" to bruker.adresse?.toPGObject(),
+			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
 			"createdAt" to bruker.createdAt,
 			"modifiedAt" to bruker.modifiedAt
 		)

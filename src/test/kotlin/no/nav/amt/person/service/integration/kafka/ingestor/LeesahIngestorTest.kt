@@ -61,10 +61,14 @@ class LeesahIngestorTest : IntegrationTestBase() {
 	}
 	@Test
 	internal fun `Ingest - person får adressebeskyttelse - oppdaterer navbruker`() {
-		val navBruker = TestData.lagNavBruker()
+		val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
 		testDataRepository.insertNavBruker(navBruker)
 
-		mockPdlHttpServer.mockHentPerson(navBruker.person.personident, TestData.lagPdlPerson(navBruker.person, adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+		mockPdlHttpServer.mockHentPerson(navBruker.person.personident, TestData.lagPdlPerson(
+			navBruker.person,
+			adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+			adresse = navBruker.adresse
+		))
 
 		val msg = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
 			personidenter = listOf(navBruker.person.personident),
@@ -79,7 +83,7 @@ class LeesahIngestorTest : IntegrationTestBase() {
 			val oppdatertNavBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
 
 			oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
+			oppdatertNavBruker?.adresse shouldBe null
 		}
-
 	}
 }

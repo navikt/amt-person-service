@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_bruker
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
+import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
@@ -12,6 +13,8 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
 import no.nav.amt.person.service.person.RolleService
+import no.nav.amt.person.service.person.model.Adresse
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.erBeskyttet
@@ -68,7 +71,6 @@ class NavBrukerService(
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
-		val adressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -78,13 +80,9 @@ class NavBrukerService(
 			telefon = kontaktinformasjon?.telefonnummer ?:  personOpplysninger.telefonnummer,
 			epost = kontaktinformasjon?.epost,
 			erSkjermet = erSkjermet,
-			adresse = if (adressebeskyttelse == null) {
-				personOpplysninger.adresse
-			} else {
-				null
-			},
+			adresse = getAdresse(personOpplysninger),
 			sisteKrrSync = LocalDateTime.now(),
-			adressebeskyttelse = adressebeskyttelse
+			adressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
 		)
 
 		upsert(navBruker)
@@ -179,7 +177,7 @@ class NavBrukerService(
 
 		if (bruker.adressebeskyttelse == oppdatertAdressebeskyttelse) return
 
-		upsert(bruker.copy(adressebeskyttelse = oppdatertAdressebeskyttelse))
+		upsert(bruker.copy(adressebeskyttelse = oppdatertAdressebeskyttelse, adresse = getAdresse(personOpplysninger)))
 	}
 
 	fun oppdaterAdresse(personidenter: List<String>) {
@@ -202,9 +200,20 @@ class NavBrukerService(
 			return
 		}
 
-		if (bruker.adresse == personOpplysninger.adresse) return
+		val oppdatertAdresse = getAdresse(personOpplysninger)
 
-		upsert(bruker.copy(adresse = personOpplysninger.adresse))
+		if (bruker.adresse == oppdatertAdresse) return
+
+		upsert(bruker.copy(adresse = oppdatertAdresse))
+	}
+
+	private fun getAdresse(personopplysninger: PdlPerson): Adresse? {
+		val adressebeskyttelse = personopplysninger.getAdressebeskyttelse()
+		return if (adressebeskyttelse == null) {
+			personopplysninger.adresse
+		} else {
+			null
+		}
 	}
 
 	fun slettBruker(bruker: NavBruker) {
