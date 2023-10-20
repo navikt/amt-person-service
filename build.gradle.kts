@@ -22,7 +22,7 @@ repositories {
 	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2023.09.13_04.55-a8ff452fbd94"
+val commonVersion = "3.2023.10.18_13.28-58db82ecb1a5"
 val okhttp3Version = "4.12.0"
 val kotestVersion = "5.7.2"
 val poaoTilgangVersion = "2023.09.25_09.26-72043f243cad"
@@ -30,7 +30,7 @@ val testcontainersVersion = "1.19.1"
 val tokenSupportVersion = "3.1.7"
 val mockkVersion = "1.13.8"
 val lang3Version = "3.13.0"
-val shedlockVersion = "5.9.0"
+val shedlockVersion = "5.9.1"
 val confluentVersion = "7.3.3"
 val avroVersion = "1.11.3"
 val flywayVersion = "9.22.3"
@@ -56,7 +56,6 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
-	implementation("com.squareup.okio:okio:3.6.0")//overstyrer sårbar dependency
 	implementation("org.flywaydb:flyway-core:$flywayVersion")
 	implementation("org.postgresql:postgresql")
 
