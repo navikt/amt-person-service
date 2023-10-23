@@ -64,9 +64,8 @@ dependencies {
 	implementation("no.nav.common:token-client:$commonVersion")
 	implementation("no.nav.common:rest:$commonVersion")
 	implementation("no.nav.common:job:$commonVersion")
-	implementation("no.nav.common:kafka:$commonVersion") {
-		exclude("org.xerial.snappy", "snappy-java")
-	}
+	implementation("no.nav.common:kafka:$commonVersion")
+	implementation("org.xerial.snappy:snappy-java:1.1.10.5") // overstyrer sårbar dependency
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 	implementation("org.apache.avro:avro:$avroVersion")
