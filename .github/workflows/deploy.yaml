@@ -22,15 +22,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Setup Gradle
+      - name: Setup Gradle to generate and submit dependency graphs
         uses: gradle/gradle-build-action@v2
+        with:
+          dependency-graph: generate-and-submit
       - name: Build artifacts
         run: ./gradlew build
-      - name: Dependency submission (for dependabot)
-        uses: mikepenz/gradle-dependency-submission@v0.9.0
-        with:
-          fail-on-error: true
-          gradle-dependency-path: "build.gradle.kts"
       - name: docker-build-push
         uses: nais/docker-build-push@v0
         id: docker-build-push
@@ -70,8 +67,6 @@ jobs:
     name: Deploy application to prod
     needs: [ test-build-and-push, deploy-dev ]
     runs-on: ubuntu-latest
-    permissions:
-      contents: "write"
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
@@ -83,9 +78,3 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/nais-prod.yaml
           VAR: image=${{ needs.test-build-and-push.outputs.image }}
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{ env.IMAGE_TAG }}
-          tag_name: release_${{ env.IMAGE_TAG }}
-          prerelease: false
