@@ -33,7 +33,6 @@ val lang3Version = "3.13.0"
 val shedlockVersion = "5.9.1"
 val confluentVersion = "7.3.3"
 val avroVersion = "1.11.3"
-val flywayVersion = "9.22.3"
 val jacksonVersion = "2.15.3"
 val micrometerVersion = "1.11.5"
 val postgresVersion = "42.6.0"
@@ -56,7 +55,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 	implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
-	implementation("org.flywaydb:flyway-core:$flywayVersion")
+	implementation("org.flywaydb:flyway-core")
 	implementation("org.postgresql:postgresql")
 
 	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
