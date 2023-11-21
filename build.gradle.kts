@@ -35,7 +35,7 @@ val confluentVersion = "7.3.3"
 val avroVersion = "1.11.3"
 val jacksonVersion = "2.16.0"
 val micrometerVersion = "1.12.0"
-val postgresVersion = "42.6.0"
+val postgresVersion = "42.7.0"
 val mockOauth2ServerVersion = "2.0.0"
 
 dependencies {
