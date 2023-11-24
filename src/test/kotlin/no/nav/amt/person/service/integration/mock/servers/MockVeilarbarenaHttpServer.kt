@@ -11,6 +11,6 @@ class MockVeilarbarenaHttpServer : MockHttpServer(name = "MockVeilarbarenaHttpSe
 				.setResponseCode(200)
 				.setBody("""{"oppfolgingsenhet": $enhet}""")
 
-		addResponseHandler("/veilarbarena/api/arena/status?fnr=$fnr", response)
+		addResponseHandler("/veilarbarena/api/v2/arena/hent-status", response)
 	}
 }

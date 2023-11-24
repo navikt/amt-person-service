@@ -23,7 +23,7 @@ class VeilarbarenaClient(
 	fun hentBrukerOppfolgingsenhetId(fnr: String): String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
-			.url("$baseUrl/veilarbarena/api/arena/hent-status")
+			.url("$baseUrl/veilarbarena/api/v2/arena/hent-status")
 			.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
 			.addHeader("Nav-Consumer-Id", consumerId)
 			.post(personRequestJson.toRequestBody(mediaTypeJson))
