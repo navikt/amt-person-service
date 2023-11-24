@@ -64,7 +64,6 @@ dependencies {
 	implementation("no.nav.common:rest:$commonVersion")
 	implementation("no.nav.common:job:$commonVersion")
 	implementation("no.nav.common:kafka:$commonVersion")
-	implementation("no.nav.common:types:$commonVersion")
 	implementation("org.xerial.snappy:snappy-java:1.1.10.5") // overstyrer sårbar dependency
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")

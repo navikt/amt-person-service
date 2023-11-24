@@ -4,7 +4,6 @@ import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
-import no.nav.common.types.identer.Fnr
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.function.Supplier
@@ -22,7 +21,7 @@ class VeilarbarenaClient(
 	}
 
 	fun hentBrukerOppfolgingsenhetId(fnr: String): String? {
-		val personRequestJson = toJsonString(PersonRequest(Fnr(fnr)))
+		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$baseUrl/veilarbarena/api/arena/hent-status")
 			.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
@@ -53,6 +52,6 @@ class VeilarbarenaClient(
 	)
 
 	private data class PersonRequest(
-		val fnr: Fnr
+		val fnr: String
 	)
 }
