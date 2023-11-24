@@ -6,9 +6,9 @@ import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.function.Supplier
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.function.Supplier
 
 class VeilarbarenaClient(
 	private val baseUrl: String,
