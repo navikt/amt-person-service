@@ -41,8 +41,8 @@ class VeilarbarenaClientTest {
 
 		val request = server.takeRequest()
 
-		request.path shouldBe "/veilarbarena/api/arena/status?fnr=987654"
-		request.method shouldBe "GET"
+		request.path shouldBe "/veilarbarena/api/v2/arena/hent-status"
+		request.method shouldBe "POST"
 		request.getHeader("Authorization") shouldBe "Bearer VEILARBARENA_TOKEN"
 		request.getHeader("Nav-Consumer-Id") shouldBe "amt-person-service"
 	}
