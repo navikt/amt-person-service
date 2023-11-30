@@ -47,6 +47,7 @@ spec:
       rules:
         - application: amt-arrangor
         - application: amt-tiltak
+        - application: amt-deltaker-bff
     outbound:
       rules:
         - application: poao-tilgang
