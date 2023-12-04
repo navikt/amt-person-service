@@ -109,6 +109,7 @@ class IntegrationTestBase {
 			registry.add("no.nav.security.jwt.issuer.azuread.accepted-audience") { "test-aud" }
 
 			registry.add("kodeverk.url") { "http://kodeverk" }
+			registry.add("kodeverk.scope") { "test.kodeverk" }
 
 			val container = SingletonPostgresContainer.getContainer()
 

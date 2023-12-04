@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients.kodeverk
 
 import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
+import no.nav.common.token_client.client.MachineToMachineTokenClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.slf4j.LoggerFactory
@@ -16,7 +17,9 @@ import java.util.UUID
 @Component
 class KodeverkClient(
 	@Value("\${kodeverk.url}") private val url: String,
-	private val kodeverkHttpClient: OkHttpClient
+	@Value("\${kodeverk.scope}") private val scope: String,
+	private val kodeverkHttpClient: OkHttpClient,
+	private val machineToMachineTokenClient: MachineToMachineTokenClient
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -27,6 +30,7 @@ class KodeverkClient(
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 			.header("Nav-Call-Id", callId.toString())
 			.header("Nav-Consumer-Id", "amt-person-service")
+			.header("Authorization", "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
 			.get()
 			.build()
 

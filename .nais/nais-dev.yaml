@@ -78,6 +78,8 @@ spec:
       value: https://norg2.dev-fss-pub.nais.io
     - name: KODEVERK_URL
       value: https://kodeverk.dev-fss-pub.nais.io
+    - name: KODEVERK_SCOPE
+      value: api://dev-fss.team-rocket.kodeverk/.default
     - name: POAO_TILGANG_SCOPE
       value: api://dev-gcp.poao.poao-tilgang/.default
     - name: POAO_TILGANG_URL
