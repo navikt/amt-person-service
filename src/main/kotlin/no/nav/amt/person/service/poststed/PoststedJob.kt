@@ -14,7 +14,7 @@ class PoststedJob(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@Scheduled(cron = "0 0/15 * * * *")// hvert kvarter for å teste
+	@Scheduled(cron = "0 0 6 * * *")
 	@SchedulerLock(name = "PoststedJob", lockAtMostFor = "30m")
 	fun run() {
 		val sporingsId = UUID.randomUUID()
