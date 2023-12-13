@@ -22,7 +22,7 @@ repositories {
 	maven { setUrl("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2023.10.18_13.28-58db82ecb1a5"
+val commonVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val okhttp3Version = "4.12.0"
 val kotestVersion = "5.8.0"
 val poaoTilgangVersion = "2023.09.25_09.26-72043f243cad"
@@ -36,7 +36,7 @@ val avroVersion = "1.11.3"
 val jacksonVersion = "2.16.0"
 val micrometerVersion = "1.12.1"
 val postgresVersion = "42.7.1"
-val mockOauth2ServerVersion = "2.0.1"
+val mockOauth2ServerVersion = "2.1.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -46,7 +46,6 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-logging")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	implementation("org.yaml:snakeyaml:2.2")//overstyrer sårbar dependency
 
 	implementation("org.springframework.retry:spring-retry")
 	implementation("org.springframework:spring-aspects")
