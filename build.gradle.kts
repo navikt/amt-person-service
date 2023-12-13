@@ -36,7 +36,7 @@ val avroVersion = "1.11.3"
 val jacksonVersion = "2.16.0"
 val micrometerVersion = "1.12.1"
 val postgresVersion = "42.7.1"
-val mockOauth2ServerVersion = "2.0.1"
+val mockOauth2ServerVersion = "2.1.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
