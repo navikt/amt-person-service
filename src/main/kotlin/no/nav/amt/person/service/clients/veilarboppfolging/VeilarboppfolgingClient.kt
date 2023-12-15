@@ -21,7 +21,7 @@ class VeilarboppfolgingClient(
 	fun hentVeilederIdent(fnr: String) : String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
-			.url("$apiUrl/api/v3//hent-veileder")
+			.url("$apiUrl/api/v3/hent-veileder")
 			.header("Accept", "application/json; charset=utf-8")
 			.header("Authorization", "Bearer ${veilarboppfolgingTokenProvider.get()}")
 			.post(personRequestJson.toRequestBody(mediaTypeJson))
