@@ -60,7 +60,7 @@ class VeilarboppfolgingClientTest {
 
 		val request = server.takeRequest()
 
-		request.path shouldBe "/api/api/v2/veileder?fnr=$fnr"
+		request.path shouldBe "/api/api/v3/hent-veileder"
 	}
 
 	@Test
