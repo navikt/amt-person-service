@@ -38,6 +38,8 @@ val micrometerVersion = "1.12.1"
 val postgresVersion = "42.7.1"
 val mockOauth2ServerVersion = "2.1.0"
 
+extra["logback.version"] = "1.4.12"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
