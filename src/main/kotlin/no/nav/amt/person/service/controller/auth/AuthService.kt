@@ -18,7 +18,7 @@ class AuthService(
 
 	private fun isRequestFromMachine(): Boolean {
 		val claims = tokenValidationContextHolder
-			.tokenValidationContext
+			.getTokenValidationContext()
 			.getClaims(Issuer.AZURE_AD)
 
 		val sub = claims.getStringClaim("sub")?.let { UUID.fromString(it) }
