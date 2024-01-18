@@ -36,7 +36,7 @@ val avroVersion = "1.11.3"
 val jacksonVersion = "2.16.1"
 val micrometerVersion = "1.12.2"
 val postgresVersion = "42.7.1"
-val mockOauth2ServerVersion = "2.1.0"
+val mockOauth2ServerVersion = "2.1.1"
 
 extra["logback.version"] = "1.4.14"
 
