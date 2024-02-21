@@ -79,6 +79,15 @@ class PersonController (
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+	@GetMapping("/nav-enhet/{id}")
+	fun hentNavEnhet(
+		@PathVariable id: UUID
+	): NavEnhetDto {
+		authService.verifyRequestIsMachineToMachine()
+		return navEnhetService.hentNavEnhet(id).toDto()
+	}
+
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/person/adressebeskyttelse")
 	fun hentAdressebeskyttelse(
 		@RequestBody request: AdressebeskyttelseRequest

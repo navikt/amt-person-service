@@ -22,6 +22,7 @@ import no.nav.amt.person.service.person.model.IdentType
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 
 class PersonControllerTest: IntegrationTestBase() {
 
@@ -292,12 +293,34 @@ class PersonControllerTest: IntegrationTestBase() {
 	}
 
 	@Test
+	fun `hentNavEnhet - enhet finnes - skal ha status 200 og returnere riktig response`() {
+		val navEnhet = TestData.lagNavEnhet()
+		testDataRepository.insertNavEnhet(navEnhet)
+
+		val response = sendRequest(
+			method = "GET",
+			path = "/api/nav-enhet/${navEnhet.id}",
+			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
+		)
+
+		response.code shouldBe 200
+
+		val body = objectMapper.readValue<NavEnhetDto>(response.body!!.string())
+
+		navEnhet.id shouldBe body.id
+		navEnhet.enhetId shouldBe body.enhetId
+		navEnhet.navn shouldBe body.navn
+	}
+
+	@Test
 	internal fun `skal teste token autentisering`() {
 		val requestBuilders = listOf(
 			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/arrangor-ansatt"),
 			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-ansatt"),
 			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-bruker"),
 			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-enhet"),
+			Request.Builder().get().url("${serverUrl()}/api/nav-ansatt/${UUID.randomUUID()}"),
+			Request.Builder().get().url("${serverUrl()}/api/nav-enhet/${UUID.randomUUID()}")
 		)
 		testTokenAutentisering(requestBuilders)
 	}
