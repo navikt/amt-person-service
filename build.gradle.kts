@@ -24,7 +24,7 @@ repositories {
 
 val commonVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val okhttp3Version = "4.12.0"
-val kotestVersion = "5.8.0"
+val kotestVersion = "5.8.1"
 val poaoTilgangVersion = "2023.09.25_09.26-72043f243cad"
 val testcontainersVersion = "1.19.7"
 val tokenSupportVersion = "4.1.3"
