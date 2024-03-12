@@ -34,7 +34,7 @@ val shedlockVersion = "5.12.0"
 val confluentVersion = "7.5.1"
 val avroVersion = "1.11.3"
 val jacksonVersion = "2.16.2"
-val micrometerVersion = "1.12.3"
+val micrometerVersion = "1.12.4"
 val mockOauth2ServerVersion = "2.1.2"
 
 extra["postgresql.version"] = "42.7.2"
