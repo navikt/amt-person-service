@@ -61,7 +61,7 @@ spec:
         - host: norg2.prod-fss-pub.nais.io
         - host: nom-api.intern.nav.no
         - host: veilarbarena.prod-fss-pub.nais.io
-        - host: kodeverk.prod-fss-pub.nais.io
+        - host: kodeverk-api.nav.no
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
@@ -78,9 +78,9 @@ spec:
     - name: NORG_URL
       value: https://norg2.prod-fss-pub.nais.io
     - name: KODEVERK_URL
-      value: https://kodeverk.prod-fss-pub.nais.io
+      value: https://kodeverk-api.nav.no
     - name: KODEVERK_SCOPE
-      value: api://prod-fss.team-rocket.kodeverk/.default
+      value: api://prod-gcp.team-rocket.kodeverk-api/.default
     - name: POAO_TILGANG_SCOPE
       value: api://prod-gcp.poao.poao-tilgang/.default
     - name: POAO_TILGANG_URL
