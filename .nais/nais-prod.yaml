@@ -128,3 +128,12 @@ spec:
         databases:
           - name: amt-person-service
             envVarPrefix: DB
+
+  observability:
+      autoInstrumentation:
+        enabled: true
+        runtime: java
+      logging:
+        destinations:
+          - id: elastic
+          - id: loki
