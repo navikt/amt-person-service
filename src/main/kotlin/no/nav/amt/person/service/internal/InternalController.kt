@@ -106,13 +106,13 @@ class InternalController(
 	}
 
 	@Unprotected
-	@GetMapping("/nav-brukere/republiser/{personId}")
+	@GetMapping("/nav-brukere/republiser/{navBrukerId}")
 	fun republiserNavBruker(
 		servlet: HttpServletRequest,
-		@PathVariable("personId") personId: UUID
+		@PathVariable("navBrukerId") navBrukerId: UUID
 	) {
 		if (isInternal(servlet)) {
-			republiserNavBruker(personId)
+			republiserNavBruker(navBrukerId)
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
@@ -216,8 +216,8 @@ class InternalController(
 		} while (navbrukere.isNotEmpty())
 	}
 
-	private fun republiserNavBruker(personId: UUID) {
-		val bruker = navBrukerRepository.get(personId)
+	private fun republiserNavBruker(navBrukerId: UUID) {
+		val bruker = navBrukerRepository.get(navBrukerId)
 		kafkaProducerService.publiserNavBruker(bruker.toModel())
 	}
 
