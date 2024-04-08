@@ -35,7 +35,7 @@ val confluentVersion = "7.5.1"
 val avroVersion = "1.11.3"
 val jacksonVersion = "2.17.0"
 val micrometerVersion = "1.12.4"
-val mockOauth2ServerVersion = "2.1.2"
+val mockOauth2ServerVersion = "2.1.3"
 
 extra["postgresql.version"] = "42.7.2"
 
