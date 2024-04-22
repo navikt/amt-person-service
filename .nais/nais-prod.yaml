@@ -113,6 +113,8 @@ spec:
       value: amt.nav-ansatt-personalia-v1
     - name: DELTAKER_V2_TOPIC
       value: amt.deltaker-v2
+    - name: OPPFOLGINGSPERIODE_TOPIC
+      value: pto.oppfolgingsperiode-v1
 
   gcp:
     sqlInstances:

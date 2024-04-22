@@ -121,6 +121,27 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterOppfolgingsperiode(navBrukerId: UUID, oppfolgingsperiode: Oppfolgingsperiode) {
+		val bruker = repository.get(navBrukerId).toModel()
+		val oppfolgingsperioderFraDb = bruker.oppfolgingsperioder.toMutableList()
+
+		if (oppfolgingsperioderFraDb.find { it.id == oppfolgingsperiode.id } == null) {
+			oppfolgingsperioderFraDb.add(oppfolgingsperiode)
+			upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioderFraDb))
+		} else {
+			val eksisterendePeriode = oppfolgingsperioderFraDb.find { it.id == oppfolgingsperiode.id }
+				?: throw IllegalStateException("Oppfølgingsperiode som ikke var null kan ikke være null")
+			if (eksisterendePeriode.startdato.toLocalDate() == oppfolgingsperiode.startdato.toLocalDate() &&
+				eksisterendePeriode.sluttdato?.toLocalDate() == oppfolgingsperiode.sluttdato?.toLocalDate()) {
+				return
+			} else {
+				oppfolgingsperioderFraDb.removeIf { it.id == oppfolgingsperiode.id }
+				oppfolgingsperioderFraDb.add(oppfolgingsperiode)
+				upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioderFraDb))
+			}
+		}
+	}
+
 	fun oppdaterKontaktinformasjon(bruker: NavBruker) {
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
 			val feilmelding =

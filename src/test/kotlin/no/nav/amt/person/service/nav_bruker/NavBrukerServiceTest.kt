@@ -362,4 +362,80 @@ class NavBrukerServiceTest {
 		verify(exactly = 0) { personService.slettPerson(bruker.person.toModel()) }
 		verify { kafkaProducerService.publiserSlettNavBruker(bruker.person.id) }
 	}
+
+	@Test
+	fun `oppdaterOppfolgingsperiode - har ingen oppfolgingsperioder - lagrer`() {
+		val bruker = TestData.lagNavBruker(oppfolgingsperioder = emptyList())
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+		val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
+
+		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+
+		verify(exactly = 1) { repository.upsert(match {
+			it.oppfolgingsperioder == listOf(oppfolgingsperiode)
+
+		}) }
+	}
+
+	@Test
+	fun `oppdaterOppfolgingsperiode - har eldre oppfolgingsperiode - lagrer`() {
+		val bruker = TestData.lagNavBruker(oppfolgingsperioder = listOf(
+			Oppfolgingsperiode(
+				id = UUID.randomUUID(),
+				startdato = LocalDateTime.now().minusYears(3),
+				sluttdato = LocalDateTime.now().minusYears(1)
+			)
+		))
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+		val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
+
+		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+
+		verify(exactly = 1) { repository.upsert(match {
+			it.oppfolgingsperioder.size == 2 &&
+				it.oppfolgingsperioder.find { it.id == bruker.oppfolgingsperioder.first().id } == bruker.oppfolgingsperioder.first() &&
+				it.oppfolgingsperioder.find { it.id == oppfolgingsperiode.id } == oppfolgingsperiode
+		}) }
+	}
+
+	@Test
+	fun `oppdaterOppfolgingsperiode - har samme oppfolgingsperiode, annen sluttdato - oppdaterer`() {
+		val bruker = TestData.lagNavBruker(oppfolgingsperioder = listOf(
+			Oppfolgingsperiode(
+				id = UUID.randomUUID(),
+				startdato = LocalDateTime.now().minusYears(3),
+				sluttdato = LocalDateTime.now().minusYears(1)
+			)
+		))
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+		val oppfolgingsperiode = bruker.oppfolgingsperioder.first().copy(sluttdato = null)
+
+		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+
+		verify(exactly = 1) { repository.upsert(match {
+			it.oppfolgingsperioder.size == 1 &&
+				it.oppfolgingsperioder.find { it.id == bruker.oppfolgingsperioder.first().id } == oppfolgingsperiode
+		}) }
+	}
+
+	@Test
+	fun `oppdaterOppfolgingsperiode - har samme oppfolgingsperiode, ingen endring - oppdaterer ikke`() {
+		val bruker = TestData.lagNavBruker(oppfolgingsperioder = listOf(
+			Oppfolgingsperiode(
+				id = UUID.randomUUID(),
+				startdato = LocalDateTime.now().minusYears(3),
+				sluttdato = LocalDateTime.now().minusYears(1)
+			)
+		))
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+		val oppfolgingsperiode = bruker.oppfolgingsperioder.first()
+
+		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+
+		verify(exactly = 0) { repository.upsert(any()) }
+	}
 }
