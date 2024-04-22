@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_bruker.dbo
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
 import no.nav.amt.person.service.nav_bruker.NavBruker
+import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Adresse
@@ -21,7 +22,8 @@ data class NavBrukerDbo(
 	val sisteKrrSync: LocalDateTime?,
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime,
-	val adressebeskyttelse: Adressebeskyttelse?
+	val adressebeskyttelse: Adressebeskyttelse?,
+	val oppfolgingsperioder: List<Oppfolgingsperiode>
 ) {
 	fun toModel() = NavBruker(
 		id = id,
@@ -33,6 +35,7 @@ data class NavBrukerDbo(
 		erSkjermet = erSkjermet,
 		adresse = adresse,
 		sisteKrrSync = sisteKrrSync,
-		adressebeskyttelse = adressebeskyttelse
+		adressebeskyttelse = adressebeskyttelse,
+		oppfolgingsperioder = oppfolgingsperioder
 	)
 }

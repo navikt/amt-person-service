@@ -97,7 +97,8 @@ class NavBrukerProducerTest: IntegrationTestBase() {
 				epost = navBruker.epost,
 				erSkjermet = navBruker.erSkjermet,
 				adresse = navBruker.adresse,
-				adressebeskyttelse = navBruker.adressebeskyttelse
+				adressebeskyttelse = navBruker.adressebeskyttelse,
+				oppfolgingsperioder = navBruker.oppfolgingsperioder
 			)
 		)
 	}

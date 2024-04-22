@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.nav_bruker.dbo
 
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
+import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.model.Adresse
 import java.time.LocalDateTime
 import java.util.*
@@ -15,5 +16,6 @@ data class NavBrukerUpsert(
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
 	val sisteKrrSync: LocalDateTime? = null,
-	val adressebeskyttelse: Adressebeskyttelse?
+	val adressebeskyttelse: Adressebeskyttelse?,
+	val oppfolgingsperioder: List<Oppfolgingsperiode>
 )

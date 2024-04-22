@@ -10,6 +10,7 @@ import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.getNullableUUID
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
+import no.nav.amt.person.service.utils.toPGObject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
@@ -61,7 +62,8 @@ class NavBrukerRepository(
 			sisteKrrSync = rs.getTimestamp("siste_krr_sync")?.toLocalDateTime(),
 			createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
 			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
-			adressebeskyttelse = rs.getString("nav_bruker.adressebeskyttelse")?.let { Adressebeskyttelse.valueOf(it) }
+			adressebeskyttelse = rs.getString("nav_bruker.adressebeskyttelse")?.let { Adressebeskyttelse.valueOf(it) },
+			oppfolgingsperioder = rs.getString("nav_bruker.oppfolgingsperioder")?.let { fromJsonString<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
 		)
 	}
 
@@ -131,7 +133,8 @@ class NavBrukerRepository(
 				er_skjermet,
 				adresse,
 				siste_krr_sync,
-				adressebeskyttelse
+				adressebeskyttelse,
+				oppfolgingsperioder
 			) values (
 				:id,
 				:personId,
@@ -142,7 +145,8 @@ class NavBrukerRepository(
 				:erSkjermet,
 				:adresse,
 				:sisteKrrSync,
-				:adressebeskyttelse
+				:adressebeskyttelse,
+				:oppfolgingsperioder
 			) on conflict(person_id) do update set
 				nav_veileder_id = :navVeilederId,
 				nav_enhet_id = :navEnhetId,
@@ -152,6 +156,7 @@ class NavBrukerRepository(
 				adresse = :adresse,
 				siste_krr_sync = :sisteKrrSync,
 				adressebeskyttelse = :adressebeskyttelse,
+				oppfolgingsperioder = :oppfolgingsperioder,
 				modified_at = current_timestamp
 				where nav_bruker.id = :id
 		""".trimIndent()
@@ -164,9 +169,10 @@ class NavBrukerRepository(
 			"telefon" to bruker.telefon,
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
-			"adresse" to bruker.adresse?.toPGObject(),
+			"adresse" to toPGObject(bruker.adresse),
 			"sisteKrrSync" to bruker.sisteKrrSync,
-			"adressebeskyttelse" to bruker.adressebeskyttelse?.name
+			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
+			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder)
 		)
 
 		template.update(sql, parameters)
@@ -184,6 +190,7 @@ class NavBrukerRepository(
 				   nav_bruker.er_skjermet as "nav_bruker.er_skjermet",
 				   nav_bruker.adresse as "nav_bruker.adresse",
 				   nav_bruker.adressebeskyttelse as "nav_bruker.adressebeskyttelse",
+				   nav_bruker.oppfolgingsperioder as "nav_bruker.oppfolgingsperioder",
 				   nav_bruker.siste_krr_sync,
 				   nav_bruker.created_at as "nav_bruker.created_at",
 				   nav_bruker.modified_at as "nav_bruker.modified_at",

@@ -2,6 +2,7 @@ package no.nav.amt.person.service.controller.dto
 
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
 import no.nav.amt.person.service.nav_bruker.NavBruker
+import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
@@ -18,7 +19,8 @@ data class NavBrukerDto (
 	val epost: String?,
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
-	val adressebeskyttelse: Adressebeskyttelse?
+	val adressebeskyttelse: Adressebeskyttelse?,
+	val oppfolgingsperioder: List<Oppfolgingsperiode>
 )
 
 fun NavBruker.toDto() = NavBrukerDto(
@@ -33,5 +35,6 @@ fun NavBruker.toDto() = NavBrukerDto(
 	epost = this.epost,
 	erSkjermet = this.erSkjermet,
 	adresse = this.adresse,
-	adressebeskyttelse = this.adressebeskyttelse
+	adressebeskyttelse = this.adressebeskyttelse,
+	oppfolgingsperioder = this.oppfolgingsperioder
 )

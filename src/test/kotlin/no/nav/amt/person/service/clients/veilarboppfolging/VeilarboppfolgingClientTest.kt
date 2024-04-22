@@ -1,11 +1,14 @@
 package no.nav.amt.person.service.clients.veilarboppfolging
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.ZonedDateTime
+import java.util.UUID
 
 class VeilarboppfolgingClientTest {
     private lateinit var server: MockWebServer
@@ -71,4 +74,31 @@ class VeilarboppfolgingClientTest {
 		veileder shouldBe null
 	}
 
+	@Test
+	fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`() {
+		val id = UUID.randomUUID()
+		val startdato = ZonedDateTime.now()
+		val oppfolgingStatus = VeilarboppfolgingClient.OppfolgingStatus(
+			oppfolgingsPerioder = listOf(
+				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+					uuid = id,
+					startDato = startdato,
+					sluttDato = null
+				)
+			)
+		)
+		server.enqueue(MockResponse().setBody(toJsonString(oppfolgingStatus)))
+
+		val oppfolgingsperioder = client.hentOppfolgingperioder(fnr)
+		oppfolgingsperioder.size shouldBe 1
+		oppfolgingsperioder.first().id shouldBe id
+		oppfolgingsperioder.first().startdato.toLocalDate() shouldBe startdato.toLocalDate()
+		oppfolgingsperioder.first().sluttdato shouldBe null
+	}
+
+	@Test
+	fun `hentOppfolgingperioder - manglende tilgang - kaster exception`() {
+		server.enqueue(MockResponse().setResponseCode(401))
+		assertThrows<RuntimeException> { client.hentOppfolgingperioder("123")  }
+	}
 }

@@ -18,7 +18,8 @@ data class NavBruker(
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
 	val sisteKrrSync: LocalDateTime?,
-	val adressebeskyttelse: Adressebeskyttelse?
+	val adressebeskyttelse: Adressebeskyttelse?,
+	val oppfolgingsperioder: List<Oppfolgingsperiode>
 ) {
 	fun toUpsert() = NavBrukerUpsert(
 		id = this.id,
@@ -30,7 +31,8 @@ data class NavBruker(
 		erSkjermet = this.erSkjermet,
 		adresse = this.adresse,
 		sisteKrrSync = this.sisteKrrSync,
-		adressebeskyttelse = this.adressebeskyttelse
+		adressebeskyttelse = this.adressebeskyttelse,
+		oppfolgingsperioder = this.oppfolgingsperioder
 	)
 }
 

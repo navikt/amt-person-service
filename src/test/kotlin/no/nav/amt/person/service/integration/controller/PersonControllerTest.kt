@@ -1,8 +1,6 @@
 package no.nav.amt.person.service.integration.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
@@ -19,14 +17,13 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.utils.JsonUtils.objectMapper
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 class PersonControllerTest: IntegrationTestBase() {
-
-	private val objectMapper = ObjectMapper().registerKotlinModule()
 
 	@Autowired
 	lateinit var personService: PersonService
@@ -102,6 +99,7 @@ class PersonControllerTest: IntegrationTestBase() {
 
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
+		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
@@ -162,6 +160,7 @@ class PersonControllerTest: IntegrationTestBase() {
 			)
 		)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
+		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
@@ -357,6 +356,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.epost shouldBe brukerDto.epost
 		faktiskBruker.erSkjermet shouldBe brukerDto.erSkjermet
 		faktiskBruker.adressebeskyttelse shouldBe brukerDto.adressebeskyttelse
+		faktiskBruker.oppfolgingsperioder shouldBe brukerDto.oppfolgingsperioder
 	}
 
 }

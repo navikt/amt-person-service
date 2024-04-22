@@ -4,6 +4,7 @@ import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
@@ -37,6 +38,7 @@ class NavBrukerService(
 	private val krrProxyClient: KrrProxyClient,
 	private val poaoTilgangClient: PoaoTilgangClient,
 	private val pdlClient: PdlClient,
+	private val veilarboppfolgingClient: VeilarboppfolgingClient,
 	private val kafkaProducerService: KafkaProducerService,
 	private val transactionTemplate: TransactionTemplate,
 ) {
@@ -71,6 +73,7 @@ class NavBrukerService(
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
+		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -82,7 +85,8 @@ class NavBrukerService(
 			erSkjermet = erSkjermet,
 			adresse = getAdresse(personOpplysninger),
 			sisteKrrSync = LocalDateTime.now(),
-			adressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
+			adressebeskyttelse = personOpplysninger.getAdressebeskyttelse(),
+			oppfolgingsperioder = oppfolgingsperioder
 		)
 
 		upsert(navBruker)

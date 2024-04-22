@@ -8,6 +8,7 @@ import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
@@ -36,6 +37,7 @@ class NavBrukerServiceTest {
 	lateinit var krrProxyClient: KrrProxyClient
 	lateinit var poaoTilgangClient: PoaoTilgangClient
 	lateinit var pdlClient: PdlClient
+	lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
 	lateinit var kafkaProducerService: KafkaProducerService
 	lateinit var transactionTemplate: TransactionTemplate
 
@@ -48,6 +50,7 @@ class NavBrukerServiceTest {
 		krrProxyClient = mockk()
 		poaoTilgangClient = mockk()
 		pdlClient = mockk()
+		veilarboppfolgingClient = mockk()
 		rolleService = mockk(relaxUnitFun = true)
 		kafkaProducerService = mockk(relaxUnitFun = true)
 		transactionTemplate = mockk()
@@ -61,6 +64,7 @@ class NavBrukerServiceTest {
 			krrProxyClient = krrProxyClient,
 			poaoTilgangClient = poaoTilgangClient,
 			pdlClient = pdlClient,
+			veilarboppfolgingClient = veilarboppfolgingClient,
 			kafkaProducerService = kafkaProducerService,
 			transactionTemplate = transactionTemplate,
 		)
@@ -79,6 +83,7 @@ class NavBrukerServiceTest {
 
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
+		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -97,6 +102,7 @@ class NavBrukerServiceTest {
 		faktiskBruker.epost shouldBe kontaktinformasjon.epost
 		faktiskBruker.erSkjermet shouldBe erSkjermet
 		faktiskBruker.adressebeskyttelse shouldBe null
+		faktiskBruker.oppfolgingsperioder shouldBe navBruker.oppfolgingsperioder
 	}
 
 	@Test
@@ -111,6 +117,7 @@ class NavBrukerServiceTest {
 
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
+		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()

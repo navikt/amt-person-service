@@ -7,6 +7,7 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
+import no.nav.amt.person.service.utils.toPGObject
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -185,6 +186,7 @@ class TestDataRepository(
 				siste_krr_sync,
 				adresse,
 				adressebeskyttelse,
+				oppfolgingsperioder,
 				created_at,
 				modified_at
 			) values (
@@ -198,6 +200,7 @@ class TestDataRepository(
 				:sisteKrrSync,
 				:adresse,
 				:adressebeskyttelse,
+				:oppfolgingsperioder,
 				:createdAt,
 				:modifiedAt
 			)
@@ -212,8 +215,9 @@ class TestDataRepository(
 			"epost" to bruker.epost,
 			"erSkjermet" to bruker.erSkjermet,
 			"sisteKrrSync" to bruker.sisteKrrSync,
-			"adresse" to bruker.adresse?.toPGObject(),
+			"adresse" to toPGObject(bruker.adresse),
 			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
+			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
 			"createdAt" to bruker.createdAt,
 			"modifiedAt" to bruker.modifiedAt
 		)
