@@ -49,7 +49,7 @@ class VeilarboppfolgingClient(
 	fun hentOppfolgingperioder(fnr: String) : List<Oppfolgingsperiode> {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
-			.url("$apiUrl/api/v3/oppfolging/hent-status")
+			.url("$apiUrl/api/v3/oppfolging/hent-perioder")
 			.header("Accept", "application/json; charset=utf-8")
 			.header("Authorization", "Bearer ${veilarboppfolgingTokenProvider.get()}")
 			.post(personRequestJson.toRequestBody(mediaTypeJson))
@@ -61,9 +61,9 @@ class VeilarboppfolgingClient(
 			}
 			val body = response.body?.string() ?: throw RuntimeException("Body mangler i hent status-respons fra veilarboppfolging")
 
-			val oppfolgingStatusRespons = fromJsonString<OppfolgingStatus>(body)
+			val oppfolgingsperioderRespons = fromJsonString<List<OppfolgingPeriodeDTO>>(body)
 
-			return oppfolgingStatusRespons.oppfolgingsPerioder.map { it.toOppfolgingsperiode() }
+			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
 		}
 	}
 
@@ -73,10 +73,6 @@ class VeilarboppfolgingClient(
 
 	private data class PersonRequest(
 		val fnr: String
-	)
-
-	data class OppfolgingStatus(
-		val oppfolgingsPerioder: List<OppfolgingPeriodeDTO>
 	)
 
 	data class OppfolgingPeriodeDTO(

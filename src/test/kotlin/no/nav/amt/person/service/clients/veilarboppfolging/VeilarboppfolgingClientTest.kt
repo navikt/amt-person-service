@@ -78,16 +78,14 @@ class VeilarboppfolgingClientTest {
 	fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`() {
 		val id = UUID.randomUUID()
 		val startdato = ZonedDateTime.now()
-		val oppfolgingStatus = VeilarboppfolgingClient.OppfolgingStatus(
-			oppfolgingsPerioder = listOf(
-				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
-					uuid = id,
-					startDato = startdato,
-					sluttDato = null
-				)
+		val oppfolgingsperioderRespons = listOf(
+			VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+				uuid = id,
+				startDato = startdato,
+				sluttDato = null
 			)
 		)
-		server.enqueue(MockResponse().setBody(toJsonString(oppfolgingStatus)))
+		server.enqueue(MockResponse().setBody(toJsonString(oppfolgingsperioderRespons)))
 
 		val oppfolgingsperioder = client.hentOppfolgingperioder(fnr)
 		oppfolgingsperioder.size shouldBe 1

@@ -32,7 +32,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 	}
 
 	fun mockHentOppfolgingperioder(fnr: String, oppfolgingsperioder: List<Oppfolgingsperiode>) {
-		val url = "/veilarboppfolging/api/v3/oppfolging/hent-status"
+		val url = "/veilarboppfolging/api/v3/oppfolging/hent-perioder"
 		val predicate = { req: RecordedRequest ->
 			val body = req.getBodyAsString()
 
@@ -41,19 +41,17 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 				&& body.contains(fnr)
 		}
 
-		val oppfolgingsstatusRespons = VeilarboppfolgingClient.OppfolgingStatus(
-			oppfolgingsPerioder = oppfolgingsperioder.map {
-				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
-					uuid = it.id,
-					startDato = it.startdato.atZone(ZoneId.systemDefault()),
-					sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault())
-				)
-			}
-		)
+		val oppfolgingsperioderRespons = oppfolgingsperioder.map {
+			VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+				uuid = it.id,
+				startDato = it.startdato.atZone(ZoneId.systemDefault()),
+				sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault())
+			)
+		}
 
 		val response = MockResponse()
 				.setResponseCode(200)
-				.setBody(toJsonString(oppfolgingsstatusRespons))
+				.setBody(toJsonString(oppfolgingsperioderRespons))
 		addResponseHandler(predicate, response)
 	}
 }
