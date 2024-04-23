@@ -56,13 +56,12 @@ class VeilarboppfolgingClient(
 			.build()
 
 		httpClient.newCall(request).execute().use { response ->
-			response.takeIf { !it.isSuccessful }
-				?.let { throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${it.code}") }
+			if (!response.isSuccessful) {
+				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
+			}
+			val body = response.body?.string() ?: throw RuntimeException("Body mangler i hent status-respons fra veilarboppfolging")
 
-			response.takeIf { it.body == null }
-				?.let { throw RuntimeException("Body mangler i hent status-respons fra veilarboppfolging") }
-
-			val oppfolgingStatusRespons = fromJsonString<OppfolgingStatus>(response.body!!.string())
+			val oppfolgingStatusRespons = fromJsonString<OppfolgingStatus>(body)
 
 			return oppfolgingStatusRespons.oppfolgingsPerioder.map { it.toOppfolgingsperiode() }
 		}
