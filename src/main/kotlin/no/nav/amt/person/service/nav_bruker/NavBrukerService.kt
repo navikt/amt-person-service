@@ -123,6 +123,13 @@ class NavBrukerService(
 
 	fun oppdaterOppfolgingsperiode(navBrukerId: UUID, oppfolgingsperiode: Oppfolgingsperiode) {
 		val bruker = repository.get(navBrukerId).toModel()
+		val oppfolgingsperioder = bruker.oppfolgingsperioder.filter { it.id != oppfolgingsperiode.id }.plus(oppfolgingsperiode)
+
+		if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
+			upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioder))
+		}
+	}
+		val bruker = repository.get(navBrukerId).toModel()
 		val oppfolgingsperioderFraDb = bruker.oppfolgingsperioder.toMutableList()
 
 		if (oppfolgingsperioderFraDb.find { it.id == oppfolgingsperiode.id } == null) {
