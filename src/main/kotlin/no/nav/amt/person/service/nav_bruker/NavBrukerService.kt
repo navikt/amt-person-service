@@ -15,10 +15,7 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
 import no.nav.amt.person.service.person.RolleService
 import no.nav.amt.person.service.person.model.Adresse
-import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
-import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.person.model.erBeskyttet
 import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
@@ -127,25 +124,6 @@ class NavBrukerService(
 
 		if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
 			upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioder))
-		}
-	}
-		val bruker = repository.get(navBrukerId).toModel()
-		val oppfolgingsperioderFraDb = bruker.oppfolgingsperioder.toMutableList()
-
-		if (oppfolgingsperioderFraDb.find { it.id == oppfolgingsperiode.id } == null) {
-			oppfolgingsperioderFraDb.add(oppfolgingsperiode)
-			upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioderFraDb))
-		} else {
-			val eksisterendePeriode = oppfolgingsperioderFraDb.find { it.id == oppfolgingsperiode.id }
-				?: throw IllegalStateException("Oppfølgingsperiode som ikke var null kan ikke være null")
-			if (eksisterendePeriode.startdato.toLocalDate() == oppfolgingsperiode.startdato.toLocalDate() &&
-				eksisterendePeriode.sluttdato?.toLocalDate() == oppfolgingsperiode.sluttdato?.toLocalDate()) {
-				return
-			} else {
-				oppfolgingsperioderFraDb.removeIf { it.id == oppfolgingsperiode.id }
-				oppfolgingsperioderFraDb.add(oppfolgingsperiode)
-				upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioderFraDb))
-			}
 		}
 	}
 
