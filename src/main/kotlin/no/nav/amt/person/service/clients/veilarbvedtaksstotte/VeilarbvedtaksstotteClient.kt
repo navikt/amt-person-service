@@ -59,14 +59,14 @@ class VeilarbvedtaksstotteClient(
 		GRADERT_VARIG_TILPASSET_INNSATS,
 		VARIG_TILPASSET_INNSATS
 	}
+}
 
-	private fun InnsatsgruppeDto.toInnsatsgruppe(): Innsatsgruppe {
-		return when (this) {
-			InnsatsgruppeDto.STANDARD_INNSATS -> Innsatsgruppe.STANDARD_INNSATS
-			InnsatsgruppeDto.SITUASJONSBESTEMT_INNSATS -> Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
-			InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS -> Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
-			InnsatsgruppeDto.GRADERT_VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
-			InnsatsgruppeDto.VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
-		}
+fun VeilarbvedtaksstotteClient.InnsatsgruppeDto.toInnsatsgruppe(): Innsatsgruppe {
+	return when (this) {
+		VeilarbvedtaksstotteClient.InnsatsgruppeDto.STANDARD_INNSATS -> Innsatsgruppe.STANDARD_INNSATS
+		VeilarbvedtaksstotteClient.InnsatsgruppeDto.SITUASJONSBESTEMT_INNSATS -> Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
+		VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS -> Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
+		VeilarbvedtaksstotteClient.InnsatsgruppeDto.GRADERT_VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
+		VeilarbvedtaksstotteClient.InnsatsgruppeDto.VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
 	}
 }

@@ -415,7 +415,6 @@ class NavBrukerServiceTest {
 
 		verify(exactly = 1) { repository.upsert(match {
 			it.oppfolgingsperioder == listOf(oppfolgingsperiode)
-
 		}) }
 	}
 
@@ -476,6 +475,90 @@ class NavBrukerServiceTest {
 		val oppfolgingsperiode = bruker.oppfolgingsperioder.first()
 
 		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+
+		verify(exactly = 0) { repository.upsert(any()) }
+	}
+
+	@Test
+	fun `oppdaterInnsatsgruppe - har aktiv oppfolgingsperiode - lagrer`() {
+		val bruker = TestData.lagNavBruker(
+			oppfolgingsperioder = listOf(
+				Oppfolgingsperiode(
+					id = UUID.randomUUID(),
+					startdato = LocalDateTime.now().minusYears(3),
+					sluttdato = null
+				)
+			),
+			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+		)
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
+
+		verify(exactly = 1) { repository.upsert(match {
+			it.innsatsgruppe == Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
+		}) }
+	}
+
+	@Test
+	fun `oppdaterInnsatsgruppe - har aktiv oppfolgingsperiode, ingen endring - lagrer ikke`() {
+		val bruker = TestData.lagNavBruker(
+			oppfolgingsperioder = listOf(
+				Oppfolgingsperiode(
+					id = UUID.randomUUID(),
+					startdato = LocalDateTime.now().minusYears(3),
+					sluttdato = null
+				)
+			),
+			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+		)
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.STANDARD_INNSATS)
+
+		verify(exactly = 0) { repository.upsert(any()) }
+	}
+
+	@Test
+	fun `oppdaterInnsatsgruppe - har ikke aktiv oppfolgingsperiode - lagrer innsatsgruppe null`() {
+		val bruker = TestData.lagNavBruker(
+			oppfolgingsperioder = listOf(
+				Oppfolgingsperiode(
+					id = UUID.randomUUID(),
+					startdato = LocalDateTime.now().minusYears(3),
+					sluttdato = LocalDateTime.now().minusMonths(2)
+				)
+			),
+			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+		)
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
+
+		verify(exactly = 1) { repository.upsert(match {
+			it.innsatsgruppe == null
+		}) }
+	}
+
+	@Test
+	fun `oppdaterInnsatsgruppe - har ikke aktiv oppfolgingsperiode, ikke innsatsgruppe - oppdaterer ikke`() {
+		val bruker = TestData.lagNavBruker(
+			oppfolgingsperioder = listOf(
+				Oppfolgingsperiode(
+					id = UUID.randomUUID(),
+					startdato = LocalDateTime.now().minusYears(3),
+					sluttdato = LocalDateTime.now().minusMonths(2)
+				)
+			),
+			innsatsgruppe = null
+		)
+		every { repository.get(bruker.id) } returns bruker
+		mockExecuteWithoutResult(transactionTemplate)
+
+		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
 
 		verify(exactly = 0) { repository.upsert(any()) }
 	}

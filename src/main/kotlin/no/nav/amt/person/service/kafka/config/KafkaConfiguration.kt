@@ -35,7 +35,8 @@ class KafkaConfiguration(
 	skjermetPersonIngestor: SkjermetPersonIngestor,
 	leesahIngestor: LeesahIngestor,
 	endretDeltakerIngestor: EndretDeltakerIngestor,
-	oppfolgingsperiodeIngestor: OppfolgingsperiodeIngestor
+	oppfolgingsperiodeIngestor: OppfolgingsperiodeIngestor,
+	innsatsgruppeIngestor: InnsatsgruppeIngestor
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -71,6 +72,15 @@ class KafkaConfiguration(
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
 					Consumer<ConsumerRecord<String, String>> { oppfolgingsperiodeIngestor.ingest(it.value()) }
+				),
+			KafkaConsumerClientBuilder.TopicConfig<String, String>()
+				.withLogging()
+				.withStoreOnFailure(consumerRepository)
+				.withConsumerConfig(
+					kafkaTopicProperties.innsatsgruppeTopic,
+					Deserializers.stringDeserializer(),
+					Deserializers.stringDeserializer(),
+					Consumer<ConsumerRecord<String, String>> { innsatsgruppeIngestor.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
 				.withLogging()

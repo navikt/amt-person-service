@@ -120,6 +120,8 @@ spec:
       value: api://prod-fss.pto.veilarbvedtaksstotte/.default
     - name: VEILARBVEDTAKSSTOTTE_URL
       value: https://veilarbvedtaksstotte.prod-fss-pub.nais.io
+    - name: INNSATSGRUPPE_TOPIC
+      value: pto.siste-14a-vedtak-v1
 
   gcp:
     sqlInstances:

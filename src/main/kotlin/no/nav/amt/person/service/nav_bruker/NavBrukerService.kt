@@ -136,6 +136,18 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterInnsatsgruppe(navBrukerId: UUID, innsatsgruppe: Innsatsgruppe) {
+		val bruker = repository.get(navBrukerId).toModel()
+
+		if (innsatsgruppe != bruker.innsatsgruppe) {
+			if (harAktivOppfolgingsperiode(bruker.oppfolgingsperioder)) {
+				upsert(bruker.copy(innsatsgruppe = innsatsgruppe))
+			} else if (bruker.innsatsgruppe != null) {
+				upsert(bruker.copy(innsatsgruppe = null))
+			}
+		}
+	}
+
 	fun oppdaterKontaktinformasjon(bruker: NavBruker) {
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
 			val feilmelding =
