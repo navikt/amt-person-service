@@ -5,6 +5,7 @@ import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
@@ -36,6 +37,7 @@ class NavBrukerService(
 	private val poaoTilgangClient: PoaoTilgangClient,
 	private val pdlClient: PdlClient,
 	private val veilarboppfolgingClient: VeilarboppfolgingClient,
+	private val veilarbvedtaksstotteClient: VeilarbvedtaksstotteClient,
 	private val kafkaProducerService: KafkaProducerService,
 	private val transactionTemplate: TransactionTemplate,
 ) {
@@ -71,6 +73,12 @@ class NavBrukerService(
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
+		val innsatsgruppe = if (harAktivOppfolgingsperiode(oppfolgingsperioder)) {
+			veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
+		} else {
+			// innsatsgrupper fjernes ikke når bruker går ut av oppfølging
+			null
+		}
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -83,7 +91,8 @@ class NavBrukerService(
 			adresse = getAdresse(personOpplysninger),
 			sisteKrrSync = LocalDateTime.now(),
 			adressebeskyttelse = personOpplysninger.getAdressebeskyttelse(),
-			oppfolgingsperioder = oppfolgingsperioder
+			oppfolgingsperioder = oppfolgingsperioder,
+			innsatsgruppe = innsatsgruppe
 		)
 
 		upsert(navBruker)

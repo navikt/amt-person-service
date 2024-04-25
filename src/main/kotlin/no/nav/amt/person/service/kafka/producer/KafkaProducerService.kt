@@ -35,7 +35,8 @@ class KafkaProducerService(
 			erSkjermet = navBruker.erSkjermet,
 			adresse = navBruker.adresse,
 			adressebeskyttelse = navBruker.adressebeskyttelse,
-			oppfolgingsperioder = navBruker.oppfolgingsperioder
+			oppfolgingsperioder = navBruker.oppfolgingsperioder,
+			innsatsgruppe = navBruker.innsatsgruppe
 		)
 
 		val key = navBruker.person.id.toString()

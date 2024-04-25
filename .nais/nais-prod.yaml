@@ -62,6 +62,7 @@ spec:
         - host: nom-api.intern.nav.no
         - host: veilarbarena.prod-fss-pub.nais.io
         - host: kodeverk-api.nav.no
+        - host: veilarbvedtaksstotte.prod-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
@@ -115,6 +116,10 @@ spec:
       value: amt.deltaker-v2
     - name: OPPFOLGINGSPERIODE_TOPIC
       value: pto.oppfolgingsperiode-v1
+    - name: VEILARBVEDTAKSSTOTTE_SCOPE
+      value: api://prod-fss.pto.veilarbvedtaksstotte/.default
+    - name: VEILARBVEDTAKSSTOTTE_URL
+      value: https://veilarbvedtaksstotte.prod-fss-pub.nais.io
 
   gcp:
     sqlInstances:

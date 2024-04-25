@@ -52,6 +52,7 @@ class IntegrationTestBase {
 		mockPoaoTilgangHttpServer.resetHttpServer()
 		mockVeilarbarenaHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
+		mockVeilarboppfolgingHttpServer.resetHttpServer()
 	}
 
 	companion object {
@@ -59,6 +60,7 @@ class IntegrationTestBase {
 		val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
 		val mockKrrProxyHttpServer = MockKrrProxyHttpServer()
 		val mockVeilarboppfolgingHttpServer = MockVeilarboppfolgingHttpServer()
+		val mockVeilarbvedtaksstotteHttpServer = MockVeilarbvedtaksstotteHttpServer()
 		val mockNorgHttpServer = MockNorgHttpServer()
 		val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
 		val mockNomHttpServer = MockNomHttpServer()
@@ -88,6 +90,10 @@ class IntegrationTestBase {
 			mockVeilarboppfolgingHttpServer.start()
 			registry.add("veilarboppfolging.url") { mockVeilarboppfolgingHttpServer.serverUrl() }
 			registry.add("veilarboppfolging.scope") { "test.veilarboppfolging" }
+
+			mockVeilarbvedtaksstotteHttpServer.start()
+			registry.add("veilarbvedtaksstotte.url") { mockVeilarbvedtaksstotteHttpServer.serverUrl() }
+			registry.add("veilarbvedtaksstotte.scope") { "test.veilarbvedtaksstotte" }
 
 			mockNorgHttpServer.start()
 			registry.add("norg.url") { mockNorgHttpServer.serverUrl() }

@@ -149,7 +149,8 @@ class NavBrukerRepositoryTest {
 			erSkjermet = bruker.erSkjermet,
 			adresse = bruker.adresse,
 			adressebeskyttelse = bruker.adressebeskyttelse,
-			oppfolgingsperioder = bruker.oppfolgingsperioder
+			oppfolgingsperioder = bruker.oppfolgingsperioder,
+			innsatsgruppe = bruker.innsatsgruppe
 		))
 
 		val faktiskBruker = repository.get(bruker.id)
@@ -175,7 +176,8 @@ class NavBrukerRepositoryTest {
 			erSkjermet = bruker.erSkjermet,
 			adresse = bruker.adresse,
 			adressebeskyttelse = bruker.adressebeskyttelse,
-			oppfolgingsperioder = bruker.oppfolgingsperioder
+			oppfolgingsperioder = bruker.oppfolgingsperioder,
+			innsatsgruppe = bruker.innsatsgruppe
 		))
 
 		val faktiskBruker = repository.get(bruker.id)
@@ -219,7 +221,8 @@ class NavBrukerRepositoryTest {
 				)
 			),
 			adressebeskyttelse = null,
-			oppfolgingsperioder = bruker.oppfolgingsperioder
+			oppfolgingsperioder = bruker.oppfolgingsperioder,
+			innsatsgruppe = Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
 		)
 
 		repository.upsert(upsert)
@@ -239,6 +242,7 @@ class NavBrukerRepositoryTest {
 		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.poststed shouldBe "MOSS"
 
 		faktiskBruker.oppfolgingsperioder shouldBe upsert.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
 
 		faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
 		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()
@@ -293,6 +297,7 @@ class NavBrukerRepositoryTest {
 		faktiskBruker.modifiedAt shouldBeCloseTo bruker.modifiedAt
 		faktiskBruker.adressebeskyttelse shouldBe bruker.adressebeskyttelse
 		faktiskBruker.oppfolgingsperioder shouldBe bruker.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe bruker.innsatsgruppe
 	}
 
 }

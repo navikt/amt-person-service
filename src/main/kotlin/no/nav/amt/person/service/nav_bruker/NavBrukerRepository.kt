@@ -64,6 +64,7 @@ class NavBrukerRepository(
 			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
 			adressebeskyttelse = rs.getString("nav_bruker.adressebeskyttelse")?.let { Adressebeskyttelse.valueOf(it) },
 			oppfolgingsperioder = rs.getString("nav_bruker.oppfolgingsperioder")?.let { fromJsonString<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
+			innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { Innsatsgruppe.valueOf(it) }
 		)
 	}
 
@@ -134,7 +135,8 @@ class NavBrukerRepository(
 				adresse,
 				siste_krr_sync,
 				adressebeskyttelse,
-				oppfolgingsperioder
+				oppfolgingsperioder,
+				innsatsgruppe
 			) values (
 				:id,
 				:personId,
@@ -146,7 +148,8 @@ class NavBrukerRepository(
 				:adresse,
 				:sisteKrrSync,
 				:adressebeskyttelse,
-				:oppfolgingsperioder
+				:oppfolgingsperioder,
+				:innsatsgruppe
 			) on conflict(person_id) do update set
 				nav_veileder_id = :navVeilederId,
 				nav_enhet_id = :navEnhetId,
@@ -157,6 +160,7 @@ class NavBrukerRepository(
 				siste_krr_sync = :sisteKrrSync,
 				adressebeskyttelse = :adressebeskyttelse,
 				oppfolgingsperioder = :oppfolgingsperioder,
+				innsatsgruppe = :innsatsgruppe,
 				modified_at = current_timestamp
 				where nav_bruker.id = :id
 		""".trimIndent()
@@ -172,7 +176,8 @@ class NavBrukerRepository(
 			"adresse" to toPGObject(bruker.adresse),
 			"sisteKrrSync" to bruker.sisteKrrSync,
 			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder)
+			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
+			"innsatsgruppe" to bruker.innsatsgruppe?.name
 		)
 
 		template.update(sql, parameters)
@@ -191,6 +196,7 @@ class NavBrukerRepository(
 				   nav_bruker.adresse as "nav_bruker.adresse",
 				   nav_bruker.adressebeskyttelse as "nav_bruker.adressebeskyttelse",
 				   nav_bruker.oppfolgingsperioder as "nav_bruker.oppfolgingsperioder",
+				   nav_bruker.innsatsgruppe as "nav_bruker.innsatsgruppe",
 				   nav_bruker.siste_krr_sync,
 				   nav_bruker.created_at as "nav_bruker.created_at",
 				   nav_bruker.modified_at as "nav_bruker.modified_at",

@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.controller.dto
 
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
+import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_enhet.NavEnhet
@@ -20,7 +21,8 @@ data class NavBrukerDto (
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
 	val adressebeskyttelse: Adressebeskyttelse?,
-	val oppfolgingsperioder: List<Oppfolgingsperiode>
+	val oppfolgingsperioder: List<Oppfolgingsperiode>,
+	val innsatsgruppe: Innsatsgruppe?
 )
 
 fun NavBruker.toDto() = NavBrukerDto(
@@ -36,5 +38,6 @@ fun NavBruker.toDto() = NavBrukerDto(
 	erSkjermet = this.erSkjermet,
 	adresse = this.adresse,
 	adressebeskyttelse = this.adressebeskyttelse,
-	oppfolgingsperioder = this.oppfolgingsperioder
+	oppfolgingsperioder = this.oppfolgingsperioder,
+	innsatsgruppe = this.innsatsgruppe
 )

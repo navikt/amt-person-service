@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.producer.dto
 
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
+import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
@@ -18,5 +19,6 @@ data class NavBrukerDtoV1 (
 	val erSkjermet: Boolean,
 	val adresse: Adresse?,
 	val adressebeskyttelse: Adressebeskyttelse?,
-	val oppfolgingsperioder: List<Oppfolgingsperiode>
+	val oppfolgingsperioder: List<Oppfolgingsperiode>,
+	val innsatsgruppe: Innsatsgruppe?
 )

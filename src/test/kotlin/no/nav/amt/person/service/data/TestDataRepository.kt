@@ -187,6 +187,7 @@ class TestDataRepository(
 				adresse,
 				adressebeskyttelse,
 				oppfolgingsperioder,
+				innsatsgruppe,
 				created_at,
 				modified_at
 			) values (
@@ -201,6 +202,7 @@ class TestDataRepository(
 				:adresse,
 				:adressebeskyttelse,
 				:oppfolgingsperioder,
+				:innsatsgruppe,
 				:createdAt,
 				:modifiedAt
 			)
@@ -218,6 +220,7 @@ class TestDataRepository(
 			"adresse" to toPGObject(bruker.adresse),
 			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
 			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
+			"innsatsgruppe" to bruker.innsatsgruppe?.name,
 			"createdAt" to bruker.createdAt,
 			"modifiedAt" to bruker.modifiedAt
 		)

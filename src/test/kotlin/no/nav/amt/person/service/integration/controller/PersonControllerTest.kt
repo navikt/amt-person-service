@@ -2,6 +2,7 @@ package no.nav.amt.person.service.integration.controller
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.controller.dto.NavAnsattDto
@@ -100,6 +101,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
+		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
@@ -161,6 +163,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
+		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
@@ -357,6 +360,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		faktiskBruker.erSkjermet shouldBe brukerDto.erSkjermet
 		faktiskBruker.adressebeskyttelse shouldBe brukerDto.adressebeskyttelse
 		faktiskBruker.oppfolgingsperioder shouldBe brukerDto.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe brukerDto.innsatsgruppe
 	}
 
 }

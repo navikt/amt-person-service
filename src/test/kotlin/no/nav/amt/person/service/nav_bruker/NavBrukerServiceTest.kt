@@ -9,6 +9,7 @@ import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
@@ -22,7 +23,6 @@ import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -38,6 +38,7 @@ class NavBrukerServiceTest {
 	lateinit var poaoTilgangClient: PoaoTilgangClient
 	lateinit var pdlClient: PdlClient
 	lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
+	lateinit var veilarbvedtaksstotteClient: VeilarbvedtaksstotteClient
 	lateinit var kafkaProducerService: KafkaProducerService
 	lateinit var transactionTemplate: TransactionTemplate
 
@@ -51,6 +52,7 @@ class NavBrukerServiceTest {
 		poaoTilgangClient = mockk()
 		pdlClient = mockk()
 		veilarboppfolgingClient = mockk()
+		veilarbvedtaksstotteClient = mockk()
 		rolleService = mockk(relaxUnitFun = true)
 		kafkaProducerService = mockk(relaxUnitFun = true)
 		transactionTemplate = mockk()
@@ -65,6 +67,7 @@ class NavBrukerServiceTest {
 			poaoTilgangClient = poaoTilgangClient,
 			pdlClient = pdlClient,
 			veilarboppfolgingClient = veilarboppfolgingClient,
+			veilarbvedtaksstotteClient = veilarbvedtaksstotteClient,
 			kafkaProducerService = kafkaProducerService,
 			transactionTemplate = transactionTemplate,
 		)
@@ -84,6 +87,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -103,6 +107,7 @@ class NavBrukerServiceTest {
 		faktiskBruker.erSkjermet shouldBe erSkjermet
 		faktiskBruker.adressebeskyttelse shouldBe null
 		faktiskBruker.oppfolgingsperioder shouldBe navBruker.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe navBruker.innsatsgruppe
 	}
 
 	@Test
@@ -118,6 +123,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -137,6 +143,41 @@ class NavBrukerServiceTest {
 		faktiskBruker.erSkjermet shouldBe erSkjermet
 		faktiskBruker.adresse shouldBe null
 		faktiskBruker.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
+	}
+
+	@Test
+	fun `hentEllerOpprettNavBruker - ikke aktiv oppfolgingsperiode - innsatsgruppe er null`() {
+		val navBruker = TestData.lagNavBruker(
+			oppfolgingsperioder = listOf(TestData.lagOppfolgingsperiode(
+				startdato = LocalDateTime.now().minusYears(1),
+				sluttdato = LocalDateTime.now().minusDays(29)))
+		)
+		val person = navBruker.person
+		val personOpplysninger = TestData.lagPdlPerson(person = person)
+
+		val veileder =  navBruker.navVeileder!!
+		val navEnhet = navBruker.navEnhet!!
+		val kontaktinformasjon = Kontaktinformasjon(navBruker.epost, navBruker.telefon)
+		val erSkjermet = navBruker.erSkjermet
+
+		every { repository.get(person.personident) } returns null
+		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
+		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
+		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
+		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
+		every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
+		every { poaoTilgangClient.erSkjermetPerson(person.personident) } returns ApiResult(result = erSkjermet, throwable = null)
+		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { repository.getByPersonId(person.id) } returns navBruker.copy(innsatsgruppe = null)
+		mockExecuteWithoutResult(transactionTemplate)
+
+		val faktiskBruker = service.hentEllerOpprettNavBruker(person.personident)
+
+		faktiskBruker.person.id shouldBe person.id
+		faktiskBruker.oppfolgingsperioder shouldBe navBruker.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe null
 	}
 
 	@Test
