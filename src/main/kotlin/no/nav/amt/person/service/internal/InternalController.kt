@@ -106,15 +106,15 @@ class InternalController(
 	}
 
 	@Unprotected
-	@GetMapping("/nav-brukere/oppdater-republiser")
-	fun oppdaterAltOgRepubliserNavBrukere(
+	@GetMapping("/nav-brukere/oppdater-innsats-republiser")
+	fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
 		servlet: HttpServletRequest,
 		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
 		@RequestParam(value = "batchSize", required = false) batchSize: Int?
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-republiser-nav-brukere") {
-				batchHandterNavBrukere(startFromOffset?:0, batchSize?:500) { navBrukerService.hentEllerOpprettNavBruker(it.person.personident, skalOppdatereBruker = true) }
+				batchHandterNavBrukere(startFromOffset?:0, batchSize?:500) { navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(it) }
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)

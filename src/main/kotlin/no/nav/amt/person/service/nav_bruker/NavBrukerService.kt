@@ -60,10 +60,7 @@ class NavBrukerService(
 		return repository.get(personident)?.toModel()
 	}
 
-	fun hentEllerOpprettNavBruker(personident: String, skalOppdatereBruker: Boolean = false): NavBruker {
-		if (skalOppdatereBruker) {
-			return opprettNavBruker(personident)
-		}
+	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
 		return repository.get(personident)?.toModel() ?: opprettNavBruker(personident)
 	}
 
@@ -148,6 +145,24 @@ class NavBrukerService(
 			} else if (bruker.innsatsgruppe != null) {
 				upsert(bruker.copy(innsatsgruppe = null))
 			}
+		}
+	}
+
+	fun oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker:NavBruker) {
+		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(navBruker.person.personident)
+		val innsatsgruppe = if (harAktivOppfolgingsperiode(oppfolgingsperioder)) {
+			veilarbvedtaksstotteClient.hentInnsatsgruppe(navBruker.person.personident)
+		} else {
+			null
+		}
+		if (navBruker.innsatsgruppe != innsatsgruppe || navBruker.oppfolgingsperioder != oppfolgingsperioder) {
+			upsert(
+				navBruker.copy(
+					oppfolgingsperioder = oppfolgingsperioder,
+					innsatsgruppe = innsatsgruppe
+				)
+			)
+			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for navbruker med id ${navBruker.id}")
 		}
 	}
 
