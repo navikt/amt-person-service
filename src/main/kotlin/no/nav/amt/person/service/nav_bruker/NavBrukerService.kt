@@ -60,7 +60,10 @@ class NavBrukerService(
 		return repository.get(personident)?.toModel()
 	}
 
-	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
+	fun hentEllerOpprettNavBruker(personident: String, skalOppdatereBruker: Boolean = false): NavBruker {
+		if (skalOppdatereBruker) {
+			return opprettNavBruker(personident)
+		}
 		return repository.get(personident)?.toModel() ?: opprettNavBruker(personident)
 	}
 
