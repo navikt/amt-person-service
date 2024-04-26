@@ -48,6 +48,10 @@ class NavBrukerService(
 		return repository.getAll(offset, limit, notSyncedSince).map { it.toModel() }
 	}
 
+	fun getNavBrukere(offset: Int, limit: Int, lastUpdated: LocalDateTime = LocalDateTime.now()): List<NavBruker> {
+		return repository.getAllNavBrukere(offset, limit, lastUpdated).map { it.toModel() }
+	}
+
 	fun getPersonidenter(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<String> {
 		return repository.getPersonidenter(offset, limit, notSyncedSince).distinct()
 	}
