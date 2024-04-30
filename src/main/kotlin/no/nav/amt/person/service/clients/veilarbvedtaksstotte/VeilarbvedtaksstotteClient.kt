@@ -40,7 +40,7 @@ class VeilarbvedtaksstotteClient(
 
 			val siste14aVedtakDTORespons = fromJsonString<Siste14aVedtakDTO>(body)
 
-			return siste14aVedtakDTORespons.innsatsgruppe.toInnsatsgruppe()
+			return siste14aVedtakDTORespons.innsatsgruppe
 		}
 	}
 
@@ -49,24 +49,6 @@ class VeilarbvedtaksstotteClient(
 	)
 
 	data class Siste14aVedtakDTO(
-		val innsatsgruppe: InnsatsgruppeDto
+		val innsatsgruppe: Innsatsgruppe
 	)
-
-	enum class InnsatsgruppeDto {
-		STANDARD_INNSATS,
-		SITUASJONSBESTEMT_INNSATS,
-		SPESIELT_TILPASSET_INNSATS,
-		GRADERT_VARIG_TILPASSET_INNSATS,
-		VARIG_TILPASSET_INNSATS
-	}
-}
-
-fun VeilarbvedtaksstotteClient.InnsatsgruppeDto.toInnsatsgruppe(): Innsatsgruppe {
-	return when (this) {
-		VeilarbvedtaksstotteClient.InnsatsgruppeDto.STANDARD_INNSATS -> Innsatsgruppe.STANDARD_INNSATS
-		VeilarbvedtaksstotteClient.InnsatsgruppeDto.SITUASJONSBESTEMT_INNSATS -> Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
-		VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS -> Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
-		VeilarbvedtaksstotteClient.InnsatsgruppeDto.GRADERT_VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
-		VeilarbvedtaksstotteClient.InnsatsgruppeDto.VARIG_TILPASSET_INNSATS -> Innsatsgruppe.VARIG_TILPASSET_INNSATS
-	}
 }

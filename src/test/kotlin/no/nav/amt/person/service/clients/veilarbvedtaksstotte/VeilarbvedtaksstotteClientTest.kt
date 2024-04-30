@@ -28,13 +28,13 @@ class VeilarbvedtaksstotteClientTest {
 	@Test
 	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
 		val siste14aVedtakDTORespons = VeilarbvedtaksstotteClient.Siste14aVedtakDTO(
-			innsatsgruppe = VeilarbvedtaksstotteClient.InnsatsgruppeDto.GRADERT_VARIG_TILPASSET_INNSATS
+			innsatsgruppe = Innsatsgruppe.GRADERT_VARIG_TILPASSET_INNSATS
 		)
 		server.enqueue(MockResponse().setBody(JsonUtils.toJsonString(siste14aVedtakDTORespons)))
 
 		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
-		innsatsgruppe shouldBe Innsatsgruppe.VARIG_TILPASSET_INNSATS
+		innsatsgruppe shouldBe Innsatsgruppe.GRADERT_VARIG_TILPASSET_INNSATS
 	}
 
 	@Test

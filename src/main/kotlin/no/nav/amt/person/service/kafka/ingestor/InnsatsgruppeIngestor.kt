@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.kafka.ingestor
 
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.toInnsatsgruppe
+import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
@@ -29,13 +28,13 @@ class InnsatsgruppeIngestor(
 
 		navBrukerService.oppdaterInnsatsgruppe(
 			brukerId,
-			siste14aVedtak.innsatsgruppe.toInnsatsgruppe()
+			siste14aVedtak.innsatsgruppe
 		)
 		log.info("Oppdatert innsatsgruppe for bruker $brukerId")
 	}
 
 	data class Siste14aVedtak(
 		val aktorId: String,
-		val innsatsgruppe: VeilarbvedtaksstotteClient.InnsatsgruppeDto
+		val innsatsgruppe: Innsatsgruppe
 	)
 }

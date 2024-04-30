@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.kafka.ingestor
 
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
@@ -27,7 +26,7 @@ class InnsatsgruppeIngestorTest : IntegrationTestBase() {
 
 		val siste14aVedtak = InnsatsgruppeIngestor.Siste14aVedtak(
 			aktorId = navBruker.person.personident,
-			innsatsgruppe = VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS
+			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
 		)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
 
@@ -45,7 +44,7 @@ class InnsatsgruppeIngestorTest : IntegrationTestBase() {
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
 		val siste14aVedtak = InnsatsgruppeIngestor.Siste14aVedtak(
 			aktorId = "1234",
-			innsatsgruppe = VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS
+			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
 		)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilInnsatsgruppeTopic(JsonUtils.toJsonString(siste14aVedtak))

@@ -2,7 +2,6 @@ package no.nav.amt.person.service.integration.controller
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.controller.dto.NavAnsattDto
@@ -12,6 +11,7 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
+import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService
@@ -101,7 +101,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		mockPdlHttpServer.mockHentPerson(navBruker.person)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
-		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS)
+		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, Innsatsgruppe.SPESIELT_TILPASSET_INNSATS)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
@@ -163,7 +163,7 @@ class PersonControllerTest: IntegrationTestBase() {
 		)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(navBruker.person.personident, navBruker.oppfolgingsperioder)
-		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, VeilarbvedtaksstotteClient.InnsatsgruppeDto.SPESIELT_TILPASSET_INNSATS)
+		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(navBruker.person.personident, Innsatsgruppe.SPESIELT_TILPASSET_INNSATS)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(MockKontaktinformasjon(navBruker.person.personident, navBruker.epost, navBruker.telefon))
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
