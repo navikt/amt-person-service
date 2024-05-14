@@ -34,7 +34,6 @@ val shedlockVersion = "5.13.0"
 val confluentVersion = "7.5.1"
 val avroVersion = "1.11.3"
 val jacksonVersion = "2.17.1"
-val micrometerVersion = "1.12.5"
 val mockOauth2ServerVersion = "2.1.5"
 
 extra["postgresql.version"] = "42.7.2"
@@ -58,13 +57,12 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.postgresql:postgresql")
 
-	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("no.nav.common:log:$commonVersion")
 	implementation("no.nav.common:token-client:$commonVersion")
 	implementation("no.nav.common:rest:$commonVersion")
 	implementation("no.nav.common:job:$commonVersion")
 	implementation("no.nav.common:kafka:$commonVersion")
-	implementation("org.xerial.snappy:snappy-java:1.1.10.5") // overstyrer sårbar dependency
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 	implementation("org.apache.avro:avro:$avroVersion")
