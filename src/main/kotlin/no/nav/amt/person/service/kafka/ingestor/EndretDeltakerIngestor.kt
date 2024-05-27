@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.ingestor
 
 import no.nav.amt.person.service.kafka.ingestor.dto.DeltakerDto
+import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import org.slf4j.LoggerFactory
@@ -20,8 +21,13 @@ class EndretDeltakerIngestor(
 			log.warn("Fant ikke bruker for deltaker med id ${deltakerRecord.id}")
 			return
 		}
-		if (bruker.sisteKrrSync == null || bruker.sisteKrrSync.isBefore(LocalDateTime.now().minusDays(14))) {
+		if (kontaktinformasjonErUtdatert(bruker)) {
 			navBrukerService.oppdaterKontaktinformasjon(bruker)
 		}
+	}
+
+	private fun kontaktinformasjonErUtdatert(navBruker: NavBruker): Boolean {
+		return navBruker.sisteKrrSync == null || navBruker.sisteKrrSync.isBefore(LocalDateTime.now().minusDays(7)) ||
+			navBruker.telefon == null || navBruker.epost == null
 	}
 }

@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.internal
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.amt.person.service.controller.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBruker
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -174,6 +176,20 @@ class InternalController(
 				val personidenter = navBrukerService.getPersonidenter(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
 				navBrukerService.syncKontaktinfoBulk(personidenter)
 			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
+	@PostMapping("/nav-brukere/synkroniser-krr")
+	fun synkroniserKrrForPerson(
+		servlet: HttpServletRequest,
+		@RequestBody request: NavBrukerRequest
+	) {
+		if (isInternal(servlet)) {
+			val navBruker = navBrukerService.hentNavBruker(request.personident) ?: throw IllegalArgumentException("Fant ikke person")
+			navBrukerService.oppdaterKontaktinformasjon(navBruker)
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
