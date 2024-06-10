@@ -11,8 +11,7 @@ data class Oppfolgingsperiode(
 ) {
 	fun erAktiv(): Boolean {
 		val now = LocalDate.now()
-		val antallDagerGracePeriod = 28L
-		return !(now.isBefore(startdato.toLocalDate()) || (sluttdato != null && now.isAfter(sluttdato.toLocalDate().plusDays(antallDagerGracePeriod))))
+		return !(now.isBefore(startdato.toLocalDate()) || (sluttdato != null && !now.isBefore(sluttdato.toLocalDate())))
 	}
 }
 

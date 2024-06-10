@@ -42,20 +42,20 @@ class AktivOppfolgingsperiodeTest {
 	}
 
 	@Test
-	fun `harAktivOppfolgingsperiode - startdato passert, sluttdato for 25 dager siden - returnerer true`() {
+	fun `harAktivOppfolgingsperiode - startdato passert, sluttdato i dag - returnerer false`() {
 		val oppfolgingsperiode = TestData.lagOppfolgingsperiode(
 			startdato = LocalDateTime.now().minusYears(1),
-			sluttdato = LocalDateTime.now().minusDays(25)
+			sluttdato = LocalDateTime.now()
 		)
 
-		harAktivOppfolgingsperiode(listOf(oppfolgingsperiode)) shouldBe true
+		harAktivOppfolgingsperiode(listOf(oppfolgingsperiode)) shouldBe false
 	}
 
 	@Test
-	fun `harAktivOppfolgingsperiode - startdato passert, sluttdato for 29 dager siden - returnerer false`() {
+	fun `harAktivOppfolgingsperiode - startdato passert, sluttdato for 2 dager siden - returnerer false`() {
 		val oppfolgingsperiode = TestData.lagOppfolgingsperiode(
 			startdato = LocalDateTime.now().minusYears(1),
-			sluttdato = LocalDateTime.now().minusDays(29)
+			sluttdato = LocalDateTime.now().minusDays(2)
 		)
 
 		harAktivOppfolgingsperiode(listOf(oppfolgingsperiode)) shouldBe false
