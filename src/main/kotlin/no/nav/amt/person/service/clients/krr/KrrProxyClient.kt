@@ -4,12 +4,14 @@ import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
+import no.nav.common.rest.client.RestClient.baseClientBuilder
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 class KrrProxyClient(
@@ -20,6 +22,7 @@ class KrrProxyClient(
 
 	companion object {
 		private val mediaTypeJson = "application/json".toMediaType()
+		private const val INCREASED_TIMEOUT_SECONDS = 10L
 	}
 
 	fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> {
@@ -48,6 +51,11 @@ class KrrProxyClient(
 
 
 	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
+		val httpClientIncreasedTimeout = baseClientBuilder()
+			.connectTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.readTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.writeTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.build()
 		val requestBody = toJsonString(PostPersonerRequest(personidenter))
 
 		val request: Request = Request.Builder()
@@ -57,7 +65,7 @@ class KrrProxyClient(
 			.post(requestBody.toRequestBody(mediaTypeJson))
 			.build()
 
-		httpClient.newCall(request).execute().use { response ->
+		httpClientIncreasedTimeout.newCall(request).execute().use { response ->
 			if (!response.isSuccessful) {
 				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
 			}

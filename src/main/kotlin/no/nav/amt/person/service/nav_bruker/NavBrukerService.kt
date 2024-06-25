@@ -193,7 +193,7 @@ class NavBrukerService(
 	}
 
 	fun syncKontaktinfoBulk(personident: List<String>) {
-		val personerChunks = personident.chunked(500) // maksgrense på 500 hos krr
+		val personerChunks = personident.chunked(250) // maksgrense på 500 hos krr, vi spør på færre for å redusere timeout-problematikk
 
 		personerChunks.forEach { personChunk ->
 			val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personChunk.toSet()).getOrElse {
