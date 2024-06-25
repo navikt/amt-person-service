@@ -11,7 +11,7 @@ class NavBrukerUpdateJob(
 	private val navBrukerService: NavBrukerService
 ) {
 
-	@Scheduled(cron = "@midnight")
+	@Scheduled(cron = "@hourly")
 	@SchedulerLock(name = "navBrukerUpdater", lockAtMostFor = "60m")
 	fun update() {
 		JobRunner.run("oppdater_nav_brukere") { oppdaterBrukere() }
