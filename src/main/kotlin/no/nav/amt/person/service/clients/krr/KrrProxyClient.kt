@@ -22,7 +22,7 @@ class KrrProxyClient(
 
 	companion object {
 		private val mediaTypeJson = "application/json".toMediaType()
-		private const val INCREASED_TIMEOUT_SECONDS = 10L
+		private const val INCREASED_TIMEOUT_SECONDS = 20L
 	}
 
 	fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> {
