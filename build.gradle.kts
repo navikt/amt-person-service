@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-	val kotlinVersion = "2.0.10"
+	val kotlinVersion = "2.0.20"
 
-	id("org.springframework.boot") version "3.3.2"
+	id("org.springframework.boot") version "3.3.3"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 	kotlin("plugin.serialization") version kotlinVersion
@@ -35,8 +35,6 @@ val confluentVersion = "7.5.1"
 val avroVersion = "1.12.0"
 val jacksonVersion = "2.17.2"
 val mockOauth2ServerVersion = "2.1.9"
-
-extra["postgresql.version"] = "42.7.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
