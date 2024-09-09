@@ -50,6 +50,7 @@ spec:
         - application: amt-deltaker-bff
         - application: amt-deltaker
         - application: amt-distribusjon
+        - application: amt-tiltaksarrangor-bff
     outbound:
       rules:
         - application: poao-tilgang
