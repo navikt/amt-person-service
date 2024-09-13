@@ -56,6 +56,9 @@ spec:
         - application: poao-tilgang
           namespace: poao
           cluster: dev-gcp
+        - application: veilarbvedtaksstotte
+          namespace: obo
+          cluster: dev-gcp
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.dev.nav.no
@@ -64,7 +67,6 @@ spec:
         - host: nom-api.intern.dev.nav.no
         - host: veilarbarena.dev-fss-pub.nais.io
         - host: kodeverk-api.nav.no
-        - host: veilarbvedtaksstotte.dev-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
@@ -119,9 +121,9 @@ spec:
     - name: OPPFOLGINGSPERIODE_TOPIC
       value: pto.oppfolgingsperiode-v1
     - name: VEILARBVEDTAKSSTOTTE_SCOPE
-      value: api://dev-fss.pto.veilarbvedtaksstotte/.default
+      value: api://dev-gcp.obo.veilarbvedtaksstotte/.default
     - name: VEILARBVEDTAKSSTOTTE_URL
-      value: https://veilarbvedtaksstotte.dev-fss-pub.nais.io
+      value: http://veilarbvedtaksstotte.obo
     - name: INNSATSGRUPPE_TOPIC
       value: pto.siste-14a-vedtak-v1
 
