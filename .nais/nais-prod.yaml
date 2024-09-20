@@ -56,10 +56,12 @@ spec:
         - application: poao-tilgang
           namespace: poao
           cluster: prod-gcp
+        - application: veilarboppfolging
+          namespace: poao
+          cluster: prod-gcp
       external:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.nav.no
-        - host: veilarboppfolging.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: nom-api.intern.nav.no
         - host: veilarbarena.prod-fss-pub.nais.io
@@ -75,9 +77,9 @@ spec:
     - name: DIGDIR_KRR_PROXY_URL
       value: https://digdir-krr-proxy.intern.nav.no
     - name: VEILARBOPPFOLGING_SCOPE
-      value: api://prod-fss.pto.veilarboppfolging/.default
+      value: api://prod-gcp.poao.veilarboppfolging/.default
     - name: VEILARBOPPFOLGING_URL
-      value: https://veilarboppfolging.prod-fss-pub.nais.io
+      value: http://veilarboppfolging.poao
     - name: NORG_URL
       value: https://norg2.prod-fss-pub.nais.io
     - name: KODEVERK_URL

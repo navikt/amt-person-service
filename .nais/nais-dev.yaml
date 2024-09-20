@@ -59,10 +59,12 @@ spec:
         - application: veilarbvedtaksstotte
           namespace: obo
           cluster: dev-gcp
+        - application: veilarboppfolging
+          namespace: poao
+          cluster: dev-gcp
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.dev.nav.no
-        - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: nom-api.intern.dev.nav.no
         - host: veilarbarena.dev-fss-pub.nais.io
@@ -77,9 +79,9 @@ spec:
     - name: DIGDIR_KRR_PROXY_URL
       value: https://digdir-krr-proxy.intern.dev.nav.no
     - name: VEILARBOPPFOLGING_SCOPE
-      value: api://dev-fss.pto.veilarboppfolging/.default
+      value: api://dev-gcp.poao.veilarboppfolging/.default
     - name: VEILARBOPPFOLGING_URL
-      value: https://veilarboppfolging.dev-fss-pub.nais.io
+      value: http://veilarboppfolging.poao
     - name: NORG_URL
       value: https://norg2.dev-fss-pub.nais.io
     - name: KODEVERK_URL
