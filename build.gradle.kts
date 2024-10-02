@@ -36,6 +36,8 @@ val avroVersion = "1.12.0"
 val jacksonVersion = "2.18.0"
 val mockOauth2ServerVersion = "2.1.9"
 
+extra["jackson-bom.version"] = "2.18.0"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
