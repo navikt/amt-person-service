@@ -25,7 +25,7 @@ class LeesahIngestor(
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
-			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn)
+			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn, personhendelse)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
@@ -48,7 +48,7 @@ class LeesahIngestor(
 		}
 	}
 
-	private fun handterNavn(personidenter: List<String>, navn: Navn?) {
+	private fun handterNavn(personidenter: List<String>, navn: Navn?, hendelse: Personhendelse) {
 		if (navn == null) {
 			log.warn("Mottok melding med opplysningstype Navn fra pdl-leesah men navn manglet")
 			return
@@ -59,7 +59,14 @@ class LeesahIngestor(
 		if (personer.isEmpty()) return
 
 		personer.forEach { person ->
-			log.info("Oppdaterer navn for person ${person.id}")
+			log.info("Oppdaterer navn for person ${person.id}\n" +
+				"Endringstype: ${hendelse.endringstype}\n " +
+				"tidligereHendelseId: ${hendelse.tidligereHendelseId}\n " +
+				"HendelseId: ${hendelse.hendelseId}\n" +
+				"Opprettet: ${hendelse.opprettet}\n" +
+				"Master: ${hendelse.master}\n" +
+				"Adressebeskyttelse: ${hendelse.adressebeskyttelse}")
+
 			personService.upsert(person.copy(
 				fornavn = navn.fornavn,
 				mellomnavn = navn.mellomnavn,
