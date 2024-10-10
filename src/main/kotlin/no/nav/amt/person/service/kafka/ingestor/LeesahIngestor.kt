@@ -25,6 +25,14 @@ class LeesahIngestor(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(personhendelse: Personhendelse) {
+		SecureLog.secureLog.info("Personhendelse for person ${personhendelse.personidenter}\n" +
+			"Opplysning: ${personhendelse.opplysningstype}\n" +
+			"Endringstype: ${personhendelse.endringstype}\n " +
+			"tidligereHendelseId: ${personhendelse.tidligereHendelseId}\n " +
+			"HendelseId: ${personhendelse.hendelseId}\n" +
+			"Opprettet: ${personhendelse.opprettet}\n" +
+			"Master: ${personhendelse.master}\n" +
+			"Adressebeskyttelse: ${personhendelse.adressebeskyttelse}")
 		when (personhendelse.opplysningstype) {
 			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn, personhendelse)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
