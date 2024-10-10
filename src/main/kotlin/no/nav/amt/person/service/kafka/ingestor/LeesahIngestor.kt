@@ -59,6 +59,7 @@ class LeesahIngestor(
 		if (personer.isEmpty()) return
 
 		personer.forEach { person ->
+			log.info("Oppdaterer navn for person ${person.id}")
 			personService.upsert(person.copy(
 				fornavn = navn.fornavn,
 				mellomnavn = navn.mellomnavn,

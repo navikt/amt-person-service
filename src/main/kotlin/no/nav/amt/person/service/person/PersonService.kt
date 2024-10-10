@@ -62,6 +62,7 @@ class PersonService(
 		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
+			log.info("Oppdaterer personident for person ${person.id}")
 			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
