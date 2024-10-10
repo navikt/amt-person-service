@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.kafka.ingestor
 
+import no.nav.amt.person.service.config.SecureLog
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
@@ -51,6 +52,7 @@ class LeesahIngestor(
 	private fun handterNavn(personidenter: List<String>, navn: Navn?, hendelse: Personhendelse) {
 		if (navn == null) {
 			log.warn("Mottok melding med opplysningstype Navn fra pdl-leesah men navn manglet")
+			SecureLog.secureLog.info("Mottok melding med opplysningstype Navn fra pdl-leesah men navn manglet for ${personidenter.joinToString { it }}")
 			return
 		}
 
