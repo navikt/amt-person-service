@@ -7,6 +7,7 @@ import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.utils.EnvUtils
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.retry.annotation.Retryable
@@ -62,10 +63,38 @@ class PersonService(
 		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
+			log.info("Oppdaterer personident for person ${person.id}")
 			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
 
+	}
+
+	fun oppdaterNavn(person: Person) {
+		val personOpplysninger = try {
+			pdlClient.hentPerson(person.personident)
+		} catch (e: Exception) {
+			val feilmelding = "Klarte ikke hente person fra PDL ved oppdatert navn: ${e.message}"
+
+			if (EnvUtils.isDev()) log.info(feilmelding)
+			else log.error(feilmelding)
+
+			return
+		}
+
+		if (
+			person.fornavn == personOpplysninger.fornavn &&
+			person.mellomnavn == personOpplysninger.mellomnavn &&
+			person.etternavn == personOpplysninger.etternavn
+		) return
+
+		upsert(person.copy(
+			fornavn = personOpplysninger.fornavn,
+			mellomnavn = personOpplysninger.mellomnavn,
+			etternavn = personOpplysninger.etternavn,
+		))
+
+		log.info("Oppdaterte navn på person ${person.id}")
 	}
 
 	fun upsert(person: Person) {

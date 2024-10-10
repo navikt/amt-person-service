@@ -4,7 +4,6 @@ import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse
-import no.nav.person.pdl.leesah.navn.Navn
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -25,7 +24,7 @@ class LeesahIngestor(
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
-			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter, personhendelse.navn)
+			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
@@ -48,22 +47,13 @@ class LeesahIngestor(
 		}
 	}
 
-	private fun handterNavn(personidenter: List<String>, navn: Navn?) {
-		if (navn == null) {
-			log.warn("Mottok melding med opplysningstype Navn fra pdl-leesah men navn manglet")
-			return
-		}
-
+	private fun handterNavn(personidenter: List<String>) {
 		val personer = personService.hentPersoner(personidenter)
 
 		if (personer.isEmpty()) return
 
 		personer.forEach { person ->
-			personService.upsert(person.copy(
-				fornavn = navn.fornavn,
-				mellomnavn = navn.mellomnavn,
-				etternavn = navn.etternavn,
-			))
+			personService.oppdaterNavn(person)
 		}
 	}
 

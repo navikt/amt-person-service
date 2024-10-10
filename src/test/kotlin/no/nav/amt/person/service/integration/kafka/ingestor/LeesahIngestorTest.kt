@@ -39,6 +39,12 @@ class LeesahIngestorTest : IntegrationTestBase() {
 
 		mockPdlHttpServer.mockHentTelefon(person.personident, null)
 
+		mockPdlHttpServer.mockHentPerson(person.copy(
+			fornavn = nyttFornavn,
+			mellomnavn = nyttMellomnavn,
+			etternavn = nyttEtternavn
+		))
+
 		val msg = KafkaMessageCreator.lagPersonhendelseNavn(
 			personidenter = listOf(person.personident),
 			fornavn = nyttFornavn,

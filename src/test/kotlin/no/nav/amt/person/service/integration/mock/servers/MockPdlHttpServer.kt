@@ -152,7 +152,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				errors = null,
 				data = PdlQueries.HentPerson.ResponseData(
 					PdlQueries.HentPerson.HentPerson(
-						navn = listOf(PdlQueries.Attribute.Navn(mockPdlPerson.fornavn, null, mockPdlPerson.etternavn)),
+						navn = listOf(PdlQueries.Attribute.Navn(mockPdlPerson.fornavn, mockPdlPerson.mellomnavn, mockPdlPerson.etternavn)),
 						telefonnummer = listOf(PdlQueries.Attribute.Telefonnummer("47", "12345678", 1)),
 						adressebeskyttelse = if (mockPdlPerson.adressebeskyttelseGradering != null) {
 							listOf(PdlQueries.Attribute.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
