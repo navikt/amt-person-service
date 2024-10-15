@@ -65,7 +65,16 @@ class NavBrukerService(
 	}
 
 	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
-		return repository.get(personident)?.toModel() ?: opprettNavBruker(personident)
+		val navBruker = repository.get(personident)?.toModel()?.let {
+			if (it.innsatsgruppe == null) {
+				oppdaterOppfolgingsperiodeOgInnsatsgruppe(it)
+				repository.get(it.id).toModel()
+			} else {
+				it
+			}
+		} ?: opprettNavBruker(personident)
+
+		return navBruker
 	}
 
 	private fun opprettNavBruker(personident: String): NavBruker {
