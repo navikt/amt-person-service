@@ -260,6 +260,7 @@ class InternalController(
 		do {
 			data = navBrukerService.getNavBrukere(currentOffset, batchSize)
 			data.forEach { action(it) }
+			log.info("Handled nav-bruker batch $totalHandled records. offset $currentOffset")
 			totalHandled += data.size
 			currentOffset += batchSize
 		} while (data.isNotEmpty())
