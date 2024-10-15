@@ -124,6 +124,20 @@ class InternalController(
 	}
 
 	@Unprotected
+	@GetMapping("/nav-brukere/oppdater-innsats-republiser/{id}")
+	fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
+		servlet: HttpServletRequest,
+		@RequestParam("id") id: UUID,
+	) {
+		if (isInternal(servlet)) {
+			val navBruker = navBrukerService.hentNavBruker(id)
+			navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker)
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
 	@GetMapping("/nav-brukere/republiser/{navBrukerId}")
 	fun republiserNavBruker(
 		servlet: HttpServletRequest,
