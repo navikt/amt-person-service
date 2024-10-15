@@ -125,9 +125,9 @@ class InternalController(
 
 	@Unprotected
 	@GetMapping("/nav-brukere/oppdater-innsats-republiser/{id}")
-	fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
+	fun oppdaterOppfolgingInnsatsOgRepubliserNavBruker(
 		servlet: HttpServletRequest,
-		@RequestParam("id") id: UUID,
+		@PathVariable("id") id: UUID,
 	) {
 		if (isInternal(servlet)) {
 			val navBruker = navBrukerService.hentNavBruker(id)
