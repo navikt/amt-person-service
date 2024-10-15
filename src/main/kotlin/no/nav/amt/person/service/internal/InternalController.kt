@@ -124,14 +124,16 @@ class InternalController(
 	}
 
 	@Unprotected
-	@GetMapping("/nav-brukere/oppdater-innsats-republiser/{id}")
+	@GetMapping("/nav-bruker/oppdater-innsats-republiser/{id}")
 	fun oppdaterOppfolgingInnsatsOgRepubliserNavBruker(
 		servlet: HttpServletRequest,
 		@PathVariable("id") id: UUID,
 	) {
 		if (isInternal(servlet)) {
+			log.info("Oppdaterer bruker $id")
 			val navBruker = navBrukerService.hentNavBruker(id)
 			navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker)
+			log.info("Oppdaterte bruker $id")
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
