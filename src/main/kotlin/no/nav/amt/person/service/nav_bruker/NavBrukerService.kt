@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.transaction.support.TransactionTemplate
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -50,6 +51,10 @@ class NavBrukerService(
 
 	fun getNavBrukere(offset: Int, limit: Int): List<NavBruker> {
 		return repository.getAllNavBrukere(offset, limit).map { it.toModel() }
+	}
+
+	fun getNavBrukereModifiedBefore(limit: Int, modifiedBefore: LocalDate, lastId: UUID?): List<NavBruker> {
+		return repository.getAllNavBrukere(limit, modifiedBefore, lastId).map { it.toModel() }
 	}
 
 	fun getPersonidenter(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<String> {
