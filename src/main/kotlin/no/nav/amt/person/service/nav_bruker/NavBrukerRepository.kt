@@ -14,6 +14,7 @@ import no.nav.amt.person.service.utils.toPGObject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -107,13 +108,15 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper)
 	}
 
-	fun	getAllNavBrukere(offset: Int, limit: Int): List<NavBrukerDbo> {
+	fun	getAllNavBrukere(offset: Int, limit: Int, modifiedBefore: LocalDate?): List<NavBrukerDbo> {
+		val where = modifiedBefore?.let { "WHERE modified_at < :modified_before" } ?: ""
 		val sql = selectNavBrukerQuery("""
+			$where
 			ORDER BY nav_bruker.created_at
 			OFFSET :offset
 			LIMIT :limit
 			""")
-		val parameters = sqlParameters("offset" to offset, "limit" to limit)
+		val parameters = sqlParameters("offset" to offset, "limit" to limit, "modified_before" to modifiedBefore)
 
 		return template.query(sql, parameters, rowMapper)
 	}
