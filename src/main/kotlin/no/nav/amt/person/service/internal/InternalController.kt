@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -113,12 +112,11 @@ class InternalController(
 	fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
 		servlet: HttpServletRequest,
 		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
-		@RequestParam(value = "batchSize", required = false) batchSize: Int?,
-		@RequestParam(value = "modifiedBefore", required = false) modifiedBefore: LocalDate?
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-innsats-republiser-nav-brukere") {
-				batchHandterNavBrukereByLastUpdated(startFromOffset?:0, batchSize?:500, modifiedBefore) { navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(it) }
+				batchHandterNavBrukereByLastUpdated(startFromOffset?:0, batchSize?:500) { navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(it) }
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -252,7 +250,7 @@ class InternalController(
 
 	}
 
-	private fun batchHandterNavBrukereByLastUpdated(startFromOffset: Int, batchSize: Int, modifiedBefore: LocalDate?, action: (navBruker: NavBruker) -> Unit) {
+	private fun batchHandterNavBrukereByLastUpdated(startFromOffset: Int, batchSize: Int, action: (navBruker: NavBruker) -> Unit) {
 		var currentOffset = startFromOffset
 		var data: List<NavBruker>
 
@@ -260,7 +258,7 @@ class InternalController(
 		var totalHandled = 0
 
 		do {
-			data = navBrukerService.getNavBrukere(currentOffset, batchSize, modifiedBefore)
+			data = navBrukerService.getNavBrukere(currentOffset, batchSize)
 			data.forEach { action(it) }
 			log.info("Handled nav-bruker batch $totalHandled records. offset $currentOffset")
 			totalHandled += data.size
