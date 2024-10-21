@@ -22,6 +22,7 @@ class EndretDeltakerIngestor(
 			return
 		}
 		if (kontaktinformasjonErUtdatert(bruker)) {
+			log.info("Oppdaterer utdatert kontaktinformasjon for deltaker med id ${deltakerRecord.id}")
 			navBrukerService.oppdaterKontaktinformasjon(bruker)
 		}
 	}

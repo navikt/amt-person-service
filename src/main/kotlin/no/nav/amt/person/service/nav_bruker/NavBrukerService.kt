@@ -224,6 +224,7 @@ class NavBrukerService(
 					oppdaterKontaktinfo(bruker, it.value.copy(telefonnummer = telefon))
 			}
 		}
+		log.info("Syncet kontaktinfo for ${personerChunks.size} personer")
 	}
 
 	fun oppdaterAdressebeskyttelse(personident: String) {
@@ -309,9 +310,16 @@ class NavBrukerService(
 	private fun oppdaterKontaktinfo(bruker: NavBruker, kontaktinformasjon: Kontaktinformasjon) {
 		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
 			repository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
+			log.info("Ingen endring i kontaktinfo for personId ${bruker.person.id}")
 			return
 		}
 
+		if (bruker.telefon != null && kontaktinformasjon.telefonnummer == null) {
+			log.info("Fjerner telefonnummer for personId ${bruker.person.id}")
+		}
+		if (bruker.epost != null && kontaktinformasjon.epost == null) {
+			log.info("Fjerner epostadresse for personId ${bruker.person.id}")
+		}
 		upsert(bruker.copy(telefon = kontaktinformasjon.telefonnummer, epost = kontaktinformasjon.epost, sisteKrrSync = LocalDateTime.now()))
 	}
 
