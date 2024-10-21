@@ -187,7 +187,7 @@ class PdlClient(
 	private fun getTelefonnummer(telefonnummere: List<PdlQueries.Attribute.Telefonnummer>): String? {
 		val prioritertNummer = telefonnummere.minByOrNull { it.prioritet } ?: return null
 
-		return "${prioritertNummer.landskode} ${prioritertNummer.nummer}"
+		return "${prioritertNummer.landskode}${prioritertNummer.nummer}"
 	}
 
 	private fun getDiskresjonskode(adressebeskyttelse: List<PdlQueries.Attribute.Adressebeskyttelse>): AdressebeskyttelseGradering? {

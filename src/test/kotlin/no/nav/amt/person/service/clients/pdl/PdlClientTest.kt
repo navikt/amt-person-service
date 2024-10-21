@@ -68,7 +68,7 @@ class PdlClientTest {
 		pdlPerson.fornavn shouldBe "Tester"
 		pdlPerson.mellomnavn shouldBe "Test"
 		pdlPerson.etternavn shouldBe "Testersen"
-		pdlPerson.telefonnummer shouldBe "+47 12345678"
+		pdlPerson.telefonnummer shouldBe "+4712345678"
 		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.tilleggsnavn shouldBe "Storgården"
 		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.postnummer shouldBe "0484"
 		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.poststed shouldBe "OSLO"
@@ -274,7 +274,7 @@ class PdlClientTest {
 
 		val telefon = client.hentTelefon("FNR")
 
-		telefon shouldBe "+47 12345678"
+		telefon shouldBe "+4712345678"
 	}
 
 }
