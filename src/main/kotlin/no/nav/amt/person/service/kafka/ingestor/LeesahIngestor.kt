@@ -11,7 +11,8 @@ enum class  OpplysningsType {
 	NAVN_V1,
 	ADRESSEBESKYTTELSE_V1,
 	KONTAKTADRESSE_V1,
-	BOSTEDSADRESSE_V1
+	BOSTEDSADRESSE_V1,
+	OPPHOLDSADRESSE_V1
 }
 
 @Service
@@ -29,6 +30,7 @@ class LeesahIngestor(
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 			OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
+			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 		}
 	}
 

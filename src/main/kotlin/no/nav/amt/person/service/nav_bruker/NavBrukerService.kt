@@ -273,6 +273,7 @@ class NavBrukerService(
 		if (bruker.adresse == oppdatertAdresse) return
 
 		upsert(bruker.copy(adresse = oppdatertAdresse))
+		log.info("Oppdatert adresse for navbruker med personId ${bruker.person.id}")
 	}
 
 	private fun getAdresse(personopplysninger: PdlPerson): Adresse? {
