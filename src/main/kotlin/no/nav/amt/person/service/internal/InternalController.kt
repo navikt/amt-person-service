@@ -109,6 +109,22 @@ class InternalController(
 	}
 
 	@Unprotected
+	@GetMapping("/nav-bruker/oppdater-adr-republiser/{id}")
+	fun oppdaterAdresseOgRepubliserNavBruker(
+		servlet: HttpServletRequest,
+		@PathVariable("id") id: UUID,
+	) {
+		if (isInternal(servlet)) {
+			log.info("Oppdaterer adresse for navbruker-id $id")
+			val navBruker = navBrukerService.hentNavBruker(id)
+			navBrukerService.oppdaterAdresse(listOf(navBruker.person.personident))
+			log.info("Oppdaterte adresse for navbruker-id $id")
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
 	@GetMapping("/nav-brukere/oppdater-innsats-republiser")
 	fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
 		servlet: HttpServletRequest,
