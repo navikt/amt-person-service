@@ -207,7 +207,7 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentIdenter: HentIdenter,
+			val hentIdenter: HentIdenter?,
 		)
 		data class HentIdenter(
 			val identer: List<Attribute.Ident>,

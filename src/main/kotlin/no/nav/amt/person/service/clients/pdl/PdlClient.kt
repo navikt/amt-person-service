@@ -89,7 +89,7 @@ class PdlClient(
 
 			logPdlWarnings(gqlResponse.extensions?.warnings)
 
-			if (gqlResponse.data == null) {
+			if (gqlResponse.data?.hentIdenter == null) {
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
