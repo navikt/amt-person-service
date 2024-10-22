@@ -11,6 +11,7 @@ import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.kafka.producer.KafkaProducerClient
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -19,6 +20,7 @@ class KafkaProducerService(
 	private val kafkaTopicProperties: KafkaTopicProperties,
 	private val kafkaProducerClient: KafkaProducerClient<String, String>,
 ) {
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun publiserNavBruker(navBruker: NavBruker) {
 
@@ -44,6 +46,7 @@ class KafkaProducerService(
 		val record = ProducerRecord(kafkaTopicProperties.amtNavBrukerTopic, key, value)
 
 		kafkaProducerClient.sendSync(record)
+		log.info("Publiserte navbruker med personId ${navBrukerDto.personId} til topic")
 	}
 
 	fun publiserSlettNavBruker(personId: UUID) {
