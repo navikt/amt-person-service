@@ -101,7 +101,8 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-adr-republiser-nav-brukere") {
-				oppdaterAdresseOgRepubliserAlleNavBrukere(startOffset = offset ?: 0)
+				log.info("Oppdaterer adresse for alle navbrukere som mangler adresse")
+				oppdaterAdresseHvisManglerOgRepubliser(startOffset = offset ?: 0)
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -326,16 +327,17 @@ class InternalController(
 
 	}
 
-	private fun oppdaterAdresseOgRepubliserAlleNavBrukere(startOffset: Int = 0) {
+	private fun oppdaterAdresseHvisManglerOgRepubliser(startOffset: Int = 0) {
 		var offset = startOffset
 		var navbrukere: List<NavBrukerDbo>
+		val sistOppdatert = LocalDateTime.now().minusHours(12)
 
 		do {
-			navbrukere = navBrukerRepository.getAll(offset, 500)
+			navbrukere = navBrukerRepository.getAllUtenAdresse(offset, 500, sistOppdatert)
 			val personidenter = navbrukere.map { it.person.personident }
 			navBrukerService.oppdaterAdresse(personidenter)
 
-			log.info("Oppdaterte persondata for personer fra offset $offset til ${offset + navbrukere.size}")
+			log.info("Oppdaterte adresse for personer fra offset $offset til ${offset + navbrukere.size}")
 			offset += navbrukere.size
 		} while (navbrukere.isNotEmpty())
 	}
