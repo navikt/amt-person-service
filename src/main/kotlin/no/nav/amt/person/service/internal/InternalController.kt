@@ -97,12 +97,14 @@ class InternalController(
 	@GetMapping("/nav-brukere/oppdater-adr-republiser")
 	fun oppdaterOgRepubliserNavBrukere(
 		servlet: HttpServletRequest,
-		@RequestParam(value = "offset", required = false) offset: Int?
+		@RequestParam(value = "batchSize", required = false) batchSize: Int = 500,
+		@RequestParam(value = "modifiedBefore", required = false) modifiedBefore: LocalDateTime = LocalDateTime.now(),
+		@RequestParam(value = "lastId", required = false) lastId: UUID? = null,
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-adr-republiser-nav-brukere") {
 				log.info("Oppdaterer adresse for alle navbrukere som mangler adresse")
-				oppdaterAdresseHvisManglerOgRepubliser(startOffset = offset ?: 0)
+				oppdaterAdresseHvisManglerOgRepubliser(modifiedBefore, batchSize, lastId)
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -327,18 +329,20 @@ class InternalController(
 
 	}
 
-	private fun oppdaterAdresseHvisManglerOgRepubliser(startOffset: Int = 0) {
-		var offset = startOffset
+	private fun oppdaterAdresseHvisManglerOgRepubliser(
+		modifiedBefore: LocalDateTime,
+		batchSize: Int,
+		startAfterId: UUID?
+	) {
+		var lastId: UUID? = startAfterId
 		var navbrukere: List<NavBrukerDbo>
-		val sistOppdatert = LocalDateTime.now().minusHours(12)
 
 		do {
-			navbrukere = navBrukerRepository.getAllUtenAdresse(offset, 500, sistOppdatert)
+			navbrukere = navBrukerRepository.getAllUtenAdresse(batchSize, modifiedBefore, lastId)
 			val personidenter = navbrukere.map { it.person.personident }
 			navBrukerService.oppdaterAdresse(personidenter)
-
-			log.info("Oppdaterte adresse for personer fra offset $offset til ${offset + navbrukere.size}")
-			offset += navbrukere.size
+			lastId = navbrukere.lastOrNull()?.id
+			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste navbrukerid: $lastId")
 		} while (navbrukere.isNotEmpty())
 	}
 

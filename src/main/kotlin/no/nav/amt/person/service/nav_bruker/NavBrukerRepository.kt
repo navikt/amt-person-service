@@ -108,16 +108,20 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper)
 	}
 
-	fun	getAllUtenAdresse(offset: Int, limit: Int, sistOppdatert: LocalDateTime): List<NavBrukerDbo> {
+	fun	getAllUtenAdresse(limit: Int, modifiedBefore: LocalDateTime, lastId: UUID?): List<NavBrukerDbo> {
 		val sql = selectNavBrukerQuery("""
 			WHERE nav_bruker.adresse is null
 				AND nav_bruker.adressebeskyttelse is null
-				AND nav_bruker.modified_at < :sist_oppdatert
-			ORDER BY nav_bruker.modified_at
-			OFFSET :offset
+				AND nav_bruker.modified_at < :modified_before
+				AND nav_bruker.id > :last_id
+			ORDER BY nav_bruker.id
 			LIMIT :limit
 			""")
-		val parameters = sqlParameters("offset" to offset, "limit" to limit, "sist_oppdatert" to sistOppdatert)
+		val parameters = sqlParameters(
+			"modified_before" to modifiedBefore,
+			"last_id" to lastId,
+			"limit" to limit,
+		)
 
 		return template.query(sql, parameters, rowMapper)
 	}
