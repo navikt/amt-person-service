@@ -109,11 +109,11 @@ class NavBrukerRepository(
 	}
 
 	fun	getAllUtenAdresse(limit: Int, modifiedBefore: LocalDateTime, lastId: UUID?): List<NavBrukerDbo> {
+		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
 		val sql = selectNavBrukerQuery("""
 			WHERE nav_bruker.adresse is null
 				AND nav_bruker.adressebeskyttelse is null
-				AND nav_bruker.modified_at < :modified_before
-				AND nav_bruker.id > :last_id
+				AND nav_bruker.modified_at < :modified_before $andLastId
 			ORDER BY nav_bruker.id
 			LIMIT :limit
 			""")
