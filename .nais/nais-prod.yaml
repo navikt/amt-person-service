@@ -56,6 +56,9 @@ spec:
         - application: poao-tilgang
           namespace: poao
           cluster: prod-gcp
+        - application: veilarbvedtaksstotte
+          namespace: obo
+          cluster: prod-gcp
         - application: veilarboppfolging
           namespace: poao
           cluster: prod-gcp
@@ -66,7 +69,6 @@ spec:
         - host: nom-api.intern.nav.no
         - host: veilarbarena.prod-fss-pub.nais.io
         - host: kodeverk-api.nav.no
-        - host: veilarbvedtaksstotte.prod-fss-pub.nais.io
   env:
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
@@ -121,9 +123,9 @@ spec:
     - name: OPPFOLGINGSPERIODE_TOPIC
       value: pto.oppfolgingsperiode-v1
     - name: VEILARBVEDTAKSSTOTTE_SCOPE
-      value: api://prod-fss.pto.veilarbvedtaksstotte/.default
+      value: api://prod-gcp.obo.veilarbvedtaksstotte/.default
     - name: VEILARBVEDTAKSSTOTTE_URL
-      value: https://veilarbvedtaksstotte.prod-fss-pub.nais.io
+      value: http://veilarbvedtaksstotte.obo
     - name: INNSATSGRUPPE_TOPIC
       value: pto.siste-14a-vedtak-v1
 
