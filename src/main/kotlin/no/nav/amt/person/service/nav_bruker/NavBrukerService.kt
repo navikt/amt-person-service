@@ -69,18 +69,8 @@ class NavBrukerService(
 		return repository.get(personident)?.toModel()
 	}
 
-	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
-		val navBruker = repository.get(personident)?.toModel()?.let {
-			if (it.innsatsgruppe == null) {
-				oppdaterOppfolgingsperiodeOgInnsatsgruppe(it)
-				repository.get(it.id).toModel()
-			} else {
-				it
-			}
-		} ?: opprettNavBruker(personident)
-
-		return navBruker
-	}
+	fun hentEllerOpprettNavBruker(personident: String): NavBruker =
+		repository.get(personident)?.toModel() ?: opprettNavBruker(personident)
 
 	private fun opprettNavBruker(personident: String): NavBruker {
 		val personOpplysninger = pdlClient.hentPerson(personident)
