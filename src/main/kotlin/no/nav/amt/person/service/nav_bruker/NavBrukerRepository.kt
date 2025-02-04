@@ -95,19 +95,6 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
-
-	fun	getAll(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<NavBrukerDbo> {
-		val sql = selectNavBrukerQuery("""
-			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
-			ORDER BY siste_krr_sync asc nulls first, nav_bruker.modified_at
-			OFFSET :offset
-			LIMIT :limit
-			""")
-		val parameters = sqlParameters("offset" to offset, "limit" to limit, "notSyncedSince" to notSyncedSince)
-
-		return template.query(sql, parameters, rowMapper)
-	}
-
 	fun	getAllUtenAdresse(limit: Int, modifiedBefore: LocalDateTime, lastId: UUID?): List<NavBrukerDbo> {
 		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
 		val sql = selectNavBrukerQuery("""

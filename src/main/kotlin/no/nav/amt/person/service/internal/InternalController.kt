@@ -86,7 +86,7 @@ class InternalController(
 		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-nav-brukere") {
-				batchHandterNavBrukereByKrrSync(startFromOffset?:0, batchSize?:500) { kafkaProducerService.publiserNavBruker(it) }
+				batchHandterNavBrukere(startFromOffset?:0, batchSize?:500) { kafkaProducerService.publiserNavBruker(it) }
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -259,27 +259,6 @@ class InternalController(
 		} while (ansatte.isNotEmpty())
 	}
 
-	private fun batchHandterNavBrukereByKrrSync(startFromOffset: Int, batchSize: Int, action: (navBruker: NavBruker) -> Unit) {
-		var currentOffset = startFromOffset
-		var data: List<NavBruker>
-
-		val start = Instant.now()
-		var totalHandled = 0
-
-		do {
-			data = navBrukerService.get(currentOffset, batchSize)
-			data.forEach { action(it) }
-			totalHandled += data.size
-			currentOffset += batchSize
-		} while (data.isNotEmpty())
-
-		val duration = Duration.between(start, Instant.now())
-
-		if (totalHandled > 0)
-			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
-
-	}
-
 	private fun batchHandterNavBrukere(startFromOffset: Int, batchSize: Int, action: (navBruker: NavBruker) -> Unit) {
 		var currentOffset = startFromOffset
 		var data: List<NavBruker>
@@ -290,7 +269,6 @@ class InternalController(
 		do {
 			data = navBrukerService.getNavBrukere(currentOffset, batchSize)
 			data.forEach { action(it) }
-			log.info("Handled nav-bruker batch $totalHandled records. offset $currentOffset")
 			totalHandled += data.size
 			currentOffset += batchSize
 		} while (data.isNotEmpty())

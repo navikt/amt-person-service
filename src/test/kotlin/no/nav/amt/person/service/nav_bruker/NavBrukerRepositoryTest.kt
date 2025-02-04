@@ -102,7 +102,7 @@ class NavBrukerRepositoryTest {
 
 
 	@Test
-	fun `getAll - brukere finnes - returnerer brukere`() {
+	fun `getAllNavBrukere - brukere finnes - returnerer brukere`() {
 		val bruker1 = TestData.lagNavBruker()
 		val bruker2 = TestData.lagNavBruker()
 		val bruker3 = TestData.lagNavBruker()
@@ -111,23 +111,12 @@ class NavBrukerRepositoryTest {
 		testRepository.insertNavBruker(bruker2)
 		testRepository.insertNavBruker(bruker3)
 
-		val brukere = repository.getAll(0, 2)
+		val brukere = repository.getAllNavBrukere(0, 2)
 
 		brukere.size shouldBe 2
 
 		sammenlign(brukere[0], bruker1)
 		sammenlign(brukere[1], bruker2)
-
-	}
-
-	@Test
-	fun `getAll - bruker er nylig synkronisert - returnerer ikke bruker`() {
-		val bruker1 = TestData.lagNavBruker(sisteKrrSync = LocalDateTime.now().minusDays(1))
-		testRepository.insertNavBruker(bruker1)
-
-		val brukere = repository.getAll(0, 1, LocalDateTime.now().minusDays(2))
-
-		brukere.size shouldBe 0
 
 	}
 

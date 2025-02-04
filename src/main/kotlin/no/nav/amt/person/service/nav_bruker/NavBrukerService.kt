@@ -45,10 +45,6 @@ class NavBrukerService(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun get(offset: Int, limit: Int, notSyncedSince: LocalDateTime? = null): List<NavBruker> {
-		return repository.getAll(offset, limit, notSyncedSince).map { it.toModel() }
-	}
-
 	fun getNavBrukere(offset: Int, limit: Int): List<NavBruker> {
 		return repository.getAllNavBrukere(offset, limit).map { it.toModel() }
 	}
