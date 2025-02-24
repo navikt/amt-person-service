@@ -271,6 +271,7 @@ class InternalController(
 			data.forEach { action(it) }
 			totalHandled += data.size
 			currentOffset += batchSize
+			log.info("Republisering av nav-brukere - offset: $currentOffset, total handled: $totalHandled")
 		} while (data.isNotEmpty())
 
 		val duration = Duration.between(start, Instant.now())
