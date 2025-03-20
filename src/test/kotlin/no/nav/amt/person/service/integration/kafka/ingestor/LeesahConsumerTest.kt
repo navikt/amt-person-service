@@ -15,7 +15,7 @@ import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class LeesahIngestorTest : IntegrationTestBase() {
+class LeesahConsumerTest : IntegrationTestBase() {
 
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender

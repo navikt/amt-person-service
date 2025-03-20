@@ -3,7 +3,7 @@ package no.nav.amt.person.service.data.kafka
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
-import no.nav.amt.person.service.kafka.ingestor.OpplysningsType
+import no.nav.amt.person.service.kafka.consumer.OpplysningsType
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse

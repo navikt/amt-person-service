@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
@@ -6,7 +6,7 @@ import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import org.springframework.stereotype.Service
 
 @Service
-class SkjermetPersonIngestor(
+class SkjermetPersonConsumer(
 	private val navBrukerService: NavBrukerService
 ) {
 	fun ingest(key: String, value: String) {

@@ -12,7 +12,7 @@ import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class TildeltVeilederIngestorTest : IntegrationTestBase() {
+class TildeltVeilederConsumerTest : IntegrationTestBase() {
 
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender

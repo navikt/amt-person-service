@@ -9,7 +9,7 @@ import no.nav.amt.person.service.utils.AsyncUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class SkjermetPersonIngestorTest: IntegrationTestBase() {
+class SkjermetPersonConsumerTest: IntegrationTestBase() {
 
 	@Autowired
 	private lateinit var navBrukerService: NavBrukerService

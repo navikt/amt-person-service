@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.ZonedDateTime
 import java.util.UUID
 
-class OppfolgingsperiodeIngestorTest : IntegrationTestBase() {
+class OppfolgingsperiodeConsumerTest : IntegrationTestBase() {
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender
 
@@ -25,7 +25,7 @@ class OppfolgingsperiodeIngestorTest : IntegrationTestBase() {
 		val navBruker = TestData.lagNavBruker(oppfolgingsperioder = emptyList())
 		testDataRepository.insertNavBruker(navBruker)
 
-		val sisteOppfolgingsperiodeV1 = OppfolgingsperiodeIngestor.SisteOppfolgingsperiodeV1(
+		val sisteOppfolgingsperiodeV1 = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
 			uuid = UUID.randomUUID(),
 			aktorId = navBruker.person.personident,
 			startDato = ZonedDateTime.now().minusWeeks(1),
@@ -46,7 +46,7 @@ class OppfolgingsperiodeIngestorTest : IntegrationTestBase() {
 
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
-		val sisteOppfolgingsperiodeV1 = OppfolgingsperiodeIngestor.SisteOppfolgingsperiodeV1(
+		val sisteOppfolgingsperiodeV1 = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
 			uuid = UUID.randomUUID(),
 			aktorId = "1234",
 			startDato = ZonedDateTime.now().minusWeeks(1),

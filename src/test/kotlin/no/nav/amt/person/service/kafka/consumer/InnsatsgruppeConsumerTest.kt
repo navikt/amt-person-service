@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
@@ -12,7 +12,7 @@ import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class InnsatsgruppeIngestorTest : IntegrationTestBase() {
+class InnsatsgruppeConsumerTest : IntegrationTestBase() {
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender
 
@@ -24,7 +24,7 @@ class InnsatsgruppeIngestorTest : IntegrationTestBase() {
 		val navBruker = TestData.lagNavBruker(innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS)
 		testDataRepository.insertNavBruker(navBruker)
 
-		val siste14aVedtak = InnsatsgruppeIngestor.Siste14aVedtak(
+		val siste14aVedtak = InnsatsgruppeConsumer.Siste14aVedtak(
 			aktorId = navBruker.person.personident,
 			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
 		)
@@ -42,7 +42,7 @@ class InnsatsgruppeIngestorTest : IntegrationTestBase() {
 
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
-		val siste14aVedtak = InnsatsgruppeIngestor.Siste14aVedtak(
+		val siste14aVedtak = InnsatsgruppeConsumer.Siste14aVedtak(
 			aktorId = "1234",
 			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
 		)

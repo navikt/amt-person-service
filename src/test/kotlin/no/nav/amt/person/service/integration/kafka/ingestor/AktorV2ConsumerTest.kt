@@ -14,7 +14,7 @@ import no.nav.person.pdl.aktor.v2.Type
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class AktorV2IngestorTest : IntegrationTestBase() {
+class AktorV2ConsumerTest : IntegrationTestBase() {
 
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender

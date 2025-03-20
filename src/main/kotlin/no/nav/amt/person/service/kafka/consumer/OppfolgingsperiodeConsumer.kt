@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
@@ -10,7 +10,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 @Service
-class OppfolgingsperiodeIngestor(
+class OppfolgingsperiodeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {

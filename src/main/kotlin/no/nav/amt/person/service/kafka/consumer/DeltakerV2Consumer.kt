@@ -1,6 +1,6 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.kafka.ingestor.dto.DeltakerDto
+import no.nav.amt.person.service.kafka.consumer.dto.DeltakerDto
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class EndretDeltakerIngestor(
+class DeltakerV2Consumer(
 	private val navBrukerService: NavBrukerService
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)

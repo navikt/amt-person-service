@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class InnsatsgruppeIngestor(
+class InnsatsgruppeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {

@@ -1,6 +1,6 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.kafka.ingestor.dto.SisteTildeltVeilederDto
+import no.nav.amt.person.service.kafka.consumer.dto.SisteTildeltVeilederDto
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class TildeltVeilederIngestor(
+class TildeltVeilederConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 	private val navAnsattService: NavAnsattService,

@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.person.PersonService
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class AktorV2Ingestor(
+class AktorV2Consumer(
 	private val personService: PersonService
 ) {
 

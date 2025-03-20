@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
@@ -16,7 +16,7 @@ enum class  OpplysningsType {
 }
 
 @Service
-class LeesahIngestor(
+class LeesahConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {

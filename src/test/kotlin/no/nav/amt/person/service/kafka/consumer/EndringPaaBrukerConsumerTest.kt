@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor
+package no.nav.amt.person.service.kafka.consumer
 
 import io.mockk.mockk
 import io.mockk.verify
@@ -8,21 +8,21 @@ import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class EndringPaaBrukerIngestorTest {
+class EndringPaaBrukerConsumerTest {
 	lateinit var navBrukerService: NavBrukerService
 	lateinit var navEnhetService: NavEnhetService
-	lateinit var endringPaaBrukerIngestor: EndringPaaBrukerIngestor
+	lateinit var endringPaaBrukerConsumer: EndringPaaBrukerConsumer
 
 	@BeforeEach
 	fun setup() {
 		navBrukerService = mockk()
 		navEnhetService = mockk()
-		endringPaaBrukerIngestor = EndringPaaBrukerIngestor(navBrukerService, navEnhetService)
+		endringPaaBrukerConsumer = EndringPaaBrukerConsumer(navBrukerService, navEnhetService)
 	}
 
 	@Test
 	fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
-		endringPaaBrukerIngestor.ingest(
+		endringPaaBrukerConsumer.ingest(
 			KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null).toJson()
 		)
 

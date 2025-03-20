@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
-import no.nav.amt.person.service.kafka.ingestor.*
+import no.nav.amt.person.service.kafka.consumer.*
 import no.nav.common.kafka.consumer.KafkaConsumerClient
 import no.nav.common.kafka.consumer.feilhandtering.KafkaConsumerRecordProcessor
 import no.nav.common.kafka.consumer.feilhandtering.util.KafkaConsumerRecordProcessorBuilder
@@ -29,14 +29,14 @@ class KafkaConfiguration(
 	kafkaTopicProperties: KafkaTopicProperties,
 	kafkaProperties: KafkaProperties,
 	jdbcTemplate: JdbcTemplate,
-	endringPaaBrukerIngestor: EndringPaaBrukerIngestor,
-	tildeltVeilederIngestor: TildeltVeilederIngestor,
-	aktorV2Ingestor: AktorV2Ingestor,
-	skjermetPersonIngestor: SkjermetPersonIngestor,
-	leesahIngestor: LeesahIngestor,
-	endretDeltakerIngestor: EndretDeltakerIngestor,
-	oppfolgingsperiodeIngestor: OppfolgingsperiodeIngestor,
-	innsatsgruppeIngestor: InnsatsgruppeIngestor
+	endringPaaBrukerConsumer: EndringPaaBrukerConsumer,
+	tildeltVeilederConsumer: TildeltVeilederConsumer,
+	aktorV2Consumer: AktorV2Consumer,
+	skjermetPersonConsumer: SkjermetPersonConsumer,
+	leesahConsumer: LeesahConsumer,
+	deltakerV2Consumer: DeltakerV2Consumer,
+	oppfolgingsperiodeConsumer: OppfolgingsperiodeConsumer,
+	innsatsgruppeConsumer: InnsatsgruppeConsumer
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -53,7 +53,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.endringPaaBrukerTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { endringPaaBrukerIngestor.ingest(it.value()) }
+					Consumer<ConsumerRecord<String, String>> { endringPaaBrukerConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -62,7 +62,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.sisteTilordnetVeilederTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { tildeltVeilederIngestor.ingest(it.value()) }
+					Consumer<ConsumerRecord<String, String>> { tildeltVeilederConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -71,7 +71,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.oppfolgingsperiodeTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { oppfolgingsperiodeIngestor.ingest(it.value()) }
+					Consumer<ConsumerRecord<String, String>> { oppfolgingsperiodeConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -80,7 +80,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.innsatsgruppeTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { innsatsgruppeIngestor.ingest(it.value()) }
+					Consumer<ConsumerRecord<String, String>> { innsatsgruppeConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
 				.withLogging()
@@ -89,7 +89,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.aktorV2Topic,
 					Deserializers.stringDeserializer(),
 					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer<ConsumerRecord<String, Aktor>> { aktorV2Ingestor.ingest(it.key(), it.value()) }
+					Consumer<ConsumerRecord<String, Aktor>> { aktorV2Consumer.ingest(it.key(), it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, Personhendelse>()
 				.withLogging()
@@ -98,7 +98,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.leesahTopic,
 					Deserializers.stringDeserializer(),
 					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer<ConsumerRecord<String, Personhendelse>> { leesahIngestor.ingest(it.value()) }
+					Consumer<ConsumerRecord<String, Personhendelse>> { leesahConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -107,7 +107,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.skjermedePersonerTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { skjermetPersonIngestor.ingest(it.key(), it.value()) }
+					Consumer<ConsumerRecord<String, String>> { skjermetPersonConsumer.ingest(it.key(), it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -116,7 +116,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.deltakerV2Topic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String?>> { record -> record.value()?.let { endretDeltakerIngestor.ingest(it) } }
+					Consumer<ConsumerRecord<String, String?>> { record -> record.value()?.let { deltakerV2Consumer.ingest(it) } }
 				),
 		)
 

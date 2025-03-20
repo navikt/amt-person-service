@@ -10,7 +10,7 @@ import no.nav.amt.person.service.utils.AsyncUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class EndringPaaBrukerIngestorTest : IntegrationTestBase() {
+class EndringPaaBrukerConsumerTest : IntegrationTestBase() {
 
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender

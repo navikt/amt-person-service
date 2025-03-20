@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.kafka.ingestor.dto
+package no.nav.amt.person.service.kafka.consumer.dto
 
 import java.time.ZonedDateTime
 
