@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.internal
 
 import jakarta.servlet.http.HttpServletRequest
-import no.nav.amt.person.service.controller.request.NavBrukerRequest
+import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBruker

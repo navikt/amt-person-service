@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.integration.controller.auth
 
-import no.nav.amt.person.service.controller.auth.AuthService
-import no.nav.amt.person.service.controller.auth.Issuer
+import no.nav.amt.person.service.api.auth.AuthService
+import no.nav.amt.person.service.api.auth.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder

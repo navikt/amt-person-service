@@ -2,11 +2,11 @@ package no.nav.amt.person.service.integration.controller
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.controller.dto.AdressebeskyttelseDto
-import no.nav.amt.person.service.controller.dto.ArrangorAnsattDto
-import no.nav.amt.person.service.controller.dto.NavAnsattDto
-import no.nav.amt.person.service.controller.dto.NavBrukerDto
-import no.nav.amt.person.service.controller.dto.NavEnhetDto
+import no.nav.amt.person.service.api.dto.AdressebeskyttelseDto
+import no.nav.amt.person.service.api.dto.ArrangorAnsattDto
+import no.nav.amt.person.service.api.dto.NavAnsattDto
+import no.nav.amt.person.service.api.dto.NavBrukerDto
+import no.nav.amt.person.service.api.dto.NavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon

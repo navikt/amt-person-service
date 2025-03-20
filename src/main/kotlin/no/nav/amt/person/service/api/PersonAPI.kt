@@ -1,13 +1,13 @@
-package no.nav.amt.person.service.controller
+package no.nav.amt.person.service.api
 
-import no.nav.amt.person.service.controller.auth.AuthService
-import no.nav.amt.person.service.controller.auth.Issuer
-import no.nav.amt.person.service.controller.dto.*
-import no.nav.amt.person.service.controller.request.AdressebeskyttelseRequest
-import no.nav.amt.person.service.controller.request.ArrangorAnsattRequest
-import no.nav.amt.person.service.controller.request.NavAnsattRequest
-import no.nav.amt.person.service.controller.request.NavBrukerRequest
-import no.nav.amt.person.service.controller.request.NavEnhetRequest
+import no.nav.amt.person.service.api.auth.AuthService
+import no.nav.amt.person.service.api.auth.Issuer
+import no.nav.amt.person.service.api.dto.*
+import no.nav.amt.person.service.api.request.AdressebeskyttelseRequest
+import no.nav.amt.person.service.api.request.ArrangorAnsattRequest
+import no.nav.amt.person.service.api.request.NavAnsattRequest
+import no.nav.amt.person.service.api.request.NavBrukerRequest
+import no.nav.amt.person.service.api.request.NavEnhetRequest
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_enhet.NavEnhetService

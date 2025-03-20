@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.controller.auth
+package no.nav.amt.person.service.api.auth
 
 object Issuer {
 	const val TOKEN_X = "tokenx"

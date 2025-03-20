@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.controller.dto
+package no.nav.amt.person.service.api.dto
 
 import no.nav.amt.person.service.nav_enhet.NavEnhet
 import java.util.*
