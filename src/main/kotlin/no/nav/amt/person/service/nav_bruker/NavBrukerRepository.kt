@@ -65,7 +65,7 @@ class NavBrukerRepository(
 			modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
 			adressebeskyttelse = rs.getString("nav_bruker.adressebeskyttelse")?.let { Adressebeskyttelse.valueOf(it) },
 			oppfolgingsperioder = rs.getString("nav_bruker.oppfolgingsperioder")?.let { fromJsonString<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
-			innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { Innsatsgruppe.valueOf(it) }
+			innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { InnsatsgruppeV1.valueOf(it) }
 		)
 	}
 

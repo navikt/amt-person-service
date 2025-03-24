@@ -3,7 +3,7 @@ package no.nav.amt.person.service.data
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
+import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
@@ -91,7 +91,7 @@ object TestData {
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 		adressebeskyttelse: Adressebeskyttelse? = null,
 		oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
-		innsatsgruppe: Innsatsgruppe? = Innsatsgruppe.STANDARD_INNSATS
+		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS
 	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, adresse, sisteKrrSync, createdAt, modifiedAt, adressebeskyttelse, oppfolgingsperioder, innsatsgruppe)
 
 	fun lagOppfolgingsperiode(

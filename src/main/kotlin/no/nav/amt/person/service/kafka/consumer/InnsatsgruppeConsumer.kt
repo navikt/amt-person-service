@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
+import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
@@ -35,6 +35,6 @@ class InnsatsgruppeConsumer(
 
 	data class Siste14aVedtak(
 		val aktorId: String,
-		val innsatsgruppe: Innsatsgruppe
+		val innsatsgruppe: InnsatsgruppeV1
 	)
 }

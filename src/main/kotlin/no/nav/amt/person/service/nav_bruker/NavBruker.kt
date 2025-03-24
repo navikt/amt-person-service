@@ -20,7 +20,7 @@ data class NavBruker(
 	val sisteKrrSync: LocalDateTime?,
 	val adressebeskyttelse: Adressebeskyttelse?,
 	val oppfolgingsperioder: List<Oppfolgingsperiode>,
-	val innsatsgruppe: Innsatsgruppe?
+	val innsatsgruppe: InnsatsgruppeV1?
 ) {
 	fun toUpsert() = NavBrukerUpsert(
 		id = this.id,

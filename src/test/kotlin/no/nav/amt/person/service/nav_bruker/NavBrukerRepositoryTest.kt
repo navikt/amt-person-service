@@ -211,7 +211,7 @@ class NavBrukerRepositoryTest {
 			),
 			adressebeskyttelse = null,
 			oppfolgingsperioder = bruker.oppfolgingsperioder,
-			innsatsgruppe = Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
 		)
 
 		repository.upsert(upsert)
@@ -231,7 +231,7 @@ class NavBrukerRepositoryTest {
 		faktiskBruker.adresse?.kontaktadresse?.vegadresse?.poststed shouldBe "MOSS"
 
 		faktiskBruker.oppfolgingsperioder shouldBe upsert.oppfolgingsperioder
-		faktiskBruker.innsatsgruppe shouldBe Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
+		faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
 
 		faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
 		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()

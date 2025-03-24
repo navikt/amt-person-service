@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.api.dto
 
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
+import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_enhet.NavEnhet
@@ -22,7 +22,7 @@ data class NavBrukerDto (
 	val adresse: Adresse?,
 	val adressebeskyttelse: Adressebeskyttelse?,
 	val oppfolgingsperioder: List<Oppfolgingsperiode>,
-	val innsatsgruppe: Innsatsgruppe?
+	val innsatsgruppe: InnsatsgruppeV1?
 )
 
 fun NavBruker.toDto() = NavBrukerDto(

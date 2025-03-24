@@ -87,7 +87,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -123,7 +123,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -163,7 +163,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -489,15 +489,15 @@ class NavBrukerServiceTest {
 					sluttdato = null
 				)
 			),
-			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS
 		)
 		every { repository.get(bruker.id) } returns bruker
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
+		service.oppdaterInnsatsgruppe(bruker.id, InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS)
 
 		verify(exactly = 1) { repository.upsert(match {
-			it.innsatsgruppe == Innsatsgruppe.SITUASJONSBESTEMT_INNSATS
+			it.innsatsgruppe == InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
 		}) }
 	}
 
@@ -511,12 +511,12 @@ class NavBrukerServiceTest {
 					sluttdato = null
 				)
 			),
-			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS
 		)
 		every { repository.get(bruker.id) } returns bruker
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.STANDARD_INNSATS)
+		service.oppdaterInnsatsgruppe(bruker.id, InnsatsgruppeV1.STANDARD_INNSATS)
 
 		verify(exactly = 0) { repository.upsert(any()) }
 	}
@@ -531,12 +531,12 @@ class NavBrukerServiceTest {
 					sluttdato = LocalDateTime.now().minusMonths(2)
 				)
 			),
-			innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS
 		)
 		every { repository.get(bruker.id) } returns bruker
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
+		service.oppdaterInnsatsgruppe(bruker.id, InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS)
 
 		verify(exactly = 1) { repository.upsert(match {
 			it.innsatsgruppe == null
@@ -558,7 +558,7 @@ class NavBrukerServiceTest {
 		every { repository.get(bruker.id) } returns bruker
 		mockExecuteWithoutResult(transactionTemplate)
 
-		service.oppdaterInnsatsgruppe(bruker.id, Innsatsgruppe.SITUASJONSBESTEMT_INNSATS)
+		service.oppdaterInnsatsgruppe(bruker.id, InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS)
 
 		verify(exactly = 0) { repository.upsert(any()) }
 	}

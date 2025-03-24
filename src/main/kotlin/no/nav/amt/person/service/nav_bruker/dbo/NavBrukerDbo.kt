@@ -2,7 +2,7 @@ package no.nav.amt.person.service.nav_bruker.dbo
 
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
+import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
@@ -25,7 +25,7 @@ data class NavBrukerDbo(
 	val modifiedAt: LocalDateTime,
 	val adressebeskyttelse: Adressebeskyttelse?,
 	val oppfolgingsperioder: List<Oppfolgingsperiode>,
-	val innsatsgruppe: Innsatsgruppe?
+	val innsatsgruppe: InnsatsgruppeV1?
 ) {
 	fun toModel() = NavBruker(
 		id = id,

@@ -87,12 +87,7 @@ class NavBrukerService(
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
-		val innsatsgruppe = if (harAktivOppfolgingsperiode(oppfolgingsperioder)) {
-			veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
-		} else {
-			// innsatsgrupper fjernes ikke når bruker går ut av oppfølging
-			null
-		}
+		val innsatsgruppe = veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(personident)
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -150,7 +145,7 @@ class NavBrukerService(
 		}
 	}
 
-	fun oppdaterInnsatsgruppe(navBrukerId: UUID, innsatsgruppe: Innsatsgruppe) {
+	fun oppdaterInnsatsgruppe(navBrukerId: UUID, innsatsgruppe: InnsatsgruppeV1) {
 		val bruker = repository.get(navBrukerId).toModel()
 
 		if (innsatsgruppe != bruker.innsatsgruppe) {
@@ -164,11 +159,8 @@ class NavBrukerService(
 
 	fun oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker:NavBruker) {
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(navBruker.person.personident)
-		val innsatsgruppe = if (harAktivOppfolgingsperiode(oppfolgingsperioder)) {
-			veilarbvedtaksstotteClient.hentInnsatsgruppe(navBruker.person.personident)
-		} else {
-			null
-		}
+		val innsatsgruppe = veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(navBruker.person.personident)
+
 		if (navBruker.innsatsgruppe != innsatsgruppe || navBruker.oppfolgingsperioder != oppfolgingsperioder) {
 			upsert(
 				navBruker.copy(

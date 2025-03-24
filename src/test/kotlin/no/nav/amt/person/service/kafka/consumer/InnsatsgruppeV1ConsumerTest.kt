@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
+import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.utils.AsyncUtils
 import no.nav.amt.person.service.utils.JsonUtils
@@ -12,7 +12,7 @@ import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class InnsatsgruppeConsumerTest : IntegrationTestBase() {
+class InnsatsgruppeV1ConsumerTest : IntegrationTestBase() {
 	@Autowired
 	lateinit var kafkaMessageSender: KafkaMessageSender
 
@@ -21,12 +21,12 @@ class InnsatsgruppeConsumerTest : IntegrationTestBase() {
 
 	@Test
 	fun `ingest - bruker finnes, ny innsatsgruppe - oppdaterer`() {
-		val navBruker = TestData.lagNavBruker(innsatsgruppe = Innsatsgruppe.STANDARD_INNSATS)
+		val navBruker = TestData.lagNavBruker(innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS)
 		testDataRepository.insertNavBruker(navBruker)
 
 		val siste14aVedtak = InnsatsgruppeConsumer.Siste14aVedtak(
 			aktorId = navBruker.person.personident,
-			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
 		)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
 
@@ -36,7 +36,7 @@ class InnsatsgruppeConsumerTest : IntegrationTestBase() {
 		AsyncUtils.eventually {
 			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
 
-			faktiskBruker.innsatsgruppe shouldBe Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
+			faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
 		}
 	}
 
@@ -44,7 +44,7 @@ class InnsatsgruppeConsumerTest : IntegrationTestBase() {
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
 		val siste14aVedtak = InnsatsgruppeConsumer.Siste14aVedtak(
 			aktorId = "1234",
-			innsatsgruppe = Innsatsgruppe.SPESIELT_TILPASSET_INNSATS
+			innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
 		)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilInnsatsgruppeTopic(JsonUtils.toJsonString(siste14aVedtak))
