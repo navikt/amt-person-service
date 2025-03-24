@@ -27,29 +27,29 @@ class VeilarbvedtaksstotteClientTest {
 	}
 
 	@Test
-	fun `hentSisteInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
+	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
 		val siste14aVedtakDTORespons = VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
 			innsatsgruppe = Innsatsgruppe.JOBBE_DELVIS
 		)
 		server.enqueue(MockResponse().setBody(JsonUtils.toJsonString(siste14aVedtakDTORespons)))
 
-		val innsatsgruppe = client.hentGjeldendeInnsatsgruppe(fnr)
+		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
 		innsatsgruppe shouldBe InnsatsgruppeV1.GRADERT_VARIG_TILPASSET_INNSATS
 	}
 
 	@Test
-	fun `hentGjeldendeInnsatsgruppe - bruker har ikke innsatsgruppe - returnerer null`() {
+	fun `hentInnsatsgruppe - bruker har ikke innsatsgruppe - returnerer null`() {
 		server.enqueue(MockResponse())
 
-		val innsatsgruppe = client.hentGjeldendeInnsatsgruppe(fnr)
+		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
 		innsatsgruppe shouldBe null
 	}
 
 	@Test
-	fun `hentGjeldendeInnsatsgruppe - manglende tilgang - kaster exception`() {
+	fun `hentInnsatsgruppe - manglende tilgang - kaster exception`() {
 		server.enqueue(MockResponse().setResponseCode(401))
-		assertThrows<RuntimeException> { client.hentGjeldendeInnsatsgruppe("123")  }
+		assertThrows<RuntimeException> { client.hentInnsatsgruppe("123")  }
 	}
 }

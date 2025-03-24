@@ -87,7 +87,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -123,7 +123,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()
@@ -163,7 +163,7 @@ class NavBrukerServiceTest {
 		every { repository.get(person.personident) } returns null
 		every { pdlClient.hentPerson(person.personident) } returns personOpplysninger
 		every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
-		every { veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
+		every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
 		every { personService.hentEllerOpprettPerson(person.personident, personOpplysninger) } returns person.toModel()
 		every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder.toModel()
 		every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet.toModel()

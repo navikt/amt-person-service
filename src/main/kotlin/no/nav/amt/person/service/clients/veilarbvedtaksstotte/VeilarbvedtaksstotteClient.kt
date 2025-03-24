@@ -20,7 +20,7 @@ class VeilarbvedtaksstotteClient(
 		private val mediaTypeJson = "application/json".toMediaType()
 	}
 
-	fun hentGjeldendeInnsatsgruppe(fnr: String): InnsatsgruppeV1? {
+	fun hentInnsatsgruppe(fnr: String): InnsatsgruppeV1? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/hent-gjeldende-14a-vedtak")

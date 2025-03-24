@@ -87,7 +87,7 @@ class NavBrukerService(
 		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
-		val innsatsgruppe = veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(personident)
+		val innsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
 
 		val navBruker = NavBruker(
 			id = UUID.randomUUID(),
@@ -159,7 +159,7 @@ class NavBrukerService(
 
 	fun oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker:NavBruker) {
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(navBruker.person.personident)
-		val innsatsgruppe = veilarbvedtaksstotteClient.hentGjeldendeInnsatsgruppe(navBruker.person.personident)
+		val innsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(navBruker.person.personident)
 
 		if (navBruker.innsatsgruppe != innsatsgruppe || navBruker.oppfolgingsperioder != oppfolgingsperioder) {
 			upsert(
