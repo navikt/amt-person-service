@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-	val kotlinVersion = "2.1.10"
+	val kotlinVersion = "2.1.20"
 
-	id("org.springframework.boot") version "3.4.3"
+	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 	kotlin("plugin.serialization") version kotlinVersion
@@ -27,10 +27,10 @@ val okhttp3Version = "4.12.0"
 val kotestVersion = "5.9.1"
 val poaoTilgangVersion = "2024.10.29_14.10-4fff597d6e1b"
 val testcontainersVersion = "1.20.6"
-val tokenSupportVersion = "5.0.19"
+val tokenSupportVersion = "5.0.24"
 val mockkVersion = "1.13.17"
 val lang3Version = "3.17.0"
-val shedlockVersion = "6.3.0"
+val shedlockVersion = "6.3.1"
 val confluentVersion = "7.5.1"
 val avroVersion = "1.12.0"
 val jacksonVersion = "2.18.3"
