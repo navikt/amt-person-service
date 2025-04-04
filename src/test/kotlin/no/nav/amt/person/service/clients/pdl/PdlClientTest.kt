@@ -4,6 +4,7 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.errorPrefix
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
+import no.nav.amt.person.service.clients.pdl.PdlClientTestData.fodselsarRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.nullError
@@ -277,4 +278,49 @@ class PdlClientTest {
 		telefon shouldBe "+4712345678"
 	}
 
+	@Test
+	fun `hentPersonFodselsar - person har fodselsar - returnerer fodselsar`() {
+		val client = PdlClient(
+			serverUrl,
+			{ "TOKEN" },
+			poststedRepository = poststedRepository
+		)
+
+		server.enqueue(MockResponse().setBody(fodselsarRespons))
+
+		val fodselsar = client.hentPersonFodselsar("FNR")
+
+		fodselsar shouldBe 1976
+	}
+
+	@Test
+	fun `hentPersonFodselsar - data mangler - skal kaste exception`() {
+		val client = PdlClient(
+			serverUrl,
+			{ "TOKEN" },
+			poststedRepository = poststedRepository
+		)
+
+		server.enqueue(
+			MockResponse().setBody(
+				"""
+					{
+						"errors": [{"message": "Noe gikk galt"}],
+						"data": null
+					}
+				""".trimIndent()
+			)
+		)
+
+		val exception = assertThrows<RuntimeException> {
+			client.hentPersonFodselsar("FNR")
+		}
+
+		exception.message shouldBe "$errorPrefix$nullError- Noe gikk galt (code: null details: null)\n"
+
+		val request = server.takeRequest()
+
+		request.path shouldBe "/graphql"
+		request.method shouldBe "POST"
+	}
 }

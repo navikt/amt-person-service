@@ -123,6 +123,21 @@ object PdlClientTestData {
 		}
 	""".trimIndent()
 
+	val fodselsarRespons = """
+		{
+			"errors": null,
+			"data": {
+				"hentPerson": {
+					"foedselsdato": [
+						{
+				  			"foedselsaar": 1976
+						}
+					]
+				}
+			}
+		}
+	""".trimIndent()
+
 	val telefonResponse = """
 		{
 		  "data": {
