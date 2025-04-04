@@ -78,6 +78,11 @@ class NavBrukerService(
 		return navBruker
 	}
 
+	fun hentNavBrukerFodselsar(personident: String): Int {
+		val fodselsar = pdlClient.hentPersonFodselsar(personident)
+		return fodselsar
+	}
+
 	private fun opprettNavBruker(personident: String): NavBruker {
 		val personOpplysninger = pdlClient.hentPerson(personident)
 

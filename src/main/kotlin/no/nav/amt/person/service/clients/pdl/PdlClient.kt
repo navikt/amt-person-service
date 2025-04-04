@@ -68,6 +68,38 @@ class PdlClient(
 		}
 	}
 
+	fun hentPersonFodselsar(personident: String): Int {
+		val requestBody = toJsonString(
+			GraphqlUtils.GraphqlQuery(
+				PdlQueries.HentPersonFodselsar.query,
+				PdlQueries.Variables(personident)
+			)
+		)
+
+		val request = createGraphqlRequest(requestBody)
+
+		httpClient.newCall(request).execute().use { response ->
+			if (!response.isSuccessful) {
+				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
+			}
+
+			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
+
+			val gqlResponse = fromJsonString<PdlQueries.HentPersonFodselsar.Response>(body)
+
+			throwPdlApiErrors(gqlResponse) // respons kan inneholde feil selv om den ikke er tom ref: https://pdldocs-navno.msappproxy.net/ekstern/index.html#appendix-graphql-feilhandtering
+
+			logPdlWarnings(gqlResponse.extensions?.warnings)
+
+			if (gqlResponse.data == null) {
+				throw RuntimeException("PDL respons inneholder ikke data")
+			}
+
+			val fodselsdato = gqlResponse.data.hentPersonFoedselsdato.foedselsdato.firstOrNull() ?: throw RuntimeException("PDL person mangler fodselsdato")
+			return fodselsdato.foedselsaar
+		}
+	}
+
 	fun hentIdenter(ident: String): List<Personident> {
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(

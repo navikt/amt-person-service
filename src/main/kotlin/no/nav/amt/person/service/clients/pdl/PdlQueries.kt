@@ -131,6 +131,32 @@ object PdlQueries {
 
 	}
 
+	object HentPersonFodselsar {
+		val query = """
+			query(${"$"}ident: ID!) {
+			  hentPerson(ident: ${"$"}ident) {
+				foedselsdato {
+				  foedselsaar
+				}
+			  },
+			}
+		""".trimIndent()
+
+		data class Response(
+			override val errors: List<PdlError>?,
+			override val data: ResponseData?,
+			val extensions: Extensions?,
+		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
+
+		data class ResponseData(
+			val hentPersonFoedselsdato: HentPersonFoedselsdato,
+		)
+
+		data class HentPersonFoedselsdato(
+			val foedselsdato: List<Attribute.Foedselsdato>,
+		)
+	}
+
 	object HentAdressebeskyttelse {
 		val query = """
 			query(${"$"}ident: ID!) {
@@ -226,6 +252,9 @@ object PdlQueries {
 			val etternavn: String,
 		)
 
+		data class Foedselsdato(
+			val foedselsaar: Int
+		)
 
 		data class Ident(
 			val ident: String,

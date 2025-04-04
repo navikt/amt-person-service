@@ -39,6 +39,15 @@ class PersonAPI (
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+	@PostMapping("/nav-bruker-fodselsar")
+	fun hentNavBrukerFodselsar(
+		@RequestBody request: NavBrukerRequest
+	): Int {
+		authService.verifyRequestIsMachineToMachine()
+		return navBrukerService.hentNavBrukerFodselsar(request.personident)
+	}
+
+	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-ansatt")
 	fun hentEllerOpprettNavAnsatt(
 		@RequestBody request: NavAnsattRequest
