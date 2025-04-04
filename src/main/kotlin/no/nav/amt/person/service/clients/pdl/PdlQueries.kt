@@ -149,7 +149,7 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentPersonFoedselsdato: HentPersonFoedselsdato,
+			val hentPerson: HentPersonFoedselsdato,
 		)
 
 		data class HentPersonFoedselsdato(

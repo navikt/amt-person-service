@@ -95,7 +95,7 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			val fodselsdato = gqlResponse.data.hentPersonFoedselsdato.foedselsdato.firstOrNull() ?: throw RuntimeException("PDL person mangler fodselsdato")
+			val fodselsdato = gqlResponse.data.hentPerson.foedselsdato.firstOrNull() ?: throw RuntimeException("PDL person mangler fodselsdato")
 			return fodselsdato.foedselsaar
 		}
 	}
