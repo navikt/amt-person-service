@@ -42,7 +42,7 @@ class PersonAPI (
 	@PostMapping("/nav-bruker-fodselsar")
 	fun hentNavBrukerFodselsar(
 		@RequestBody request: NavBrukerRequest
-	): Int {
+	): NavBrukerFodselsdatoDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navBrukerService.hentNavBrukerFodselsar(request.personident)
 	}
