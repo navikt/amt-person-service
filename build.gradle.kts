@@ -33,7 +33,7 @@ val lang3Version = "3.17.0"
 val shedlockVersion = "6.4.0"
 val confluentVersion = "7.5.1"
 val avroVersion = "1.12.0"
-val jacksonVersion = "2.18.3"
+val jacksonVersion = "2.19.0"
 val mockOauth2ServerVersion = "2.1.10"
 
 dependencies {
