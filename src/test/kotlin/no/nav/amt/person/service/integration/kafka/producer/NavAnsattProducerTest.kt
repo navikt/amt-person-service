@@ -87,6 +87,7 @@ class NavAnsattProducerTest: IntegrationTestBase() {
 				navn = ansatt.navn,
 				telefon = ansatt.telefon,
 				epost = ansatt.epost,
+				navEnhetId = ansatt.navEnhetId,
 			)
 		)
 	}
