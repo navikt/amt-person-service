@@ -101,7 +101,7 @@ class TestDataRepository(
 			)
 		)
 
-	final fun insertNavEnhet(enhet: NavEnhetDbo) {
+	fun insertNavEnhet(enhet: NavEnhetDbo) {
 		val sql = """
 			INSERT INTO nav_enhet(id, nav_enhet_id, navn, created_at, modified_at)
 			VALUES (:id, :enhetId, :navn, :createdAt, :modifiedAt)
