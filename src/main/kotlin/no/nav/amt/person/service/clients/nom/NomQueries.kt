@@ -2,11 +2,12 @@ package no.nav.amt.person.service.clients.nom
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.amt.person.service.utils.GraphqlUtils
+import java.time.LocalDate
 
 
 object NomQueries {
 
-	object HentIdenter {
+	object HentRessurser {
 		val query = """
 			query(${"$"}identer: [String!]!) {
 				ressurser(where: { navidenter: ${"$"}identer }){
@@ -21,6 +22,14 @@ object NomQueries {
 							nummer
 							type
 						}
+					    orgTilknytning {
+					  		gyldigFom
+					  		gyldigTom
+					  		orgEnhet {
+					  			remedyEnhetId
+					  		}
+					  		erDagligOppfolging
+					    }
 					}
 				}
 			}
@@ -64,7 +73,17 @@ object NomQueries {
 			val etternavn: String?,
 			val epost: String?,
 			val telefon: List<Telefon>,
+			val orgTilknytning: List<OrgTilknytning>,
 		)
+
+		data class OrgTilknytning(
+			val gyldigFom: LocalDate,
+			val gyldigTom: LocalDate?,
+			val orgEnhet: OrgEnhet,
+			val erDagligOppfolging: Boolean,
+		) {
+			data class OrgEnhet(val remedyEnhetId: String?)
+		}
 
 		data class Telefon(
 			val nummer: String,

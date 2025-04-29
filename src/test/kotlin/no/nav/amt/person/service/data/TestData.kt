@@ -2,6 +2,7 @@ package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
+import no.nav.amt.person.service.nav_ansatt.navGrunerlokka
 import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
 import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
@@ -73,6 +74,7 @@ object TestData {
 		navn = navn,
 		telefon = telefon,
 		epost = epost,
+		navEnhetId = navGrunerlokka.id,
 		createdAt = createdAt,
 		modifiedAt = modifiedAt,
 	)

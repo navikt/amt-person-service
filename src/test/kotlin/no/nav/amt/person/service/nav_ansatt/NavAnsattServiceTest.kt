@@ -5,18 +5,24 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
+import no.nav.amt.person.service.clients.nom.NomQueries
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
+import no.nav.amt.person.service.nav_enhet.NavEnhet
+import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 class NavAnsattServiceTest {
-	lateinit var navAnsattRepository: NavAnsattRepository
-	lateinit var nomClient: NomClientImpl
-	lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
-	lateinit var service: NavAnsattService
-	lateinit var kafkaProducerService: KafkaProducerService
+	private lateinit var navAnsattRepository: NavAnsattRepository
+	private lateinit var nomClient: NomClientImpl
+	private lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
+	private lateinit var service: NavAnsattService
+	private lateinit var kafkaProducerService: KafkaProducerService
+	private lateinit var navEnhetService: NavEnhetService
 
 	@BeforeEach
 	fun setup() {
@@ -24,11 +30,13 @@ class NavAnsattServiceTest {
 		nomClient = mockk()
 		veilarboppfolgingClient = mockk()
 		kafkaProducerService = mockk(relaxUnitFun = true)
+		navEnhetService = mockk()
 		service = NavAnsattService(
 			navAnsattRepository = navAnsattRepository,
 			nomClient = nomClient,
 			veilarboppfolgingClient = veilarboppfolgingClient,
 			kafkaProducerService = kafkaProducerService,
+			navEnhetService = navEnhetService,
 		)
 	}
 
@@ -42,8 +50,10 @@ class NavAnsattServiceTest {
 			navn = ansatt.navn,
 			telefonnummer = ansatt.telefon,
 			epost = ansatt.epost,
+			orgTilknytning = orgTilknytning,
 		)
 		every { navAnsattRepository.upsert(any()) } returns ansatt
+		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
 		val faktiskAnsatt = service.hentEllerOpprettAnsatt(ansatt.navIdent)
 
@@ -54,3 +64,18 @@ class NavAnsattServiceTest {
 	}
 
 }
+
+val orgTilknytning = listOf(
+	NomQueries.HentRessurser.OrgTilknytning(
+	gyldigFom = LocalDate.of(2020, 1, 1),
+	gyldigTom = null,
+	orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+	erDagligOppfolging = true,
+	)
+)
+
+val navGrunerlokka = NavEnhet(
+	id = UUID.randomUUID(),
+	navn = "Nav Grünerløkka",
+	enhetId = "0315",
+)

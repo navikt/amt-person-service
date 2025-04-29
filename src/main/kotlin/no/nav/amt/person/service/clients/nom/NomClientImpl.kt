@@ -32,8 +32,8 @@ class NomClientImpl(
 	override fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
 		val requestBody = toJsonString(
 			GraphqlUtils.GraphqlQuery(
-				NomQueries.HentIdenter.query,
-				NomQueries.HentIdenter.Variables(navIdenter)
+				NomQueries.HentRessurser.query,
+				NomQueries.HentRessurser.Variables(navIdenter)
 			)
 		)
 
@@ -51,15 +51,15 @@ class NomClientImpl(
 			response.takeUnless { response.body != null }
 				?.let { throw IllegalStateException("Ingen body i response") }
 
-			val hentIdenterResponse = fromJsonString<NomQueries.HentIdenter.Response>(response.body!!.string())
+			val ressurserResponse = fromJsonString<NomQueries.HentRessurser.Response>(response.body!!.string())
 
-			return toVeiledere(hentIdenterResponse)
+			return toVeiledere(ressurserResponse)
 		}
 	}
 
-	private fun toVeiledere(hentIdenterResponse: NomQueries.HentIdenter.Response): List<NomNavAnsatt> {
+	private fun toVeiledere(hentIdenterResponse: NomQueries.HentRessurser.Response): List<NomNavAnsatt> {
 		return hentIdenterResponse.data?.ressurser?.mapNotNull {
-			if (it.code != NomQueries.HentIdenter.ResultCode.OK || it.ressurs == null) {
+			if (it.code != NomQueries.HentRessurser.ResultCode.OK || it.ressurs == null) {
 				log.warn("Fant ikke veileder i NOM. statusCode=${it.code}")
 				return@mapNotNull null
 			}
@@ -72,12 +72,13 @@ class NomClientImpl(
 				navIdent = ansatt.navident,
 				navn = ansatt.visningsnavn ?: "${ansatt.fornavn} ${ansatt.etternavn}",
 				epost = it.ressurs.epost,
-				telefonnummer = telefonnummer
+				telefonnummer = telefonnummer,
+				orgTilknytning = ansatt.orgTilknytning,
 			)
 		} ?: emptyList()
 	}
 
-	private fun hentTjenesteTelefonnummer(telefonnumere: List<NomQueries.HentIdenter.Telefon>): String? {
+	private fun hentTjenesteTelefonnummer(telefonnumere: List<NomQueries.HentRessurser.Telefon>): String? {
 		return telefonnumere.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
 			?: telefonnumere.find { it.type == "NAV_TJENESTE_TELEFON" }?.nummer
 	}

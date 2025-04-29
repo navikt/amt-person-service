@@ -36,6 +36,7 @@ class TildeltVeilederConsumerTest : IntegrationTestBase() {
 
 		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+		mockNorgHttpServer.addNavAnsattEnhet()
 
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
 

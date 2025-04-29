@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.nav_ansatt
 
-import java.util.*
+import java.util.UUID
 
 data class NavAnsatt(
 	val id: UUID,
@@ -8,4 +8,5 @@ data class NavAnsatt(
 	val navn: String,
 	val epost: String?,
 	val telefon: String?,
+	val navEnhetId: UUID?,
 )

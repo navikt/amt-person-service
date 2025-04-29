@@ -1,5 +1,7 @@
 package no.nav.amt.person.service.clients.nom
 
+import java.time.LocalDate
+
 class NomClientMock : NomClient {
 	override fun hentNavAnsatt(navIdent: String): NomNavAnsatt? {
 		return hentNavAnsatte(listOf(navIdent)).firstOrNull()
@@ -11,7 +13,15 @@ class NomClientMock : NomClient {
 				navIdent = navIdent,
 				navn = "F_$navIdent E_$navIdent",
 				epost = "F_$navIdent.E_$navIdent@trygdeetaten.no",
-				telefonnummer = "12345678"
+				telefonnummer = "12345678",
+				orgTilknytning = listOf(
+					NomQueries.HentRessurser.OrgTilknytning(
+						gyldigFom = LocalDate.of(2020, 1, 1),
+						gyldigTom = null,
+						orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+						erDagligOppfolging = true,
+					)
+				)
 			)
 		}
 	}

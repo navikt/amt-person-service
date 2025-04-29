@@ -14,8 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.NoSuchElementException
+import java.util.UUID
 
 class NavAnsattRepositoryTest {
 	companion object {
@@ -103,6 +102,7 @@ class NavAnsattRepositoryTest {
 			navn = "Nytt Navn",
 			epost = "ny_epost@nav.no",
 			telefon = "12345678",
+			navEnhetId = null,
 		)
 
 		testRepository.insertNavAnsatt(ansatt)
@@ -144,7 +144,8 @@ class NavAnsattRepositoryTest {
 				navIdent = ansatt1.navIdent,
 				navn =	"nytt navn 1",
 				telefon = ansatt1.telefon,
-				epost = ansatt1.epost
+				epost = ansatt1.epost,
+				navEnhetId = null,
 		)
 
 		val oppdatertAnsatt2 = NavAnsatt(
@@ -152,7 +153,8 @@ class NavAnsattRepositoryTest {
 				navIdent = ansatt2.navIdent,
 				navn =	"nytt navn 2",
 				telefon = ansatt2.telefon,
-				epost = ansatt2.epost
+				epost = ansatt2.epost,
+				navEnhetId = null,
 		)
 
 		repository.upsertMany(listOf(oppdatertAnsatt1, oppdatertAnsatt2))

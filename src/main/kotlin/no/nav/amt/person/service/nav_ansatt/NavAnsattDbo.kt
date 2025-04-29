@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.nav_ansatt
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class NavAnsattDbo(
 	val id: UUID,
@@ -11,6 +11,7 @@ data class NavAnsattDbo(
 	val epost: String?,
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime,
+	val navEnhetId: UUID?,
 ) {
 	fun toModel() = NavAnsatt(
 		id = id,
@@ -18,5 +19,6 @@ data class NavAnsattDbo(
 		navn = navn,
 		epost = epost,
 		telefon = telefon,
+		navEnhetId = navEnhetId,
 	)
 }

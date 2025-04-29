@@ -8,34 +8,9 @@ import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import java.time.LocalDate
 
 class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
-
-	fun addDefaultData() {
-		mockHentNavAnsatt(
-			NomClientResponseInput(
-				navident = "NavIdent",
-				visningsnavn = "Jeg er en test",
-				fornavn = "INTEGRASJON",
-				etternavn = "TEST",
-				epost = "integrasjon.test@nav.no",
-				telefon = listOf(
-					NomQueries.HentIdenter.Telefon("12345678", "NAV_TJENESTE_TELEFON")
-				)
-			)
-		)
-	}
-
-	fun mockHentNavAnsatt(input: NomClientResponseInput) {
-		val predicate = { req: RecordedRequest ->
-			req.path == "/graphql"
-				&& req.method == "POST"
-				&& containsIdentifier(req, input.navident)
-		}
-
-
-		addResponseHandler(predicate, createResponse(input))
-	}
 
 	fun mockHentNavAnsatt(ansatt: NavAnsatt) {
 		val predicate = { req: RecordedRequest ->
@@ -50,17 +25,12 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 			fornavn = ansatt.navn.split(" ").first(),
 			etternavn = ansatt.navn.split(" ").last(),
 			epost = ansatt.epost,
-			telefon = ansatt.telefon?.let {
-				listOf(NomQueries.HentIdenter.Telefon(nummer = it, type = "NAV_TJENESTE_TELEFON"))
-			} ?: emptyList()
+			telefon = ansatt.telefon?.let { listOf(NomQueries.HentRessurser.Telefon(nummer = it, type = "NAV_TJENESTE_TELEFON")) } ?: emptyList(),
 		)
 
 
 		addResponseHandler(predicate, createResponse(input))
 	}
-
-
-
 
 
 	private fun containsIdentifier(req: RecordedRequest, identifier: String): Boolean {
@@ -70,28 +40,27 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 	}
 
 	private fun createResponse(input: NomClientResponseInput): MockResponse {
-		val body = NomQueries.HentIdenter.Response(
+		val body = NomQueries.HentRessurser.Response(
 			errors = emptyList(),
-			data = NomQueries.HentIdenter.ResponseData(
+			data = NomQueries.HentRessurser.ResponseData(
 				listOf(
-					NomQueries.HentIdenter.RessursResult(
-						code = NomQueries.HentIdenter.ResultCode.OK,
-						ressurs = NomQueries.HentIdenter.Ressurs(
+					NomQueries.HentRessurser.RessursResult(
+						code = NomQueries.HentRessurser.ResultCode.OK,
+						ressurs = NomQueries.HentRessurser.Ressurs(
 							navident = input.navident,
 							visningsnavn = input.visningsnavn,
 							fornavn = input.fornavn,
 							etternavn = input.etternavn,
 							epost = input.epost,
-							telefon = input.telefon
+							telefon = input.telefon,
+							orgTilknytning = input.orgTilknytning,
 						)
 					)
 				)
 			)
 		)
 
-		return MockResponse()
-			.setResponseCode(200)
-			.setBody(toJsonString(body))
+		return MockResponse().setResponseCode(200).setBody(toJsonString(body))
 	}
 
 	data class NomClientResponseInput(
@@ -100,6 +69,14 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 		val fornavn: String?,
 		val etternavn: String?,
 		val epost: String?,
-		val telefon: List<NomQueries.HentIdenter.Telefon>,
+		val telefon: List<NomQueries.HentRessurser.Telefon>,
+		val orgTilknytning: List<NomQueries.HentRessurser.OrgTilknytning> = listOf(
+			NomQueries.HentRessurser.OrgTilknytning(
+				gyldigFom = LocalDate.of(2020, 1, 1),
+				gyldigTom = null,
+				orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+				erDagligOppfolging = true,
+			)
+		)
 	)
 }

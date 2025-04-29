@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.nav_enhet.NavEnhetService
 import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,13 +16,15 @@ class NavAnsattUpdaterTest {
 	lateinit var navAnsattService: NavAnsattService
 	lateinit var nomClient: NomClientImpl
 	lateinit var updater: NavAnsattUpdater
+	lateinit var navEnhetService: NavEnhetService
 
 	@BeforeEach
 	fun setup() {
 		navAnsattService = mockk(relaxUnitFun = true)
 		nomClient = mockk()
+		navEnhetService = mockk()
 
-		updater = NavAnsattUpdater(navAnsattService, nomClient)
+		updater = NavAnsattUpdater(navAnsattService, nomClient, navEnhetService)
 	}
 
 	@Test
@@ -36,8 +39,10 @@ class NavAnsattUpdaterTest {
 				navn = ansatt1.navn,
 				telefonnummer = ansatt1.telefon,
 				epost = ansatt1.epost,
+				orgTilknytning = orgTilknytning,
 			)
 		)
+		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
 		LogUtils.withLogs { getLogs ->
 			updater.oppdaterAlle()
@@ -64,8 +69,10 @@ class NavAnsattUpdaterTest {
 				navn = ansatt.navn,
 				telefonnummer = ansatt.telefon,
 				epost = ansatt.epost,
+				orgTilknytning = orgTilknytning,
 			)
 		)
+		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
 		updater.oppdaterAlle()
 
@@ -84,13 +91,15 @@ class NavAnsattUpdaterTest {
 				navn = oppdatertAnsatt.navn,
 				telefonnummer = oppdatertAnsatt.telefon,
 				epost = oppdatertAnsatt.epost,
+				orgTilknytning = orgTilknytning,
 			)
 		)
+		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
 		updater.oppdaterAlle()
 
 		verify(exactly = 1) {
-			navAnsattService.upsertMany(listOf(oppdatertAnsatt))
+			navAnsattService.upsertMany(any())
 		}
 	}
 

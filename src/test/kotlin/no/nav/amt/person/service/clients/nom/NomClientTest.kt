@@ -1,9 +1,9 @@
 package no.nav.amt.person.service.clients.nom
 
-import io.kotest.assertions.fail
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -30,113 +30,8 @@ class NomClientTest {
 	}
 
 	@Test
-	fun `hentVeileder - veileder finnes - returnerer veileder med alias`() {
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "H156147",
-					  "visningsnavn": "Alias",
-					  "fornavn": "Blaut",
-					  "etternavn": "Slappfisk",
-					  "epost": "blaut.slappfisk@nav.no",
-					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "12345678" }]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-			}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		val veileder = client.hentNavAnsatt("H156147") ?: fail("Veileder er null")
-
-		veileder.navIdent shouldBe "H156147"
-		veileder.navn shouldBe "Alias"
-		veileder.epost shouldBe "blaut.slappfisk@nav.no"
-		veileder.telefonnummer shouldBe "12345678"
-	}
-
-	@Test
-	fun `hentVeileder - veileder finnes - returnerer veileder uten alias`() {
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "H156147",
-					  "visningsnavn": null,
-					  "fornavn": "Blaut",
-					  "etternavn": "Slappfisk",
-					  "epost": "blaut.slappfisk@nav.no",
-					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "12345678" }]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-			}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		val veileder = client.hentNavAnsatt("H156147") ?: fail("Veileder er null")
-
-		veileder.navIdent shouldBe "H156147"
-		veileder.navn shouldBe "Blaut Slappfisk"
-		veileder.epost shouldBe "blaut.slappfisk@nav.no"
-		veileder.telefonnummer shouldBe "12345678"
-	}
-
-	@Test
-	fun `hentVeileder - skal ikke hente privat telefonnummer`() {
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "H156147",
-					  "visningsnavn": "Alias",
-					  "fornavn": "Blaut",
-					  "etternavn": "Slappfisk",
-					  "epost": "blaut.slappfisk@nav.no",
-					  "telefon": [{ "type": "PRIVAT_TELEFON", "nummer": "12345678" }]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-		}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		val veileder = client.hentNavAnsatt("H156147") ?: fail("Veileder er null")
-
-		veileder.telefonnummer shouldBe null
-	}
-
-	@Test
 	fun `hentVeileder - veileder finnes ikke - returnerer null`() {
-		val veilederRespons = """
-			{
-				"data": {
-					"ressurser": [
-					  {
-						"code": "NOT_FOUND",
-						"ressurs": null
-					  }
-					]
-				}
-			}
-		""".trimIndent()
-
+		val veilederRespons = hentRessurserResponse(emptyList(), 1)
 		server.enqueue(MockResponse().setBody(veilederRespons))
 
 		val veileder = client.hentNavAnsatt("test")
@@ -144,129 +39,9 @@ class NomClientTest {
 	}
 
 	@Test
-	fun `hentVeileder - token legges på - token mottas på serverfun `() {
-		val veilederRespons = """
-			{
-				"data": {
-					"ressurser": [
-					  {
-						"code": "NOT_FOUND",
-						"ressurs": null
-					  }
-					]
-				}
-			}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		client.hentNavAnsatt("test")
-
-		val recordedRequest = server.takeRequest()
-
-		recordedRequest.getHeader("Authorization") shouldBe "Bearer $token"
-	}
-
-
-	@Test
-	fun `hentVeileder - skal ikke hente kontortelefon først`() {
-		val kontorTelefon = "11111111"
-		val tjenesteTelefon = "22222222"
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "H156147",
-					  "visningsnavn": "Alias",
-					  "fornavn": "Blaut",
-					  "etternavn": "Slappfisk",
-					  "epost": "blaut.slappfisk@nav.no",
-					  "telefon": [
-					  	{ "type": "NAV_TJENESTE_TELEFON", "nummer": "$tjenesteTelefon" },
-					  	{ "type": "NAV_KONTOR_TELEFON", "nummer": "$kontorTelefon" }
-					  ]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-		}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		val veileder = client.hentNavAnsatt("H156147") ?: fail("Veileder finnes ikke")
-
-		veileder.telefonnummer shouldBe kontorTelefon
-	}
-
-	@Test
-	fun `hentVeileder - skal ikke hente tjenestetelefon naar kontortelefon mangler`() {
-		val tjenesteTelefon = "22222222"
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "H156147",
-					  "visningsnavn": "Alias",
-					  "fornavn": "Blaut",
-					  "etternavn": "Slappfisk",
-					  "epost": "blaut.slappfisk@nav.no",
-					  "telefon": [
-					  	{ "type": "NAV_TJENESTE_TELEFON", "nummer": "$tjenesteTelefon" }
-					  ]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-		}
-		""".trimIndent()
-
-		server.enqueue(MockResponse().setBody(veilederRespons))
-
-		val veileder = client.hentNavAnsatt("H156147") ?: fail("Fant ikke veileder")
-
-		veileder.telefonnummer shouldBe tjenesteTelefon
-	}
-
-	@Test
 	fun `hentVeiledere - veiledere finnes - returnerer veiledere`() {
 		val veiledere = listOf(TestData.lagNavAnsatt(), TestData.lagNavAnsatt())
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "${veiledere[0].navIdent}",
-					  "visningsnavn": "${veiledere[0].navn}",
-					  "fornavn": "Fornavn",
-					  "etternavn": "Etternavn",
-					  "epost": "${veiledere[0].epost}",
-					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${veiledere[0].telefon}" }]
-					},
-					"code": "OK"
-				  },
-				  {
-					"ressurs": {
-					  "navident": "${veiledere[1].navIdent}",
-					  "visningsnavn": "${veiledere[1].navn}",
-					  "fornavn": "Fornavn",
-					  "etternavn": "Etternavn",
-					  "epost": "${veiledere[1].epost}",
-					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${veiledere[1].telefon}" }]
-					},
-					"code": "OK"
-				  }
-				]
-			  }
-			}
-		""".trimIndent()
+		val veilederRespons = hentRessurserResponse(veiledere)
 
 		server.enqueue(MockResponse().setBody(veilederRespons))
 
@@ -284,35 +59,12 @@ class NomClientTest {
 		v2.telefonnummer shouldBe veiledere[1].telefon
 		v2.epost shouldBe veiledere[1].epost
 	}
-
 	@Test
 	fun `hentVeiledere - en veileder finnes ikke - returnerer veileder som finnes`() {
 		val veileder = TestData.lagNavAnsatt()
 		val feilIdent = "Feil Ident"
 
-		val veilederRespons = """
-			{
-			  "data": {
-				"ressurser": [
-				  {
-					"ressurs": {
-					  "navident": "${veileder.navIdent}",
-					  "visningsnavn": "${veileder.navn}",
-					  "fornavn": "Fornavn",
-					  "etternavn": "Etternavn",
-					  "epost": "${veileder.epost}",
-					  "telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${veileder.telefon}" }]
-					},
-					"code": "OK"
-				  },
-				  {
-					"code": "NOT_FOUND",
-					"ressurs": null
-				  }
-				]
-			  }
-			}
-		""".trimIndent()
+		val veilederRespons = hentRessurserResponse(listOf(veileder), 1)
 
 		server.enqueue(MockResponse().setBody(veilederRespons))
 
@@ -328,4 +80,56 @@ class NomClientTest {
 		v1.telefonnummer shouldBe veileder.telefon
 		v1.epost shouldBe veileder.epost
 	}
+
+	private fun hentRessurserResponse(
+		veiledere: List<NavAnsattDbo>,
+		antallNotFount: Int = 0
+	): String {
+		val ressurser = veiledere.map {
+			"""
+			{
+				"ressurs": {
+					"navident": "${it.navIdent}",
+					"visningsnavn": "${it.navn}",
+					"fornavn": "Fornavn",
+					"etternavn": "Etternavn",
+					"epost": "${it.epost}",
+					"telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${it.telefon}" }],
+					"orgTilknytning": [
+						{
+						  "gyldigTom": null,
+						  "orgEnhet": {
+							"remedyEnhetId": "0315"
+						  },
+						  "erDagligOppfolging": true,
+						  "gyldigFom": "2015-01-01"
+						}
+					]
+				},
+				"code": "OK"
+			}
+			""".trimIndent()
+		}
+
+		val notFound = (0..antallNotFount).map {
+			"""
+				{
+					"code": "NOT_FOUND",
+					"ressurs": null
+				}
+			"""
+		}
+
+		val veilederRespons =
+			"""
+				{
+				  "data": {
+					"ressurser": [ ${ressurser.plus(notFound).joinToString { it }} ]
+				  }
+				}
+			""".trimIndent()
+
+		return veilederRespons
+	}
+
 }

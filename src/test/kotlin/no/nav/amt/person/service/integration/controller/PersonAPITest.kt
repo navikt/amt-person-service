@@ -107,6 +107,7 @@ class PersonAPITest: IntegrationTestBase() {
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
+		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response = sendRequest(
 			method = "POST",
@@ -169,6 +170,7 @@ class PersonAPITest: IntegrationTestBase() {
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
+		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response = sendRequest(
 			method = "POST",
@@ -186,10 +188,11 @@ class PersonAPITest: IntegrationTestBase() {
 	}
 
 	@Test
-	fun `hentEllerOpprettNavAnsatt - nav ansatt finnes ikke - skal ha status 200 og returnere riktig response`() {
+	fun `hentEllerOpprettNavAnsatt - nav ansatt er ikke lagret - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
 
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response = sendRequest(
 			method = "POST",

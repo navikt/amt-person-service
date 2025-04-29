@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.nav_ansatt
 
+import no.nav.amt.person.service.utils.getNullableUUID
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
@@ -19,6 +20,7 @@ class NavAnsattRepository(
 			navn = rs.getString("navn"),
 			telefon = rs.getString("telefon"),
 			epost = rs.getString("epost"),
+			navEnhetId = rs.getNullableUUID("nav_enhet_id"),
 			createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
 			modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
 		)
@@ -60,6 +62,7 @@ class NavAnsattRepository(
 			"navn" to navAnsatt.navn,
 			"telefon" to navAnsatt.telefon,
 			"epost" to navAnsatt.epost,
+			"nav_enhet_id" to navAnsatt.navEnhetId,
 		)
 
 		return template.query("$upsertSql returning *", parameters, rowMapper).first()
@@ -73,6 +76,7 @@ class NavAnsattRepository(
 				"navn" to navAnsatt.navn,
 				"telefon" to navAnsatt.telefon,
 				"epost" to navAnsatt.epost,
+				"nav_enhet_id" to navAnsatt.navEnhetId,
 			)
 		}
 
@@ -81,13 +85,14 @@ class NavAnsattRepository(
 	}
 
 	private val upsertSql = """
-			insert into nav_ansatt(id, nav_ident, navn, telefon, epost)
-			values (:id, :navIdent, :navn, :telefon, :epost)
+			insert into nav_ansatt(id, nav_ident, navn, telefon, epost, nav_enhet_id)
+			values (:id, :navIdent, :navn, :telefon, :epost, :nav_enhet_id)
 			on conflict (nav_ident) do update set
 				navn = :navn,
 				telefon = :telefon,
 				epost = :epost,
-				modified_at = current_timestamp
+				modified_at = current_timestamp,
+				nav_enhet_id = :nav_enhet_id
 		""".trimIndent()
 
 }

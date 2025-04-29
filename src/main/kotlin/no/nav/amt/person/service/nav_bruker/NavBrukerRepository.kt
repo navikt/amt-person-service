@@ -42,6 +42,7 @@ class NavBrukerRepository(
 					navn = rs.getString("nav_ansatt.navn"),
 					telefon = rs.getString("nav_ansatt.telefon"),
 					epost = rs.getString("nav_ansatt.epost"),
+					navEnhetId = rs.getNullableUUID("nav_ansatt.nav_enhet_id"),
 					createdAt = rs.getTimestamp("nav_ansatt.created_at").toLocalDateTime(),
 					modifiedAt = rs.getTimestamp("nav_ansatt.modified_at").toLocalDateTime(),
 				)
@@ -239,6 +240,7 @@ class NavBrukerRepository(
 				   nav_ansatt.navn as "nav_ansatt.navn",
 				   nav_ansatt.telefon as "nav_ansatt.telefon",
 				   nav_ansatt.epost as "nav_ansatt.epost",
+				   nav_ansatt.nav_enhet_id as "nav_ansatt.nav_enhet_id",
 				   nav_ansatt.created_at as "nav_ansatt.created_at",
 				   nav_ansatt.modified_at as "nav_ansatt.modified_at",
 				   nav_enhet.nav_enhet_id as "nav_enhet.nav_enhet_id",

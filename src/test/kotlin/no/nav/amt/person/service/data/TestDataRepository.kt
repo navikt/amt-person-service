@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
+import no.nav.amt.person.service.nav_ansatt.navGrunerlokka
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Component
@@ -20,6 +22,10 @@ class TestDataRepository(
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
+
+	init {
+		insertNavGrunerlokka()
+	}
 
 	fun insertPerson(person: PersonDbo) {
 		val sql = """
@@ -85,10 +91,21 @@ class TestDataRepository(
 		template.batchUpdate(sql, parameters.toTypedArray())
 	}
 
-	fun insertNavEnhet(enhet: NavEnhetDbo) {
+	final fun insertNavGrunerlokka() = insertNavEnhet(
+			NavEnhetDbo(
+				navGrunerlokka.id,
+				navGrunerlokka.enhetId,
+				navGrunerlokka.navn,
+				LocalDateTime.now(),
+				LocalDateTime.now(),
+			)
+		)
+
+	final fun insertNavEnhet(enhet: NavEnhetDbo) {
 		val sql = """
 			INSERT INTO nav_enhet(id, nav_enhet_id, navn, created_at, modified_at)
 			VALUES (:id, :enhetId, :navn, :createdAt, :modifiedAt)
+			ON CONFLICT DO NOTHING
 		""".trimIndent()
 
 		val parameters = sqlParameters(
@@ -103,6 +120,7 @@ class TestDataRepository(
 	}
 
 	fun insertNavAnsatt(ansatt: NavAnsattDbo) {
+		insertNavGrunerlokka()
 		val sql = """
 			insert into nav_ansatt(
 				id,
@@ -110,6 +128,7 @@ class TestDataRepository(
 				navn,
 				telefon,
 				epost,
+				nav_enhet_id,
 				created_at,
 				modified_at
 			) values (
@@ -118,6 +137,7 @@ class TestDataRepository(
 				:navn,
 				:telefon,
 				:epost,
+				:nav_enhet_id,
 				:createdAt,
 				:modifiedAt
 			)
@@ -129,6 +149,7 @@ class TestDataRepository(
 			"navn" to ansatt.navn,
 			"telefon" to ansatt.telefon,
 			"epost" to ansatt.epost,
+			"nav_enhet_id" to ansatt.navEnhetId,
 			"createdAt" to ansatt.createdAt,
 			"modifiedAt" to ansatt.modifiedAt,
 		)

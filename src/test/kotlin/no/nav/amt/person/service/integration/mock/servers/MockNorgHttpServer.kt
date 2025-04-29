@@ -12,8 +12,8 @@ class MockNorgHttpServer : MockHttpServer(name = "MockNorgHttpServer") {
 		addNavEnhet(navEnhet.enhetId, navEnhet.navn)
 	}
 
-	fun addDefaultData() {
-		addNavEnhet("INTEGRATION_TEST_NAV_ENHET", "INTEGRATION_TEST_NAV_ENHET_NAVN")
+	fun addNavAnsattEnhet() {
+		addNavEnhet("0315", "Nav Grünerløkka")
 	}
 
 	fun addNavEnhet(enhetNr: String, navn: String) {
