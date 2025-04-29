@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
+import no.nav.amt.person.service.nav_ansatt.NavAnsattUpdater
 import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
@@ -39,7 +40,8 @@ class InternalController(
 	private val navBrukerRepository: NavBrukerRepository,
 	private val arrangorAnsattService: ArrangorAnsattService,
 	private val navAnsattService: NavAnsattService,
-	private val kafkaProducerService: KafkaProducerService
+	private val kafkaProducerService: KafkaProducerService,
+	private val navAnsattUpdater: NavAnsattUpdater,
 ) {
 	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
@@ -203,6 +205,18 @@ class InternalController(
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-nav-ansatte") {
 				republiserAlleNavAnsatte()
+			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
+	@GetMapping("/nav-ansatte/oppdater")
+	fun oppdaterNavAnsatte(servlet: HttpServletRequest) {
+		if (isInternal(servlet)) {
+			JobRunner.runAsync("oppdater-nav-ansatte") {
+				navAnsattUpdater.oppdaterAlle()
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
