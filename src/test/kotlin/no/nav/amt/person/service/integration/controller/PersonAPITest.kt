@@ -68,6 +68,8 @@ class PersonAPITest: IntegrationTestBase() {
 	fun `hentEllerOpprettArrangorAnsatt - ansatt er navBruker - skal ha status 200 og returnere riktig response`() {
 		val person = TestData.lagPerson()
 		val navBruker = TestData.lagNavBruker(person = person)
+		val enhet = TestData.lagNavEnhet(id =  navBruker.navVeileder?.navEnhetId!!, enhetId = "0315", navn = "Nav Grünerløkka")
+		testDataRepository.insertNavEnhet(enhet)
 		testDataRepository.insertNavBruker(navBruker)
 
 		val token = mockOAuthServer.issueAzureAdM2MToken()
@@ -132,6 +134,8 @@ class PersonAPITest: IntegrationTestBase() {
 	@Test
 	fun `hentEllerOpprettNavBruker - nav bruker finnes - skal ha status 200 og returnere riktig response`() {
 		val navBruker = TestData.lagNavBruker()
+		val enhet = TestData.lagNavEnhet(id =  navBruker.navVeileder?.navEnhetId!!, enhetId = "0315", navn = "Nav Grünerløkka")
+		testDataRepository.insertNavEnhet(enhet)
 		testDataRepository.insertNavBruker(navBruker)
 
 		val response = sendRequest(
@@ -278,6 +282,8 @@ class PersonAPITest: IntegrationTestBase() {
 	@Test
 	fun `hentNavAnsatt - nav ansatt finnes - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
+		val enhet = TestData.lagNavEnhet(id =  navAnsatt.navEnhetId!!, enhetId = "0315", navn = "Nav Grünerløkka")
+		testDataRepository.insertNavEnhet(enhet)
 		testDataRepository.insertNavAnsatt(navAnsatt)
 
 		val response = sendRequest(
