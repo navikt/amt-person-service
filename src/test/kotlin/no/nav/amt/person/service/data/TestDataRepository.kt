@@ -105,7 +105,7 @@ class TestDataRepository(
 		val sql = """
 			INSERT INTO nav_enhet(id, nav_enhet_id, navn, created_at, modified_at)
 			VALUES (:id, :enhetId, :navn, :createdAt, :modifiedAt)
-			ON CONFLICT DO NOTHING
+			ON CONFLICT (nav_enhet_id) DO update set id = :id, nav_enhet_id = :enhetId, navn = :navn, created_at = :createdAt, modified_at = :modifiedAt
 		""".trimIndent()
 
 		val parameters = sqlParameters(

@@ -75,7 +75,7 @@ val orgTilknytning = listOf(
 )
 
 val navGrunerlokka = NavEnhet(
-	id = UUID.randomUUID(),
+	id = UUID(0L, 0L),
 	navn = "Nav Grünerløkka",
 	enhetId = "0315",
 )

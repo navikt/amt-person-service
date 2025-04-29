@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
+import org.springframework.jdbc.core.JdbcTemplate
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.utility.DockerImageName
@@ -43,6 +44,20 @@ object SingletonPostgresContainer {
 		}
 
 		return postgresContainer as PostgreSQLContainer<Nothing>
+	}
+
+	fun cleanup() {
+		val jdbcTemplate = JdbcTemplate(getDataSource())
+
+		val tables: List<String> = jdbcTemplate.queryForList(
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
+			String::class.java
+		)
+
+		tables.forEach { table ->
+			log.info("Dropping table $table...")
+			jdbcTemplate.execute("TRUNCATE TABLE $table CASCADE")
+		}
 	}
 
 	private fun applyMigrations(dataSource: DataSource) {

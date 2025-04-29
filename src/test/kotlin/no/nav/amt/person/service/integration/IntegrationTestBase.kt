@@ -2,7 +2,17 @@ package no.nav.amt.person.service.integration
 
 import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.integration.kafka.utils.SingletonKafkaProvider
-import no.nav.amt.person.service.integration.mock.servers.*
+import no.nav.amt.person.service.integration.mock.servers.MockKrrProxyHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockNomHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockNorgHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockOAuthServer
+import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockPoaoTilgangHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockSchemaRegistryHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockVeilarbarenaHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockVeilarboppfolgingHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockVeilarbvedtaksstotteHttpServer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
 import no.nav.amt.person.service.utils.DbTestDataUtils
 import no.nav.amt.person.service.utils.SingletonPostgresContainer
@@ -53,6 +63,7 @@ class IntegrationTestBase {
 		mockVeilarbarenaHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
+		SingletonPostgresContainer.cleanup()
 	}
 
 	companion object {
