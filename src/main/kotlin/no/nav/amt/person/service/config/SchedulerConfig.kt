@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @Configuration
 @EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "10m")
+@EnableSchedulerLock(defaultLockAtMostFor = "30m", defaultLockAtLeastFor = "10m")
 class SchedulerConfig {
 	@Bean
 	fun lockProvider(jdbcTemplate: JdbcTemplate): LockProvider {

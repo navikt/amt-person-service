@@ -11,7 +11,7 @@ class NavAnsattUpdateJob(
 ) {
 
 	@Scheduled(cron = "@midnight")
-	@SchedulerLock(name = "navAnsattUpdater", lockAtMostFor = "60m")
+	@SchedulerLock(name = "navAnsattUpdater", lockAtMostFor = "30m", lockAtLeastFor = "15m")
 	fun update() {
 		JobRunner.run("oppdater_alle_nav_ansatte", navAnsattUpdater::oppdaterAlle)
 	}
