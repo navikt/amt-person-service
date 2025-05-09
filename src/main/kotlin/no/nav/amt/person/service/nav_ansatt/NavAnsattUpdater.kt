@@ -45,12 +45,20 @@ class NavAnsattUpdater(
 		val navEnhet = nomAnsatt.navEnhetNummer?.let {  navEnhetService.hentEllerOpprettNavEnhet(it) }
 
 		return if (ansatt.lagretAnsatt.skalOppdateres(nomAnsatt, navEnhet)) {
+			val telefon = nomAnsatt.telefonnummer ?: ansatt.lagretAnsatt.telefon?.also {
+				log.warn("Telefonnummer for nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
+			}
+
+			val epost = nomAnsatt.epost ?: ansatt.lagretAnsatt.epost?.also {
+				log.warn("Epost for nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
+			}
+
 			NavAnsatt(
 				id = ansatt.lagretAnsatt.id,
 				navIdent = nomAnsatt.navIdent,
 				navn = nomAnsatt.navn,
-				epost = nomAnsatt.epost,
-				telefon = nomAnsatt.telefonnummer,
+				epost = epost,
+				telefon = telefon,
 				navEnhetId = navEnhet?.id
 			)
 		} else {
