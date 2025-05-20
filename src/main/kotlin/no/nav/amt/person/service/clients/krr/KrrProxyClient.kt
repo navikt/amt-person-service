@@ -25,30 +25,11 @@ class KrrProxyClient(
 		private const val INCREASED_TIMEOUT_SECONDS = 20L
 	}
 
-	fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> {
-		val request: Request = Request.Builder()
-			.url("$baseUrl/rest/v1/person?inkluderSikkerDigitalPost=false")
-			.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-			.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider.get())
-			.header("Nav-Personident", personident)
-			.build()
-
-		httpClient.newCall(request).execute().use { response ->
-			if (!response.isSuccessful) {
-				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
-			}
-
-			val body = response.body?.string() ?: return Result.failure(RuntimeException("Body manglet i respons fra KRR-proxy"))
-
-			val responseDto = fromJsonString<KontaktinformasjonDto>(body)
-
-			return Result.success(Kontaktinformasjon(
-				epost = responseDto.epostadresse,
-				telefonnummer = responseDto.mobiltelefonnummer,
-			))
+	fun hentKontaktinformasjon(personident: String) = hentKontaktinformasjon(setOf(personident))
+		.mapCatching {
+			it.personer[personident]
+				?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
 		}
-	}
-
 
 	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
 		val httpClientIncreasedTimeout = baseClientBuilder()
