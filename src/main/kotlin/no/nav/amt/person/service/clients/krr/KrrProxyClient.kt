@@ -68,10 +68,4 @@ class KrrProxyClient(
 		val personer: Map<String, Kontaktinformasjon>,
 		val feil: Map<String, String>
 	)
-
-	private data class KontaktinformasjonDto(
-		val personident: String,
-		val epostadresse: String?,
-		val mobiltelefonnummer: String?,
-	)
 }
