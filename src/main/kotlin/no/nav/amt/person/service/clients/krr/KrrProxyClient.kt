@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.clients.krr
 
-import no.nav.amt.person.service.config.SecureLog.secureLog
+import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClientBuilder
@@ -53,7 +53,7 @@ class KrrProxyClient(
 			val responseDto = fromJsonString<PostPersonerResponse>(body)
 
 			if(responseDto.feil.isNotEmpty()) {
-				secureLog.error(responseDto.feil.toString())
+				TeamLogs.error(responseDto.feil.toString())
 				return Result.failure(RuntimeException("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer"))
 			}
 			return Result.success(KontaktinformasjonForPersoner(responseDto.personer))

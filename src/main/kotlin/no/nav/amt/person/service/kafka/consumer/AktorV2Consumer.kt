@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.config.SecureLog.secureLog
+import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
@@ -19,7 +19,7 @@ class AktorV2Consumer(
 
 	fun ingest(key: String, value: Aktor?) {
 		if (value == null) {
-			secureLog.warn("Fikk tombstone for record med key=$key.")
+			TeamLogs.warn("Fikk tombstone for record med key=$key.")
 			log.warn("Fikk tombstone for kafka record. Se secure logs for key. Behandler ikke meldingen.")
 			return
 		}
@@ -27,8 +27,8 @@ class AktorV2Consumer(
 		val identer = value.identifikatorer.map { Personident(it.idnummer, !it.gjeldende, it.type.toModel()) }
 
 		if (finnGjeldendeIdent(identer).isFailure) {
-			secureLog.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")
-			log.error("AktorV2 ingestor mottok bruker med 0 gjeldende ident(er). Se secure logs for detaljer")
+			TeamLogs.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")
+			log.error("AktorV2 ingestor mottok bruker med 0 gjeldende ident(er). Se team logs for detaljer")
 			throw IllegalStateException("Kan ikke ingeste bruker med 0 gjeldende ident(er)")
 		}
 

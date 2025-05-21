@@ -2,7 +2,7 @@ package no.nav.amt.person.service.nav_enhet
 
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
-import no.nav.amt.person.service.config.SecureLog.secureLog
+import no.nav.amt.person.service.config.TeamLogs
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -19,7 +19,7 @@ class NavEnhetService(
 		return hentEllerOpprettNavEnhet(oppfolgingsenhetId)
 			.also {
 				if (it == null) {
-					secureLog.warn("Bruker med personident=$personident har enhetId=$oppfolgingsenhetId som ikke finnes i norg")
+					TeamLogs.warn("Bruker med personident=$personident har enhetId=$oppfolgingsenhetId som ikke finnes i norg")
 				}
 			}
 	}
