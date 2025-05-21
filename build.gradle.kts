@@ -35,6 +35,7 @@ val confluentVersion = "7.5.1"
 val avroVersion = "1.12.0"
 val jacksonVersion = "2.19.0"
 val mockOauth2ServerVersion = "2.1.11"
+val logstashEncoderVersion = "8.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -62,6 +63,8 @@ dependencies {
 	implementation("no.nav.common:rest:$commonVersion")
 	implementation("no.nav.common:job:$commonVersion")
 	implementation("no.nav.common:kafka:$commonVersion")
+
+	implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
 	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 	implementation("org.apache.avro:avro:$avroVersion")

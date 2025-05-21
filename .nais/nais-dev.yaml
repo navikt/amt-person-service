@@ -62,6 +62,8 @@ spec:
         - application: veilarboppfolging
           namespace: poao
           cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.dev.nav.no

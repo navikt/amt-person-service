@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="no/nav/common/log/logback-stdout-json.xml"/>
     <include resource="no/nav/common/log/logback-securelogs.xml"/>
+
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <includeContext>false</includeContext>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>TEAM_LOGS</marker>
+            </evaluator>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+    </appender>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <appender name="stdout_json_masked" class="no.nav.common.log.MaskingAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>TEAM_LOGS</marker>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+            <OnMismatch>ACCEPT</OnMismatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    return level != ERROR &amp;&amp; (logger.contains("org.apache.cxf") || logger.contains("no.nav.common.cxf"));
+                </expression>
+            </evaluator>
+            <onMatch>DENY</onMatch>
+            <onMismatch>NEUTRAL</onMismatch>
+        </filter>
+        <appender-ref ref="consoleAppender"/>
+    </appender>
+    <root level="${ROOT_LOG_LEVEL:-INFO}">
+        <appender-ref ref="stdout_json_masked"/>
+        <appender-ref ref="team-logs" />
+    </root>
+
+    <!-- Logger cookies dersom den ikke parses riktig, noe vi ikke ønsker -->
+    <logger name="org.apache.tomcat.util.http.parser.Cookie" level="OFF" />
+
+    <logger name="org.apache" level="INFO"/>
+    <logger name="org.apache.cxf" level="ERROR"/>
+    <logger name="no.nav.common.cxf" level="ERROR"/>
+    <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
+    <logger name="org.apache.wss4j.common.crypto.CryptoBase" level="ERROR"/>
+
+    <logger name="team-logs-logger" level="INFO" additivity="false">
+        <appenfer-ref ref="team-logs" />
+    </logger>
 </configuration>
