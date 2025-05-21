@@ -11,8 +11,8 @@ class TeamLogsCheck : ApplicationListener<ApplicationReadyEvent> {
 
 	override fun onApplicationEvent(event: ApplicationReadyEvent ) {
 		TeamLogs.info("Applikasjonen har startet.")
-		TeamLogs.warn("Meldingen her skal bare vises i teamlogs")
-		SecureLog.secureLog.info("SecureLog skal fortsatt fungere")
-		log.info("Vanlig logg skal funke")
+		TeamLogs.warn("Team logs maskerer ikke fnr 15519932412")
+		SecureLog.secureLog.info("SecureLog skal fortsatt fungere 15519932412")
+		log.info("Vanlig logg skal maskere fnr 15519932412")
 	}
 }
