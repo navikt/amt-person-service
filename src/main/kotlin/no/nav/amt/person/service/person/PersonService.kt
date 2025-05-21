@@ -131,12 +131,6 @@ class PersonService(
 		return person
 	}
 
-	fun slettPerson(person: Person) {
-		repository.delete(person.id)
-
-		log.info("Slettet person med id: ${person.id}")
-	}
-
 	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
 		return pdlClient.hentAdressebeskyttelse(personident)
 	}

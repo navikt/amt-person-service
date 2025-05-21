@@ -2,7 +2,6 @@ package no.nav.amt.person.service.integration
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
 class IntegrationTest : IntegrationTestBase() {
 

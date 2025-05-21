@@ -15,8 +15,4 @@ class RolleService(
 	fun harRolle(personId: UUID, rolle: Rolle): Boolean {
 		return rolleRepository.harRolle(personId, rolle)
 	}
-
-	fun fjernRolle(personId: UUID, rolle: Rolle) {
-		rolleRepository.delete(personId, rolle)
-	}
 }
