@@ -7,7 +7,6 @@ import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
-import no.nav.amt.person.service.config.SecureLog.secureLog
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_ansatt.NavAnsattService
@@ -277,22 +276,6 @@ class NavBrukerService(
 		} else {
 			null
 		}
-	}
-
-	fun slettBruker(bruker: NavBruker) {
-		transactionTemplate.executeWithoutResult {
-			repository.delete(bruker.id)
-			rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER)
-
-			if (!rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT)) {
-				personService.slettPerson(bruker.person)
-			}
-
-			kafkaProducerService.publiserSlettNavBruker(bruker.person.id)
-		}
-
-		secureLog.info("Slettet navbruker med personident: ${bruker.person.personident}")
-		log.info("Slettet navbruker med personId: ${bruker.person.id}")
 	}
 
 	@TransactionalEventListener

@@ -374,37 +374,6 @@ class NavBrukerServiceTest {
 	}
 
 	@Test
-	fun `slettBruker - bruker har kun NAV_BRUKER-rolle - sletter bruker og person`() {
-		val bruker = TestData.lagNavBruker()
-
-		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns false
-
-		mockExecuteWithoutResult(transactionTemplate)
-
-		service.slettBruker(bruker.toModel())
-
-		verify { repository.delete(bruker.id) }
-		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
-		verify { personService.slettPerson(bruker.person.toModel()) }
-		verify { kafkaProducerService.publiserSlettNavBruker(bruker.person.id) }
-	}
-
-	@Test
-	fun `slettBruker - bruker har andre roller - sletter bruker og men ikke person`() {
-		val bruker = TestData.lagNavBruker()
-
-		every { rolleService.harRolle(bruker.person.id, Rolle.ARRANGOR_ANSATT) } returns true
-		mockExecuteWithoutResult(transactionTemplate)
-
-		service.slettBruker(bruker.toModel())
-
-		verify { repository.delete(bruker.id) }
-		verify { rolleService.fjernRolle(bruker.person.id, Rolle.NAV_BRUKER) }
-		verify(exactly = 0) { personService.slettPerson(bruker.person.toModel()) }
-		verify { kafkaProducerService.publiserSlettNavBruker(bruker.person.id) }
-	}
-
-	@Test
 	fun `oppdaterOppfolgingsperiode - har ingen oppfolgingsperioder - lagrer`() {
 		val bruker = TestData.lagNavBruker(oppfolgingsperioder = emptyList())
 		every { repository.get(bruker.id) } returns bruker
