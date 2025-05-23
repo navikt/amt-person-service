@@ -27,11 +27,9 @@ class KrrProxyClient(
 		private const val INCREASED_TIMEOUT_SECONDS = 20L
 	}
 
-	fun hentKontaktinformasjon(personident: String) = hentKontaktinformasjon(setOf(personident))
-		.mapCatching {
-			it.personer[personident]
-				?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
-		}
+	fun hentKontaktinformasjon(personident: String) = hentKontaktinformasjon(setOf(personident)).mapCatching {
+		it.personer[personident] ?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
+	}
 
 	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
 		val requestBody = toJsonString(PostPersonerRequest(personidenter))
@@ -52,20 +50,28 @@ class KrrProxyClient(
 
 			val responseDto = fromJsonString<PostPersonerResponse>(body)
 
-			if(responseDto.feil.isNotEmpty()) {
+			if (responseDto.feil.isNotEmpty()) {
 				TeamLogs.error(responseDto.feil.toString())
 				return Result.failure(RuntimeException("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer"))
 			}
-			return Result.success(KontaktinformasjonForPersoner(responseDto.personer))
+			return Result.success(
+				KontaktinformasjonForPersoner(responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.mobiltelefonnummer, v.epostadresse) })
+			)
 		}
 	}
 
 	private data class PostPersonerRequest(
-		val personidenter: Set<String>
-	)
+		val personidenter: Set<String>,
+    )
 
 	private data class PostPersonerResponse(
-		val personer: Map<String, Kontaktinformasjon>,
-		val feil: Map<String, String>
+		val personer: Map<String, KontaktinformasjonDto>,
+		val feil: Map<String, String>,
+    )
+
+	private data class KontaktinformasjonDto(
+		val personident: String,
+		val epostadresse: String?,
+		val mobiltelefonnummer: String?,
 	)
 }

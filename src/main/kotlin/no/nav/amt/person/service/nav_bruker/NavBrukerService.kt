@@ -89,7 +89,9 @@ class NavBrukerService(
 		val person = personService.hentEllerOpprettPerson(personident, personOpplysninger)
 		val veileder = navAnsattService.hentBrukersVeileder(personident)
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
-		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrNull()
+		val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
+			null.also{ log.warn("Navbruker ${person.id} mangler kontaktinformasjon fra KRR") }
+		}
 		val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
 		val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
 		val innsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
