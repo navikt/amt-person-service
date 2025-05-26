@@ -158,6 +158,7 @@ class NavBrukerRepository(
 			FROM nav_bruker
 					 INNER JOIN person ON nav_bruker.person_id = person.id
 			where nav_bruker.telefon is null or nav_bruker.epost is null
+			order by nav_bruker.created_at desc
 			OFFSET :offset
 			LIMIT :limit
 			"""

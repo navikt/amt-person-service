@@ -261,12 +261,11 @@ class InternalController(
 					if (personidenter.isNotEmpty()) {
 						log.info("Processing $jobName batch #$batchNumber: offset=$offset, count=${personidenter.size}")
 						navBrukerService.syncKontaktinfoBulk(personidenter)
-					} else {
-						log.info("No more data at offset=$offset. Done.")
 					}
 					offset += limit
 					batchNumber++
 				} while (personidenter.isNotEmpty())
+				log.info("No more data at offset=$offset. Done.")
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
