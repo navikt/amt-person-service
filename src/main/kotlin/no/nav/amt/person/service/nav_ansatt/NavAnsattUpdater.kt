@@ -17,8 +17,11 @@ class NavAnsattUpdater(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun oppdaterAlle(batchSize: Int = 100) {
-		val ansattBatcher = navAnsattService.getAll().chunked(batchSize)
+		val ansattBatcher = navAnsattService.getAll()
+			.also { log.info("Oppdaterer ${it.size} nav-ansatte") }
+			.chunked(batchSize)
 		var batchNumber = 1
+
 
 		ansattBatcher.forEach { batch ->
 			log.info("Prosesserer batch ${batchNumber++}")
