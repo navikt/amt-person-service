@@ -57,7 +57,7 @@ class NavBrukerService(
 		return repository.getPersonidenter(offset, limit, notSyncedSince).distinct()
 	}
 
-	fun getPersonidenterMedManglendeKontaktinfo(offset: Int, limit: Int,) = repository.getPersonidenterMedManglendeKontaktinfo(offset, limit)
+	fun getPersonidenterMedManglendeKontaktinfo(sistePersonident: String?, limit: Int,) = repository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
 
 	fun hentNavBruker(id: UUID): NavBruker {
 		return repository.get(id).toModel()

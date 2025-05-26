@@ -245,27 +245,26 @@ class InternalController(
 	@GetMapping("/nav-brukere/oppdater-manglende-kontaktinfo")
 	fun oppdaterManglendeKontakinfo(
 		servlet: HttpServletRequest,
-		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
 		@RequestParam(value = "batchSize", required = false) batchSize: Int?
 	) {
 		if (isInternal(servlet)) {
 			val jobName = "oppdater-manglende-kontaktinfo"
 			JobRunner.runAsync(jobName) {
-				var offset = startFromOffset?:0
-				val limit = batchSize?:5000
+				val limit = batchSize?:200
 				var batchNumber = 1
 				var personidenter: List<String>
+				var sistePersonident: String? = null
 
 				do {
-					personidenter = navBrukerService.getPersonidenterMedManglendeKontaktinfo(offset, limit)
+					personidenter = navBrukerService.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
 					if (personidenter.isNotEmpty()) {
-						log.info("Processing $jobName batch #$batchNumber: offset=$offset, count=${personidenter.size}")
+						log.info("Processing $jobName batch #$batchNumber count=${personidenter.size}")
 						navBrukerService.syncKontaktinfoBulk(personidenter)
 					}
-					offset += limit
 					batchNumber++
+					sistePersonident = personidenter.lastOrNull()
 				} while (personidenter.isNotEmpty())
-				log.info("No more data at offset=$offset. Done.")
+				log.info("No more data after batch $batchNumber. Done.")
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
