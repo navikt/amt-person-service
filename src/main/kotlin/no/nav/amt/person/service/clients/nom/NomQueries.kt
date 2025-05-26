@@ -73,6 +73,9 @@ object NomQueries {
 			val etternavn: String?,
 			val epost: String?,
 			val telefon: List<Telefon>,
+			// Udokumentert verdi: Det eneste Nom er master for av telefoner er det ansatte selv velger å legge inn på primaryTelefon feltet,
+			// men det er ikke obligatorisk og ikke primærnummer, med mindre de er eksterne
+			val primaryTelefon: String?,
 			val orgTilknytning: List<OrgTilknytning>,
 		)
 

@@ -64,7 +64,7 @@ class NomClientImpl(
 				return@mapNotNull null
 			}
 
-			val telefonnummer = hentTjenesteTelefonnummer(it.ressurs.telefon)
+			val telefonnummer = hentTjenesteTelefonnummer(it.ressurs)
 
 			val ansatt = it.ressurs
 
@@ -78,8 +78,9 @@ class NomClientImpl(
 		} ?: emptyList()
 	}
 
-	private fun hentTjenesteTelefonnummer(telefonnumere: List<NomQueries.HentRessurser.Telefon>): String? {
-		return telefonnumere.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
-			?: telefonnumere.find { it.type == "NAV_TJENESTE_TELEFON" }?.nummer
+	private fun hentTjenesteTelefonnummer(ansatt: NomQueries.HentRessurser.Ressurs): String? {
+		return ansatt.telefon.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
+			?: ansatt.telefon.find { it.type == "NAV_TJENESTE_TELEFON" }?.nummer
+			?: ansatt.primaryTelefon
 	}
 }

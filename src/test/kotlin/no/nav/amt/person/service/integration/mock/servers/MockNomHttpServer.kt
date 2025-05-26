@@ -54,6 +54,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 							epost = input.epost,
 							telefon = input.telefon,
 							orgTilknytning = input.orgTilknytning,
+							primaryTelefon = null,
 						)
 					)
 				)
