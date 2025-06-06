@@ -34,7 +34,7 @@ val shedlockVersion = "6.7.0"
 val confluentVersion = "7.5.1"
 val avroVersion = "1.12.0"
 val jacksonVersion = "2.19.0"
-val mockOauth2ServerVersion = "2.1.11"
+val mockOauth2ServerVersion = "2.2.0"
 val logstashEncoderVersion = "8.1"
 
 dependencies {
