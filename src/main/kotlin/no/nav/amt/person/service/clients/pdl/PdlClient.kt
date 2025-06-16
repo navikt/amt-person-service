@@ -119,6 +119,8 @@ class PdlClient(
 
 			val gqlResponse = fromJsonString<PdlQueries.HentIdenter.Response>(body)
 
+			throwPdlApiErrors(gqlResponse)
+
 			logPdlWarnings(gqlResponse.extensions?.warnings)
 
 			if (gqlResponse.data?.hentIdenter == null) {

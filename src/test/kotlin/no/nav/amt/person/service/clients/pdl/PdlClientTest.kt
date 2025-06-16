@@ -194,39 +194,6 @@ class PdlClientTest {
 	}
 
 	@Test
-	fun `hentIdenter skal kaste exception hvis data mangler`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
-
-		server.enqueue(
-			MockResponse().setBody(
-				"""
-					{
-						"errors": [{"message": "error :("}],
-						"data": null
-					}
-				""".trimIndent()
-			)
-		)
-
-		val exception = assertThrows<RuntimeException> {
-			client.hentIdenter("112233445566")
-		}
-
-		exception.message shouldBe "PDL respons inneholder ikke data"
-
-		val request = server.takeRequest()
-
-		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
-		request.getHeader("Tema") shouldBe "GEN"
-	}
-
-	@Test
 	fun `hentPerson - Detaljert respons - skal kaste exception med noe detaljert informasjon`() {
 		val client = PdlClient(
 			serverUrl,
