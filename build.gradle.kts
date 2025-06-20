@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	val kotlinVersion = "2.1.21"
 
-	id("org.springframework.boot") version "3.5.0"
+	id("org.springframework.boot") version "3.5.2"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 	kotlin("plugin.serialization") version kotlinVersion
