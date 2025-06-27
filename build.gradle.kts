@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
 plugins {
@@ -18,8 +18,8 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
 	mavenCentral()
-	maven { setUrl("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
-	maven { setUrl("https://packages.confluent.io/maven/") }
+	maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
+	maven { url = uri("https://packages.confluent.io/maven/") }
 }
 
 val commonVersion = "3.2024.10.25_13.44-9db48a0dbe67"
@@ -94,10 +94,11 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 	this.archiveFileName.set("${archiveBaseName.get()}.${archiveExtension.get()}")
 }
 
-tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "21"
+kotlin {
+	compilerOptions {
+		freeCompilerArgs.add("-Xjsr305=strict")
+		freeCompilerArgs.add("-Xannotation-default-target=param-property")
+		jvmTarget = JvmTarget.JVM_21
 	}
 }
 
