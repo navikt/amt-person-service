@@ -23,7 +23,7 @@ repositories {
 }
 
 val commonVersion = "3.2025.06.23_14.50-3af3985d8555"
-val okhttp3Version = "5.0.0"
+val okhttp3Version = "5.1.0"
 val kotestVersion = "5.9.1"
 val poaoTilgangVersion = "2025.07.04_08.56-814fa50f6740"
 val testcontainersVersion = "1.21.3"
