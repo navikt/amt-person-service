@@ -1,7 +1,13 @@
 package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
-import no.nav.amt.person.service.kafka.consumer.*
+import no.nav.amt.person.service.kafka.consumer.AktorV2Consumer
+import no.nav.amt.person.service.kafka.consumer.EndringPaaBrukerConsumer
+import no.nav.amt.person.service.kafka.consumer.InnsatsgruppeConsumer
+import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
+import no.nav.amt.person.service.kafka.consumer.OppfolgingsperiodeConsumer
+import no.nav.amt.person.service.kafka.consumer.SkjermetPersonConsumer
+import no.nav.amt.person.service.kafka.consumer.TildeltVeilederConsumer
 import no.nav.common.kafka.consumer.KafkaConsumerClient
 import no.nav.common.kafka.consumer.feilhandtering.KafkaConsumerRecordProcessor
 import no.nav.common.kafka.consumer.feilhandtering.util.KafkaConsumerRecordProcessorBuilder
@@ -34,7 +40,6 @@ class KafkaConfiguration(
 	aktorV2Consumer: AktorV2Consumer,
 	skjermetPersonConsumer: SkjermetPersonConsumer,
 	leesahConsumer: LeesahConsumer,
-	deltakerV2Consumer: DeltakerV2Consumer,
 	oppfolgingsperiodeConsumer: OppfolgingsperiodeConsumer,
 	innsatsgruppeConsumer: InnsatsgruppeConsumer
 ) {
@@ -108,15 +113,6 @@ class KafkaConfiguration(
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
 					Consumer<ConsumerRecord<String, String>> { skjermetPersonConsumer.ingest(it.key(), it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.deltakerV2Topic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String?>> { record -> record.value()?.let { deltakerV2Consumer.ingest(it) } }
 				),
 		)
 
