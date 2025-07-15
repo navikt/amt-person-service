@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.clients.nom
 
-import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
@@ -26,7 +25,9 @@ class NomClientTest {
 	}
 
 	@AfterEach
-	fun cleanup() = server.shutdown()
+	fun cleanup() {
+		server.shutdown()
+	}
 
 	@Test
 	fun `hentVeileder - veileder finnes ikke - returnerer null`() {
@@ -45,24 +46,19 @@ class NomClientTest {
 		server.enqueue(MockResponse().setBody(veilederRespons))
 
 		val faktiskeVeiledere = client.hentNavAnsatte(veiledere.map { it.navIdent })
-		val firstFaktiskVeileder = faktiskeVeiledere.first { it.navIdent == veiledere[0].navIdent }
-		val secondFaktiskVeileder = faktiskeVeiledere.first { it.navIdent == veiledere[1].navIdent }
+		val v1 = faktiskeVeiledere.find { it.navIdent == veiledere[0].navIdent }!!
+		val v2 = faktiskeVeiledere.find { it.navIdent == veiledere[1].navIdent }!!
 
-		assertSoftly(firstFaktiskVeileder) {
-			navIdent shouldBe veiledere[0].navIdent
-			navn shouldBe veiledere[0].navn
-			telefonnummer shouldBe veiledere[0].telefon
-			epost shouldBe veiledere[0].epost
-		}
+		v1.navIdent shouldBe veiledere[0].navIdent
+		v1.navn shouldBe veiledere[0].navn
+		v1.telefonnummer shouldBe veiledere[0].telefon
+		v1.epost shouldBe veiledere[0].epost
 
-		assertSoftly(secondFaktiskVeileder) {
-			navIdent shouldBe veiledere[1].navIdent
-			navn shouldBe veiledere[1].navn
-			telefonnummer shouldBe veiledere[1].telefon
-			epost shouldBe veiledere[1].epost
-		}
+		v2.navIdent shouldBe veiledere[1].navIdent
+		v2.navn shouldBe veiledere[1].navn
+		v2.telefonnummer shouldBe veiledere[1].telefon
+		v2.epost shouldBe veiledere[1].epost
 	}
-
 	@Test
 	fun `hentVeiledere - en veileder finnes ikke - returnerer veileder som finnes`() {
 		val veileder = TestData.lagNavAnsatt()
@@ -74,17 +70,15 @@ class NomClientTest {
 
 		val faktiskeVeiledere = client.hentNavAnsatte(listOf(veileder.navIdent, feilIdent))
 
-		val faktiskVeileder = faktiskeVeiledere.first { it.navIdent == veileder.navIdent }
+		val v1 = faktiskeVeiledere.find { it.navIdent == veileder.navIdent }!!
 
 		faktiskeVeiledere.find { it.navIdent == feilIdent } shouldBe null
 		faktiskeVeiledere shouldHaveSize 1
 
-		assertSoftly(faktiskVeileder) {
-			navIdent shouldBe veileder.navIdent
-			navn shouldBe veileder.navn
-			telefonnummer shouldBe veileder.telefon
-			epost shouldBe veileder.epost
-		}
+		v1.navIdent shouldBe veileder.navIdent
+		v1.navn shouldBe veileder.navn
+		v1.telefonnummer shouldBe veileder.telefon
+		v1.epost shouldBe veileder.epost
 	}
 
 	private fun hentRessurserResponse(
@@ -137,5 +131,5 @@ class NomClientTest {
 
 		return veilederRespons
 	}
-}
 
+}

@@ -13,4 +13,5 @@ class IntegrationTest : IntegrationTestBase() {
 		)
 		response.code shouldBe 200
 	}
+
 }

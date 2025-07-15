@@ -9,12 +9,15 @@ object LogUtils {
 	private val rootLog: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 
 	fun withLogs(fn: (getLogs: () -> List<ILoggingEvent>) -> Unit) {
+
 		val listAppender: ListAppender<ILoggingEvent> = ListAppender<ILoggingEvent>()
 
 		try {
 			listAppender.start()
 			rootLog.addAppender(listAppender)
+
 			fn { listAppender.list }
+
 		} finally {
 			listAppender.stop()
 			rootLog.detachAppender(listAppender)

@@ -2,8 +2,8 @@ package no.nav.amt.person.service.clients.pdl
 
 object PdlClientTestData {
 
-	const val NULL_ERROR = "- data i respons er null \n"
-	const val ERROR_PREFIX = "Feilmeldinger i respons fra pdl:\n"
+	val nullError = "- data i respons er null \n"
+	val errorPrefix = "Feilmeldinger i respons fra pdl:\n"
 
 	val minimalFeilRespons = """
 				{
@@ -168,4 +168,5 @@ object PdlClientTestData {
 		  }
 		}
 	""".trimIndent()
+
 }

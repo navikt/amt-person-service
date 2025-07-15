@@ -1,27 +1,39 @@
 package no.nav.amt.person.service.nav_enhet
 
-import io.kotest.assertions.assertSoftly
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestDataRepository
+import no.nav.amt.person.service.utils.DbTestDataUtils
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeEqualTo
+import org.junit.AfterClass
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.test.context.SpringBootTest
-import java.util.UUID
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import java.util.*
+import kotlin.NoSuchElementException
 
-@SpringBootTest(classes = [NavEnhetRepository::class])
-class NavEnhetRepositoryTest(
-	private val enhetRepository: NavEnhetRepository,
-) : RepositoryTestBase() {
+class NavEnhetRepositoryTest {
+
+	companion object {
+		private val dataSource = SingletonPostgresContainer.getDataSource()
+		private val jdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+		val testRepository = TestDataRepository(jdbcTemplate)
+		val repository = NavEnhetRepository(jdbcTemplate)
+
+		@JvmStatic
+		@AfterClass
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(dataSource)
+		}
+	}
 
 	@Test
 	fun `get(uuid) - enhet finnes - returnerer enhet`() {
 		val enhet = TestData.lagNavEnhet()
-		testDataRepository.insertNavEnhet(enhet)
+		testRepository.insertNavEnhet(enhet)
 
-		val faktiskEnhet = enhetRepository.get(enhet.id)
+		val faktiskEnhet = repository.get(enhet.id)
 
 		faktiskEnhet.id shouldBe enhet.id
 		faktiskEnhet.enhetId shouldBe enhet.enhetId
@@ -33,28 +45,28 @@ class NavEnhetRepositoryTest(
 	@Test
 	fun `get(uuid) - enhet finnes ikke - kaster NoSuchElementException`() {
 		assertThrows<NoSuchElementException> {
-			enhetRepository.get(UUID.randomUUID())
+			repository.get(UUID.randomUUID())
 		}
 	}
+
 
 	@Test
 	fun `get(enhetId) - enhet finnes - returnerer enhet`() {
 		val enhet = TestData.lagNavEnhet()
-		testDataRepository.insertNavEnhet(enhet)
+		testRepository.insertNavEnhet(enhet)
 
-		val faktiskEnhet = enhetRepository.get(enhet.enhetId)
-		assertSoftly(faktiskEnhet.shouldNotBeNull()) {
-			id shouldBe enhet.id
-			enhetId shouldBe enhet.enhetId
-			navn shouldBe enhet.navn
-			createdAt shouldBeEqualTo enhet.createdAt
-			modifiedAt shouldBeEqualTo enhet.modifiedAt
-		}
+		val faktiskEnhet = repository.get(enhet.enhetId)!!
+
+		faktiskEnhet.id shouldBe enhet.id
+		faktiskEnhet.enhetId shouldBe enhet.enhetId
+		faktiskEnhet.navn shouldBe enhet.navn
+		faktiskEnhet.createdAt shouldBeEqualTo enhet.createdAt
+		faktiskEnhet.modifiedAt shouldBeEqualTo enhet.modifiedAt
 	}
 
 	@Test
 	fun `get(enhetId) - enhet finnes ikke - returnerer null`() {
-		enhetRepository.get("Ikke Eksisternede Enhet") shouldBe null
+		repository.get("Ikke Eksisternede Enhet") shouldBe null
 	}
 
 	@Test
@@ -65,12 +77,13 @@ class NavEnhetRepositoryTest(
 			navn = "Ny Nav Enhet",
 		)
 
-		enhetRepository.insert(enhet)
+		repository.insert(enhet)
 
-		val faktiskEnhet = enhetRepository.get(enhet.id)
+		val faktiskEnhet = repository.get(enhet.id)
 
 		faktiskEnhet.id shouldBe enhet.id
 		faktiskEnhet.enhetId shouldBe enhet.enhetId
 		faktiskEnhet.navn shouldBe enhet.navn
 	}
+
 }

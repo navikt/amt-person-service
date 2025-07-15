@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.integration.kafka.producer
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -15,14 +14,22 @@ import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
-class NavBrukerProducerTest(
-	private val kafkaProducerService: KafkaProducerService,
-	private val kafkaTopicProperties: KafkaTopicProperties,
-	private val personService: PersonService,
-	private val navBrukerService: NavBrukerService,
-) : IntegrationTestBase() {
+class NavBrukerProducerTest: IntegrationTestBase() {
+
+	@Autowired
+	lateinit var kafkaProducerService: KafkaProducerService
+
+	@Autowired
+	lateinit var kafkaTopicProperties: KafkaTopicProperties
+
+	@Autowired
+	lateinit var personService: PersonService
+
+	@Autowired
+	lateinit var navBrukerService: NavBrukerService
 
 	@Test
 	fun `publiserNavBruker - skal publisere bruker med riktig key og value`() {
@@ -30,9 +37,7 @@ class NavBrukerProducerTest(
 
 		kafkaProducerService.publiserNavBruker(navBruker)
 
-		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-		records.shouldNotBeNull()
-		val record = records.first { it.key() == navBruker.person.id.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == navBruker.person.id.toString() }
 
 		val forventetValue = brukerTilV1Json(navBruker)
 
@@ -40,15 +45,14 @@ class NavBrukerProducerTest(
 		record.value() shouldBe forventetValue
 	}
 
+
 	@Test
 	fun `publiserSlettNavBruker - skal publisere tombstone med riktig key og null value`() {
 		val personId = UUID.randomUUID()
 
 		kafkaProducerService.publiserSlettNavBruker(personId)
 
-		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-		records.shouldNotBeNull()
-		val record = records.first { it.key() == personId.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == personId.toString() }
 
 		record.value() shouldBe null
 	}
@@ -61,9 +65,7 @@ class NavBrukerProducerTest(
 		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn")).toModel()
 		personService.upsert(oppdatertBruker.person)
 
-		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-		records.shouldNotBeNull()
-		val record = records.first { it.key() == bruker.person.id.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.person.id.toString()}
 
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
@@ -76,29 +78,29 @@ class NavBrukerProducerTest(
 		val oppdatertBruker = bruker.copy(navEnhet = null).toModel()
 		navBrukerService.upsert(oppdatertBruker)
 
-		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-		records.shouldNotBeNull()
-		val record = records.first { it.key() == bruker.person.id.toString() }
+		val record = consume(kafkaTopicProperties.amtNavBrukerTopic)!!.first { it.key() == bruker.person.id.toString()}
 
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
 
-	private fun brukerTilV1Json(navBruker: NavBruker): String = JsonUtils.toJsonString(
-		NavBrukerDtoV1(
-			personId = navBruker.person.id,
-			personident = navBruker.person.personident,
-			fornavn = navBruker.person.fornavn,
-			mellomnavn = navBruker.person.mellomnavn,
-			etternavn = navBruker.person.etternavn,
-			navVeilederId = navBruker.navVeileder?.id,
-			navEnhet = navBruker.navEnhet?.let { NavEnhetDtoV1(it.id, it.enhetId, it.navn) },
-			telefon = navBruker.telefon,
-			epost = navBruker.epost,
-			erSkjermet = navBruker.erSkjermet,
-			adresse = navBruker.adresse,
-			adressebeskyttelse = navBruker.adressebeskyttelse,
-			oppfolgingsperioder = navBruker.oppfolgingsperioder,
-			innsatsgruppe = navBruker.innsatsgruppe
+	private fun brukerTilV1Json(navBruker: NavBruker): String {
+		return JsonUtils.toJsonString(
+			NavBrukerDtoV1(
+				personId = navBruker.person.id,
+				personident = navBruker.person.personident,
+				fornavn = navBruker.person.fornavn,
+				mellomnavn = navBruker.person.mellomnavn,
+				etternavn = navBruker.person.etternavn,
+				navVeilederId = navBruker.navVeileder?.id,
+				navEnhet = navBruker.navEnhet?.let { NavEnhetDtoV1(it.id, it.enhetId, it.navn) },
+				telefon = navBruker.telefon,
+				epost = navBruker.epost,
+				erSkjermet = navBruker.erSkjermet,
+				adresse = navBruker.adresse,
+				adressebeskyttelse = navBruker.adressebeskyttelse,
+				oppfolgingsperioder = navBruker.oppfolgingsperioder,
+				innsatsgruppe = navBruker.innsatsgruppe
+			)
 		)
-	)
+	}
 }

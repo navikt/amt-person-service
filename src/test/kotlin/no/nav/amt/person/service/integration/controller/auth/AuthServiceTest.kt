@@ -89,15 +89,19 @@ class AuthServiceTest {
 		}
 	}
 
-	private fun mockContextHolder(issuer: String, token: String): TokenValidationContextHolder =
-		object : TokenValidationContextHolder {
-			override fun getTokenValidationContext(): TokenValidationContext = TokenValidationContext(
-				mapOf(
-					issuer to JwtToken(token)
+	private fun mockContextHolder(issuer: String, token: String) : TokenValidationContextHolder {
+		return object: TokenValidationContextHolder {
+			override fun getTokenValidationContext(): TokenValidationContext {
+				return TokenValidationContext(
+					mapOf(
+						issuer to JwtToken(token)
+					)
 				)
-			)
-
-			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit =
+			}
+			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?) {
 				throw NotImplementedError()
+			}
 		}
+	}
+
 }

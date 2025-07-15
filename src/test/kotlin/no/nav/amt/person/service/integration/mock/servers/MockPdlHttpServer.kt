@@ -16,7 +16,9 @@ import okhttp3.mockwebserver.RecordedRequest
 
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
-	fun mockHentPerson(person: PersonDbo) = mockHentPerson(person.personident, TestData.lagPdlPerson(person))
+	fun mockHentPerson(person: PersonDbo) {
+		mockHentPerson(person.personident, TestData.lagPdlPerson(person))
+	}
 
 	fun mockHentPerson(brukerFnr: String, mockPdlPerson: PdlPerson) {
 		val request = toJsonString(
@@ -127,6 +129,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		return MockResponse().setResponseCode(200).setBody(body)
 	}
 
+
 	private fun createHentIdenterResponse(ident: Personident): MockResponse {
 		val body = toJsonString(
 			PdlQueries.HentIdenter.Response(
@@ -149,13 +152,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				errors = null,
 				data = PdlQueries.HentPerson.ResponseData(
 					PdlQueries.HentPerson.HentPerson(
-						navn = listOf(
-							PdlQueries.Attribute.Navn(
-								mockPdlPerson.fornavn,
-								mockPdlPerson.mellomnavn,
-								mockPdlPerson.etternavn
-							)
-						),
+						navn = listOf(PdlQueries.Attribute.Navn(mockPdlPerson.fornavn, mockPdlPerson.mellomnavn, mockPdlPerson.etternavn)),
 						telefonnummer = listOf(PdlQueries.Attribute.Telefonnummer("47", "12345678", 1)),
 						adressebeskyttelse = if (mockPdlPerson.adressebeskyttelseGradering != null) {
 							listOf(PdlQueries.Attribute.Adressebeskyttelse(gradering = mockPdlPerson.adressebeskyttelseGradering.toString()))
@@ -187,15 +184,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 							)
 						)
 					),
-					PdlQueries.HentPerson.HentIdenter(
-						listOf(
-							PdlQueries.Attribute.Ident(
-								personident,
-								false,
-								"FOLKEREGISTERIDENT"
-							)
-						)
-					)
+					PdlQueries.HentPerson.HentIdenter(listOf(PdlQueries.Attribute.Ident(personident, false, "FOLKEREGISTERIDENT")))
 				),
 				extensions = null,
 			)
@@ -205,4 +194,5 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 			.setResponseCode(200)
 			.setBody(body)
 	}
+
 }

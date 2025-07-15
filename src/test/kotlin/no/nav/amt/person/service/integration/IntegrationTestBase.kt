@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.integration
 
-import no.nav.amt.person.service.data.RepositoryTestBase
+import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.integration.kafka.utils.SingletonKafkaProvider
 import no.nav.amt.person.service.integration.mock.servers.MockKrrProxyHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHttpServer
@@ -14,13 +14,17 @@ import no.nav.amt.person.service.integration.mock.servers.MockVeilarbarenaHttpSe
 import no.nav.amt.person.service.integration.mock.servers.MockVeilarboppfolgingHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockVeilarbvedtaksstotteHttpServer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
+import no.nav.amt.person.service.utils.DbTestDataUtils
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -36,7 +40,7 @@ import java.time.Duration
 @Import(IntegrationTestConfiguration::class)
 @TestConfiguration("application-integration.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-abstract class IntegrationTestBase : RepositoryTestBase() {
+class IntegrationTestBase {
 
 	@LocalServerPort
 	private var port: Int = 0
@@ -45,6 +49,9 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 		.callTimeout(Duration.ofMinutes(5))
 		.readTimeout(Duration.ofMinutes(5))
 		.build()
+
+	@Autowired
+	lateinit var testDataRepository: TestDataRepository
 
 	@AfterEach
 	fun cleanUp() {
@@ -56,6 +63,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 		mockVeilarbarenaHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
 		mockVeilarboppfolgingHttpServer.resetHttpServer()
+		SingletonPostgresContainer.cleanup()
 	}
 
 	companion object {
@@ -73,7 +81,6 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 
 		@JvmStatic
 		@DynamicPropertySource
-		@Suppress("unused")
 		fun startEnvironment(registry: DynamicPropertyRegistry) {
 			mockSchemaRegistryHttpServer.start()
 			registry.add("kafka.schema.registry.url") { mockSchemaRegistryHttpServer.serverUrl() }
@@ -84,7 +91,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 
 			mockMachineToMachineHttpServer.start()
 			registry.add("nais.env.azureOpenIdConfigTokenEndpoint") {
-				mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.TOKEN_PATH
+				mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.tokenPath
 			}
 
 			mockKrrProxyHttpServer.start()
@@ -120,7 +127,21 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 
 			registry.add("kodeverk.url") { "http://kodeverk" }
 			registry.add("kodeverk.scope") { "test.kodeverk" }
+
+			val container = SingletonPostgresContainer.getContainer()
+
+			registry.add("spring.datasource.url") { container.jdbcUrl }
+			registry.add("spring.datasource.username") { container.username }
+			registry.add("spring.datasource.password") { container.password }
+			registry.add("spring.datasource.hikari.maximum-pool-size") { 3 }
 		}
+
+		@JvmStatic
+		@AfterAll
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(SingletonPostgresContainer.getDataSource())
+		}
+
 	}
 
 	fun serverUrl() = "http://localhost:$port"
@@ -151,6 +172,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 		val mediaTypeHtml = "application/json".toMediaType()
 		return "".toRequestBody(mediaTypeHtml)
 	}
+
 }
 
 @Profile("integration")
@@ -158,5 +180,8 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 class IntegrationTestConfiguration {
 
 	@Bean
-	fun kafkaProperties(): KafkaProperties = SingletonKafkaProvider.getKafkaProperties()
+	fun kafkaProperties(): KafkaProperties {
+		return SingletonKafkaProvider.getKafkaProperties()
+	}
+
 }

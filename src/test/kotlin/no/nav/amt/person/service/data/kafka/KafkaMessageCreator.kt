@@ -43,10 +43,10 @@ object KafkaMessageCreator {
 	)
 
 	fun lagPersonhendelseNavn(
-		personidenter: List<String>,
-		fornavn: String,
-		mellomnavn: String?,
-		etternavn: String,
+        personidenter: List<String>,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
 	) = lagPersonhendelse(
 		personidenter = personidenter,
 		navn = Navn(
@@ -67,15 +67,16 @@ object KafkaMessageCreator {
 		adressebeskyttelse: Adressebeskyttelse?,
 		opplysningsType: OpplysningsType
 	) = Personhendelse(
-		/* hendelseId = */ UUID.randomUUID().toString(),
-		/* personidenter = */ personidenter,
-		/* master = */ "FREG",
-		/* opprettet = */ ZonedDateTime.now().toInstant(),
-		/* opplysningstype = */ opplysningsType.toString(),
-		/* endringstype = */ Endringstype.OPPRETTET,
-		/* tidligereHendelseId = */ null,
-		/* adressebeskyttelse = */ adressebeskyttelse,
-		/* navn = */ navn,
+			/* hendelseId = */ UUID.randomUUID().toString(),
+			/* personidenter = */ personidenter,
+			/* master = */ "FREG",
+			/* opprettet = */ ZonedDateTime.now().toInstant(),
+			/* opplysningstype = */ opplysningsType.toString(),
+			/* endringstype = */ Endringstype.OPPRETTET,
+			/* tidligereHendelseId = */ null,
+			/* adressebeskyttelse = */ adressebeskyttelse,
+			/* navn = */ navn,
 	)
-}
 
+
+}

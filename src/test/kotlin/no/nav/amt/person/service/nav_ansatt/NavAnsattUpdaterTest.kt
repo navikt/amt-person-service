@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.nav_ansatt
 
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,13 +13,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class NavAnsattUpdaterTest {
-	private val navAnsattService: NavAnsattService = mockk(relaxUnitFun = true)
-	private val nomClient: NomClientImpl = mockk()
-	private val navEnhetService: NavEnhetService = mockk()
-	private val updater = NavAnsattUpdater(navAnsattService, nomClient, navEnhetService)
+	lateinit var navAnsattService: NavAnsattService
+	lateinit var nomClient: NomClientImpl
+	lateinit var updater: NavAnsattUpdater
+	lateinit var navEnhetService: NavEnhetService
 
 	@BeforeEach
-	fun setup() = clearAllMocks()
+	fun setup() {
+		navAnsattService = mockk(relaxUnitFun = true)
+		nomClient = mockk()
+		navEnhetService = mockk()
+
+		updater = NavAnsattUpdater(navAnsattService, nomClient, navEnhetService)
+	}
 
 	@Test
 	fun `oppdaterAlle - navIdent mangler hos Nom - logger warning`() {
@@ -49,6 +54,7 @@ class NavAnsattUpdaterTest {
 			getLogs().any {
 				it.message == "Fant ikke nav ansatt med ident=${ansatt2.navIdent} id=${ansatt2.id} i NOM"
 			} shouldBe true
+
 		}
 	}
 
@@ -96,4 +102,5 @@ class NavAnsattUpdaterTest {
 			navAnsattService.upsertMany(any())
 		}
 	}
+
 }

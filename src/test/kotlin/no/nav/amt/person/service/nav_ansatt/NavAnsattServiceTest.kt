@@ -1,8 +1,6 @@
 package no.nav.amt.person.service.nav_ansatt
 
-import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.amt.person.service.clients.nom.NomClientImpl
@@ -19,21 +17,28 @@ import java.time.LocalDate
 import java.util.UUID
 
 class NavAnsattServiceTest {
-	private val navAnsattRepository: NavAnsattRepository = mockk(relaxUnitFun = true)
-	private val nomClient: NomClientImpl = mockk()
-	private val veilarboppfolgingClient: VeilarboppfolgingClient = mockk()
-	private val kafkaProducerService: KafkaProducerService = mockk(relaxUnitFun = true)
-	private val navEnhetService: NavEnhetService = mockk()
-	private val service = NavAnsattService(
-		navAnsattRepository = navAnsattRepository,
-		nomClient = nomClient,
-		veilarboppfolgingClient = veilarboppfolgingClient,
-		kafkaProducerService = kafkaProducerService,
-		navEnhetService = navEnhetService,
-	)
+	private lateinit var navAnsattRepository: NavAnsattRepository
+	private lateinit var nomClient: NomClientImpl
+	private lateinit var veilarboppfolgingClient: VeilarboppfolgingClient
+	private lateinit var service: NavAnsattService
+	private lateinit var kafkaProducerService: KafkaProducerService
+	private lateinit var navEnhetService: NavEnhetService
 
 	@BeforeEach
-	fun setup() = clearAllMocks()
+	fun setup() {
+		navAnsattRepository = mockk(relaxUnitFun = true)
+		nomClient = mockk()
+		veilarboppfolgingClient = mockk()
+		kafkaProducerService = mockk(relaxUnitFun = true)
+		navEnhetService = mockk()
+		service = NavAnsattService(
+			navAnsattRepository = navAnsattRepository,
+			nomClient = nomClient,
+			veilarboppfolgingClient = veilarboppfolgingClient,
+			kafkaProducerService = kafkaProducerService,
+			navEnhetService = navEnhetService,
+		)
+	}
 
 	@Test
 	fun `hentHellerOpprettAnsatt - ansatt finnes ikke - oppretter og returnerer ansatt`() {
@@ -52,21 +57,20 @@ class NavAnsattServiceTest {
 
 		val faktiskAnsatt = service.hentEllerOpprettAnsatt(ansatt.navIdent)
 
-		assertSoftly(faktiskAnsatt) {
-			navIdent shouldBe ansatt.navIdent
-			navn shouldBe ansatt.navn
-			telefon shouldBe ansatt.telefon
-			epost shouldBe ansatt.epost
-		}
+		faktiskAnsatt.navIdent shouldBe ansatt.navIdent
+		faktiskAnsatt.navn shouldBe ansatt.navn
+		faktiskAnsatt.telefon shouldBe ansatt.telefon
+		faktiskAnsatt.epost shouldBe ansatt.epost
 	}
+
 }
 
 val orgTilknytning = listOf(
 	NomQueries.HentRessurser.OrgTilknytning(
-		gyldigFom = LocalDate.of(2020, 1, 1),
-		gyldigTom = null,
-		orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
-		erDagligOppfolging = true,
+	gyldigFom = LocalDate.of(2020, 1, 1),
+	gyldigTom = null,
+	orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+	erDagligOppfolging = true,
 	)
 )
 

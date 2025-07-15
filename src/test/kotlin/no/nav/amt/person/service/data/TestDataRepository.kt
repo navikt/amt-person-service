@@ -20,6 +20,7 @@ import java.util.UUID
 class TestDataRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {
+
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	init {
@@ -91,14 +92,14 @@ class TestDataRepository(
 	}
 
 	final fun insertNavGrunerlokka() = insertNavEnhet(
-		NavEnhetDbo(
-			navGrunerlokka.id,
-			navGrunerlokka.enhetId,
-			navGrunerlokka.navn,
-			LocalDateTime.now(),
-			LocalDateTime.now(),
+			NavEnhetDbo(
+				navGrunerlokka.id,
+				navGrunerlokka.enhetId,
+				navGrunerlokka.navn,
+				LocalDateTime.now(),
+				LocalDateTime.now(),
+			)
 		)
-	)
 
 	fun insertNavEnhet(enhet: NavEnhetDbo) {
 		val sql = """
@@ -174,24 +175,22 @@ class TestDataRepository(
 	fun insertNavBruker(bruker: NavBrukerDbo) {
 		try {
 			insertPerson(bruker.person)
-		} catch (_: DuplicateKeyException) {
+		} catch (e: DuplicateKeyException) {
 			log.warn("Person med id ${bruker.person.id} er allerede opprettet")
 		}
-
-		bruker.navVeileder?.let {
-			try {
-				insertNavAnsatt(bruker.navVeileder)
-			} catch (_: DuplicateKeyException) {
-				log.warn("Nav ansatt med id ${bruker.navVeileder.id} er allerede opprettet")
+		try {
+			if (bruker.navVeileder != null) {
+				insertNavAnsatt(bruker.navVeileder!!)
 			}
+		} catch (e: DuplicateKeyException) {
+			log.warn("Nav ansatt med id ${bruker.navVeileder!!.id} er allerede opprettet")
 		}
-
-		bruker.navEnhet?.let {
-			try {
-				insertNavEnhet(bruker.navEnhet)
-			} catch (_: DuplicateKeyException) {
-				log.warn("Nav enhet med id ${bruker.navEnhet.id} er allerede opprettet")
+		try {
+			if (bruker.navEnhet != null) {
+				insertNavEnhet(bruker.navEnhet!!)
 			}
+		} catch (e: DuplicateKeyException) {
+			log.warn("Nav enhet med id ${bruker.navEnhet!!.id} er allerede opprettet")
 		}
 
 		insertRolle(bruker.person.id, Rolle.NAV_BRUKER)

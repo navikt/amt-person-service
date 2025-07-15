@@ -23,9 +23,13 @@ import java.util.UUID
 
 object TestData {
 
-	fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
+	fun randomIdent(): String {
+		return (10_00_19_00_00_000 .. 31_12_20_99_99_999).random().toString()
+	}
 
-	fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
+	fun randomNavIdent(): String {
+		return ('A'..'Z').random().toString() + (100_000 .. 999_999).random().toString()
+	}
 
 	fun randomEnhetId() = (1000..9999).random().toString()
 
@@ -38,13 +42,13 @@ object TestData {
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = PersonDbo(
-		id,
-		personident,
-		fornavn,
-		mellomnavn,
-		etternavn,
-		createdAt,
-		modifiedAt
+			id,
+			personident,
+			fornavn,
+			mellomnavn,
+			etternavn,
+			createdAt,
+			modifiedAt
 	)
 
 	fun lagNavEnhet(
@@ -90,22 +94,7 @@ object TestData {
 		adressebeskyttelse: Adressebeskyttelse? = null,
 		oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
 		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS
-	) = NavBrukerDbo(
-		id,
-		person,
-		navVeileder,
-		navEnhet,
-		telefon,
-		epost,
-		erSkjermet,
-		adresse,
-		sisteKrrSync,
-		createdAt,
-		modifiedAt,
-		adressebeskyttelse,
-		oppfolgingsperioder,
-		innsatsgruppe
-	)
+	) = NavBrukerDbo(id, person, navVeileder, navEnhet, telefon, epost, erSkjermet, adresse, sisteKrrSync, createdAt, modifiedAt, adressebeskyttelse, oppfolgingsperioder, innsatsgruppe)
 
 	fun lagOppfolgingsperiode(
 		id: UUID = UUID.randomUUID(),
@@ -118,10 +107,10 @@ object TestData {
 	)
 
 	fun lagPdlPerson(
-		person: PersonDbo,
-		telefon: String? = null,
-		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
-		identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
+        person: PersonDbo,
+        telefon: String? = null,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
+        identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
 		adresse: Adresse? = lagAdresse()
 	) = PdlPerson(
 		fornavn = person.fornavn,
@@ -168,4 +157,3 @@ object TestData {
 			)
 		)
 }
-

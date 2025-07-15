@@ -9,7 +9,7 @@ class StringExtensionsTest {
 	fun `titlecase() - konverterer navn med full uppercasing til title case`() {
 		val navn = "MITT NAVN"
 		val konvertertNavn = navn.titlecase()
-		konvertertNavn shouldBe "Mitt Navn"
+		 konvertertNavn shouldBe "Mitt Navn"
 	}
 
 	@Test
@@ -46,4 +46,5 @@ class StringExtensionsTest {
 		val konvertertNavn = navn.titlecase()
 		konvertertNavn shouldBe "Foo Bar Jr."
 	}
+
 }

@@ -1,37 +1,48 @@
 package no.nav.amt.person.service.person
 
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.person.model.Rolle
+import no.nav.amt.person.service.utils.DbTestDataUtils
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
+import org.junit.AfterClass
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
-@SpringBootTest(classes = [RolleRepository::class])
-class RolleRepositoryTest(
-	private val rolleRepository: RolleRepository
-) : RepositoryTestBase() {
+class RolleRepositoryTest {
+	companion object {
+		private val dataSource = SingletonPostgresContainer.getDataSource()
+		private val jdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+		val testRepository = TestDataRepository(jdbcTemplate)
+		val repository = RolleRepository(jdbcTemplate)
+
+		@JvmStatic
+		@AfterClass
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(dataSource)
+		}
+	}
 
 	@Test
 	fun `insert - ny rolle - inserter rolle`() {
 		val person = TestData.lagPerson()
-		testDataRepository.insertPerson(person)
-		rolleRepository.insert(person.id, Rolle.ARRANGOR_ANSATT)
-		rolleRepository.insert(person.id, Rolle.NAV_BRUKER)
+		testRepository.insertPerson(person)
+		repository.insert(person.id, Rolle.ARRANGOR_ANSATT)
+		repository.insert(person.id, Rolle.NAV_BRUKER)
 
-		rolleRepository.harRolle(person.id, Rolle.ARRANGOR_ANSATT) shouldBe true
-		rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe true
+		repository.harRolle(person.id, Rolle.ARRANGOR_ANSATT) shouldBe true
+		repository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe true
 	}
 
 	@Test
 	fun `delete - rolle finnes - sletter rolle for person`() {
 		val person = TestData.lagPerson()
-		testDataRepository.insertPerson(person)
-		testDataRepository.insertRolle(person.id, Rolle.NAV_BRUKER)
+		testRepository.insertPerson(person)
+		testRepository.insertRolle(person.id, Rolle.NAV_BRUKER)
 
-		rolleRepository.delete(person.id, Rolle.NAV_BRUKER)
+		repository.delete(person.id, Rolle.NAV_BRUKER)
 
-		rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe false
+		repository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe false
 	}
 }
-

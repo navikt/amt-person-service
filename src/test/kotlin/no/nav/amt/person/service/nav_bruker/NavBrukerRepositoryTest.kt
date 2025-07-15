@@ -1,34 +1,51 @@
 package no.nav.amt.person.service.nav_bruker
 
-import io.kotest.assertions.assertSoftly
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestDataRepository
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Kontaktadresse
 import no.nav.amt.person.service.person.model.Vegadresse
+import no.nav.amt.person.service.utils.DbTestDataUtils
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
+import org.junit.AfterClass
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@SpringBootTest(classes = [NavBrukerRepository::class])
-class NavBrukerRepositoryTest(
-	private val brukerRepository: NavBrukerRepository,
-) : RepositoryTestBase() {
+class NavBrukerRepositoryTest {
+
+	companion object {
+		private val dataSource = SingletonPostgresContainer.getDataSource()
+		private val jdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+		val testRepository = TestDataRepository(jdbcTemplate)
+		val repository = NavBrukerRepository(jdbcTemplate)
+
+		@JvmStatic
+		@AfterClass
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(dataSource)
+		}
+	}
+
+	@AfterEach
+	fun after() {
+		DbTestDataUtils.cleanDatabase(dataSource)
+	}
 
 	@Test
 	fun `get(uuid) - bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		val faktiskBruker = brukerRepository.get(bruker.id)
+		val faktiskBruker = repository.get(bruker.id)
 
 		sammenlign(faktiskBruker, bruker)
 	}
@@ -36,50 +53,53 @@ class NavBrukerRepositoryTest(
 	@Test
 	fun `get(uuid) - bruker finnes ikke - kaster NoSuchElementException`() {
 		assertThrows<NoSuchElementException> {
-			brukerRepository.get(UUID.randomUUID())
+			repository.get(UUID.randomUUID())
 		}
 	}
 
 	@Test
 	fun `get(personident) - bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		val faktiskBruker = brukerRepository.get(bruker.person.personident)
-		sammenlign(faktiskBruker.shouldNotBeNull(), bruker)
+		val faktiskBruker = repository.get(bruker.person.personident)!!
+
+		sammenlign(faktiskBruker, bruker)
 	}
 
 	@Test
 	fun `get(personident) - søk med historisk ident, bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
 		val historiskIdent = TestData.lagPersonident(personId = bruker.person.id, historisk = true)
-		testDataRepository.insertPersonidenter(listOf(historiskIdent))
+		testRepository.insertPersonidenter(listOf(historiskIdent))
 
-		val faktiskBruker = brukerRepository.get(historiskIdent.ident)
-		sammenlign(faktiskBruker.shouldNotBeNull(), bruker)
+		val faktiskBruker = repository.get(historiskIdent.ident)!!
+
+		sammenlign(faktiskBruker, bruker)
 	}
 
 	@Test
 	fun `get(personident) - bruker finnes ikke - returnerer null`() {
-		brukerRepository.get("FNR") shouldBe null
+		repository.get("FNR") shouldBe null
 	}
 
 	@Test
 	fun `getByPersonId(uuid) - bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		val faktiskBruker = brukerRepository.getByPersonId(bruker.person.id)
+		val faktiskBruker = repository.getByPersonId(bruker.person.id)!!
 
-		sammenlign(faktiskBruker.shouldNotBeNull(), bruker)
+		sammenlign(faktiskBruker, bruker)
 	}
 
 	@Test
 	fun `getByPersonId(uuid) - bruker finnes ikke - returnerer null`() {
-		brukerRepository.getByPersonId(UUID.randomUUID()) shouldBe null
+		repository.getByPersonId(UUID.randomUUID()) shouldBe null
 	}
+
 
 	@Test
 	fun `getAllNavBrukere - brukere finnes - returnerer brukere`() {
@@ -87,43 +107,42 @@ class NavBrukerRepositoryTest(
 		val bruker2 = TestData.lagNavBruker()
 		val bruker3 = TestData.lagNavBruker()
 
-		testDataRepository.insertNavBruker(bruker1)
-		testDataRepository.insertNavBruker(bruker2)
-		testDataRepository.insertNavBruker(bruker3)
+		testRepository.insertNavBruker(bruker1)
+		testRepository.insertNavBruker(bruker2)
+		testRepository.insertNavBruker(bruker3)
 
-		val brukere = brukerRepository.getAllNavBrukere(0, 2)
+		val brukere = repository.getAllNavBrukere(0, 2)
 
 		brukere.size shouldBe 2
 
 		sammenlign(brukere[0], bruker1)
 		sammenlign(brukere[1], bruker2)
+
 	}
 
 	@Test
 	fun `upsert - bruker finnes ikke - inserter ny bruker`() {
 		val bruker = TestData.lagNavBruker()
 
-		testDataRepository.insertPerson(bruker.person)
-		testDataRepository.insertNavAnsatt(bruker.navVeileder!!)
-		testDataRepository.insertNavEnhet(bruker.navEnhet!!)
+		testRepository.insertPerson(bruker.person)
+		testRepository.insertNavAnsatt(bruker.navVeileder!!)
+		testRepository.insertNavEnhet(bruker.navEnhet!!)
 
-		brukerRepository.upsert(
-			NavBrukerUpsert(
-				id = bruker.id,
-				personId = bruker.person.id,
-				navVeilederId = bruker.navVeileder.id,
-				navEnhetId = bruker.navEnhet.id,
-				telefon = bruker.telefon,
-				epost = bruker.epost,
-				erSkjermet = bruker.erSkjermet,
-				adresse = bruker.adresse,
-				adressebeskyttelse = bruker.adressebeskyttelse,
-				oppfolgingsperioder = bruker.oppfolgingsperioder,
-				innsatsgruppe = bruker.innsatsgruppe
-			)
-		)
+		repository.upsert(NavBrukerUpsert(
+			id = bruker.id,
+			personId = bruker.person.id,
+			navVeilederId = bruker.navVeileder?.id,
+			navEnhetId = bruker.navEnhet?.id,
+			telefon = bruker.telefon,
+			epost = bruker.epost,
+			erSkjermet = bruker.erSkjermet,
+			adresse = bruker.adresse,
+			adressebeskyttelse = bruker.adressebeskyttelse,
+			oppfolgingsperioder = bruker.oppfolgingsperioder,
+			innsatsgruppe = bruker.innsatsgruppe
+		))
 
-		val faktiskBruker = brukerRepository.get(bruker.id)
+		val faktiskBruker = repository.get(bruker.id)
 
 		sammenlign(faktiskBruker, bruker)
 	}
@@ -132,27 +151,25 @@ class NavBrukerRepositoryTest(
 	fun `upsert - bruker finnes ikke, har adressebeskyttelse - inserter ny bruker`() {
 		val bruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG, adresse = null)
 
-		testDataRepository.insertPerson(bruker.person)
-		testDataRepository.insertNavAnsatt(bruker.navVeileder!!)
-		testDataRepository.insertNavEnhet(bruker.navEnhet!!)
+		testRepository.insertPerson(bruker.person)
+		testRepository.insertNavAnsatt(bruker.navVeileder!!)
+		testRepository.insertNavEnhet(bruker.navEnhet!!)
 
-		brukerRepository.upsert(
-			NavBrukerUpsert(
-				id = bruker.id,
-				personId = bruker.person.id,
-				navVeilederId = bruker.navVeileder.id,
-				navEnhetId = bruker.navEnhet.id,
-				telefon = bruker.telefon,
-				epost = bruker.epost,
-				erSkjermet = bruker.erSkjermet,
-				adresse = bruker.adresse,
-				adressebeskyttelse = bruker.adressebeskyttelse,
-				oppfolgingsperioder = bruker.oppfolgingsperioder,
-				innsatsgruppe = bruker.innsatsgruppe
-			)
-		)
+		repository.upsert(NavBrukerUpsert(
+			id = bruker.id,
+			personId = bruker.person.id,
+			navVeilederId = bruker.navVeileder?.id,
+			navEnhetId = bruker.navEnhet?.id,
+			telefon = bruker.telefon,
+			epost = bruker.epost,
+			erSkjermet = bruker.erSkjermet,
+			adresse = bruker.adresse,
+			adressebeskyttelse = bruker.adressebeskyttelse,
+			oppfolgingsperioder = bruker.oppfolgingsperioder,
+			innsatsgruppe = bruker.innsatsgruppe
+		))
 
-		val faktiskBruker = brukerRepository.get(bruker.id)
+		val faktiskBruker = repository.get(bruker.id)
 
 		sammenlign(faktiskBruker, bruker)
 	}
@@ -164,9 +181,9 @@ class NavBrukerRepositoryTest(
 			modifiedAt = LocalDateTime.now().minusMonths(6),
 			erSkjermet = false,
 		)
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		brukerRepository.get(bruker.id)
+		repository.get(bruker.id)
 
 		val upsert = NavBrukerUpsert(
 			id = bruker.id,
@@ -197,9 +214,9 @@ class NavBrukerRepositoryTest(
 			innsatsgruppe = InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
 		)
 
-		brukerRepository.upsert(upsert)
+		repository.upsert(upsert)
 
-		val faktiskBruker = brukerRepository.get(bruker.id)
+		val faktiskBruker = repository.get(bruker.id)
 
 		faktiskBruker.navVeileder shouldBe null
 		faktiskBruker.navEnhet shouldBe null
@@ -218,59 +235,58 @@ class NavBrukerRepositoryTest(
 
 		faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
 		faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()
+
 	}
 
 	@Test
 	fun `finnBrukerId - bruker finnes ikke - returnerer null`() {
-		brukerRepository.finnBrukerId("en ident") shouldBe null
+		repository.finnBrukerId("en ident") shouldBe null
 	}
 
 	@Test
 	fun `finnBrukerId - bruker finnes - returnerer id`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		brukerRepository.finnBrukerId(bruker.person.personident) shouldBe bruker.id
+		repository.finnBrukerId(bruker.person.personident) shouldBe bruker.id
 	}
 
 	@Test
 	fun `finnBrukerId - søk med historisk ident, bruker finnes - returnerer id`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 		val historiskIdent = TestData.lagPersonident(personId = bruker.person.id, historisk = true)
-		testDataRepository.insertPersonidenter(listOf(historiskIdent))
+		testRepository.insertPersonidenter(listOf(historiskIdent))
 
-		brukerRepository.finnBrukerId(historiskIdent.ident) shouldBe bruker.id
+		repository.finnBrukerId(historiskIdent.ident) shouldBe bruker.id
 	}
 
 	@Test
 	fun `delete- bruker finnes - sletter bruker`() {
 		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
+		testRepository.insertNavBruker(bruker)
 
-		brukerRepository.delete(bruker.id)
+		repository.delete(bruker.id)
 
-		brukerRepository.get(bruker.person.personident) shouldBe null
+		repository.get(bruker.person.personident) shouldBe null
 	}
 
 	private fun sammenlign(
 		faktiskBruker: NavBrukerDbo,
 		bruker: NavBrukerDbo,
 	) {
-		assertSoftly(faktiskBruker) {
-			id shouldBe bruker.id
-			person.id shouldBe bruker.person.id
-			navVeileder?.id shouldBe bruker.navVeileder?.id
-			navEnhet?.id shouldBe bruker.navEnhet?.id
-			telefon shouldBe bruker.telefon
-			epost shouldBe bruker.epost
-			erSkjermet shouldBe bruker.erSkjermet
-			createdAt shouldBeCloseTo bruker.createdAt
-			modifiedAt shouldBeCloseTo bruker.modifiedAt
-			adressebeskyttelse shouldBe bruker.adressebeskyttelse
-			oppfolgingsperioder shouldBe bruker.oppfolgingsperioder
-			innsatsgruppe shouldBe bruker.innsatsgruppe
-		}
+		faktiskBruker.id shouldBe bruker.id
+		faktiskBruker.person.id shouldBe bruker.person.id
+		faktiskBruker.navVeileder?.id shouldBe bruker.navVeileder?.id
+		faktiskBruker.navEnhet?.id shouldBe bruker.navEnhet?.id
+		faktiskBruker.telefon shouldBe bruker.telefon
+		faktiskBruker.epost shouldBe bruker.epost
+		faktiskBruker.erSkjermet shouldBe bruker.erSkjermet
+		faktiskBruker.createdAt shouldBeCloseTo bruker.createdAt
+		faktiskBruker.modifiedAt shouldBeCloseTo bruker.modifiedAt
+		faktiskBruker.adressebeskyttelse shouldBe bruker.adressebeskyttelse
+		faktiskBruker.oppfolgingsperioder shouldBe bruker.oppfolgingsperioder
+		faktiskBruker.innsatsgruppe shouldBe bruker.innsatsgruppe
 	}
-}
 
+}

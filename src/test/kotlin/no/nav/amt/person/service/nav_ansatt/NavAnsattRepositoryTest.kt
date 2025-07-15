@@ -1,88 +1,92 @@
 package no.nav.amt.person.service.nav_ansatt
 
-import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestDataRepository
+import no.nav.amt.person.service.utils.DbTestDataUtils
+import no.nav.amt.person.service.utils.SingletonPostgresContainer
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
+import org.junit.AfterClass
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@SpringBootTest(classes = [NavAnsattRepository::class])
-class NavAnsattRepositoryTest(
-	private val ansattRepository: NavAnsattRepository
-) : RepositoryTestBase() {
+class NavAnsattRepositoryTest {
+	companion object {
+		private val dataSource = SingletonPostgresContainer.getDataSource()
+		private val jdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+		val testRepository = TestDataRepository(jdbcTemplate)
+		val repository = NavAnsattRepository(jdbcTemplate)
+
+		@JvmStatic
+		@AfterClass
+		fun tearDown() {
+			DbTestDataUtils.cleanDatabase(dataSource)
+		}
+	}
 
 	@Test
 	fun `get(uuid) - ansatt finnes - returnerer ansatt`() {
 		val ansatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(ansatt)
+		testRepository.insertNavAnsatt(ansatt)
 
-		val faktiskAnsatt = ansattRepository.get(ansatt.id)
+		val faktiskAnsatt = repository.get(ansatt.id)
 
-		assertSoftly(faktiskAnsatt) {
-			id shouldBe ansatt.id
-			navIdent shouldBe ansatt.navIdent
-			navn shouldBe ansatt.navn
-			telefon shouldBe ansatt.telefon
-			epost shouldBe ansatt.epost
-			createdAt shouldBeEqualTo ansatt.createdAt
-			modifiedAt shouldBeEqualTo ansatt.modifiedAt
-		}
+		faktiskAnsatt.id shouldBe ansatt.id
+		faktiskAnsatt.navIdent shouldBe ansatt.navIdent
+		faktiskAnsatt.navn shouldBe ansatt.navn
+		faktiskAnsatt.telefon shouldBe ansatt.telefon
+		faktiskAnsatt.epost shouldBe ansatt.epost
+		faktiskAnsatt.createdAt shouldBeEqualTo ansatt.createdAt
+		faktiskAnsatt.modifiedAt shouldBeEqualTo ansatt.modifiedAt
 	}
 
 	@Test
 	fun `get(uuid) - ansatt finnes ikke - kaster NoSuchElementException`() {
 		assertThrows<NoSuchElementException> {
-			ansattRepository.get(UUID.randomUUID())
+			repository.get(UUID.randomUUID())
 		}
 	}
 
 	@Test
 	fun `get(navIdent) - ansatt finnes - returnerer ansatt`() {
 		val ansatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(ansatt)
+		testRepository.insertNavAnsatt(ansatt)
 
-		val faktiskAnsatt = ansattRepository.get(ansatt.navIdent)
+		val faktiskAnsatt = repository.get(ansatt.navIdent)!!
 
-		assertSoftly(faktiskAnsatt.shouldNotBeNull()) {
-			id shouldBe ansatt.id
-			navIdent shouldBe ansatt.navIdent
-			navn shouldBe ansatt.navn
-			telefon shouldBe ansatt.telefon
-			epost shouldBe ansatt.epost
-			createdAt shouldBeEqualTo ansatt.createdAt
-			modifiedAt shouldBeEqualTo ansatt.modifiedAt
-		}
+		faktiskAnsatt.id shouldBe ansatt.id
+		faktiskAnsatt.navIdent shouldBe ansatt.navIdent
+		faktiskAnsatt.navn shouldBe ansatt.navn
+		faktiskAnsatt.telefon shouldBe ansatt.telefon
+		faktiskAnsatt.epost shouldBe ansatt.epost
+		faktiskAnsatt.createdAt shouldBeEqualTo ansatt.createdAt
+		faktiskAnsatt.modifiedAt shouldBeEqualTo ansatt.modifiedAt
 	}
 
 	@Test
 	fun `get(navIdent) - ansatt finnes ikke - returnerer null`() {
-		ansattRepository.get("Ukjent Ident") shouldBe null
+		repository.get("Ukjent Ident") shouldBe null
 	}
 
 	@Test
 	fun `upsert - ansatt finnes ikke - oppretter ny ansatt`() {
 		val ansatt = TestData.lagNavAnsatt().toModel()
-		testDataRepository.insertNavGrunerlokka()
 
-		ansattRepository.upsert(ansatt)
+		repository.upsert(ansatt)
 
-		val faktiskAnsatt = ansattRepository.get(ansatt.navIdent)
-		assertSoftly(faktiskAnsatt.shouldNotBeNull()) {
-			id shouldBe ansatt.id
-			navIdent shouldBe ansatt.navIdent
-			navn shouldBe ansatt.navn
-			telefon shouldBe ansatt.telefon
-			epost shouldBe ansatt.epost
-		}
+		val faktiskAnsatt = repository.get(ansatt.navIdent)!!
+
+		faktiskAnsatt.id shouldBe ansatt.id
+		faktiskAnsatt.navIdent shouldBe ansatt.navIdent
+		faktiskAnsatt.navn shouldBe ansatt.navn
+		faktiskAnsatt.telefon shouldBe ansatt.telefon
+		faktiskAnsatt.epost shouldBe ansatt.epost
 	}
 
 	@Test
@@ -101,63 +105,62 @@ class NavAnsattRepositoryTest(
 			navEnhetId = null,
 		)
 
-		testDataRepository.insertNavAnsatt(ansatt)
+		testRepository.insertNavAnsatt(ansatt)
 
-		ansattRepository.upsert(oppdatertAnsatt)
+		repository.upsert(oppdatertAnsatt)
 
-		val faktiskAnsatt = ansattRepository.get(ansatt.id)
+		val faktiskAnsatt = repository.get(ansatt.id)
 
-		assertSoftly(faktiskAnsatt) {
-			id shouldBe ansatt.id
-			navIdent shouldBe ansatt.navIdent
-			navn shouldBe oppdatertAnsatt.navn
-			telefon shouldBe oppdatertAnsatt.telefon
-			epost shouldBe oppdatertAnsatt.epost
-			createdAt shouldBeEqualTo ansatt.createdAt
-			modifiedAt shouldBeCloseTo LocalDateTime.now()
-		}
+		faktiskAnsatt.id shouldBe ansatt.id
+		faktiskAnsatt.navIdent shouldBe ansatt.navIdent
+		faktiskAnsatt.navn shouldBe oppdatertAnsatt.navn
+		faktiskAnsatt.telefon shouldBe oppdatertAnsatt.telefon
+		faktiskAnsatt.epost shouldBe oppdatertAnsatt.epost
+		faktiskAnsatt.createdAt shouldBeEqualTo ansatt.createdAt
+		faktiskAnsatt.modifiedAt shouldBeCloseTo LocalDateTime.now()
 	}
 
 	@Test
 	fun `getAll - ansatte finnes - returnerer liste med ansatte`() {
 		val ansatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(ansatt)
+		testRepository.insertNavAnsatt(ansatt)
 
-		val alleAnsatte = ansattRepository.getAll()
+		val alleAnsatte = repository.getAll()
 
 		alleAnsatte shouldHaveAtLeastSize 1
-		alleAnsatte.firstOrNull { it.id == ansatt.id } shouldNotBe null
+		alleAnsatte.firstOrNull{ it.id == ansatt.id } shouldNotBe null
+
 	}
 
 	@Test
 	fun `upsertMany - flere ansatte - oppdaterer ansatte`() {
 		val ansatt1 = TestData.lagNavAnsatt()
 		val ansatt2 = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(ansatt1)
-		testDataRepository.insertNavAnsatt(ansatt2)
+		testRepository.insertNavAnsatt(ansatt1)
+		testRepository.insertNavAnsatt(ansatt2)
 
 		val oppdatertAnsatt1 = NavAnsatt(
-			id = ansatt1.id,
-			navIdent = ansatt1.navIdent,
-			navn = "nytt navn 1",
-			telefon = ansatt1.telefon,
-			epost = ansatt1.epost,
-			navEnhetId = null,
+				id = ansatt1.id,
+				navIdent = ansatt1.navIdent,
+				navn =	"nytt navn 1",
+				telefon = ansatt1.telefon,
+				epost = ansatt1.epost,
+				navEnhetId = null,
 		)
 
 		val oppdatertAnsatt2 = NavAnsatt(
-			id = ansatt2.id,
-			navIdent = ansatt2.navIdent,
-			navn = "nytt navn 2",
-			telefon = ansatt2.telefon,
-			epost = ansatt2.epost,
-			navEnhetId = null,
+				id = ansatt2.id,
+				navIdent = ansatt2.navIdent,
+				navn =	"nytt navn 2",
+				telefon = ansatt2.telefon,
+				epost = ansatt2.epost,
+				navEnhetId = null,
 		)
 
-		ansattRepository.upsertMany(listOf(oppdatertAnsatt1, oppdatertAnsatt2))
+		repository.upsertMany(listOf(oppdatertAnsatt1, oppdatertAnsatt2))
 
-		ansattRepository.get(oppdatertAnsatt1.navIdent)!!.navn shouldBe oppdatertAnsatt1.navn
-		ansattRepository.get(oppdatertAnsatt2.navIdent)!!.navn shouldBe oppdatertAnsatt2.navn
+		repository.get(oppdatertAnsatt1.navIdent)!!.navn shouldBe oppdatertAnsatt1.navn
+		repository.get(oppdatertAnsatt2.navIdent)!!.navn shouldBe oppdatertAnsatt2.navn
 	}
-}
 
+}

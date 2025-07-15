@@ -10,12 +10,12 @@ import java.util.UUID
 @Transactional
 @Component
 class PoststedRepository(
-	private val template: NamedParameterJdbcTemplate
+	private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun getPoststed(postnummer: String): String? {
-		return template.query(
+		return namedParameterJdbcTemplate.query(
 			"""
 				SELECT poststed
 				FROM postnummer
@@ -42,7 +42,7 @@ class PoststedRepository(
 		val oppdateresIDb = oppdatertePostnummerMap.filter { postnummerFraDbMap[it.key] != it.value }
 
 		slettesfraDb.forEach {
-			template.update(
+			namedParameterJdbcTemplate.update(
 				"""
 					DELETE FROM postnummer
 					where postnummer = :postnummer;
@@ -51,7 +51,7 @@ class PoststedRepository(
 			)
 		}
 		oppdateresIDb.forEach {
-			template.update(
+			namedParameterJdbcTemplate.update(
 				"""
 					INSERT INTO postnummer(postnummer, poststed)
 					VALUES (:postnummer, :poststed)
@@ -66,7 +66,7 @@ class PoststedRepository(
 	}
 
 	fun getAllePoststeder(): List<Postnummer> {
-		return template.query(
+		return namedParameterJdbcTemplate.query(
 			"""
 				SELECT postnummer,
 				poststed
@@ -81,7 +81,7 @@ class PoststedRepository(
 		if (postnummer.isEmpty()) {
 			return emptyList()
 		}
-		return template.query(
+		return namedParameterJdbcTemplate.query(
 			"""
 				SELECT postnummer,
 				poststed

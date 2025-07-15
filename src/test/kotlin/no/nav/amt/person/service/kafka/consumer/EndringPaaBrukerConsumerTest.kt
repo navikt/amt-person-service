@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import io.mockk.clearAllMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
@@ -10,12 +9,16 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndringPaaBrukerConsumerTest {
-	private val navBrukerService: NavBrukerService = mockk()
-	private val navEnhetService: NavEnhetService = mockk()
-	private val endringPaaBrukerConsumer = EndringPaaBrukerConsumer(navBrukerService, navEnhetService)
+	lateinit var navBrukerService: NavBrukerService
+	lateinit var navEnhetService: NavEnhetService
+	lateinit var endringPaaBrukerConsumer: EndringPaaBrukerConsumer
 
 	@BeforeEach
-	fun setup() = clearAllMocks()
+	fun setup() {
+		navBrukerService = mockk()
+		navEnhetService = mockk()
+		endringPaaBrukerConsumer = EndringPaaBrukerConsumer(navBrukerService, navEnhetService)
+	}
 
 	@Test
 	fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
