@@ -86,6 +86,18 @@ class NavBrukerRepositoryTest {
 	}
 
 	@Test
+	fun `get(personidenter) - brukere finnes - returnerer brukere`() {
+		val bruker = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker)
+		val bruker2 = TestData.lagNavBruker()
+		testRepository.insertNavBruker(bruker2)
+
+		val faktiskBrukere = repository.get(setOf(bruker.person.personident, bruker2.person.personident))
+
+		faktiskBrukere.size shouldBe 2
+	}
+
+	@Test
 	fun `getByPersonId(uuid) - bruker finnes - returnerer bruker`() {
 		val bruker = TestData.lagNavBruker()
 		testRepository.insertNavBruker(bruker)

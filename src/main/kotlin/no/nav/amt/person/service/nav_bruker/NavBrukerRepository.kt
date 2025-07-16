@@ -89,6 +89,18 @@ class NavBrukerRepository(
 		return template.query(sql, parameters, rowMapper).firstOrNull()
 	}
 
+	fun	get(personidenter: Set<String>): List<NavBrukerDbo> {
+		val sql = selectNavBrukerQuery(
+			"""
+				left join personident on nav_bruker.person_id = personident.person_id
+				where personident.ident = any (:personidenter)
+			""".trimIndent()
+		)
+		val parameters = sqlParameters("personidenter" to personidenter.toTypedArray())
+
+		return template.query(sql, parameters, rowMapper)
+	}
+
 	fun getByPersonId(personId: UUID): NavBrukerDbo? {
 		val sql = selectNavBrukerQuery("where person_id = :personId")
 		val parameters = sqlParameters("personId" to personId)

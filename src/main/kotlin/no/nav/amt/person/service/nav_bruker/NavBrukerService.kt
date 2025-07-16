@@ -2,6 +2,7 @@ package no.nav.amt.person.service.nav_bruker
 
 import no.nav.amt.person.service.api.dto.NavBrukerFodselsdatoDto
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
+import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
@@ -215,13 +216,32 @@ class NavBrukerService(
 				return
 			}
 
-			krrKontaktinfo.personer.forEach kontaktinfoPersoner@ {
+			krrKontaktinfo.forEach kontaktinfoPersoner@ {
 					val telefon = it.value.telefonnummer ?: pdlClient.hentTelefon(it.key)
 					val bruker = repository.get(it.key)?.toModel() ?: return@kontaktinfoPersoner
 					oppdaterKontaktinfo(bruker, it.value.copy(telefonnummer = telefon))
 			}
 		}
 		log.info("Syncet kontaktinfo for ${personerChunks.size} personer")
+	}
+
+	fun fetchOppdatertKontaktinfo(personidenter: Set<String>): KontaktinformasjonForPersoner {
+		if (personidenter.size > 500) {
+			throw IllegalArgumentException("Kontaktinformasjon kan henters for maks 500 personidenter i en batch")
+		}
+		return krrProxyClient
+			.hentKontaktinformasjon(personidenter)
+			.getOrThrow()
+			.mapValues { (ident, info) ->
+				val bruker = repository.get(ident)?.toModel()
+					?: throw NoSuchElementException("Kunne ikke oppdatere kontakinformasjon, bruker finnes ikke")
+
+				val tlf = info.telefonnummer ?: pdlClient.hentTelefon(ident)
+
+				info.copy(telefonnummer = tlf).also {
+					oppdaterKontaktinfo(bruker, it)
+				}
+			}
 	}
 
 	fun oppdaterAdressebeskyttelse(personident: String) {

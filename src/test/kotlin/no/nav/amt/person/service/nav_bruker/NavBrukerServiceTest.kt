@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
-import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
@@ -187,7 +186,7 @@ class NavBrukerServiceTest {
 			"ny epost",
 			"krr-telefon",
 		)
-		val kontakinfoForPersoner = KontaktinformasjonForPersoner(mapOf(bruker.person.personident to kontaktinfo))
+		val kontakinfoForPersoner = mapOf(bruker.person.personident to kontaktinfo)
 
 		every { repository.finnBrukerId(bruker.person.personident) } returns bruker.id
 		every { repository.get(bruker.person.personident) } returns bruker
@@ -228,7 +227,7 @@ class NavBrukerServiceTest {
 			"ny epost",
 			null,
 		)
-		val kontakinfoForPersoner = KontaktinformasjonForPersoner(mapOf(bruker.person.personident to krrKontaktinfo))
+		val kontakinfoForPersoner = mapOf(bruker.person.personident to krrKontaktinfo)
 
 		val pdlTelefon = "pdl-telefon"
 

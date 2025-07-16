@@ -28,7 +28,7 @@ class KrrProxyClient(
 	}
 
 	fun hentKontaktinformasjon(personident: String) = hentKontaktinformasjon(setOf(personident)).mapCatching {
-		it.personer[personident] ?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
+		it[personident] ?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
 	}
 
 	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
@@ -55,7 +55,7 @@ class KrrProxyClient(
 				return Result.failure(RuntimeException("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer"))
 			}
 			return Result.success(
-				KontaktinformasjonForPersoner(responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.epostadresse, v.mobiltelefonnummer) })
+				responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.epostadresse, v.mobiltelefonnummer) }
 			)
 		}
 	}
