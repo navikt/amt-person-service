@@ -7,6 +7,7 @@ import no.nav.common.rest.client.RestClient.baseClientBuilder
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import java.util.concurrent.TimeUnit
@@ -21,6 +22,8 @@ class KrrProxyClient(
 		.readTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 		.writeTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 		.build()
+
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	companion object {
 		private val mediaTypeJson = "application/json".toMediaType()
@@ -46,14 +49,15 @@ class KrrProxyClient(
 				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
 			}
 
-			val body = response.body?.string() ?: return Result.failure(RuntimeException("Body manglet i respons fra KRR-proxy"))
-
-			val responseDto = fromJsonString<PostPersonerResponse>(body)
+			val responseDto = fromJsonString<PostPersonerResponse>(response.body.string())
 
 			if (responseDto.feil.isNotEmpty()) {
 				TeamLogs.error(responseDto.feil.toString())
-				return Result.failure(RuntimeException("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer"))
+				log.warn("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer")
 			}
+
+			log.info("Hentet kontaktinformasjon for ${responseDto.personer.size} av ${personidenter.size} personer fra KRR-proxy")
+
 			return Result.success(
 				responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.epostadresse, v.mobiltelefonnummer) }
 			)
