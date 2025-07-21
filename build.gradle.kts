@@ -30,7 +30,7 @@ val lang3Version = "3.18.0"
 val shedlockVersion = "6.9.2"
 val confluentVersion = "8.0.0"
 val avroVersion = "1.12.0"
-val jacksonVersion = "2.19.1"
+val jacksonVersion = "2.19.2"
 val mockOauth2ServerVersion = "2.2.1"
 val logstashEncoderVersion = "8.1"
 
