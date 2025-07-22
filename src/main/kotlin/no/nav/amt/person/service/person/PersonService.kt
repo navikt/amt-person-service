@@ -74,19 +74,26 @@ class PersonService(
 		val personOpplysninger = try {
 			pdlClient.hentPerson(person.personident)
 		} catch (e: Exception) {
-			val feilmelding = "Klarte ikke hente person fra PDL ved oppdatert navn: ${e.message}"
+			val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
 
-			if (EnvUtils.isDev()) log.info(feilmelding)
-			else log.error(feilmelding)
-
-			return
+			if (EnvUtils.isDev()) {
+				log.info(feilmelding)
+				return
+			}
+			else {
+				log.error(feilmelding, e)
+				throw RuntimeException(feilmelding, e)
+			}
 		}
 
 		if (
 			person.fornavn == personOpplysninger.fornavn &&
 			person.mellomnavn == personOpplysninger.mellomnavn &&
 			person.etternavn == personOpplysninger.etternavn
-		) return
+		) {
+			log.info("Navn på person ${person.id} er allerede oppdatert, ingen endringer gjort.")
+			return
+		}
 
 		upsert(person.copy(
 			fornavn = personOpplysninger.fornavn,
