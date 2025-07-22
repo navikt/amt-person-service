@@ -81,6 +81,18 @@ class InternalController(
 	}
 
 	@Unprotected
+	@GetMapping("/person/navn/{id}")
+	fun oppdaterNavn(
+		servlet: HttpServletRequest,
+		@PathVariable id: UUID,
+	) {
+		if (isInternal(servlet)) {
+			val person = personService.repository.get(id).toModel()
+			personService.oppdaterNavn(person)
+		}
+	}
+
+	@Unprotected
 	@GetMapping("/nav-brukere/republiser")
 	fun republiserNavBrukere(
 		servlet: HttpServletRequest,
