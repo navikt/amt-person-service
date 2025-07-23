@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_enhet
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
 import no.nav.amt.person.service.config.TeamLogs
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -12,6 +13,7 @@ class NavEnhetService(
 	private val norgClient: NorgClient,
 	private val veilarbarenaClient: VeilarbarenaClient
 ) {
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun hentNavEnhetForBruker(personident: String): NavEnhet? {
 		val oppfolgingsenhetId = veilarbarenaClient.hentBrukerOppfolgingsenhetId(personident) ?: return null
@@ -44,4 +46,19 @@ class NavEnhetService(
 		return enhet
 	}
 
+	fun hentNavEnheter() = navEnhetRepository.getAll().map { it.toModel() }
+
+	fun oppdaterNavEnheter(enheter: List<NavEnhet>) {
+		val oppdaterteEnheter = norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetId }
+		enheter.forEach {
+			val oppdatertEnhet = oppdaterteEnheter[it.enhetId]
+			if (oppdatertEnhet != null && oppdatertEnhet.navn != it.navn) {
+				navEnhetRepository.update(it.copy(navn = oppdatertEnhet.navn))
+				log.info("Oppdaterer navn for enhetId=${it.enhetId} fra '${it.navn}' til '${oppdatertEnhet.navn}'")
+			} else {
+				log.error("Fant ikke enhet for enhetId=${it.enhetId} i Norg")
+			}
+		}
+
+	}
 }

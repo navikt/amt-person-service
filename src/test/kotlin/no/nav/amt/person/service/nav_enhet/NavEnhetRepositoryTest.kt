@@ -1,8 +1,12 @@
 package no.nav.amt.person.service.nav_enhet
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.date.shouldBeAfter
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.utils.shouldBeEqualTo
@@ -72,5 +76,40 @@ class NavEnhetRepositoryTest(
 		faktiskEnhet.id shouldBe enhet.id
 		faktiskEnhet.enhetId shouldBe enhet.enhetId
 		faktiskEnhet.navn shouldBe enhet.navn
+	}
+
+	@Test
+	fun `getAll - ingen enheter - returnerer tom liste`() {
+		val enheter = enhetRepository.getAll()
+		enheter.shouldBeEmpty()
+	}
+
+	@Test
+	fun `getAll - flere enheter - returnerer flere enheter`() {
+		val enhet1 = TestData.lagNavEnhet()
+		val enhet2 = TestData.lagNavEnhet()
+		testDataRepository.insertNavEnhet(enhet1)
+		testDataRepository.insertNavEnhet(enhet2)
+
+		val enheter = enhetRepository.getAll()
+
+		enheter shouldHaveSize 2
+		enheter.find { it.id == enhet1.id } shouldNotBe null
+		enheter.find { it.id == enhet2.id } shouldNotBe null
+	}
+
+	@Test
+	fun `update - enhet finnes - oppdaterer enhet`() {
+		val enhet = TestData.lagNavEnhet()
+		testDataRepository.insertNavEnhet(enhet)
+
+		val oppdatertEnhet = enhet.copy(navn = "Nytt Navn")
+
+		enhetRepository.update(oppdatertEnhet.toModel())
+
+		val faktiskEnhet = enhetRepository.get(enhet.id)
+
+		faktiskEnhet.navn shouldBe "Nytt Navn"
+		faktiskEnhet.modifiedAt shouldBeAfter enhet.modifiedAt
 	}
 }

@@ -22,10 +22,6 @@ class TestDataRepository(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	init {
-		insertNavGrunerlokka()
-	}
-
 	fun insertPerson(person: PersonDbo) {
 		val sql = """
 			insert into person(

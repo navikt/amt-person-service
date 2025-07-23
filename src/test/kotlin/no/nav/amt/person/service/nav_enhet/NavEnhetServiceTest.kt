@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.norg.NorgNavEnhet
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
@@ -41,5 +42,23 @@ class NavEnhetServiceTest {
 			enhetId shouldBe enhet.enhetId
 			navn shouldBe enhet.navn
 		}
+	}
+
+	@Test
+	fun `oppdaterNavEnheter - enhet med nytt navn - oppdaterer enhet`() {
+		val enhet1 = TestData.lagNavEnhet(navn = "NAV Test 1").toModel()
+		val enhet2 = TestData.lagNavEnhet(navn = "NAV Test 2").toModel()
+
+		val oppdatertEnhet1 = NorgNavEnhet(enhet1.enhetId, "Nytt Navn")
+
+		every { norgClient.hentNavEnheter(listOf(enhet1.enhetId, enhet2.enhetId)) } returns listOf(
+			oppdatertEnhet1,
+			NorgNavEnhet(enhet2.enhetId, enhet2.navn)
+		)
+
+		service.oppdaterNavEnheter(listOf(enhet1, enhet2))
+
+		verify(exactly = 1) { navEnhetRepository.update(enhet1.copy(navn = "Nytt Navn")) }
+		verify(exactly = 0) { navEnhetRepository.update(enhet2) }
 	}
 }

@@ -5,7 +5,7 @@ import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class NavEnhetRepository(
@@ -57,6 +57,27 @@ class NavEnhetRepository(
 			sqlParameters("enhetId" to enhetId),
 			rowMapper
 		).firstOrNull()
+	}
+
+	fun getAll(): List<NavEnhetDbo> {
+		val sql = """
+			SELECT * FROM nav_enhet
+		""".trimIndent()
+
+		return template.query(sql, rowMapper)
+	}
+
+	fun update(enhet: NavEnhet) {
+		val sql = """
+			UPDATE nav_enhet SET navn = :navn, modified_at = current_timestamp WHERE id = :id
+		""".trimIndent()
+
+		val parameters = sqlParameters(
+			"navn" to enhet.navn,
+			"id" to enhet.id
+		)
+
+		template.update(sql, parameters)
 	}
 
 }
