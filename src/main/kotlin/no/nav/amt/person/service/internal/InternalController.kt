@@ -9,6 +9,7 @@ import no.nav.amt.person.service.nav_bruker.NavBruker
 import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
 import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.nav_enhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.Person
@@ -42,6 +43,7 @@ class InternalController(
 	private val navAnsattService: NavAnsattService,
 	private val kafkaProducerService: KafkaProducerService,
 	private val navAnsattUpdater: NavAnsattUpdater,
+	private val navEnhetUpdateJob: NavEnhetUpdateJob,
 ) {
 	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
@@ -230,6 +232,16 @@ class InternalController(
 			JobRunner.runAsync("oppdater-nav-ansatte") {
 				navAnsattUpdater.oppdaterAlle()
 			}
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
+	@GetMapping("/nav-enhet/oppdater")
+	fun oppdaterNavEnheter(servlet: HttpServletRequest) {
+		if (isInternal(servlet)) {
+			navEnhetUpdateJob.update()
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}

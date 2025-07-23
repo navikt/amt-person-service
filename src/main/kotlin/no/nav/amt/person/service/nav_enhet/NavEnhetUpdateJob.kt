@@ -13,7 +13,7 @@ class NavEnhetUpdateJob(
 	@Scheduled(cron = "@daily")
 	@SchedulerLock(name = "NavEnhetUpdateJob", lockAtMostFor = "60m")
 	fun update() {
-		JobRunner.run("oppdater_nav_enheter") { oppdaterEnheter() }
+		JobRunner.runAsync("oppdater_nav_enheter") { oppdaterEnheter() }
 	}
 
 	private fun oppdaterEnheter() {
