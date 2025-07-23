@@ -16,5 +16,6 @@ data class KafkaTopicProperties(
 	// Producer topics:
 	val amtNavBrukerTopic: String,
 	val amtArrangorAnsattPersonaliaTopic: String,
-	val amtNavAnsattPersonaliaTopic: String
+	val amtNavAnsattPersonaliaTopic: String,
+	val amtNavEnhetTopic: String,
 )

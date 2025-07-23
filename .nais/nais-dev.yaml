@@ -118,6 +118,8 @@ spec:
       value: amt.arrangor-ansatt-personalia-v1
     - name: AMT_NAV_ANSATT_PERSONALIA_TOPIC
       value: amt.nav-ansatt-personalia-v1
+    - name: AMT_NAV_ENHET_TOPIC
+      value: amt.nav-enhet-v1
     - name: OPPFOLGINGSPERIODE_TOPIC
       value: pto.oppfolgingsperiode-v1
     - name: VEILARBVEDTAKSSTOTTE_SCOPE

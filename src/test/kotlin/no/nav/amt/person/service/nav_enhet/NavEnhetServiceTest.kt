@@ -11,6 +11,7 @@ import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.norg.NorgNavEnhet
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -18,11 +19,13 @@ class NavEnhetServiceTest {
 	private val norgClient: NorgClient = mockk()
 	private val navEnhetRepository: NavEnhetRepository = mockk(relaxUnitFun = true)
 	private val veilarbarenaClient: VeilarbarenaClient = mockk()
+	private val kafkaProducerService = mockk<KafkaProducerService>(relaxUnitFun = true)
 
 	private val service = NavEnhetService(
 		navEnhetRepository = navEnhetRepository,
 		norgClient = norgClient,
 		veilarbarenaClient = veilarbarenaClient,
+		kafkaProducerService,
 	)
 
 	@BeforeEach
@@ -42,6 +45,7 @@ class NavEnhetServiceTest {
 			enhetId shouldBe enhet.enhetId
 			navn shouldBe enhet.navn
 		}
+		verify { kafkaProducerService.publiserNavEnhet(faktiskEnhet) }
 	}
 
 	@Test
@@ -58,7 +62,9 @@ class NavEnhetServiceTest {
 
 		service.oppdaterNavEnheter(listOf(enhet1, enhet2))
 
-		verify(exactly = 1) { navEnhetRepository.update(enhet1.copy(navn = "Nytt Navn")) }
+		val enhet1MedNyttNavn = enhet1.copy(navn = "Nytt Navn")
+		verify(exactly = 1) { navEnhetRepository.update(enhet1MedNyttNavn) }
+		verify(exactly = 1) { kafkaProducerService.publiserNavEnhet(enhet1MedNyttNavn) }
 		verify(exactly = 0) { navEnhetRepository.update(enhet2) }
 	}
 }

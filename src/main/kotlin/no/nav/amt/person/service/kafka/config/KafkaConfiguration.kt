@@ -16,7 +16,6 @@ import no.nav.common.kafka.consumer.util.deserializer.Deserializers
 import no.nav.common.kafka.spring.PostgresJdbcTemplateConsumerRepository
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.leesah.Personhendelse
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -44,10 +43,10 @@ class KafkaConfiguration(
 	innsatsgruppeConsumer: InnsatsgruppeConsumer
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
-	private var consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
+	private val consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
 
-	private lateinit var client: KafkaConsumerClient
-	private lateinit var consumerRecordProcessor: KafkaConsumerRecordProcessor
+	private val client: KafkaConsumerClient
+	private val consumerRecordProcessor: KafkaConsumerRecordProcessor
 
 	init {
 		val topicConfigs = listOf(
@@ -58,7 +57,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.endringPaaBrukerTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { endringPaaBrukerConsumer.ingest(it.value()) }
+					Consumer { endringPaaBrukerConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -67,7 +66,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.sisteTilordnetVeilederTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { tildeltVeilederConsumer.ingest(it.value()) }
+					Consumer { tildeltVeilederConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -76,7 +75,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.oppfolgingsperiodeTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { oppfolgingsperiodeConsumer.ingest(it.value()) }
+					Consumer { oppfolgingsperiodeConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -85,7 +84,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.innsatsgruppeTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { innsatsgruppeConsumer.ingest(it.value()) }
+					Consumer { innsatsgruppeConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
 				.withLogging()
@@ -94,7 +93,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.aktorV2Topic,
 					Deserializers.stringDeserializer(),
 					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer<ConsumerRecord<String, Aktor>> { aktorV2Consumer.ingest(it.key(), it.value()) }
+					Consumer { aktorV2Consumer.ingest(it.key(), it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, Personhendelse>()
 				.withLogging()
@@ -103,7 +102,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.leesahTopic,
 					Deserializers.stringDeserializer(),
 					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer<ConsumerRecord<String, Personhendelse>> { leesahConsumer.ingest(it.value()) }
+					Consumer { leesahConsumer.ingest(it.value()) }
 				),
 			KafkaConsumerClientBuilder.TopicConfig<String, String>()
 				.withLogging()
@@ -112,7 +111,7 @@ class KafkaConfiguration(
 					kafkaTopicProperties.skjermedePersonerTopic,
 					Deserializers.stringDeserializer(),
 					Deserializers.stringDeserializer(),
-					Consumer<ConsumerRecord<String, String>> { skjermetPersonConsumer.ingest(it.key(), it.value()) }
+					Consumer { skjermetPersonConsumer.ingest(it.key(), it.value()) }
 				),
 		)
 

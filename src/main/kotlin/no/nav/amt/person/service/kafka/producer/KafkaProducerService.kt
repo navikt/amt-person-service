@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.kafka.producer
 
+import no.nav.amt.person.service.api.dto.toDto
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.dto.ArrangorAnsattDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
@@ -7,6 +8,7 @@ import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import no.nav.amt.person.service.nav_ansatt.NavAnsatt
 import no.nav.amt.person.service.nav_bruker.NavBruker
+import no.nav.amt.person.service.nav_enhet.NavEnhet
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.kafka.producer.KafkaProducerClient
@@ -85,5 +87,13 @@ class KafkaProducerService(
 		)
 
 		kafkaProducerClient.sendSync(ProducerRecord(kafkaTopicProperties.amtNavAnsattPersonaliaTopic, key, value))
+	}
+
+	fun publiserNavEnhet(navEnhet: NavEnhet) {
+		val key = navEnhet.id.toString()
+		val value = toJsonString(navEnhet.toDto())
+
+		kafkaProducerClient.sendSync(ProducerRecord(kafkaTopicProperties.amtNavEnhetTopic, key, value))
+		log.info("Publiserte nav enhet med id ${navEnhet.id} til topic")
 	}
 }

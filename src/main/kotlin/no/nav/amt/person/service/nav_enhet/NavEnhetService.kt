@@ -3,6 +3,7 @@ package no.nav.amt.person.service.nav_enhet
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
 import no.nav.amt.person.service.config.TeamLogs
+import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -11,7 +12,8 @@ import java.util.UUID
 class NavEnhetService(
 	private val navEnhetRepository: NavEnhetRepository,
 	private val norgClient: NorgClient,
-	private val veilarbarenaClient: VeilarbarenaClient
+	private val veilarbarenaClient: VeilarbarenaClient,
+	private val kafkaProducerService: KafkaProducerService,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -42,6 +44,7 @@ class NavEnhetService(
 		)
 
 		navEnhetRepository.insert(enhet)
+		kafkaProducerService.publiserNavEnhet(enhet)
 
 		return enhet
 	}
@@ -50,13 +53,16 @@ class NavEnhetService(
 
 	fun oppdaterNavEnheter(enheter: List<NavEnhet>) {
 		val oppdaterteEnheter = norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetId }
-		enheter.forEach {
-			val oppdatertEnhet = oppdaterteEnheter[it.enhetId]
-			if (oppdatertEnhet != null && oppdatertEnhet.navn != it.navn) {
-				navEnhetRepository.update(it.copy(navn = oppdatertEnhet.navn))
-				log.info("Oppdaterer navn for enhetId=${it.enhetId} fra '${it.navn}' til '${oppdatertEnhet.navn}'")
-			} else {
-				log.error("Fant ikke enhet for enhetId=${it.enhetId} i Norg")
+		enheter.forEach { opprinneligEnhet ->
+			val oppdatertEnhet = oppdaterteEnheter[opprinneligEnhet.enhetId]
+
+			if (oppdatertEnhet != null && oppdatertEnhet.navn != opprinneligEnhet.navn) {
+				val enhetMedNyttNavn = opprinneligEnhet.copy(navn = oppdatertEnhet.navn)
+				navEnhetRepository.update(enhetMedNyttNavn)
+				kafkaProducerService.publiserNavEnhet(enhetMedNyttNavn)
+				log.info("Oppdaterer navn for enhetId=${opprinneligEnhet.enhetId} fra '${opprinneligEnhet.navn}' til '${oppdatertEnhet.navn}'")
+			} else if (oppdatertEnhet == null) {
+				log.error("Fant ikke enhet for enhetId=${opprinneligEnhet.enhetId} i Norg")
 			}
 		}
 
