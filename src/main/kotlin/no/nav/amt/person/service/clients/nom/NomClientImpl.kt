@@ -48,11 +48,7 @@ class NomClientImpl(
 			response.takeUnless { it.isSuccessful }
 				?.let { throw RuntimeException("Uventet status ved kall mot NOM ${it.code}") }
 
-			response.takeUnless { response.body != null }
-				?.let { throw IllegalStateException("Ingen body i response") }
-
-			val ressurserResponse = fromJsonString<NomQueries.HentRessurser.Response>(response.body!!.string())
-
+			val ressurserResponse = fromJsonString<NomQueries.HentRessurser.Response>(response.body.string())
 			return toVeiledere(ressurserResponse)
 		}
 	}

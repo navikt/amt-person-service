@@ -52,9 +52,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
-
-			val gqlResponse = fromJsonString<PdlQueries.HentPerson.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentPerson.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse) // respons kan inneholde feil selv om den ikke er tom ref: https://pdldocs-navno.msappproxy.net/ekstern/index.html#appendix-graphql-feilhandtering
 
@@ -83,9 +81,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
-
-			val gqlResponse = fromJsonString<PdlQueries.HentPersonFodselsar.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentPersonFodselsar.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse) // respons kan inneholde feil selv om den ikke er tom ref: https://pdldocs-navno.msappproxy.net/ekstern/index.html#appendix-graphql-feilhandtering
 
@@ -115,9 +111,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
-
-			val gqlResponse = fromJsonString<PdlQueries.HentIdenter.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentIdenter.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 
@@ -146,9 +140,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
-
-			val gqlResponse = fromJsonString<PdlQueries.HentTelefon.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentTelefon.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 			logPdlWarnings(gqlResponse.extensions?.warnings)
@@ -176,9 +168,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing from PDL request")
-
-			val gqlResponse = fromJsonString<PdlQueries.HentAdressebeskyttelse.Response>(body)
+			val gqlResponse = fromJsonString<PdlQueries.HentAdressebeskyttelse.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 			logPdlWarnings(gqlResponse.extensions?.warnings)

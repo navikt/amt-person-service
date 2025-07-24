@@ -2,15 +2,15 @@ package no.nav.amt.person.service.clients.veilarboppfolging
 
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
+import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.function.Supplier
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.ZonedDateTime
 import java.util.UUID
+import java.util.function.Supplier
 
 class VeilarboppfolgingClient(
 	private val apiUrl: String,
@@ -21,7 +21,7 @@ class VeilarboppfolgingClient(
 		private val mediaTypeJson = "application/json".toMediaType()
 	}
 
-	fun hentVeilederIdent(fnr: String) : String? {
+	fun hentVeilederIdent(fnr: String): String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/v3/hent-veileder")
@@ -37,16 +37,13 @@ class VeilarboppfolgingClient(
 			response.takeIf { it.code == 204 }
 				?.let { return null }
 
-			response.takeIf { it.body == null }
-				?.let { throw RuntimeException("Body mangler i respons fra veilarboppfolging") }
-
-			val veilederRespons = fromJsonString<HentBrukersVeilederResponse>(response.body!!.string())
+			val veilederRespons = fromJsonString<HentBrukersVeilederResponse>(response.body.string())
 
 			return veilederRespons.veilederIdent
 		}
 	}
 
-	fun hentOppfolgingperioder(fnr: String) : List<Oppfolgingsperiode> {
+	fun hentOppfolgingperioder(fnr: String): List<Oppfolgingsperiode> {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/v3/oppfolging/hent-perioder")
@@ -59,15 +56,14 @@ class VeilarboppfolgingClient(
 			if (!response.isSuccessful) {
 				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
 			}
-			val body = response.body?.string() ?: throw RuntimeException("Body mangler i hent status-respons fra veilarboppfolging")
 
-			val oppfolgingsperioderRespons = fromJsonString<List<OppfolgingPeriodeDTO>>(body)
+			val oppfolgingsperioderRespons = fromJsonString<List<OppfolgingPeriodeDTO>>(response.body.string())
 
 			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
 		}
 	}
 
-	data class HentBrukersVeilederResponse (
+	data class HentBrukersVeilederResponse(
 		val veilederIdent: String
 	)
 

@@ -33,9 +33,9 @@ class VeilarbvedtaksstotteClient(
 			if (!response.isSuccessful) {
 				throw RuntimeException("Uventet status fra veilarbvedtaksstotte ${response.code}")
 			}
-			val body = response.body?.string()
+			val body = response.body.string()
 
-			if (body.isNullOrEmpty()) {
+			if (body.isEmpty()) {
 				return null
 			}
 
