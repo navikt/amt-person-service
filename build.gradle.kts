@@ -1,7 +1,7 @@
 plugins {
     val kotlinVersion = "2.2.0"
 
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
     kotlin("plugin.serialization") version kotlinVersion
