@@ -2,15 +2,18 @@ package no.nav.amt.person.service.clients.veilarboppfolging
 
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
+import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
 import no.nav.common.rest.client.RestClient.baseClient
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.function.Supplier
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import java.time.ZonedDateTime
 import java.util.UUID
+import java.util.function.Supplier
 
 class VeilarboppfolgingClient(
 	private val apiUrl: String,
@@ -34,14 +37,9 @@ class VeilarboppfolgingClient(
 			response.takeIf { !it.isSuccessful }
 				?.let { throw RuntimeException("Uventet status ved kall mot veilarboppfolging ${it.code}") }
 
-			response.takeIf { it.code == 204 }
-				?.let { return null }
+			if (response.code == HttpStatus.NO_CONTENT.value()) return null
 
-			response.takeIf { it.body == null }
-				?.let { throw RuntimeException("Body mangler i respons fra veilarboppfolging") }
-
-			val veilederRespons = fromJsonString<HentBrukersVeilederResponse>(response.body!!.string())
-
+			val veilederRespons = fromJsonString<HentBrukersVeilederResponse>(response.body.string())
 			return veilederRespons.veilederIdent
 		}
 	}
@@ -50,8 +48,8 @@ class VeilarboppfolgingClient(
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/v3/oppfolging/hent-perioder")
-			.header("Accept", "application/json; charset=utf-8")
-			.header("Authorization", "Bearer ${veilarboppfolgingTokenProvider.get()}")
+			.header(HttpHeaders.ACCEPT, "application/json; charset=utf-8")
+			.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider.get()}")
 			.post(personRequestJson.toRequestBody(mediaTypeJson))
 			.build()
 
@@ -59,10 +57,8 @@ class VeilarboppfolgingClient(
 			if (!response.isSuccessful) {
 				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
 			}
-			val body = response.body?.string() ?: throw RuntimeException("Body mangler i hent status-respons fra veilarboppfolging")
 
-			val oppfolgingsperioderRespons = fromJsonString<List<OppfolgingPeriodeDTO>>(body)
-
+			val oppfolgingsperioderRespons = fromJsonString<List<OppfolgingPeriodeDTO>>(response.body.string())
 			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
 		}
 	}
@@ -82,8 +78,8 @@ class VeilarboppfolgingClient(
 	) {
 		fun toOppfolgingsperiode() = Oppfolgingsperiode(
 			id = uuid,
-			startdato = startDato.toLocalDateTime(),
-			sluttdato = sluttDato?.toLocalDateTime()
+			startdato = startDato.toSystemZoneLocalDateTime(),
+			sluttdato = sluttDato?.toSystemZoneLocalDateTime()
 		)
 	}
 }
