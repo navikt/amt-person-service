@@ -4,6 +4,7 @@ import no.nav.amt.person.service.nav_bruker.NavBrukerService
 import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
+import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
@@ -32,8 +33,8 @@ class OppfolgingsperiodeConsumer(
 			brukerId,
 			Oppfolgingsperiode(
 				id = sisteOppfolgingsperiode.uuid,
-				startdato = sisteOppfolgingsperiode.startDato.toLocalDateTime(),
-				sluttdato = sisteOppfolgingsperiode.sluttDato?.toLocalDateTime()
+				startdato = sisteOppfolgingsperiode.startDato.toSystemZoneLocalDateTime(),
+				sluttdato = sisteOppfolgingsperiode.sluttDato?.toSystemZoneLocalDateTime()
 			)
 		)
 		log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
