@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -76,8 +77,11 @@ class OppfolgingsperiodeConsumerTest(
 
 	companion object {
 		private const val AKTOR_ID_IN_TEST = "1234"
-		private val nowAsLocalDateTime = LocalDateTime.now()
-		private val nowAsZonedDateTime = ZonedDateTime.of(nowAsLocalDateTime, ZoneId.systemDefault())
+
+		val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
+		val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
+			.withZoneSameInstant(ZoneId.systemDefault())
+			.toLocalDateTime()
 
 		private fun createSisteOppfolgingsperiodeV1(
 			personIdent: String,
@@ -86,8 +90,8 @@ class OppfolgingsperiodeConsumerTest(
 			OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
 				uuid = UUID.randomUUID(),
 				aktorId = personIdent,
-				startDato = nowAsZonedDateTime,
-				sluttDato = if (useEndDate) nowAsZonedDateTime.plusDays(1) else null,
+				startDato = nowAsZonedDateTimeUtc,
+				sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,
 			)
 	}
 }
