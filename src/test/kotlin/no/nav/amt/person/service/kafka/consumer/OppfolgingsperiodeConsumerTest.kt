@@ -78,20 +78,19 @@ class OppfolgingsperiodeConsumerTest(
 	companion object {
 		private const val AKTOR_ID_IN_TEST = "1234"
 
-		val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-		val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
+		private val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
+		private val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
 			.withZoneSameInstant(ZoneId.systemDefault())
 			.toLocalDateTime()
 
 		private fun createSisteOppfolgingsperiodeV1(
 			personIdent: String,
 			useEndDate: Boolean
-		) =
-			OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
-				uuid = UUID.randomUUID(),
-				aktorId = personIdent,
-				startDato = nowAsZonedDateTimeUtc,
-				sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,
-			)
+		) = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
+			uuid = UUID.randomUUID(),
+			aktorId = personIdent,
+			startDato = nowAsZonedDateTimeUtc,
+			sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,
+		)
 	}
 }

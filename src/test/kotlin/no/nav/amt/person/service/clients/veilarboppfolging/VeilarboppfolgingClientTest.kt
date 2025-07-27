@@ -129,8 +129,8 @@ class VeilarboppfolgingClientTest {
 		private const val VEILEDER_IDENT_IN_TEST = "V123"
 		private const val FNR_IN_TEST = "123"
 
-		val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-		val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
+		private val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
+		private val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
 			.withZoneSameInstant(ZoneId.systemDefault())
 			.toLocalDateTime()
 
