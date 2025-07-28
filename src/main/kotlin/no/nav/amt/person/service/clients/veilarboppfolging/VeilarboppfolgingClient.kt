@@ -34,8 +34,9 @@ class VeilarboppfolgingClient(
 			.build()
 
 		httpClient.newCall(request).execute().use { response ->
-			response.takeIf { !it.isSuccessful }
-				?.let { throw RuntimeException("Uventet status ved kall mot veilarboppfolging ${it.code}") }
+			if (!response.isSuccessful) {
+				throw RuntimeException("Uventet status ved kall mot veilarboppfolging ${response.code}")
+			}
 
 			if (response.code == HttpStatus.NO_CONTENT.value()) return null
 
