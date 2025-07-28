@@ -39,10 +39,7 @@ class KodeverkClient(
 				response.takeIf { !it.isSuccessful }
 					?.let { throw RuntimeException("Uventet status ved kall mot kodeverk ${it.code}") }
 
-				val kodeverkRespons = response.body?.string()?.let {
-					fromJsonString<GetKodeverkKoderBetydningerResponse>(it)
-				} ?: throw RuntimeException("Tom respons fra kodeverk")
-
+				val kodeverkRespons = fromJsonString<GetKodeverkKoderBetydningerResponse>(response.body.string())
 				return kodeverkRespons.toPostnummerListe()
 			}
 		} catch (e: Exception) {

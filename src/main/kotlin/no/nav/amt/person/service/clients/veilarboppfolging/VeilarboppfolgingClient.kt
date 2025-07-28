@@ -24,7 +24,7 @@ class VeilarboppfolgingClient(
 		private val mediaTypeJson = "application/json".toMediaType()
 	}
 
-	fun hentVeilederIdent(fnr: String) : String? {
+	fun hentVeilederIdent(fnr: String): String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/v3/hent-veileder")
@@ -44,7 +44,7 @@ class VeilarboppfolgingClient(
 		}
 	}
 
-	fun hentOppfolgingperioder(fnr: String) : List<Oppfolgingsperiode> {
+	fun hentOppfolgingperioder(fnr: String): List<Oppfolgingsperiode> {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
 		val request = Request.Builder()
 			.url("$apiUrl/api/v3/oppfolging/hent-perioder")
@@ -63,7 +63,7 @@ class VeilarboppfolgingClient(
 		}
 	}
 
-	data class HentBrukersVeilederResponse (
+	data class HentBrukersVeilederResponse(
 		val veilederIdent: String
 	)
 

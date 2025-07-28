@@ -1,7 +1,7 @@
 plugins {
     val kotlinVersion = "2.2.0"
 
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
     kotlin("plugin.serialization") version kotlinVersion
@@ -24,7 +24,7 @@ val okhttp3Version = "5.1.0"
 val kotestVersion = "5.9.1"
 val poaoTilgangVersion = "2025.07.04_08.56-814fa50f6740"
 val testcontainersVersion = "1.21.3"
-val tokenSupportVersion = "5.0.30"
+val tokenSupportVersion = "5.0.33"
 val mockkVersion = "1.14.5"
 val lang3Version = "3.18.0"
 val shedlockVersion = "6.9.2"

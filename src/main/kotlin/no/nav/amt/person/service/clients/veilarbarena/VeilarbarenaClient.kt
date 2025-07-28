@@ -42,9 +42,7 @@ class VeilarbarenaClient(
 				throw RuntimeException("Klarte ikke å hente status fra veilarbarena. Status: ${response.code}")
 			}
 
-			val body = response.body?.string() ?: throw RuntimeException("Body is missing")
-
-			val statusDto = fromJsonString<BrukerArenaStatusDto>(body)
+			val statusDto = fromJsonString<BrukerArenaStatusDto>(response.body.string())
 
 			return statusDto.oppfolgingsenhet
 		}
