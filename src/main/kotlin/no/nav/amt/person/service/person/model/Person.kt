@@ -16,4 +16,3 @@ data class Person(
 		etternavn = etternavn.titlecase()
 	}
 }
-

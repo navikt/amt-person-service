@@ -15,7 +15,6 @@ class NavEnhetProducerTest(
 	private val kafkaProducerService: KafkaProducerService,
 	private val kafkaTopicProperties: KafkaTopicProperties,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `publiserNavEnhet - skal publisere enhet med riktig key og value`() {
 		val navEnhet = TestData.lagNavEnhet().toModel()

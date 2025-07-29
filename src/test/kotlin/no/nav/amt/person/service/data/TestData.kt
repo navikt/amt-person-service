@@ -1,13 +1,13 @@
 package no.nav.amt.person.service.data
 
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
-import no.nav.amt.person.service.nav_ansatt.navGrunerlokka
-import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
-import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
-import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
+import no.nav.amt.person.service.navansatt.NavAnsattDbo
+import no.nav.amt.person.service.navansatt.navGrunerlokka
+import no.nav.amt.person.service.navbruker.Adressebeskyttelse
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
+import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Adresse
@@ -22,7 +22,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object TestData {
-
 	fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
 
 	fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
@@ -44,7 +43,7 @@ object TestData {
 		mellomnavn,
 		etternavn,
 		createdAt,
-		modifiedAt
+		modifiedAt,
 	)
 
 	fun lagNavEnhet(
@@ -54,7 +53,6 @@ object TestData {
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = NavEnhetDbo(id, enhetId, navn, createdAt, modifiedAt)
-
 
 	fun lagNavAnsatt(
 		id: UUID = UUID.randomUUID(),
@@ -89,7 +87,7 @@ object TestData {
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 		adressebeskyttelse: Adressebeskyttelse? = null,
 		oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
-		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS
+		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS,
 	) = NavBrukerDbo(
 		id,
 		person,
@@ -104,7 +102,7 @@ object TestData {
 		modifiedAt,
 		adressebeskyttelse,
 		oppfolgingsperioder,
-		innsatsgruppe
+		innsatsgruppe,
 	)
 
 	fun lagOppfolgingsperiode(
@@ -122,7 +120,7 @@ object TestData {
 		telefon: String? = null,
 		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
 		identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
-		adresse: Adresse? = lagAdresse()
+		adresse: Adresse? = lagAdresse(),
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,
@@ -130,7 +128,7 @@ object TestData {
 		telefonnummer = telefon,
 		adressebeskyttelseGradering = adressebeskyttelseGradering,
 		identer = identer,
-		adresse = adresse
+		adresse = adresse,
 	)
 
 	fun lagPersonident(
@@ -139,33 +137,36 @@ object TestData {
 		historisk: Boolean = false,
 		type: IdentType = IdentType.FOLKEREGISTERIDENT,
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
-		createdAt: LocalDateTime = LocalDateTime.now()
+		createdAt: LocalDateTime = LocalDateTime.now(),
 	) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
 
 	fun lagAdresse(): Adresse =
 		Adresse(
-			bostedsadresse = Bostedsadresse(
-				coAdressenavn = "C/O Gutterommet",
-				vegadresse = null,
-				matrikkeladresse = Matrikkeladresse(
-					tilleggsnavn = "Gården",
-					postnummer = "0484",
-					poststed = "OSLO"
-				)
-			),
-			oppholdsadresse = null,
-			kontaktadresse = Kontaktadresse(
-				coAdressenavn = null,
-				vegadresse = Vegadresse(
-					husnummer = "1",
-					husbokstav = null,
-					adressenavn = "Gate",
-					tilleggsnavn = null,
-					postnummer = "1234",
-					poststed = "MOSS"
+			bostedsadresse =
+				Bostedsadresse(
+					coAdressenavn = "C/O Gutterommet",
+					vegadresse = null,
+					matrikkeladresse =
+						Matrikkeladresse(
+							tilleggsnavn = "Gården",
+							postnummer = "0484",
+							poststed = "OSLO",
+						),
 				),
-				postboksadresse = null
-			)
+			oppholdsadresse = null,
+			kontaktadresse =
+				Kontaktadresse(
+					coAdressenavn = null,
+					vegadresse =
+						Vegadresse(
+							husnummer = "1",
+							husbokstav = null,
+							adressenavn = "Gate",
+							tilleggsnavn = null,
+							postnummer = "1234",
+							poststed = "MOSS",
+						),
+					postboksadresse = null,
+				),
 		)
 }
-

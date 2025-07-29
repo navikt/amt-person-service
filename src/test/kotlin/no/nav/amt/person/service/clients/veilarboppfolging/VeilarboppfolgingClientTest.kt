@@ -11,20 +11,21 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 class VeilarboppfolgingClientTest {
-    private lateinit var server: MockWebServer
-    private lateinit var client: VeilarboppfolgingClient
+	private lateinit var server: MockWebServer
+	private lateinit var client: VeilarboppfolgingClient
 
 	private val veilederIdent = "V123"
 	private val fnr = "123"
 
 	@BeforeEach
-    fun setup() {
-        server = MockWebServer()
+	fun setup() {
+		server = MockWebServer()
 		val serverUrl = server.url("/api").toString()
-        client = VeilarboppfolgingClient(
-			apiUrl = serverUrl,
-			veilarboppfolgingTokenProvider = { "VEILARBOPPFOLGING_TOKEN" }
-		)
+		client =
+			VeilarboppfolgingClient(
+				apiUrl = serverUrl,
+				veilarboppfolgingTokenProvider = { "VEILARBOPPFOLGING_TOKEN" },
+			)
 	}
 
 	@Test
@@ -40,19 +41,19 @@ class VeilarboppfolgingClientTest {
 	}
 
 	@Test
-    fun `HentVeilederIdent - Bruker finnes - Returnerer veileder ident`() {
+	fun `HentVeilederIdent - Bruker finnes - Returnerer veileder ident`() {
 		val jsonRepons = """{"veilederIdent":"V123"}""".trimIndent()
 		server.enqueue(MockResponse().setBody(jsonRepons))
 
-        val veileder = client.hentVeilederIdent(fnr)
+		val veileder = client.hentVeilederIdent(fnr)
 		veileder shouldBe veilederIdent
-    }
+	}
 
 	@Test
-    fun `HentVeilederIdent - Manglende tilgang - Kaster exception`() {
+	fun `HentVeilederIdent - Manglende tilgang - Kaster exception`() {
 		server.enqueue(MockResponse().setResponseCode(401))
-		assertThrows<RuntimeException> { client.hentVeilederIdent("123")  }
-    }
+		assertThrows<RuntimeException> { client.hentVeilederIdent("123") }
+	}
 
 	@Test
 	fun `HentVeilederIdent - Requester korrekt url`() {
@@ -78,13 +79,14 @@ class VeilarboppfolgingClientTest {
 	fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`() {
 		val id = UUID.randomUUID()
 		val startdato = ZonedDateTime.now()
-		val oppfolgingsperioderRespons = listOf(
-			VeilarboppfolgingClient.OppfolgingPeriodeDTO(
-				uuid = id,
-				startDato = startdato,
-				sluttDato = null
+		val oppfolgingsperioderRespons =
+			listOf(
+				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+					uuid = id,
+					startDato = startdato,
+					sluttDato = null,
+				),
 			)
-		)
 		server.enqueue(MockResponse().setBody(toJsonString(oppfolgingsperioderRespons)))
 
 		val oppfolgingsperioder = client.hentOppfolgingperioder(fnr)
@@ -97,6 +99,6 @@ class VeilarboppfolgingClientTest {
 	@Test
 	fun `hentOppfolgingperioder - manglende tilgang - kaster exception`() {
 		server.enqueue(MockResponse().setResponseCode(401))
-		assertThrows<RuntimeException> { client.hentOppfolgingperioder("123")  }
+		assertThrows<RuntimeException> { client.hentOppfolgingperioder("123") }
 	}
 }

@@ -9,12 +9,13 @@ class NorgClient(
 	private val url: String,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
-
 	fun hentNavEnhet(enhetId: String): NorgNavEnhet? {
-		val request = Request.Builder()
-			.url("$url/norg2/api/v1/enhet/$enhetId")
-			.get()
-			.build()
+		val request =
+			Request
+				.Builder()
+				.url("$url/norg2/api/v1/enhet/$enhetId")
+				.get()
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
 			if (response.code == 404) {
@@ -32,13 +33,13 @@ class NorgClient(
 		}
 	}
 
-	fun hentNavEnheter(
-		enheter: List<String>,
-	): List<NorgNavEnhet> {
-		val request = Request.Builder()
-			.url("$url/norg2/api/v1/enhet?enhetsnummerListe=${enheter.joinToString(",")}")
-			.get()
-			.build()
+	fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhet> {
+		val request =
+			Request
+				.Builder()
+				.url("$url/norg2/api/v1/enhet?enhetsnummerListe=${enheter.joinToString(",")}")
+				.get()
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
 			if (!response.isSuccessful) {
@@ -53,6 +54,6 @@ class NorgClient(
 
 	private data class NavEnhetDto(
 		val navn: String,
-		val enhetNr: String
+		val enhetNr: String,
 	)
 }

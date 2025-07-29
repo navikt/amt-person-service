@@ -16,9 +16,9 @@ import no.nav.amt.person.service.api.request.NavAnsattRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.api.request.NavEnhetRequest
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
-import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
-import no.nav.amt.person.service.nav_enhet.NavEnhetService
+import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -30,10 +30,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping("/api")
-class PersonAPI (
+class PersonAPI(
 	private val personService: PersonService,
 	private val navAnsattService: NavAnsattService,
 	private val navBrukerService: NavBrukerService,
@@ -41,11 +40,10 @@ class PersonAPI (
 	private val arrangorAnsattService: ArrangorAnsattService,
 	private val authService: AuthService,
 ) {
-
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-bruker")
 	fun hentEllerOpprettNavBruker(
-		@RequestBody request: NavBrukerRequest
+		@RequestBody request: NavBrukerRequest,
 	): NavBrukerDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navBrukerService.hentEllerOpprettNavBruker(request.personident).toDto()
@@ -54,7 +52,7 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-bruker-fodselsar")
 	fun hentNavBrukerFodselsar(
-		@RequestBody request: NavBrukerRequest
+		@RequestBody request: NavBrukerRequest,
 	): NavBrukerFodselsdatoDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navBrukerService.hentNavBrukerFodselsar(request.personident)
@@ -63,7 +61,7 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-bruker/kontaktinformasjon")
 	fun hentNavBrukerKontaktinformasjon(
-		@RequestBody personidenter: Set<String>
+		@RequestBody personidenter: Set<String>,
 	): Map<String, Kontaktinformasjon> {
 		authService.verifyRequestIsMachineToMachine()
 		return navBrukerService.fetchOppdatertKontaktinfo(personidenter)
@@ -72,7 +70,7 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-ansatt")
 	fun hentEllerOpprettNavAnsatt(
-		@RequestBody request: NavAnsattRequest
+		@RequestBody request: NavAnsattRequest,
 	): NavAnsattDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navAnsattService.hentEllerOpprettAnsatt(request.navIdent).toDto()
@@ -81,12 +79,11 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@GetMapping("/nav-ansatt/{id}")
 	fun hentNavAnsatt(
-		@PathVariable id: UUID
+		@PathVariable id: UUID,
 	): NavAnsattDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navAnsattService.hentNavAnsatt(id).toDto()
 	}
-
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/arrangor-ansatt")
@@ -102,7 +99,7 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/nav-enhet")
 	fun hentEllerOpprettNavEnhet(
-		@RequestBody request: NavEnhetRequest
+		@RequestBody request: NavEnhetRequest,
 	): NavEnhetDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navEnhetService.hentEllerOpprettNavEnhet(request.enhetId)?.toDto()
@@ -112,7 +109,7 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@GetMapping("/nav-enhet/{id}")
 	fun hentNavEnhet(
-		@PathVariable id: UUID
+		@PathVariable id: UUID,
 	): NavEnhetDto {
 		authService.verifyRequestIsMachineToMachine()
 		return navEnhetService.hentNavEnhet(id).toDto()
@@ -121,10 +118,9 @@ class PersonAPI (
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 	@PostMapping("/person/adressebeskyttelse")
 	fun hentAdressebeskyttelse(
-		@RequestBody request: AdressebeskyttelseRequest
+		@RequestBody request: AdressebeskyttelseRequest,
 	): AdressebeskyttelseDto {
 		authService.verifyRequestIsMachineToMachine()
 		return personService.hentAdressebeskyttelse(request.personident).toDto()
 	}
-
 }

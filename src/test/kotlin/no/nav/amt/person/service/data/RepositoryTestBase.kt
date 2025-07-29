@@ -36,9 +36,10 @@ abstract class RepositoryTestBase {
 		private const val POSTGRES_DOCKER_IMAGE_NAME = "postgres:14-alpine"
 
 		@Suppress("unused")
-		private val postgres = createContainer().apply {
-			start()
-		}
+		private val postgres =
+			createContainer().apply {
+				start()
+			}
 
 		@JvmStatic
 		@DynamicPropertySource
@@ -51,8 +52,9 @@ abstract class RepositoryTestBase {
 
 		private fun createContainer(): PostgreSQLContainer<Nothing> =
 			PostgreSQLContainer<Nothing>(
-				DockerImageName.parse(POSTGRES_DOCKER_IMAGE_NAME)
-					.asCompatibleSubstituteFor("postgres")
+				DockerImageName
+					.parse(POSTGRES_DOCKER_IMAGE_NAME)
+					.asCompatibleSubstituteFor("postgres"),
 			).apply {
 				addEnv("TZ", "Europe/Oslo")
 				waitingFor(Wait.forListeningPort())

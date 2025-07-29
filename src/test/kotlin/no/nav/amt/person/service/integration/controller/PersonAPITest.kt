@@ -12,11 +12,11 @@ import no.nav.amt.person.service.api.dto.NavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
-import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_bruker.Innsatsgruppe
-import no.nav.amt.person.service.nav_bruker.NavBruker
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
-import no.nav.amt.person.service.nav_enhet.NavEnhetService
+import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navbruker.Innsatsgruppe
+import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
@@ -31,7 +31,6 @@ class PersonAPITest(
 	private val navAnsattService: NavAnsattService,
 	private val navEnhetService: NavEnhetService,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `hentEllerOpprettArrangorAnsatt - ansatt finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val person = TestData.lagPerson()
@@ -39,12 +38,13 @@ class PersonAPITest(
 
 		mockPdlHttpServer.mockHentPerson(person)
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/arrangor-ansatt",
-			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer $token")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/arrangor-ansatt",
+				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer $token"),
+			)
 
 		response.code shouldBe 200
 
@@ -68,12 +68,13 @@ class PersonAPITest(
 
 		val token = mockOAuthServer.issueAzureAdM2MToken()
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/arrangor-ansatt",
-			body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer $token")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/arrangor-ansatt",
+				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer $token"),
+			)
 
 		response.code shouldBe 200
 
@@ -99,31 +100,32 @@ class PersonAPITest(
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(
 			navBruker.person.personident,
-			navBruker.oppfolgingsperioder
+			navBruker.oppfolgingsperioder,
 		)
 		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(
 			navBruker.person.personident,
-			Innsatsgruppe.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE
+			Innsatsgruppe.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
 		)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(
 			MockKontaktinformasjon(
 				navBruker.person.personident,
 				navBruker.epost,
-				navBruker.telefon
-			)
+				navBruker.telefon,
+			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
 		mockNorgHttpServer.addNavAnsattEnhet()
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/nav-bruker",
-			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/nav-bruker",
+				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -145,12 +147,13 @@ class PersonAPITest(
 		val navBruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(navBruker)
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/nav-bruker",
-			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/nav-bruker",
+				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -170,37 +173,38 @@ class PersonAPITest(
 			navBruker.person.personident,
 			TestData.lagPdlPerson(
 				person = navBruker.person,
-				adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-			)
+				adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+			),
 		)
 		mockVeilarboppfolgingHttpServer.mockHentVeilederIdent(navBruker.person.personident, navAnsatt.navIdent)
 		mockVeilarboppfolgingHttpServer.mockHentOppfolgingperioder(
 			navBruker.person.personident,
-			navBruker.oppfolgingsperioder
+			navBruker.oppfolgingsperioder,
 		)
 		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(
 			navBruker.person.personident,
-			Innsatsgruppe.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE
+			Innsatsgruppe.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
 		)
 		mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
 		mockKrrProxyHttpServer.mockHentKontaktinformasjon(
 			MockKontaktinformasjon(
 				navBruker.person.personident,
 				navBruker.epost,
-				navBruker.telefon
-			)
+				navBruker.telefon,
+			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
 		mockNorgHttpServer.addNavAnsattEnhet()
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/nav-bruker",
-			body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/nav-bruker",
+				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -217,12 +221,13 @@ class PersonAPITest(
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
 		mockNorgHttpServer.addNavAnsattEnhet()
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/nav-ansatt",
-			body = """{"navIdent": "${navAnsatt.navIdent}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/nav-ansatt",
+				body = """{"navIdent": "${navAnsatt.navIdent}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -244,12 +249,13 @@ class PersonAPITest(
 
 		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/nav-enhet",
-			body = """{"enhetId": "${navEnhet.enhetId}"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/nav-enhet",
+				body = """{"enhetId": "${navEnhet.enhetId}"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -270,12 +276,13 @@ class PersonAPITest(
 
 		mockPdlHttpServer.mockHentAdressebeskyttelse(personident, gradering)
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/person/adressebeskyttelse",
-			body = """{"personident": "$personident"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/person/adressebeskyttelse",
+				body = """{"personident": "$personident"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -289,12 +296,13 @@ class PersonAPITest(
 
 		mockPdlHttpServer.mockHentAdressebeskyttelse(personident, gradering)
 
-		val response = sendRequest(
-			method = "POST",
-			path = "/api/person/adressebeskyttelse",
-			body = """{"personident": "$personident"}""".toJsonRequestBody(),
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "POST",
+				path = "/api/person/adressebeskyttelse",
+				body = """{"personident": "$personident"}""".toJsonRequestBody(),
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -306,11 +314,12 @@ class PersonAPITest(
 		val navAnsatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(navAnsatt)
 
-		val response = sendRequest(
-			method = "GET",
-			path = "/api/nav-ansatt/${navAnsatt.id}",
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "GET",
+				path = "/api/nav-ansatt/${navAnsatt.id}",
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -330,11 +339,12 @@ class PersonAPITest(
 		val navEnhet = TestData.lagNavEnhet()
 		testDataRepository.insertNavEnhet(navEnhet)
 
-		val response = sendRequest(
-			method = "GET",
-			path = "/api/nav-enhet/${navEnhet.id}",
-			headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}")
-		)
+		val response =
+			sendRequest(
+				method = "GET",
+				path = "/api/nav-enhet/${navEnhet.id}",
+				headers = mapOf("Authorization" to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
+			)
 
 		response.code shouldBe 200
 
@@ -349,14 +359,15 @@ class PersonAPITest(
 
 	@Test
 	internal fun `skal teste token autentisering`() {
-		val requestBuilders = listOf(
-			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/arrangor-ansatt"),
-			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-ansatt"),
-			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-bruker"),
-			Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-enhet"),
-			Request.Builder().get().url("${serverUrl()}/api/nav-ansatt/${UUID.randomUUID()}"),
-			Request.Builder().get().url("${serverUrl()}/api/nav-enhet/${UUID.randomUUID()}")
-		)
+		val requestBuilders =
+			listOf(
+				Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/arrangor-ansatt"),
+				Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-ansatt"),
+				Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-bruker"),
+				Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/nav-enhet"),
+				Request.Builder().get().url("${serverUrl()}/api/nav-ansatt/${UUID.randomUUID()}"),
+				Request.Builder().get().url("${serverUrl()}/api/nav-enhet/${UUID.randomUUID()}"),
+			)
 		testTokenAutentisering(requestBuilders)
 	}
 
@@ -364,13 +375,15 @@ class PersonAPITest(
 		requestBuilders.forEach {
 			val utenTokenResponse = client.newCall(it.build()).execute()
 			utenTokenResponse.code shouldBe 401
-			val feilTokenResponse = client.newCall(
-				it.header(
-					name = "Authorization",
-					value = "Bearer ${mockOAuthServer.issueToken(issuer = "ikke-azuread")}"
-				)
-					.build()
-			).execute()
+			val feilTokenResponse =
+				client
+					.newCall(
+						it
+							.header(
+								name = "Authorization",
+								value = "Bearer ${mockOAuthServer.issueToken(issuer = "ikke-azuread")}",
+							).build(),
+					).execute()
 			feilTokenResponse.code shouldBe 401
 		}
 	}
@@ -403,4 +416,3 @@ class PersonAPITest(
 		}
 	}
 }
-

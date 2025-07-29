@@ -21,8 +21,11 @@ class GlobalExceptionHandler(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@ExceptionHandler(RuntimeException::class)
-	fun handleException(ex: RuntimeException, request: HttpServletRequest): ResponseEntity<Response> {
-		return when (ex) {
+	fun handleException(
+		ex: RuntimeException,
+		request: HttpServletRequest,
+	): ResponseEntity<Response> =
+		when (ex) {
 			is NoSuchElementException -> buildResponse(HttpStatus.NOT_FOUND, ex)
 			is IllegalStateException -> buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
 			is NotAuthorizedException -> buildResponse(HttpStatus.UNAUTHORIZED, ex)
@@ -34,30 +37,27 @@ class GlobalExceptionHandler(
 				buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
 			}
 		}
-	}
 
 	private fun buildResponse(
 		status: HttpStatus,
 		exception: Throwable,
-	): ResponseEntity<Response> {
-		return ResponseEntity
+	): ResponseEntity<Response> =
+		ResponseEntity
 			.status(status)
 			.body(
 				Response(
 					status = status.value(),
 					title = status,
 					detail = exception.message,
-					stacktrace = if (includeStacktrace) ExceptionUtils.getStackTrace(exception) else null
-				)
+					stacktrace = if (includeStacktrace) ExceptionUtils.getStackTrace(exception) else null,
+				),
 			)
-
-	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	data class Response(
 		val status: Int,
 		val title: HttpStatus,
 		val detail: String?,
-		val stacktrace: String? = null
+		val stacktrace: String? = null,
 	)
 }

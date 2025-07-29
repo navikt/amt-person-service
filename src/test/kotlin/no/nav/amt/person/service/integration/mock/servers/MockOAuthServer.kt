@@ -26,13 +26,13 @@ open class MockOAuthServer {
 		issuer: String,
 		subject: String = UUID.randomUUID().toString(),
 		audience: String = "test-aud",
-		claims: Map<String, Any> = emptyMap()
+		claims: Map<String, Any> = emptyMap(),
 	): String = server.issueToken(issuer, subject, audience, claims).serialize()
 
 	fun issueAzureAdM2MToken(
 		subject: String = UUID.randomUUID().toString(),
 		audience: String = "test-aud",
-		claims: Map<String, Any> = emptyMap()
+		claims: Map<String, Any> = emptyMap(),
 	): String {
 		val claims = claims.toMutableMap()
 		claims["roles"] = arrayOf("access_as_application")

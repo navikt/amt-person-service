@@ -6,27 +6,20 @@ import no.nav.common.kafka.util.KafkaPropertiesPreset
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-import java.util.*
+import java.util.Properties
 
 @Configuration
 class KafkaBeans {
 	@Bean
 	@Profile("default")
-	fun kafkaConsumerProperties(): KafkaProperties {
-		return object : KafkaProperties {
-			override fun consumer(): Properties {
-				return KafkaPropertiesPreset.aivenDefaultConsumerProperties("amt-person-service-consumer.v1")
-			}
+	fun kafkaConsumerProperties(): KafkaProperties =
+		object : KafkaProperties {
+			override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties("amt-person-service-consumer.v1")
 
-			override fun producer(): Properties {
-				return KafkaPropertiesPreset.aivenDefaultProducerProperties("amt-person-service-producer")
-			}
+			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties("amt-person-service-producer")
 		}
-	}
-
 
 	@Bean
-	fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> {
-		return KafkaProducerClientImpl(kafkaProperties.producer())
-	}
+	fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
+		KafkaProducerClientImpl(kafkaProperties.producer())
 }

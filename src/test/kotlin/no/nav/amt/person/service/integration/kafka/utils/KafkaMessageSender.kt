@@ -13,7 +13,8 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Component
 class KafkaMessageSender(
@@ -43,7 +44,7 @@ class KafkaMessageSender(
 				endringPaaBrukerTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
-			)
+			),
 		)
 	}
 
@@ -53,7 +54,7 @@ class KafkaMessageSender(
 				sisteTilordnetVeilederTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
-			)
+			),
 		)
 	}
 
@@ -63,7 +64,7 @@ class KafkaMessageSender(
 				oppfolgingsperiodeTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
-			)
+			),
 		)
 	}
 
@@ -73,28 +74,39 @@ class KafkaMessageSender(
 				innsatsgruppeTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
-			)
+			),
 		)
 	}
 
-	fun sendTilSkjermetPersonTopic(personident: String, erSkjermet: Boolean) {
+	fun sendTilSkjermetPersonTopic(
+		personident: String,
+		erSkjermet: Boolean,
+	) {
 		kafkaProducer.send(
 			ProducerRecord(
 				skjermedePersonerTopic,
 				personident,
 				erSkjermet.toString(),
-			)
+			),
 		)
 	}
 
-	fun sendTilAktorV2Topic(key: String, value: Aktor, schemaId: Int) {
+	fun sendTilAktorV2Topic(
+		key: String,
+		value: Aktor,
+		schemaId: Int,
+	) {
 		val record = ProducerRecord(aktorV2Topic, key, value)
 		record.headers().add("schemaId", schemaId.toString().toByteArray())
 
 		sendAvroRecord(record)
 	}
 
-	fun sendTilLeesahTopic(key: String, value: Personhendelse, schemaId: Int) {
+	fun sendTilLeesahTopic(
+		key: String,
+		value: Personhendelse,
+		schemaId: Int,
+	) {
 		val record = ProducerRecord(leesahTopic, key, value)
 		record.headers().add("schemaId", schemaId.toString().toByteArray())
 
@@ -102,15 +114,16 @@ class KafkaMessageSender(
 	}
 
 	private fun <K, V> sendAvroRecord(record: ProducerRecord<K, V>) {
-		KafkaProducer<K, V>(Properties().apply {
-			put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, SingletonKafkaProvider.getHost())
-			put(KafkaAvroDeserializerConfig.AUTO_REGISTER_SCHEMAS, true)
-			put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl)
-			put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
-			put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer::class.java)
-		}).use { producer ->
+		KafkaProducer<K, V>(
+			Properties().apply {
+				put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, SingletonKafkaProvider.getHost())
+				put(KafkaAvroDeserializerConfig.AUTO_REGISTER_SCHEMAS, true)
+				put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl)
+				put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
+				put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer::class.java)
+			},
+		).use { producer ->
 			producer.send(record).get()
 		}
 	}
-
 }

@@ -13,15 +13,12 @@ data class PersonDbo(
 	val createdAt: LocalDateTime,
 	val modifiedAt: LocalDateTime,
 ) {
-	fun toModel(): Person {
-		return Person(
+	fun toModel(): Person =
+		Person(
 			id,
 			personident,
 			fornavn,
 			mellomnavn,
 			etternavn,
 		)
-	}
 }
-
-

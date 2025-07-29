@@ -14,9 +14,10 @@ class NorgClientTest {
 	@BeforeEach
 	fun setup() {
 		server = MockWebServer()
-		client = NorgClient(
-			url = server.url("").toString().removeSuffix("/"),
-		)
+		client =
+			NorgClient(
+				url = server.url("").toString().removeSuffix("/"),
+			)
 	}
 
 	@AfterEach
@@ -27,27 +28,27 @@ class NorgClientTest {
 		server.enqueue(
 			MockResponse().setBody(
 				"""
-					{
-					  "enhetId": 900000042,
-					  "navn": "NAV Testheim",
-					  "enhetNr": "1234",
-					  "antallRessurser": 330,
-					  "status": "Aktiv",
-					  "orgNivaa": "EN",
-					  "type": "LOKAL",
-					  "organisasjonsnummer": "12345645",
-					  "underEtableringDato": "1970-01-01",
-					  "aktiveringsdato": "1970-01-01",
-					  "underAvviklingDato": null,
-					  "nedleggelsesdato": null,
-					  "oppgavebehandler": true,
-					  "versjon": 40,
-					  "sosialeTjenester": "Fritekst",
-					  "kanalstrategi": null,
-					  "orgNrTilKommunaltNavKontor": "123456789"
-					}
-				""".trimIndent()
-			)
+				{
+				  "enhetId": 900000042,
+				  "navn": "NAV Testheim",
+				  "enhetNr": "1234",
+				  "antallRessurser": 330,
+				  "status": "Aktiv",
+				  "orgNivaa": "EN",
+				  "type": "LOKAL",
+				  "organisasjonsnummer": "12345645",
+				  "underEtableringDato": "1970-01-01",
+				  "aktiveringsdato": "1970-01-01",
+				  "underAvviklingDato": null,
+				  "nedleggelsesdato": null,
+				  "oppgavebehandler": true,
+				  "versjon": 40,
+				  "sosialeTjenester": "Fritekst",
+				  "kanalstrategi": null,
+				  "orgNrTilKommunaltNavKontor": "123456789"
+				}
+				""".trimIndent(),
+			),
 		)
 
 		val enhet = client.hentNavEnhet("1234")

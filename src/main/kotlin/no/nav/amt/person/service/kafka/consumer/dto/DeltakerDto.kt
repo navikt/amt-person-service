@@ -4,9 +4,9 @@ import java.util.UUID
 
 data class DeltakerDto(
 	val id: UUID,
-	val personalia: DeltakerPersonaliaDto
+	val personalia: DeltakerPersonaliaDto,
 )
 
 data class DeltakerPersonaliaDto(
-	val personident: String
+	val personident: String,
 )

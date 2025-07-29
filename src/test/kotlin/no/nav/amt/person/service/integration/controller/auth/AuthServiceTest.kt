@@ -35,12 +35,14 @@ class AuthServiceTest {
 		claims["roles"] = arrayOf("access_as_application")
 		claims["oid"] = sub
 
-		val token = server.issueToken(
-			issuerId = Issuer.AZURE_AD,
-			subject = sub,
-			audience = "test-aud",
-			claims = claims
-		).serialize()
+		val token =
+			server
+				.issueToken(
+					issuerId = Issuer.AZURE_AD,
+					subject = sub,
+					audience = "test-aud",
+					claims = claims,
+				).serialize()
 
 		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
 
@@ -56,12 +58,14 @@ class AuthServiceTest {
 		claims["roles"] = arrayOf("access_as_application")
 		claims["oid"] = UUID.randomUUID()
 
-		val token = server.issueToken(
-			issuerId = Issuer.AZURE_AD,
-			subject = sub,
-			audience = "test-aud",
-			claims = claims
-		).serialize()
+		val token =
+			server
+				.issueToken(
+					issuerId = Issuer.AZURE_AD,
+					subject = sub,
+					audience = "test-aud",
+					claims = claims,
+				).serialize()
 
 		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
 
@@ -75,12 +79,14 @@ class AuthServiceTest {
 		val sub = UUID.randomUUID().toString()
 		val claims = mutableMapOf<String, Any>()
 
-		val token = server.issueToken(
-			issuerId = Issuer.AZURE_AD,
-			subject = sub,
-			audience = "test-aud",
-			claims = claims
-		).serialize()
+		val token =
+			server
+				.issueToken(
+					issuerId = Issuer.AZURE_AD,
+					subject = sub,
+					audience = "test-aud",
+					claims = claims,
+				).serialize()
 
 		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
 
@@ -89,15 +95,18 @@ class AuthServiceTest {
 		}
 	}
 
-	private fun mockContextHolder(issuer: String, token: String): TokenValidationContextHolder =
+	private fun mockContextHolder(
+		issuer: String,
+		token: String,
+	): TokenValidationContextHolder =
 		object : TokenValidationContextHolder {
-			override fun getTokenValidationContext(): TokenValidationContext = TokenValidationContext(
-				mapOf(
-					issuer to JwtToken(token)
+			override fun getTokenValidationContext(): TokenValidationContext =
+				TokenValidationContext(
+					mapOf(
+						issuer to JwtToken(token),
+					),
 				)
-			)
 
-			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit =
-				throw NotImplementedError()
+			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit = throw NotImplementedError()
 		}
 }

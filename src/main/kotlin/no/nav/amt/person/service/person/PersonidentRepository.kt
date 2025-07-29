@@ -12,24 +12,25 @@ import java.util.UUID
 
 @Component
 class PersonidentRepository(
-	val template: NamedParameterJdbcTemplate
+	val template: NamedParameterJdbcTemplate,
 ) {
-	private val rowMapper = RowMapper { rs, _ ->
-		PersonidentDbo(
-			ident = rs.getString("ident"),
-			personId = rs.getUUID("person_id"),
-			historisk = rs.getBoolean("historisk"),
-			type = rs.getString("type")?.let { IdentType.valueOf(it) } ?: IdentType.UKJENT,
-			createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-			modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-		)
-
-	}
+	private val rowMapper =
+		RowMapper { rs, _ ->
+			PersonidentDbo(
+				ident = rs.getString("ident"),
+				personId = rs.getUUID("person_id"),
+				historisk = rs.getBoolean("historisk"),
+				type = rs.getString("type")?.let { IdentType.valueOf(it) } ?: IdentType.UKJENT,
+				createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+				modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+			)
+		}
 
 	fun get(ident: String): PersonidentDbo? {
-		val sql = """
+		val sql =
+			"""
 			select * from personident where ident = :ident
-		""".trimIndent()
+			""".trimIndent()
 
 		val parameters = sqlParameters("ident" to ident)
 
@@ -37,19 +38,24 @@ class PersonidentRepository(
 	}
 
 	fun getAllForPerson(personId: UUID): List<PersonidentDbo> {
-		val sql = """
+		val sql =
+			"""
 			select * from personident where person_id = :personId
-		""".trimIndent()
+			""".trimIndent()
 
 		val parameters = sqlParameters("personId" to personId)
 
 		return template.query(sql, parameters, rowMapper)
 	}
 
-	fun upsert(personId: UUID, identer: List<Personident>) {
+	fun upsert(
+		personId: UUID,
+		identer: List<Personident>,
+	) {
 		if (identer.isEmpty()) return
 
-		val sql = """
+		val sql =
+			"""
 			insert into personident(
 				ident,
 				person_id,
@@ -64,17 +70,17 @@ class PersonidentRepository(
 				type = :type,
 				historisk = :historisk,
 				modified_at = current_timestamp
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = identer.map {
-			sqlParameters(
-				"ident" to it.ident,
-				"personId" to personId,
-				"historisk" to it.historisk,
-				"type" to it.type.name,
-			)
-		}
+		val parameters =
+			identer.map {
+				sqlParameters(
+					"ident" to it.ident,
+					"personId" to personId,
+					"historisk" to it.historisk,
+					"type" to it.type.name,
+				)
+			}
 		template.batchUpdate(sql, parameters.toTypedArray())
 	}
-
 }

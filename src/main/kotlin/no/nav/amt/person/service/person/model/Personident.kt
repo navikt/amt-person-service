@@ -7,13 +7,13 @@ data class Personident(
 )
 
 fun finnGjeldendeIdent(identer: List<Personident>): Result<Personident> {
-	val gjeldendeIdent = identer.firstOrNull{
-		!it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
-	} ?: identer.firstOrNull{
-		!it.historisk && it.type == IdentType.NPID
-	}
+	val gjeldendeIdent =
+		identer.firstOrNull {
+			!it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
+		} ?: identer.firstOrNull {
+			!it.historisk && it.type == IdentType.NPID
+		}
 
 	return gjeldendeIdent?.let { Result.success(it) }
 		?: Result.failure(NoSuchElementException("Ingen gjeldende personident finnes"))
 }
-

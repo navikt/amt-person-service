@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class VeilarboppfolgingConfig {
-
 	@Value("\${veilarboppfolging.url}")
 	lateinit var url: String
 
@@ -15,8 +14,13 @@ class VeilarboppfolgingConfig {
 	lateinit var veilarboppfolgingScope: String
 
 	@Bean
-	fun veilarboppfolgingClient(machineToMachineTokenClient: MachineToMachineTokenClient) = VeilarboppfolgingClient(
+	fun veilarboppfolgingClient(machineToMachineTokenClient: MachineToMachineTokenClient) =
+		VeilarboppfolgingClient(
 			apiUrl = "$url/veilarboppfolging",
-			veilarboppfolgingTokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingScope) }
+			veilarboppfolgingTokenProvider = {
+				machineToMachineTokenClient.createMachineToMachineToken(
+					veilarboppfolgingScope,
+				)
+			},
 		)
 }

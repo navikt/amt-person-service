@@ -9,9 +9,9 @@ import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
-import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.NavBruker
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.Adressebeskyttelse
+import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
@@ -23,7 +23,6 @@ class NavBrukerProducerTest(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `publiserNavBruker - skal publisere bruker med riktig key og value`() {
 		val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG).toModel()
@@ -83,22 +82,23 @@ class NavBrukerProducerTest(
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
 
-	private fun brukerTilV1Json(navBruker: NavBruker): String = JsonUtils.toJsonString(
-		NavBrukerDtoV1(
-			personId = navBruker.person.id,
-			personident = navBruker.person.personident,
-			fornavn = navBruker.person.fornavn,
-			mellomnavn = navBruker.person.mellomnavn,
-			etternavn = navBruker.person.etternavn,
-			navVeilederId = navBruker.navVeileder?.id,
-			navEnhet = navBruker.navEnhet?.let { NavEnhetDtoV1(it.id, it.enhetId, it.navn) },
-			telefon = navBruker.telefon,
-			epost = navBruker.epost,
-			erSkjermet = navBruker.erSkjermet,
-			adresse = navBruker.adresse,
-			adressebeskyttelse = navBruker.adressebeskyttelse,
-			oppfolgingsperioder = navBruker.oppfolgingsperioder,
-			innsatsgruppe = navBruker.innsatsgruppe
+	private fun brukerTilV1Json(navBruker: NavBruker): String =
+		JsonUtils.toJsonString(
+			NavBrukerDtoV1(
+				personId = navBruker.person.id,
+				personident = navBruker.person.personident,
+				fornavn = navBruker.person.fornavn,
+				mellomnavn = navBruker.person.mellomnavn,
+				etternavn = navBruker.person.etternavn,
+				navVeilederId = navBruker.navVeileder?.id,
+				navEnhet = navBruker.navEnhet?.let { NavEnhetDtoV1(it.id, it.enhetId, it.navn) },
+				telefon = navBruker.telefon,
+				epost = navBruker.epost,
+				erSkjermet = navBruker.erSkjermet,
+				adresse = navBruker.adresse,
+				adressebeskyttelse = navBruker.adressebeskyttelse,
+				oppfolgingsperioder = navBruker.oppfolgingsperioder,
+				innsatsgruppe = navBruker.innsatsgruppe,
+			),
 		)
-	)
 }

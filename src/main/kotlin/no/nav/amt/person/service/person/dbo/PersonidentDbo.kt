@@ -13,9 +13,10 @@ data class PersonidentDbo(
 	val modifiedAt: LocalDateTime,
 	val createdAt: LocalDateTime,
 ) {
-	fun toModel() = Personident(
-		this.ident,
-		this.historisk,
-		this.type
-	)
+	fun toModel() =
+		Personident(
+			this.ident,
+			this.historisk,
+			this.type,
+		)
 }

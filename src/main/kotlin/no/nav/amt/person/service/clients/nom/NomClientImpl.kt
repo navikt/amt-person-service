@@ -13,39 +13,41 @@ import java.util.function.Supplier
 
 class NomClientImpl(
 	private val url: String,
-	private val tokenSupplier : Supplier<String>,
+	private val tokenSupplier: Supplier<String>,
 	private val httpClient: OkHttpClient = baseClient(),
-): NomClient {
-
+) : NomClient {
 	companion object {
 		private val mediaTypeJson = "application/json".toMediaType()
 
 		private val log = LoggerFactory.getLogger(NomClientImpl::class.java)
 	}
 
-	override fun hentNavAnsatt(navIdent: String): NomNavAnsatt? {
-		return hentNavAnsatte(listOf(navIdent))
+	override fun hentNavAnsatt(navIdent: String): NomNavAnsatt? =
+		hentNavAnsatte(listOf(navIdent))
 			.firstOrNull()
-			.also { if(it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
-	}
+			.also { if (it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 
 	override fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
-		val requestBody = toJsonString(
-			GraphqlUtils.GraphqlQuery(
-				NomQueries.HentRessurser.query,
-				NomQueries.HentRessurser.Variables(navIdenter)
+		val requestBody =
+			toJsonString(
+				GraphqlUtils.GraphqlQuery(
+					NomQueries.HentRessurser.query,
+					NomQueries.HentRessurser.Variables(navIdenter),
+				),
 			)
-		)
 
-		val request: Request = Request.Builder()
-			.url("$url/graphql")
-			.header("Accept", mediaTypeJson.toString())
-			.header("Authorization", "Bearer ${tokenSupplier.get()}")
-			.post(requestBody.toRequestBody(mediaTypeJson))
-			.build()
+		val request: Request =
+			Request
+				.Builder()
+				.url("$url/graphql")
+				.header("Accept", mediaTypeJson.toString())
+				.header("Authorization", "Bearer ${tokenSupplier.get()}")
+				.post(requestBody.toRequestBody(mediaTypeJson))
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
-			response.takeUnless { it.isSuccessful }
+			response
+				.takeUnless { it.isSuccessful }
 				?.let { throw RuntimeException("Uventet status ved kall mot NOM ${it.code}") }
 
 			val ressurserResponse = fromJsonString<NomQueries.HentRessurser.Response>(response.body.string())
@@ -74,9 +76,8 @@ class NomClientImpl(
 		} ?: emptyList()
 	}
 
-	private fun hentTjenesteTelefonnummer(ansatt: NomQueries.HentRessurser.Ressurs): String? {
-		return ansatt.telefon.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
+	private fun hentTjenesteTelefonnummer(ansatt: NomQueries.HentRessurser.Ressurs): String? =
+		ansatt.telefon.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
 			?: ansatt.telefon.find { it.type == "NAV_TJENESTE_TELEFON" }?.nummer
 			?: ansatt.primaryTelefon
-	}
 }

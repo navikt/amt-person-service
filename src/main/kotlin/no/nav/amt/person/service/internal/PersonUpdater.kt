@@ -12,7 +12,6 @@ class PersonUpdater(
 	private val personRepository: PersonRepository,
 	private val personService: PersonService,
 ) {
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun oppdaterPersonidenter(startOffset: Int = 0) {
