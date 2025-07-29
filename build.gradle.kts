@@ -97,7 +97,8 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
-            "-Xannotation-default-target=param-property"
+            "-Xannotation-default-target=param-property",
+            "-Xwarning-level=IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE:disabled",
         )
     }
 }
@@ -110,6 +111,6 @@ tasks.test {
     useJUnitPlatform()
     jvmArgs(
         "-Xshare:off",
-        "-XX:+EnableDynamicAgentLoading"
+        "-XX:+EnableDynamicAgentLoading",
     )
 }
