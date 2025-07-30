@@ -13,10 +13,11 @@ class VeilarbarenaClientTest {
 	@BeforeEach
 	fun setup() {
 		server = MockWebServer()
-		client = VeilarbarenaClient(
-			baseUrl = server.url("").toString().removeSuffix("/"),
-			tokenProvider = { "VEILARBARENA_TOKEN" },
-		)
+		client =
+			VeilarbarenaClient(
+				baseUrl = server.url("").toString().removeSuffix("/"),
+				tokenProvider = { "VEILARBARENA_TOKEN" },
+			)
 	}
 
 	@Test
@@ -24,15 +25,15 @@ class VeilarbarenaClientTest {
 		server.enqueue(
 			MockResponse().setBody(
 				"""
-					{
-						"formidlingsgruppe": "ARBS",
-						"kvalifiseringsgruppe": "BFORM",
-						"rettighetsgruppe": "DAGP",
-						"iservFraDato": "2021-11-16T10:09:03",
-						"oppfolgingsenhet": "1234"
-					}
-				""".trimIndent()
-			)
+				{
+					"formidlingsgruppe": "ARBS",
+					"kvalifiseringsgruppe": "BFORM",
+					"rettighetsgruppe": "DAGP",
+					"iservFraDato": "2021-11-16T10:09:03",
+					"oppfolgingsenhet": "1234"
+				}
+				""".trimIndent(),
+			),
 		)
 
 		val oppfolgingsenhetId = client.hentBrukerOppfolgingsenhetId("987654")

@@ -6,13 +6,9 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class NorgClientConfig {
-
 	@Value("\${norg.url}")
 	lateinit var url: String
 
 	@Bean
-	fun norgClient(): NorgClient {
-		return NorgClient(url)
-	}
-
+	fun norgClient(): NorgClient = NorgClient(url)
 }

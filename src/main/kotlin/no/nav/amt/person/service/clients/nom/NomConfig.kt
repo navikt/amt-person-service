@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class NomConfig {
-
 	@Value("\${nom.url}")
 	lateinit var url: String
 
@@ -18,14 +17,14 @@ class NomConfig {
 	var mock: Boolean = false
 
 	@Bean
-	fun nomClient(machineToMachineTokenClient: MachineToMachineTokenClient) : NomClient {
+	fun nomClient(machineToMachineTokenClient: MachineToMachineTokenClient): NomClient {
 		if (mock) {
 			return NomClientMock()
 		}
 
 		return NomClientImpl(
 			url = url,
-			tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) }
+			tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
 		)
 	}
 }

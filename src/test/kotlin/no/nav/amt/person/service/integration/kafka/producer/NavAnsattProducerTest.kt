@@ -8,9 +8,9 @@ import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.co
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
-import no.nav.amt.person.service.nav_ansatt.NavAnsatt
-import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_ansatt.NavAnsattUpdater
+import no.nav.amt.person.service.navansatt.NavAnsatt
+import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navansatt.NavAnsattUpdater
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import org.junit.jupiter.api.Test
 
@@ -18,17 +18,17 @@ class NavAnsattProducerTest(
 	private val kafkaProducerService: KafkaProducerService,
 	private val kafkaTopicProperties: KafkaTopicProperties,
 	private val navAnsattService: NavAnsattService,
-	private val navAnsattUpdater: NavAnsattUpdater
+	private val navAnsattUpdater: NavAnsattUpdater,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `publiserNavAnsatt - skal publisere ansatt med riktig key og value`() {
 		val ansatt = TestData.lagNavAnsatt().toModel()
 
 		kafkaProducerService.publiserNavAnsatt(ansatt)
 
-		val record = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-			?.first { it.key() == ansatt.id.toString() }
+		val record =
+			consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+				?.first { it.key() == ansatt.id.toString() }
 
 		val forventetValue = ansattTilV1Json(ansatt)
 
@@ -45,8 +45,9 @@ class NavAnsattProducerTest(
 		val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no").toModel()
 		navAnsattService.upsert(oppdatertAnsatt)
 
-		val record = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-			?.first { it.key() == ansatt.id.toString() }
+		val record =
+			consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+				?.first { it.key() == ansatt.id.toString() }
 
 		val forventetValue = ansattTilV1Json(oppdatertAnsatt)
 
@@ -74,14 +75,15 @@ class NavAnsattProducerTest(
 		records.any { it.key() == uendretAnsatt.id.toString() } shouldBe false
 	}
 
-	private fun ansattTilV1Json(ansatt: NavAnsatt): String = toJsonString(
-		NavAnsattDtoV1(
-			id = ansatt.id,
-			navident = ansatt.navIdent,
-			navn = ansatt.navn,
-			telefon = ansatt.telefon,
-			epost = ansatt.epost,
-			navEnhetId = ansatt.navEnhetId,
+	private fun ansattTilV1Json(ansatt: NavAnsatt): String =
+		toJsonString(
+			NavAnsattDtoV1(
+				id = ansatt.id,
+				navident = ansatt.navIdent,
+				navn = ansatt.navn,
+				telefon = ansatt.telefon,
+				epost = ansatt.epost,
+				navEnhetId = ansatt.navEnhetId,
+			),
 		)
-	)
 }

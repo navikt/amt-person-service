@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class KrrProxyClientConfig {
-
 	@Value("\${digdir-krr-proxy.url}")
 	lateinit var url: String
 
@@ -15,8 +14,9 @@ class KrrProxyClientConfig {
 	lateinit var scope: String
 
 	@Bean
-	fun krrProxyClient(machineToMachineTokenClient: MachineToMachineTokenClient) = KrrProxyClient(
+	fun krrProxyClient(machineToMachineTokenClient: MachineToMachineTokenClient) =
+		KrrProxyClient(
 			baseUrl = url,
 			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-	)
+		)
 }

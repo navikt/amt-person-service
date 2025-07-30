@@ -15,7 +15,6 @@ class ActuatorTest(
 	@LocalManagementPort private val managementPort: Int,
 	private val restTemplate: TestRestTemplate,
 ) : IntegrationTestBase() {
-
 	@ParameterizedTest(name = "{0} probe skal returnere OK og status = UP")
 	@ValueSource(strings = ["liveness", "readiness"])
 	fun probe_skal_returnere_OK_og_status_UP(probeName: String) {
@@ -27,10 +26,10 @@ class ActuatorTest(
 
 		val response = restTemplate.getForEntity(uri, String::class.java)
 
-        assertSoftly(response) {
-            statusCode shouldBe HttpStatus.OK
-            body shouldBe "{\"status\":\"UP\"}"
-        }
+		assertSoftly(response) {
+			statusCode shouldBe HttpStatus.OK
+			body shouldBe "{\"status\":\"UP\"}"
+		}
 	}
 
 	@Test

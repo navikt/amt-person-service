@@ -10,7 +10,7 @@ import java.util.UUID
 @Component
 class PoststedJob(
 	val kodeverkClient: KodeverkClient,
-	val poststedRepository: PoststedRepository
+	val poststedRepository: PoststedRepository,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 

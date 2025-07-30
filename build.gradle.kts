@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
+    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
 }
 
 group = "no.nav.amt-person-service"
@@ -33,6 +34,7 @@ val avroVersion = "1.12.0"
 val jacksonVersion = "2.19.2"
 val mockOauth2ServerVersion = "2.2.1"
 val logstashEncoderVersion = "8.1"
+val ktLintVersion = "1.6.0"
 
 dependencyManagement {
     imports {
@@ -101,6 +103,14 @@ kotlin {
             "-Xwarning-level=IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE:disabled",
         )
     }
+}
+
+ktlint {
+    version = ktLintVersion
+}
+
+tasks.runKtlintCheckOverTestSourceSet {
+    dependsOn("generateTestAvroJava")
 }
 
 tasks.jar {

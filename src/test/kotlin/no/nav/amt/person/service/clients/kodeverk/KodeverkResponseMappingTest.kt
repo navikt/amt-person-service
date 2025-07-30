@@ -7,10 +7,11 @@ import org.junit.jupiter.api.Test
 class KodeverkResponseMappingTest {
 	@Test
 	fun `toPostnummerListe - reell respons fra kodeverk - kodeverkresponse mappes riktig`() {
-		val kodeverkrespons = objectMapper.readValue(
-			KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
-			GetKodeverkKoderBetydningerResponse::class.java
-		)
+		val kodeverkrespons =
+			objectMapper.readValue(
+				KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
+				GetKodeverkKoderBetydningerResponse::class.java,
+			)
 
 		val postnummerListe = kodeverkrespons.toPostnummerListe()
 

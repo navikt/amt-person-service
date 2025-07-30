@@ -20,15 +20,15 @@ class ArrangorAnsattProducerTest(
 	private val kafkaTopicProperties: KafkaTopicProperties,
 	private val personService: PersonService,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `publiserArrangorAnsatt - skal publisere ansatt med riktig key og value`() {
 		val ansatt = TestData.lagPerson().toModel()
 
 		kafkaProducerService.publiserArrangorAnsatt(ansatt)
 
-		val record = consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
-			?.first { it.key() == ansatt.id.toString() }
+		val record =
+			consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
+				?.first { it.key() == ansatt.id.toString() }
 
 		val forventetValue = ansattTilV1Json(ansatt)
 
@@ -46,8 +46,9 @@ class ArrangorAnsattProducerTest(
 		val oppdatertAnsatt = ansatt.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn").toModel()
 		personService.upsert(oppdatertAnsatt)
 
-		val record = consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
-			?.first { it.key() == ansatt.id.toString() }
+		val record =
+			consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
+				?.first { it.key() == ansatt.id.toString() }
 
 		val forventetValue = ansattTilV1Json(oppdatertAnsatt)
 
@@ -84,13 +85,14 @@ class ArrangorAnsattProducerTest(
 			?.firstOrNull { it.key() == person.id.toString() } shouldNotBe null
 	}
 
-	private fun ansattTilV1Json(ansatt: Person): String = toJsonString(
-		ArrangorAnsattDtoV1(
-			id = ansatt.id,
-			personident = ansatt.personident,
-			fornavn = ansatt.fornavn,
-			mellomnavn = ansatt.mellomnavn,
-			etternavn = ansatt.etternavn
+	private fun ansattTilV1Json(ansatt: Person): String =
+		toJsonString(
+			ArrangorAnsattDtoV1(
+				id = ansatt.id,
+				personident = ansatt.personident,
+				fornavn = ansatt.fornavn,
+				mellomnavn = ansatt.mellomnavn,
+				etternavn = ansatt.etternavn,
+			),
 		)
-	)
 }

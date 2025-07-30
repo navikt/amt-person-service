@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class VeilarbarenaConfig {
-
 	@Value("\${veilarbarena.url}")
 	lateinit var url: String
 
@@ -15,10 +14,9 @@ class VeilarbarenaConfig {
 	lateinit var scope: String
 
 	@Bean
-	fun veilarbarenaClient(machineToMachineTokenClient: MachineToMachineTokenClient): VeilarbarenaClient {
-		return VeilarbarenaClient(
+	fun veilarbarenaClient(machineToMachineTokenClient: MachineToMachineTokenClient): VeilarbarenaClient =
+		VeilarbarenaClient(
 			baseUrl = url,
 			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
 		)
-	}
 }

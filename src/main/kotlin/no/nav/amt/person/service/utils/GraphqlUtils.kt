@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.utils
 
 object GraphqlUtils {
-
 	interface GraphqlError<ErrorExtension> {
 		val message: String?
 		val locations: List<GraphqlErrorLocation>?
@@ -11,7 +10,7 @@ object GraphqlUtils {
 
 	data class GraphqlQuery(
 		val query: String,
-		val variables: Any
+		val variables: Any,
 	)
 
 	interface GraphqlResponse<Data, ErrorExtension> {

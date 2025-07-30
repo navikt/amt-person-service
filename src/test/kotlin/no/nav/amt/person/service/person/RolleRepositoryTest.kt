@@ -9,9 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest(classes = [RolleRepository::class])
 class RolleRepositoryTest(
-	private val rolleRepository: RolleRepository
+	private val rolleRepository: RolleRepository,
 ) : RepositoryTestBase() {
-
 	@Test
 	fun `insert - ny rolle - inserter rolle`() {
 		val person = TestData.lagPerson()
@@ -34,4 +33,3 @@ class RolleRepositoryTest(
 		rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) shouldBe false
 	}
 }
-

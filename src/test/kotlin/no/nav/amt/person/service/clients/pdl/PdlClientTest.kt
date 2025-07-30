@@ -26,8 +26,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.util.UUID
 
 class PdlClientTest(
-	private val poststedRepository: PoststedRepository
-): IntegrationTestBase() {
+	private val poststedRepository: PoststedRepository,
+) : IntegrationTestBase() {
 	private lateinit var serverUrl: String
 	private lateinit var server: MockWebServer
 
@@ -42,8 +42,9 @@ class PdlClientTest(
 				Postnummer("5341", "STRAUME"),
 				Postnummer("5365", "TURØY"),
 				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND")
-			), UUID.randomUUID()
+				Postnummer("9609", "NORDRE SEILAND"),
+			),
+			UUID.randomUUID(),
 		)
 	}
 
@@ -55,11 +56,12 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
-		val connector = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val connector =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(MockResponse().setBody(gyldigRespons))
 
@@ -69,13 +71,31 @@ class PdlClientTest(
 		pdlPerson.mellomnavn shouldBe "Test"
 		pdlPerson.etternavn shouldBe "Testersen"
 		pdlPerson.telefonnummer shouldBe "+4712345678"
-		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.tilleggsnavn shouldBe "Storgården"
-		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.postnummer shouldBe "0484"
-		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.poststed shouldBe "OSLO"
+		pdlPerson.adresse
+			?.bostedsadresse
+			?.matrikkeladresse
+			?.tilleggsnavn shouldBe "Storgården"
+		pdlPerson.adresse
+			?.bostedsadresse
+			?.matrikkeladresse
+			?.postnummer shouldBe "0484"
+		pdlPerson.adresse
+			?.bostedsadresse
+			?.matrikkeladresse
+			?.poststed shouldBe "OSLO"
 		pdlPerson.adresse?.oppholdsadresse shouldBe null
-		pdlPerson.adresse?.kontaktadresse?.postboksadresse?.postboks shouldBe "Postboks 1234"
-		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.postnummer shouldBe "0484"
-		pdlPerson.adresse?.bostedsadresse?.matrikkeladresse?.poststed shouldBe "OSLO"
+		pdlPerson.adresse
+			?.kontaktadresse
+			?.postboksadresse
+			?.postboks shouldBe "Postboks 1234"
+		pdlPerson.adresse
+			?.bostedsadresse
+			?.matrikkeladresse
+			?.postnummer shouldBe "0484"
+		pdlPerson.adresse
+			?.bostedsadresse
+			?.matrikkeladresse
+			?.poststed shouldBe "OSLO"
 
 		val ident = pdlPerson.identer.first()
 		assertSoftly(ident) {
@@ -93,10 +113,10 @@ class PdlClientTest(
 
 		val expectedJson =
 			"""
-				{
-					"query": "${PdlQueries.HentPerson.query.replace("\n", "\\n").replace("\t", "\\t")}",
-					"variables": { "ident": "FNR" }
-				}
+			{
+				"query": "${PdlQueries.HentPerson.query.replace("\n", "\\n").replace("\t", "\\t")}",
+				"variables": { "ident": "FNR" }
+			}
 			""".trimIndent()
 
 		val body = request.body.readUtf8()
@@ -105,26 +125,28 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPerson - data mangler - skal kaste exception`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(
 			MockResponse().setBody(
 				"""
-					{
-						"errors": [{"message": "Noe gikk galt"}],
-						"data": null
-					}
-				""".trimIndent()
-			)
+				{
+					"errors": [{"message": "Noe gikk galt"}],
+					"data": null
+				}
+				""".trimIndent(),
+			),
 		)
 
-		val exception = assertThrows<RuntimeException> {
-			client.hentPerson("FNR")
-		}
+		val exception =
+			assertThrows<RuntimeException> {
+				client.hentPerson("FNR")
+			}
 
 		exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
 
@@ -136,11 +158,12 @@ class PdlClientTest(
 
 	@Test
 	fun `hentIdenter skal lage riktig request og parse response`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
 		val personident2 = Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT)
@@ -148,27 +171,27 @@ class PdlClientTest(
 		server.enqueue(
 			MockResponse().setBody(
 				"""
-					{
-						"errors": null,
-						"data": {
-							"hentIdenter": {
-							  "identer": [
-								{
-								  "ident": "${personident1.ident}",
-								  "historisk": ${personident1.historisk},
-								  "gruppe": "${personident1.type.name}"
-								},
-								{
-								  "ident": "${personident2.ident}",
-								  "historisk": ${personident2.historisk},
-								  "gruppe": "${personident2.type.name}"
-								}
-							  ]
+				{
+					"errors": null,
+					"data": {
+						"hentIdenter": {
+						  "identer": [
+							{
+							  "ident": "${personident1.ident}",
+							  "historisk": ${personident1.historisk},
+							  "gruppe": "${personident1.type.name}"
+							},
+							{
+							  "ident": "${personident2.ident}",
+							  "historisk": ${personident2.historisk},
+							  "gruppe": "${personident2.type.name}"
 							}
-						  }
-					}
-				""".trimIndent()
-			)
+						  ]
+						}
+					  }
+				}
+				""".trimIndent(),
+			),
 		)
 
 		val identer = client.hentIdenter(personident2.ident)
@@ -184,10 +207,10 @@ class PdlClientTest(
 
 		val expectedJson =
 			"""
-				{
-					"query": "${PdlQueries.HentIdenter.query.replace("\n", "\\n").replace("\t", "\\t")}",
-					"variables": { "ident": "${personident2.ident}" }
-				}
+			{
+				"query": "${PdlQueries.HentIdenter.query.replace("\n", "\\n").replace("\t", "\\t")}",
+				"variables": { "ident": "${personident2.ident}" }
+			}
 			""".trimIndent()
 
 		val body = request.body.readUtf8()
@@ -196,17 +219,19 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPerson - Detaljert respons - skal kaste exception med noe detaljert informasjon`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(MockResponse().setBody(minimalFeilRespons))
 
-		val exception = assertThrows<RuntimeException> {
-			client.hentPerson("FNR")
-		}
+		val exception =
+			assertThrows<RuntimeException> {
+				client.hentPerson("FNR")
+			}
 
 		exception.message shouldBe ERROR_PREFIX + NULL_ERROR +
 			"- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
@@ -214,30 +239,35 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPerson - Flere feil i respons - skal kaste exception med noe detaljert informasjon`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(MockResponse().setBody(flereFeilRespons))
 
-		val exception = assertThrows<RuntimeException> {
-			client.hentPerson("FNR")
-		}
+		val exception =
+			assertThrows<RuntimeException> {
+				client.hentPerson("FNR")
+			}
 
 		exception.message shouldBe ERROR_PREFIX + NULL_ERROR +
-			"- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n" +
-			"- Test (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
+			"- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, " +
+			"cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n" +
+			"- Test (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, " +
+			"policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
 	}
 
 	@Test
 	fun `hentTelefon - person har telefon - returnerer telefon`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(MockResponse().setBody(telefonResponse))
 
@@ -248,11 +278,12 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPersonFodselsar - person har fodselsar - returnerer fodselsar`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(MockResponse().setBody(fodselsarRespons))
 
@@ -263,26 +294,28 @@ class PdlClientTest(
 
 	@Test
 	fun `hentPersonFodselsar - data mangler - skal kaste exception`() {
-		val client = PdlClient(
-			serverUrl,
-			{ "TOKEN" },
-			poststedRepository = poststedRepository
-		)
+		val client =
+			PdlClient(
+				serverUrl,
+				{ "TOKEN" },
+				poststedRepository = poststedRepository,
+			)
 
 		server.enqueue(
 			MockResponse().setBody(
 				"""
-					{
-						"errors": [{"message": "Noe gikk galt"}],
-						"data": null
-					}
-				""".trimIndent()
-			)
+				{
+					"errors": [{"message": "Noe gikk galt"}],
+					"data": null
+				}
+				""".trimIndent(),
+			),
 		)
 
-		val exception = assertThrows<RuntimeException> {
-			client.hentPersonFodselsar("FNR")
-		}
+		val exception =
+			assertThrows<RuntimeException> {
+				client.hentPersonFodselsar("FNR")
+			}
 
 		exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
 

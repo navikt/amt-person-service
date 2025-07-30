@@ -10,24 +10,27 @@ import java.util.UUID
 @Transactional
 @Component
 class PoststedRepository(
-	private val template: NamedParameterJdbcTemplate
+	private val template: NamedParameterJdbcTemplate,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun getPoststed(postnummer: String): String? {
-		return template.query(
-			"""
+	fun getPoststed(postnummer: String): String? =
+		template
+			.query(
+				"""
 				SELECT poststed
 				FROM postnummer
 				where postnummer = :postnummer;
             """,
-			mapOf("postnummer" to postnummer)
-		) { resultSet, _ ->
-			resultSet.getString("poststed")
-		}.firstOrNull()
-	}
+				mapOf("postnummer" to postnummer),
+			) { resultSet, _ ->
+				resultSet.getString("poststed")
+			}.firstOrNull()
 
-	fun oppdaterPoststed(oppdatertePostnummer: List<Postnummer>, sporingsId: UUID) {
+	fun oppdaterPoststed(
+		oppdatertePostnummer: List<Postnummer>,
+		sporingsId: UUID,
+	) {
 		val postnummerFraDb = getAllePoststeder()
 		if (postnummerFraDb.size == oppdatertePostnummer.size && postnummerFraDb.toHashSet() == oppdatertePostnummer.toHashSet()) {
 			log.info("Ingen endringer for $sporingsId, avslutter...")
@@ -47,7 +50,7 @@ class PoststedRepository(
 					DELETE FROM postnummer
 					where postnummer = :postnummer;
 					""",
-				mapOf("postnummer" to it)
+				mapOf("postnummer" to it),
 			)
 		}
 		oppdateresIDb.forEach {
@@ -59,14 +62,14 @@ class PoststedRepository(
 					""",
 				mapOf(
 					"postnummer" to it.key,
-					"poststed" to it.value.poststed
-				)
+					"poststed" to it.value.poststed,
+				),
 			)
 		}
 	}
 
-	fun getAllePoststeder(): List<Postnummer> {
-		return template.query(
+	fun getAllePoststeder(): List<Postnummer> =
+		template.query(
 			"""
 				SELECT postnummer,
 				poststed
@@ -75,7 +78,6 @@ class PoststedRepository(
 		) { resultSet, _ ->
 			resultSet.toPostnummer()
 		}
-	}
 
 	fun getPoststeder(postnummer: List<String>): List<Postnummer> {
 		if (postnummer.isEmpty()) {
@@ -87,7 +89,7 @@ class PoststedRepository(
 				poststed
 				FROM postnummer WHERE postnummer in (:postnummer);
 				""",
-			mapOf("postnummer" to postnummer)
+			mapOf("postnummer" to postnummer),
 		) { resultSet, _ ->
 			resultSet.toPostnummer()
 		}
@@ -97,5 +99,5 @@ class PoststedRepository(
 private fun ResultSet.toPostnummer(): Postnummer =
 	Postnummer(
 		postnummer = getString("postnummer"),
-		poststed = getString("poststed")
+		poststed = getString("poststed"),
 	)

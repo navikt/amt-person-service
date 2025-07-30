@@ -20,16 +20,19 @@ class VeilarbarenaClient(
 	companion object {
 		private val mediaTypeJson = "application/json".toMediaType()
 	}
+
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun hentBrukerOppfolgingsenhetId(fnr: String): String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
-		val request = Request.Builder()
-			.url("$baseUrl/veilarbarena/api/v2/arena/hent-status")
-			.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
-			.addHeader("Nav-Consumer-Id", consumerId)
-			.post(personRequestJson.toRequestBody(mediaTypeJson))
-			.build()
+		val request =
+			Request
+				.Builder()
+				.url("$baseUrl/veilarbarena/api/v2/arena/hent-status")
+				.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
+				.addHeader("Nav-Consumer-Id", consumerId)
+				.post(personRequestJson.toRequestBody(mediaTypeJson))
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
 			if (response.code == 404) {
@@ -49,10 +52,10 @@ class VeilarbarenaClient(
 	}
 
 	private data class BrukerArenaStatusDto(
-		var oppfolgingsenhet: String?
+		var oppfolgingsenhet: String?,
 	)
 
 	private data class PersonRequest(
-		val fnr: String
+		val fnr: String,
 	)
 }

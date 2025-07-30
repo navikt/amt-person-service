@@ -7,8 +7,8 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -16,10 +16,8 @@ import org.junit.jupiter.api.Test
 class TildeltVeilederConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
 	private val navBrukerService: NavBrukerService,
-	private val navAnsattService: NavAnsattService
-
+	private val navAnsattService: NavAnsattService,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `ingest - bruker finnes, ny veileder - oppretter og oppdaterer nav veileder`() {
 		val navBruker = TestData.lagNavBruker()

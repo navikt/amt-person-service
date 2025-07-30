@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import org.slf4j.LoggerFactory
@@ -12,7 +12,6 @@ class InnsatsgruppeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
@@ -28,13 +27,13 @@ class InnsatsgruppeConsumer(
 
 		navBrukerService.oppdaterInnsatsgruppe(
 			brukerId,
-			siste14aVedtak.innsatsgruppe
+			siste14aVedtak.innsatsgruppe,
 		)
 		log.info("Oppdatert innsatsgruppe for bruker $brukerId")
 	}
 
 	data class Siste14aVedtak(
 		val aktorId: String,
-		val innsatsgruppe: InnsatsgruppeV1
+		val innsatsgruppe: InnsatsgruppeV1,
 	)
 }

@@ -1,18 +1,18 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-enum class  OpplysningsType {
+enum class OpplysningsType {
 	NAVN_V1,
 	ADRESSEBESKYTTELSE_V1,
 	KONTAKTADRESSE_V1,
 	BOSTEDSADRESSE_V1,
-	OPPHOLDSADRESSE_V1
+	OPPHOLDSADRESSE_V1,
 }
 
 @Service
@@ -20,7 +20,6 @@ class LeesahConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(personhendelse: Personhendelse) {
@@ -28,13 +27,17 @@ class LeesahConsumer(
 			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter)
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
 				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 			OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
 		}
 	}
 
-	private fun handterAdressebeskyttelse(personidenter: List<String>, adressebeskyttelse: Adressebeskyttelse?) {
+	private fun handterAdressebeskyttelse(
+		personidenter: List<String>,
+		adressebeskyttelse: Adressebeskyttelse?,
+	) {
 		if (adressebeskyttelse == null) {
 			log.warn("Mottok melding med opplysningstype Adressebeskyttelse fra pdl-leesah men adressebeskyttelse manglet")
 			return

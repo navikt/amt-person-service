@@ -1,9 +1,9 @@
 package no.nav.amt.person.service.data
 
-import no.nav.amt.person.service.nav_ansatt.NavAnsattDbo
-import no.nav.amt.person.service.nav_ansatt.navGrunerlokka
-import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.nav_enhet.NavEnhetDbo
+import no.nav.amt.person.service.navansatt.NavAnsattDbo
+import no.nav.amt.person.service.navansatt.navGrunerlokka
+import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Rolle
@@ -23,7 +23,8 @@ class TestDataRepository(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun insertPerson(person: PersonDbo) {
-		val sql = """
+		val sql =
+			"""
 			insert into person(
 				id,
 				personident,
@@ -41,10 +42,11 @@ class TestDataRepository(
 				:createdAt,
 				:modifiedAt
 			)
-		""".trimIndent()
+			""".trimIndent()
 
 		template.update(
-			sql, sqlParameters(
+			sql,
+			sqlParameters(
 				"id" to person.id,
 				"personident" to person.personident,
 				"fornavn" to person.fornavn,
@@ -52,16 +54,17 @@ class TestDataRepository(
 				"etternavn" to person.etternavn,
 				"createdAt" to person.createdAt,
 				"modifiedAt" to person.modifiedAt,
-			)
+			),
 		)
 
 		insertPersonidenter(
-			listOf(TestData.lagPersonident(person.personident, person.id))
+			listOf(TestData.lagPersonident(person.personident, person.id)),
 		)
 	}
 
 	fun insertPersonidenter(identer: List<PersonidentDbo>) {
-		val sql = """
+		val sql =
+			"""
 			insert into personident(
 				ident,
 				person_id,
@@ -73,50 +76,55 @@ class TestDataRepository(
 				:type,
 				:historisk
 			)
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = identer.map {
-			sqlParameters(
-				"ident" to it.ident,
-				"personId" to it.personId,
-				"historisk" to it.historisk,
-				"type" to it.type.name,
-			)
-		}
+		val parameters =
+			identer.map {
+				sqlParameters(
+					"ident" to it.ident,
+					"personId" to it.personId,
+					"historisk" to it.historisk,
+					"type" to it.type.name,
+				)
+			}
 		template.batchUpdate(sql, parameters.toTypedArray())
 	}
 
-	final fun insertNavGrunerlokka() = insertNavEnhet(
-		NavEnhetDbo(
-			navGrunerlokka.id,
-			navGrunerlokka.enhetId,
-			navGrunerlokka.navn,
-			LocalDateTime.now(),
-			LocalDateTime.now(),
+	final fun insertNavGrunerlokka() =
+		insertNavEnhet(
+			NavEnhetDbo(
+				navGrunerlokka.id,
+				navGrunerlokka.enhetId,
+				navGrunerlokka.navn,
+				LocalDateTime.now(),
+				LocalDateTime.now(),
+			),
 		)
-	)
 
 	fun insertNavEnhet(enhet: NavEnhetDbo) {
-		val sql = """
+		val sql =
+			"""
 			INSERT INTO nav_enhet(id, nav_enhet_id, navn, created_at, modified_at)
 			VALUES (:id, :enhetId, :navn, :createdAt, :modifiedAt)
 			ON CONFLICT (nav_enhet_id) DO update set id = :id, nav_enhet_id = :enhetId, navn = :navn, created_at = :createdAt, modified_at = :modifiedAt
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = sqlParameters(
-			"id" to enhet.id,
-			"enhetId" to enhet.enhetId,
-			"navn" to enhet.navn,
-			"createdAt" to enhet.createdAt,
-			"modifiedAt" to enhet.modifiedAt,
-		)
+		val parameters =
+			sqlParameters(
+				"id" to enhet.id,
+				"enhetId" to enhet.enhetId,
+				"navn" to enhet.navn,
+				"createdAt" to enhet.createdAt,
+				"modifiedAt" to enhet.modifiedAt,
+			)
 
 		template.update(sql, parameters)
 	}
 
 	fun insertNavAnsatt(ansatt: NavAnsattDbo) {
 		insertNavGrunerlokka()
-		val sql = """
+		val sql =
+			"""
 			insert into nav_ansatt(
 				id,
 				nav_ident,
@@ -136,33 +144,39 @@ class TestDataRepository(
 				:createdAt,
 				:modifiedAt
 			)
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = sqlParameters(
-			"id" to ansatt.id,
-			"navIdent" to ansatt.navIdent,
-			"navn" to ansatt.navn,
-			"telefon" to ansatt.telefon,
-			"epost" to ansatt.epost,
-			"nav_enhet_id" to ansatt.navEnhetId,
-			"createdAt" to ansatt.createdAt,
-			"modifiedAt" to ansatt.modifiedAt,
-		)
+		val parameters =
+			sqlParameters(
+				"id" to ansatt.id,
+				"navIdent" to ansatt.navIdent,
+				"navn" to ansatt.navn,
+				"telefon" to ansatt.telefon,
+				"epost" to ansatt.epost,
+				"nav_enhet_id" to ansatt.navEnhetId,
+				"createdAt" to ansatt.createdAt,
+				"modifiedAt" to ansatt.modifiedAt,
+			)
 
 		template.update(sql, parameters)
 	}
 
-	fun insertRolle(personId: UUID, rolle: Rolle) {
-		val sql = """
+	fun insertRolle(
+		personId: UUID,
+		rolle: Rolle,
+	) {
+		val sql =
+			"""
 			insert into person_rolle(id, person_id, type)
 			values(:id, :personId, :rolle)
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = sqlParameters(
-			"id" to UUID.randomUUID(),
-			"personId" to personId,
-			"rolle" to rolle.name,
-		)
+		val parameters =
+			sqlParameters(
+				"id" to UUID.randomUUID(),
+				"personId" to personId,
+				"rolle" to rolle.name,
+			)
 
 		template.update(sql, parameters)
 	}
@@ -192,7 +206,8 @@ class TestDataRepository(
 
 		insertRolle(bruker.person.id, Rolle.NAV_BRUKER)
 
-		val sql = """
+		val sql =
+			"""
 			insert into nav_bruker(
 				id,
 				person_id,
@@ -224,24 +239,25 @@ class TestDataRepository(
 				:createdAt,
 				:modifiedAt
 			)
-		""".trimIndent()
+			""".trimIndent()
 
-		val parameters = sqlParameters(
-			"id" to bruker.id,
-			"personId" to bruker.person.id,
-			"navVeilederId" to bruker.navVeileder?.id,
-			"navEnhetId" to bruker.navEnhet?.id,
-			"telefon" to bruker.telefon,
-			"epost" to bruker.epost,
-			"erSkjermet" to bruker.erSkjermet,
-			"sisteKrrSync" to bruker.sisteKrrSync,
-			"adresse" to toPGObject(bruker.adresse),
-			"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-			"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
-			"innsatsgruppe" to bruker.innsatsgruppe?.name,
-			"createdAt" to bruker.createdAt,
-			"modifiedAt" to bruker.modifiedAt
-		)
+		val parameters =
+			sqlParameters(
+				"id" to bruker.id,
+				"personId" to bruker.person.id,
+				"navVeilederId" to bruker.navVeileder?.id,
+				"navEnhetId" to bruker.navEnhet?.id,
+				"telefon" to bruker.telefon,
+				"epost" to bruker.epost,
+				"erSkjermet" to bruker.erSkjermet,
+				"sisteKrrSync" to bruker.sisteKrrSync,
+				"adresse" to toPGObject(bruker.adresse),
+				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
+				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
+				"innsatsgruppe" to bruker.innsatsgruppe?.name,
+				"createdAt" to bruker.createdAt,
+				"modifiedAt" to bruker.modifiedAt,
+			)
 
 		template.update(sql, parameters)
 	}

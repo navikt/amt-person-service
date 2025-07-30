@@ -40,7 +40,7 @@ class KafkaConfiguration(
 	skjermetPersonConsumer: SkjermetPersonConsumer,
 	leesahConsumer: LeesahConsumer,
 	oppfolgingsperiodeConsumer: OppfolgingsperiodeConsumer,
-	innsatsgruppeConsumer: InnsatsgruppeConsumer
+	innsatsgruppeConsumer: InnsatsgruppeConsumer,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private val consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -49,89 +49,100 @@ class KafkaConfiguration(
 	private val consumerRecordProcessor: KafkaConsumerRecordProcessor
 
 	init {
-		val topicConfigs = listOf(
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.endringPaaBrukerTopic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer { endringPaaBrukerConsumer.ingest(it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.sisteTilordnetVeilederTopic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer { tildeltVeilederConsumer.ingest(it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.oppfolgingsperiodeTopic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer { oppfolgingsperiodeConsumer.ingest(it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.innsatsgruppeTopic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer { innsatsgruppeConsumer.ingest(it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, Aktor>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.aktorV2Topic,
-					Deserializers.stringDeserializer(),
-					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer { aktorV2Consumer.ingest(it.key(), it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, Personhendelse>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.leesahTopic,
-					Deserializers.stringDeserializer(),
-					SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
-					Consumer { leesahConsumer.ingest(it.value()) }
-				),
-			KafkaConsumerClientBuilder.TopicConfig<String, String>()
-				.withLogging()
-				.withStoreOnFailure(consumerRepository)
-				.withConsumerConfig(
-					kafkaTopicProperties.skjermedePersonerTopic,
-					Deserializers.stringDeserializer(),
-					Deserializers.stringDeserializer(),
-					Consumer { skjermetPersonConsumer.ingest(it.key(), it.value()) }
-				),
-		)
+		val topicConfigs =
+			listOf(
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.endringPaaBrukerTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { endringPaaBrukerConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.sisteTilordnetVeilederTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { tildeltVeilederConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.oppfolgingsperiodeTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { oppfolgingsperiodeConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.innsatsgruppeTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { innsatsgruppeConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, Aktor>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.aktorV2Topic,
+						Deserializers.stringDeserializer(),
+						SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
+						Consumer { aktorV2Consumer.ingest(it.key(), it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, Personhendelse>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.leesahTopic,
+						Deserializers.stringDeserializer(),
+						SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
+						Consumer { leesahConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.skjermedePersonerTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { skjermetPersonConsumer.ingest(it.key(), it.value()) },
+					),
+			)
 
-		consumerRecordProcessor = KafkaConsumerRecordProcessorBuilder
-			.builder()
-			.withLockProvider(JdbcTemplateLockProvider(jdbcTemplate))
-			.withKafkaConsumerRepository(consumerRepository)
-			.withConsumerConfigs(topicConfigs.map { it.consumerConfig })
-			.build()
+		consumerRecordProcessor =
+			KafkaConsumerRecordProcessorBuilder
+				.builder()
+				.withLockProvider(JdbcTemplateLockProvider(jdbcTemplate))
+				.withKafkaConsumerRepository(consumerRepository)
+				.withConsumerConfigs(topicConfigs.map { it.consumerConfig })
+				.build()
 
-		client = KafkaConsumerClientBuilder.builder()
-			.withProperties(kafkaProperties.consumer())
-			.withTopicConfigs(topicConfigs)
-			.build()
+		client =
+			KafkaConsumerClientBuilder
+				.builder()
+				.withProperties(kafkaProperties.consumer())
+				.withTopicConfigs(topicConfigs)
+				.build()
 	}
+
 	@EventListener
 	fun onApplicationEvent(_event: ContextRefreshedEvent?) {
 		log.info("Starting kafka consumer and stored record processor...")
 		client.start()
 		consumerRecordProcessor.start()
 	}
-
 }

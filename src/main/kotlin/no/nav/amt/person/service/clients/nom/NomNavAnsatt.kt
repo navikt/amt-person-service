@@ -9,9 +9,11 @@ data class NomNavAnsatt(
 	val epost: String?,
 	private val orgTilknytning: List<NomQueries.HentRessurser.OrgTilknytning>,
 ) {
-	val navEnhetNummer: String? get() =
-		orgTilknytning
-			.filter { it.erDagligOppfolging && it.gyldigFom <= LocalDate.now() }
-			.maxByOrNull { it.gyldigFom }
-			?.orgEnhet?.remedyEnhetId
+	val navEnhetNummer: String?
+		get() =
+			orgTilknytning
+				.filter { it.erDagligOppfolging && it.gyldigFom <= LocalDate.now() }
+				.maxByOrNull { it.gyldigFom }
+				?.orgEnhet
+				?.remedyEnhetId
 }

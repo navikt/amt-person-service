@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.api.dto
 
-import no.nav.amt.person.service.nav_ansatt.NavAnsatt
-import java.util.*
+import no.nav.amt.person.service.navansatt.NavAnsatt
+import java.util.UUID
 
 data class NavAnsattDto(
 	val id: UUID,

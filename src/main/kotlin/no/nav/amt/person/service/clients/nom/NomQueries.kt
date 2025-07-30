@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.amt.person.service.utils.GraphqlUtils
 import java.time.LocalDate
 
-
 object NomQueries {
-
 	object HentRessurser {
-		val query = """
+		val query =
+			"""
 			query(${"$"}identer: [String!]!) {
 				ressurser(where: { navidenter: ${"$"}identer }){
 					code
@@ -34,7 +33,7 @@ object NomQueries {
 					}
 				}
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Variables(
 			val identer: List<String>,
@@ -42,24 +41,24 @@ object NomQueries {
 
 		data class Response(
 			override val errors: List<NomError>?,
-			override val data: ResponseData?
+			override val data: ResponseData?,
 		) : GraphqlUtils.GraphqlResponse<ResponseData, JsonNode>
 
 		data class ResponseData(
 			val ressurser: List<RessursResult>,
 		)
 
-		data class NomError (
+		data class NomError(
 			override val message: String? = null,
 			override val locations: List<GraphqlUtils.GraphqlErrorLocation>? = null,
 			override val path: List<String>? = null,
 			override val extensions: JsonNode? = null,
-		): GraphqlUtils.GraphqlError<JsonNode>
+		) : GraphqlUtils.GraphqlError<JsonNode>
 
 		enum class ResultCode {
 			OK,
 			NOT_FOUND,
-			ERROR
+			ERROR,
 		}
 
 		data class RessursResult(
@@ -86,13 +85,14 @@ object NomQueries {
 			val orgEnhet: OrgEnhet,
 			val erDagligOppfolging: Boolean,
 		) {
-			data class OrgEnhet(val remedyEnhetId: String?)
+			data class OrgEnhet(
+				val remedyEnhetId: String?,
+			)
 		}
 
 		data class Telefon(
 			val nummer: String,
-			val type: String // Enten NAV_TJENESTE_TELEFON eller PRIVAT_TELEFON
+			val type: String, // Enten NAV_TJENESTE_TELEFON eller PRIVAT_TELEFON
 		)
 	}
-
 }

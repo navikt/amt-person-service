@@ -17,7 +17,6 @@ import org.springframework.retry.annotation.EnableRetry
 @EnableRetry
 @EnableJwtTokenValidation
 class ApplicationConfig {
-
 	@Bean
 	fun logFilterRegistrationBean(): FilterRegistrationBean<LogRequestFilter> {
 		val registration = FilterRegistrationBean<LogRequestFilter>()
@@ -32,25 +31,24 @@ class ApplicationConfig {
 		@Value("\${nais.env.azureAppClientId}") azureAdClientId: String,
 		@Value("\${nais.env.azureOpenIdConfigTokenEndpoint}") azureTokenEndpoint: String,
 		@Value("\${nais.env.azureAppJWK}") azureAdJWK: String,
-	): MachineToMachineTokenClient {
-		return AzureAdTokenClientBuilder.builder()
+	): MachineToMachineTokenClient =
+		AzureAdTokenClientBuilder
+			.builder()
 			.withClientId(azureAdClientId)
 			.withTokenEndpointUrl(azureTokenEndpoint)
 			.withPrivateJwk(azureAdJWK)
 			.buildMachineToMachineTokenClient()
-	}
 
 	@Bean
 	fun poaoTilgangClient(
 		@Value("\${poao-tilgang.url}") poaoTilgangUrl: String,
 		@Value("\${poao-tilgang.scope}") poaoTilgangScope: String,
-		machineToMachineTokenClient: MachineToMachineTokenClient
-	): PoaoTilgangClient {
-		return PoaoTilgangCachedClient(
+		machineToMachineTokenClient: MachineToMachineTokenClient,
+	): PoaoTilgangClient =
+		PoaoTilgangCachedClient(
 			PoaoTilgangHttpClient(
 				baseUrl = poaoTilgangUrl,
-				tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(poaoTilgangScope) }
-			)
+				tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(poaoTilgangScope) },
+			),
 		)
-	}
 }
