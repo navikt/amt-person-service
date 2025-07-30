@@ -1,6 +1,8 @@
 package no.nav.amt.person.service.kafka.consumer
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.data.TestData.lagNavBruker
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.NavBrukerService
