@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class PdlClientConfig {
-
 	@Value("\${pdl.url}")
 	lateinit var url: String
 
@@ -16,12 +15,13 @@ class PdlClientConfig {
 	lateinit var scope: String
 
 	@Bean
-	fun pdlClient(machineToMachineTokenClient: MachineToMachineTokenClient, poststedRepository: PoststedRepository): PdlClient {
-		return PdlClient(
+	fun pdlClient(
+		machineToMachineTokenClient: MachineToMachineTokenClient,
+		poststedRepository: PoststedRepository,
+	): PdlClient =
+		PdlClient(
 			baseUrl = url,
 			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-			poststedRepository = poststedRepository
+			poststedRepository = poststedRepository,
 		)
-	}
-
 }

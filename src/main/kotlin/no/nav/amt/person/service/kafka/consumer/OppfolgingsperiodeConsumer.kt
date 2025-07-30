@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
-import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
+import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
@@ -15,7 +15,6 @@ class OppfolgingsperiodeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
@@ -34,8 +33,8 @@ class OppfolgingsperiodeConsumer(
 			Oppfolgingsperiode(
 				id = sisteOppfolgingsperiode.uuid,
 				startdato = sisteOppfolgingsperiode.startDato.toSystemZoneLocalDateTime(),
-				sluttdato = sisteOppfolgingsperiode.sluttDato?.toSystemZoneLocalDateTime()
-			)
+				sluttdato = sisteOppfolgingsperiode.sluttDato?.toSystemZoneLocalDateTime(),
+			),
 		)
 		log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
 	}

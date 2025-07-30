@@ -5,12 +5,12 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 
 class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
-
 	fun mockHentKontaktinformasjon(kontaktinformasjon: MockKontaktinformasjon) {
-		val response = MockResponse()
+		val response =
+			MockResponse()
 				.setResponseCode(200)
 				.setBody(
-					toJsonString(MockKRRREsponse(mapOf(kontaktinformasjon.personident to kontaktinformasjon)))
+					toJsonString(MockKRRREsponse(mapOf(kontaktinformasjon.personident to kontaktinformasjon))),
 				)
 		addResponseHandler("/rest/v1/personer?inkluderSikkerDigitalPost=false", response)
 	}
@@ -18,7 +18,7 @@ class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
 
 data class MockKRRREsponse(
 	val personer: Map<String, MockKontaktinformasjon>,
-	val feil: Map<String, String> = emptyMap()
+	val feil: Map<String, String> = emptyMap(),
 )
 
 data class MockKontaktinformasjon(
@@ -26,4 +26,3 @@ data class MockKontaktinformasjon(
 	val epostadresse: String?,
 	val mobiltelefonnummer: String?,
 )
-

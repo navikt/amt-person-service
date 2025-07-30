@@ -1,12 +1,12 @@
 package no.nav.amt.person.service.kafka.producer.dto
 
-import no.nav.amt.person.service.nav_bruker.Adressebeskyttelse
-import no.nav.amt.person.service.nav_bruker.InnsatsgruppeV1
-import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
+import no.nav.amt.person.service.navbruker.Adressebeskyttelse
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
 
-data class NavBrukerDtoV1 (
+data class NavBrukerDtoV1(
 	val personId: UUID,
 	val personident: String,
 	val fornavn: String,
@@ -20,5 +20,5 @@ data class NavBrukerDtoV1 (
 	val adresse: Adresse?,
 	val adressebeskyttelse: Adressebeskyttelse?,
 	val oppfolgingsperioder: List<Oppfolgingsperiode>,
-	val innsatsgruppe: InnsatsgruppeV1?
+	val innsatsgruppe: InnsatsgruppeV1?,
 )

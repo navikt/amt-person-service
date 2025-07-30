@@ -1,69 +1,70 @@
 package no.nav.amt.person.service.clients.pdl
 
 object PdlClientTestData {
-
 	const val NULL_ERROR = "- data i respons er null \n"
 	const val ERROR_PREFIX = "Feilmeldinger i respons fra pdl:\n"
 
-	val minimalFeilRespons = """
-				{
-					"errors": [
-						{
-						  "message": "Ikke tilgang til å se person",
-						  "locations": [
-							{
-							  "line": 2,
-							  "column": 5
-							}
-						  ],
-						  "path": [
-							"hentPerson"
-						  ],
-						  "extensions": {
-							"code": "unauthorized",
-							"details": {
-							  "type": "abac-deny",
-							  "cause": "cause-0001-manglerrolle",
-							  "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
-							},
-							"classification": "ExecutionAborted"
-						  }
-						}
-  					]
-				}
-			""".trimIndent()
+	val minimalFeilRespons =
+		"""
+		{
+		    "errors": [
+		        {
+		            "message": "Ikke tilgang til å se person",
+		            "locations": [
+		                {
+		                    "line": 2,
+		                    "column": 5
+		                }
+		            ],
+		            "path": [
+		                "hentPerson"
+		            ],
+		            "extensions": {
+		                "code": "unauthorized",
+		                "details": {
+		                    "type": "abac-deny",
+		                    "cause": "cause-0001-manglerrolle",
+		                    "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
+		                },
+		                "classification": "ExecutionAborted"
+		            }
+		        }
+		    ]
+		}
+		""".trimIndent()
 
-	val flereFeilRespons = """
-				{
-					"errors": [
-						{
-						  "message": "Ikke tilgang til å se person",
-						  "extensions": {
-							"code": "unauthorized",
-							"details": {
-							  "type": "abac-deny",
-							  "cause": "cause-0001-manglerrolle",
-							  "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
-							}
-						  }
-						},
+	val flereFeilRespons =
+		"""
+		{
+		    "errors": [
+		        {
+		            "message": "Ikke tilgang til å se person",
+		            "extensions": {
+		                "code": "unauthorized",
+		                "details": {
+		                    "type": "abac-deny",
+		                    "cause": "cause-0001-manglerrolle",
+		                    "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
+		                }
+		            }
+		        },
+		        {
+		            "message": "Test",
+		            "extensions": {
+		                "code": "unauthorized",
+		                "details": {
+		                    "type": "abac-deny",
+		                    "cause": "cause-0001-manglerrolle",
+		                    "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
+		                }
+		            }
+		        }
+		    ]
+		}
+		""".trimIndent()
 
-						{
-						  "message": "Test",
-						  "extensions": {
-							"code": "unauthorized",
-							"details": {
-							  "type": "abac-deny",
-							  "cause": "cause-0001-manglerrolle",
-							  "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
-							}
-						  }
-						}
-  					]
-				}
-			""".trimIndent()
-
-	val gyldigRespons = """
+	val gyldigRespons =
+		"""
 		{
 			"errors": null,
 			"data": {
@@ -121,9 +122,10 @@ object PdlClientTestData {
 				}
 			}
 		}
-	""".trimIndent()
+		""".trimIndent()
 
-	val fodselsarRespons = """
+	val fodselsarRespons =
+		"""
 		{
 			"errors": null,
 			"data": {
@@ -136,9 +138,10 @@ object PdlClientTestData {
 				}
 			}
 		}
-	""".trimIndent()
+		""".trimIndent()
 
-	val telefonResponse = """
+	val telefonResponse =
+		"""
 		{
 		  "data": {
 		    "hentPerson": {
@@ -167,5 +170,5 @@ object PdlClientTestData {
 		    ]
 		  }
 		}
-	""".trimIndent()
+		""".trimIndent()
 }

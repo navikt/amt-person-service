@@ -37,14 +37,15 @@ import java.time.Duration
 @TestConfiguration("application-integration.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationTestBase : RepositoryTestBase() {
-
 	@LocalServerPort
 	private var port: Int = 0
 
-	val client = OkHttpClient.Builder()
-		.callTimeout(Duration.ofMinutes(5))
-		.readTimeout(Duration.ofMinutes(5))
-		.build()
+	val client =
+		OkHttpClient
+			.Builder()
+			.callTimeout(Duration.ofMinutes(5))
+			.readTimeout(Duration.ofMinutes(5))
+			.build()
 
 	@AfterEach
 	fun cleanUp() {
@@ -129,11 +130,13 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 		method: String,
 		path: String,
 		body: RequestBody? = null,
-		headers: Map<String, String> = emptyMap()
+		headers: Map<String, String> = emptyMap(),
 	): Response {
-		val reqBuilder = Request.Builder()
-			.url("${serverUrl()}$path")
-			.method(method, body)
+		val reqBuilder =
+			Request
+				.Builder()
+				.url("${serverUrl()}$path")
+				.method(method, body)
 
 		headers.forEach {
 			reqBuilder.addHeader(it.key, it.value)
@@ -156,7 +159,6 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
 @Profile("integration")
 @TestConfiguration
 class IntegrationTestConfiguration {
-
 	@Bean
 	fun kafkaProperties(): KafkaProperties = SingletonKafkaProvider.getKafkaProperties()
 }

@@ -4,15 +4,14 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class SkjermetPersonConsumerTest(
 	private val navBrukerService: NavBrukerService,
-	private val kafkaMessageSender: KafkaMessageSender
+	private val kafkaMessageSender: KafkaMessageSender,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `ingest - bruker finnes - skal oppdatere med skjermingsdata`() {
 		val bruker = TestData.lagNavBruker(erSkjermet = false)

@@ -8,11 +8,15 @@ import java.util.UUID
 class RolleService(
 	private val rolleRepository: RolleRepository,
 ) {
-	fun opprettRolle(personId: UUID, rolle: Rolle) {
+	fun opprettRolle(
+		personId: UUID,
+		rolle: Rolle,
+	) {
 		rolleRepository.insert(personId, rolle)
 	}
 
-	fun harRolle(personId: UUID, rolle: Rolle): Boolean {
-		return rolleRepository.harRolle(personId, rolle)
-	}
+	fun harRolle(
+		personId: UUID,
+		rolle: Rolle,
+	): Boolean = rolleRepository.harRolle(personId, rolle)
 }

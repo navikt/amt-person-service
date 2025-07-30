@@ -26,10 +26,11 @@ class VeilarboppfolgingClientTest {
 	@BeforeEach
 	fun setup() {
 		server = MockWebServer()
-		client = VeilarboppfolgingClient(
-			apiUrl = server.url("/api").toString(),
-			veilarboppfolgingTokenProvider = { "VEILARBOPPFOLGING_TOKEN" }
-		)
+		client =
+			VeilarboppfolgingClient(
+				apiUrl = server.url("/api").toString(),
+				veilarboppfolgingTokenProvider = { "VEILARBOPPFOLGING_TOKEN" },
+			)
 	}
 
 	@Nested
@@ -59,9 +60,10 @@ class VeilarboppfolgingClientTest {
 		fun `HentVeilederIdent - Manglende tilgang - Kaster exception`() {
 			server.enqueue(MockResponse().setResponseCode(401))
 
-			val thrown = shouldThrow<RuntimeException> {
-				client.hentVeilederIdent(FNR_IN_TEST)
-			}
+			val thrown =
+				shouldThrow<RuntimeException> {
+					client.hentVeilederIdent(FNR_IN_TEST)
+				}
 
 			thrown.message shouldStartWith "Uventet status ved kall mot veilarboppfolging"
 		}
@@ -91,14 +93,14 @@ class VeilarboppfolgingClientTest {
 
 	@Nested
 	inner class HentOppfolgingperioder {
-
 		@Test
 		fun `hentOppfolgingperioder - manglende tilgang - kaster exception`() {
 			server.enqueue(MockResponse().setResponseCode(401))
 
-			val thrown = shouldThrow<RuntimeException> {
-				client.hentOppfolgingperioder(FNR_IN_TEST)
-			}
+			val thrown =
+				shouldThrow<RuntimeException> {
+					client.hentOppfolgingperioder(FNR_IN_TEST)
+				}
 
 			thrown.message shouldStartWith "Uventet status ved hent status-kall mot veilarboppfolging"
 		}
@@ -130,9 +132,10 @@ class VeilarboppfolgingClientTest {
 		private const val FNR_IN_TEST = "123"
 
 		private val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-		private val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
-			.withZoneSameInstant(ZoneId.systemDefault())
-			.toLocalDateTime()
+		private val nowAsLocalDateTime: LocalDateTime =
+			nowAsZonedDateTimeUtc
+				.withZoneSameInstant(ZoneId.systemDefault())
+				.toLocalDateTime()
 
 		private fun createOppfolgingPeriodeDTO(useEndDate: Boolean) =
 			VeilarboppfolgingClient.OppfolgingPeriodeDTO(

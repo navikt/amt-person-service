@@ -16,9 +16,8 @@ import org.junit.jupiter.api.Test
 
 class AktorV2ConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val personService: PersonService
+	private val personService: PersonService,
 ) : IntegrationTestBase() {
-
 	@Test
 	fun `ingest - ny person ident - oppdaterer person`() {
 		val person = TestData.lagPerson()
@@ -26,12 +25,13 @@ class AktorV2ConsumerTest(
 
 		val nyttFnr = TestData.randomIdent()
 
-		val msg = Aktor(
-			listOf(
-				Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
-				Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
+		val msg =
+			Aktor(
+				listOf(
+					Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
+					Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
+				),
 			)
-		)
 
 		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", msg.schema)
 
@@ -58,13 +58,14 @@ class AktorV2ConsumerTest(
 		val nyttFnr = TestData.randomIdent()
 		val aktorId = TestData.randomIdent()
 
-		val msg = Aktor(
-			listOf(
-				Identifikator(aktorId, Type.AKTORID, true),
-				Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
-				Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
+		val msg =
+			Aktor(
+				listOf(
+					Identifikator(aktorId, Type.AKTORID, true),
+					Identifikator(nyttFnr, Type.FOLKEREGISTERIDENT, true),
+					Identifikator(person.personident, Type.FOLKEREGISTERIDENT, false),
+				),
 			)
-		)
 
 		mockSchemaRegistryHttpServer.registerSchema(1, "aktor-v2-topic", msg.schema)
 
@@ -84,4 +85,3 @@ class AktorV2ConsumerTest(
 		}
 	}
 }
-

@@ -19,24 +19,27 @@ class KodeverkClient(
 	@Value("\${kodeverk.url}") private val url: String,
 	@Value("\${kodeverk.scope}") private val scope: String,
 	private val kodeverkHttpClient: OkHttpClient,
-	private val machineToMachineTokenClient: MachineToMachineTokenClient
+	private val machineToMachineTokenClient: MachineToMachineTokenClient,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Retryable
 	fun hentKodeverk(callId: UUID): List<Postnummer> {
-		val request = Request.Builder()
-			.url("$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb")
-			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-			.header("Nav-Call-Id", callId.toString())
-			.header("Nav-Consumer-Id", "amt-person-service")
-			.header("Authorization", "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-			.get()
-			.build()
+		val request =
+			Request
+				.Builder()
+				.url("$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+				.header("Nav-Call-Id", callId.toString())
+				.header("Nav-Consumer-Id", "amt-person-service")
+				.header("Authorization", "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
+				.get()
+				.build()
 
 		try {
 			kodeverkHttpClient.newCall(request).execute().use { response ->
-				response.takeIf { !it.isSuccessful }
+				response
+					.takeIf { !it.isSuccessful }
 					?.let { throw RuntimeException("Uventet status ved kall mot kodeverk ${it.code}") }
 
 				val kodeverkRespons = fromJsonString<GetKodeverkKoderBetydningerResponse>(response.body.string())
@@ -50,23 +53,26 @@ class KodeverkClient(
 }
 
 data class GetKodeverkKoderBetydningerResponse(
-	val betydninger: Map<String, List<Betydning>>
+	val betydninger: Map<String, List<Betydning>>,
 ) {
-	fun toPostnummerListe(): List<Postnummer> {
-		return betydninger.map {
+	fun toPostnummerListe(): List<Postnummer> =
+		betydninger.map {
 			Postnummer(
 				postnummer = it.key,
-				poststed = it.value.first().beskrivelser["nb"]?.term
-					?: throw RuntimeException("Kode ${it.key} mangler term")
+				poststed =
+					it.value
+						.first()
+						.beskrivelser["nb"]
+						?.term
+						?: throw RuntimeException("Kode ${it.key} mangler term"),
 			)
 		}
-	}
 }
 
 data class Betydning(
-	val beskrivelser: Map<String, Beskrivelse>
+	val beskrivelser: Map<String, Beskrivelse>,
 )
 
 data class Beskrivelse(
-	val term: String
+	val term: String,
 )

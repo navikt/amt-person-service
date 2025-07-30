@@ -3,13 +3,13 @@ package no.nav.amt.person.service.internal
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
-import no.nav.amt.person.service.nav_ansatt.NavAnsattService
-import no.nav.amt.person.service.nav_ansatt.NavAnsattUpdater
-import no.nav.amt.person.service.nav_bruker.NavBruker
-import no.nav.amt.person.service.nav_bruker.NavBrukerRepository
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
-import no.nav.amt.person.service.nav_bruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.nav_enhet.NavEnhetUpdateJob
+import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navansatt.NavAnsattUpdater
+import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
+import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.Person
@@ -99,10 +99,15 @@ class InternalController(
 	fun republiserNavBrukere(
 		servlet: HttpServletRequest,
 		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
-		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?,
+	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-nav-brukere") {
-				batchHandterNavBrukere(startFromOffset?:0, batchSize?:500) { kafkaProducerService.publiserNavBruker(it) }
+				batchHandterNavBrukere(startFromOffset ?: 0, batchSize ?: 500) {
+					kafkaProducerService.publiserNavBruker(
+						it,
+					)
+				}
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -159,7 +164,7 @@ class InternalController(
 						navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(it)
 					}
 				} else {
-					batchHandterNavBrukere(startFromOffset?:0, batchSize) {
+					batchHandterNavBrukere(startFromOffset ?: 0, batchSize) {
 						navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(it)
 					}
 				}
@@ -189,7 +194,7 @@ class InternalController(
 	@GetMapping("/nav-brukere/republiser/{navBrukerId}")
 	fun republiserNavBruker(
 		servlet: HttpServletRequest,
-		@PathVariable("navBrukerId") navBrukerId: UUID
+		@PathVariable("navBrukerId") navBrukerId: UUID,
 	) {
 		if (isInternal(servlet)) {
 			republiserNavBruker(navBrukerId)
@@ -203,10 +208,11 @@ class InternalController(
 	fun republiserArrangorAnsatte(
 		servlet: HttpServletRequest,
 		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
-		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?,
+	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-arrangor-ansatte") {
-				republiserAlleArrangorAnsatte(startFromOffset?:0, batchSize?:500)
+				republiserAlleArrangorAnsatte(startFromOffset ?: 0, batchSize ?: 500)
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -252,12 +258,14 @@ class InternalController(
 	fun synkroniserKrr(
 		servlet: HttpServletRequest,
 		@RequestParam(value = "startFromOffset", required = false) startFromOffset: Int?,
-		@RequestParam(value = "batchSize", required = false) batchSize: Int?) {
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?,
+	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("synkroniser-krr-nav-brukere") {
-				val offset = startFromOffset?:0
-				val limit = batchSize?:5000
-				val personidenter = navBrukerService.getPersonidenter(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
+				val offset = startFromOffset ?: 0
+				val limit = batchSize ?: 5000
+				val personidenter =
+					navBrukerService.getPersonidenter(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
 				navBrukerService.syncKontaktinfoBulk(personidenter)
 			}
 		} else {
@@ -269,12 +277,12 @@ class InternalController(
 	@GetMapping("/nav-brukere/oppdater-manglende-kontaktinfo")
 	fun oppdaterManglendeKontakinfo(
 		servlet: HttpServletRequest,
-		@RequestParam(value = "batchSize", required = false) batchSize: Int?
+		@RequestParam(value = "batchSize", required = false) batchSize: Int?,
 	) {
 		if (isInternal(servlet)) {
 			val jobName = "oppdater-manglende-kontaktinfo"
 			JobRunner.runAsync(jobName) {
-				val limit = batchSize?:200
+				val limit = batchSize ?: 200
 				var batchNumber = 1
 				var personidenter: List<String>
 				var sistePersonident: String? = null
@@ -299,10 +307,12 @@ class InternalController(
 	@PostMapping("/nav-brukere/synkroniser-krr")
 	fun synkroniserKrrForPerson(
 		servlet: HttpServletRequest,
-		@RequestBody request: NavBrukerRequest
+		@RequestBody request: NavBrukerRequest,
 	) {
 		if (isInternal(servlet)) {
-			val navBruker = navBrukerService.hentNavBruker(request.personident) ?: throw IllegalArgumentException("Fant ikke person")
+			val navBruker =
+				navBrukerService.hentNavBruker(request.personident)
+					?: throw IllegalArgumentException("Fant ikke person")
 			navBrukerService.oppdaterKontaktinformasjon(navBruker)
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -315,7 +325,10 @@ class InternalController(
 		log.info("Publiserte ${ansatte.size} navansatte")
 	}
 
-	private fun republiserAlleArrangorAnsatte(startFromOffset: Int, batchSize: Int) {
+	private fun republiserAlleArrangorAnsatte(
+		startFromOffset: Int,
+		batchSize: Int,
+	) {
 		var offset = startFromOffset
 		var ansatte: List<Person>
 
@@ -327,7 +340,11 @@ class InternalController(
 		} while (ansatte.isNotEmpty())
 	}
 
-	private fun batchHandterNavBrukere(startFromOffset: Int, batchSize: Int, action: (navBruker: NavBruker) -> Unit) {
+	private fun batchHandterNavBrukere(
+		startFromOffset: Int,
+		batchSize: Int,
+		action: (navBruker: NavBruker) -> Unit,
+	) {
 		var currentOffset = startFromOffset
 		var data: List<NavBruker>
 
@@ -344,16 +361,16 @@ class InternalController(
 
 		val duration = Duration.between(start, Instant.now())
 
-		if (totalHandled > 0)
+		if (totalHandled > 0) {
 			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
-
+		}
 	}
 
 	private fun batchHandterNavBrukereByModifiedBefore(
 		modifiedBefore: LocalDate,
 		batchSize: Int,
 		startAfterId: UUID?,
-		action: (navBruker: NavBruker) -> Unit
+		action: (navBruker: NavBruker) -> Unit,
 	) {
 		var lastId: UUID? = startAfterId
 		var data: List<NavBruker>
@@ -371,15 +388,15 @@ class InternalController(
 
 		val duration = Duration.between(start, Instant.now())
 
-		if (totalHandled > 0)
+		if (totalHandled > 0) {
 			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
-
+		}
 	}
 
 	private fun oppdaterAdresseHvisManglerOgRepubliser(
 		modifiedBefore: LocalDateTime,
 		batchSize: Int,
-		startAfterId: UUID?
+		startAfterId: UUID?,
 	) {
 		var lastId: UUID? = startAfterId
 		var navbrukere: List<NavBrukerDbo>
@@ -398,7 +415,5 @@ class InternalController(
 		kafkaProducerService.publiserNavBruker(bruker.toModel())
 	}
 
-	private fun isInternal(servlet: HttpServletRequest): Boolean {
-		return servlet.remoteAddr == "127.0.0.1"
-	}
+	private fun isInternal(servlet: HttpServletRequest): Boolean = servlet.remoteAddr == "127.0.0.1"
 }

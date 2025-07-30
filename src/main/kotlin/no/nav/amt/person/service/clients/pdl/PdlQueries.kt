@@ -2,108 +2,111 @@ package no.nav.amt.person.service.clients.pdl
 
 import no.nav.amt.person.service.utils.GraphqlUtils
 
-
 object PdlQueries {
-
-	data class PdlError (
+	data class PdlError(
 		override val message: String? = null,
 		override val locations: List<GraphqlUtils.GraphqlErrorLocation>? = null,
 		override val path: List<String>? = null,
 		override val extensions: PdlErrorExtension? = null,
-	): GraphqlUtils.GraphqlError<PdlErrorExtension>
+	) : GraphqlUtils.GraphqlError<PdlErrorExtension>
 
 	data class PdlErrorExtension(
 		val code: String? = null,
 		val classification: String? = null,
-		val details: PdlErrorDetails? = null
+		val details: PdlErrorDetails? = null,
 	)
 
 	data class PdlErrorDetails(
 		val type: String? = null,
 		val cause: String? = null,
-		val policy: String? = null
+		val policy: String? = null,
 	)
 
 	data class PdlWarning(
 		val query: String?,
 		val id: String,
 		val message: String,
-		val details: Any?
+		val details: Any?,
 	)
 
 	data class Extensions(
-		val warnings: List<PdlWarning>
+		val warnings: List<PdlWarning>,
 	)
 
 	object HentPerson {
-		val query = """
+		val query =
+			"""
 			query(${"$"}ident: ID!) {
-			  hentPerson(ident: ${"$"}ident) {
-				navn(historikk: false) {
-				  fornavn
-				  mellomnavn
-				  etternavn
-				}
-				telefonnummer {
-				  landskode
-				  nummer
-				  prioritet
-				}
-				adressebeskyttelse(historikk: false) {
-				  gradering
-				},
-				bostedsadresse(historikk: false) {
-				  coAdressenavn
-				  vegadresse {
-					husnummer
-					husbokstav
-					adressenavn
-					tilleggsnavn
-					postnummer
-				  }
-				  matrikkeladresse {
-				 	tilleggsnavn
-				 	postnummer
-				  }
-				}
-				oppholdsadresse(historikk: false) {
-				  coAdressenavn
-				  vegadresse {
-				  	husnummer
-				  	husbokstav
-				  	adressenavn
-				  	tilleggsnavn
-				  	postnummer
-				  }
-				  matrikkeladresse {
-				  	tilleggsnavn
-				  	postnummer
-				  }
-				}
-				kontaktadresse(historikk: false) {
-				  coAdressenavn
-				  vegadresse {
-					husnummer
-					husbokstav
-					adressenavn
-					tilleggsnavn
-					postnummer
-				  }
-				  postboksadresse {
-				 	postboks
-				 	postnummer
-				  }
-				}
-			  },
-			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, AKTORID, NPID], historikk:true) {
-			  	identer {
-			  		ident,
-			  		historisk,
-			  		gruppe
-			  	}
-		      },
+			    hentPerson(ident: ${"$"}ident) {
+			        navn(historikk: false) {
+			            fornavn
+			            mellomnavn
+			            etternavn
+			        }
+			        telefonnummer {
+			            landskode
+			            nummer
+			            prioritet
+			        }
+			        adressebeskyttelse(historikk: false) {
+			            gradering
+			        }
+			        bostedsadresse(historikk: false) {
+			            coAdressenavn
+			            vegadresse {
+			                husnummer
+			                husbokstav
+			                adressenavn
+			                tilleggsnavn
+			                postnummer
+			            }
+			            matrikkeladresse {
+			                tilleggsnavn
+			                postnummer
+			            }
+			        }
+			        oppholdsadresse(historikk: false) {
+			            coAdressenavn
+			            vegadresse {
+			                husnummer
+			                husbokstav
+			                adressenavn
+			                tilleggsnavn
+			                postnummer
+			            }
+			            matrikkeladresse {
+			                tilleggsnavn
+			                postnummer
+			            }
+			        }
+			        kontaktadresse(historikk: false) {
+			            coAdressenavn
+			            vegadresse {
+			                husnummer
+			                husbokstav
+			                adressenavn
+			                tilleggsnavn
+			                postnummer
+			            }
+			            postboksadresse {
+			                postboks
+			                postnummer
+			            }
+			        }
+			    }
+			    hentIdenter(
+			        ident: ${"$"}ident,
+			        grupper: [FOLKEREGISTERIDENT, AKTORID, NPID],
+			        historikk: true
+			    ) {
+			        identer {
+			            ident
+			            historisk
+			            gruppe
+			        }
+			    }
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -122,17 +125,17 @@ object PdlQueries {
 			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>,
 			val bostedsadresse: List<Attribute.Bostedsadresse>,
 			val oppholdsadresse: List<Attribute.Oppholdsadresse>,
-			val kontaktadresse: List<Attribute.Kontaktadresse>
+			val kontaktadresse: List<Attribute.Kontaktadresse>,
 		)
 
 		data class HentIdenter(
 			val identer: List<Attribute.Ident>,
 		)
-
 	}
 
 	object HentPersonFodselsar {
-		val query = """
+		val query =
+			"""
 			query(${"$"}ident: ID!) {
 			  hentPerson(ident: ${"$"}ident) {
 				foedselsdato {
@@ -140,7 +143,7 @@ object PdlQueries {
 				}
 			  },
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -158,7 +161,8 @@ object PdlQueries {
 	}
 
 	object HentAdressebeskyttelse {
-		val query = """
+		val query =
+			"""
 			query(${"$"}ident: ID!) {
 			  hentPerson(ident: ${"$"}ident) {
 				adressebeskyttelse(historikk: false) {
@@ -166,7 +170,7 @@ object PdlQueries {
 				}
 			  }
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -179,13 +183,13 @@ object PdlQueries {
 		)
 
 		data class HentPerson(
-			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>
+			val adressebeskyttelse: List<Attribute.Adressebeskyttelse>,
 		)
-
 	}
 
 	object HentTelefon {
-		val query = """
+		val query =
+			"""
 			query(${"$"}ident: ID!) {
 			  hentPerson(ident: ${"$"}ident) {
 				telefonnummer {
@@ -195,7 +199,7 @@ object PdlQueries {
 				}
 			  },
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -204,27 +208,31 @@ object PdlQueries {
 		) : GraphqlUtils.GraphqlResponse<ResponseData, PdlErrorExtension>
 
 		data class ResponseData(
-			val hentPerson: HentPerson
+			val hentPerson: HentPerson,
 		)
 
 		data class HentPerson(
-			val telefonnummer: List<Attribute.Telefonnummer>
+			val telefonnummer: List<Attribute.Telefonnummer>,
 		)
-
 	}
 
 	object HentIdenter {
-		val query = """
+		val query =
+			"""
 			query(${"$"}ident: ID!) {
-			  hentIdenter(ident: ${"$"}ident, grupper: [FOLKEREGISTERIDENT, AKTORID, NPID], historikk:true) {
-			  	identer {
-			  		ident,
-			  		historisk,
-			  		gruppe
-			  	}
-		      }
+			    hentIdenter(
+			        ident: ${"$"}ident,
+			        grupper: [FOLKEREGISTERIDENT, AKTORID, NPID],
+			        historikk: true
+			    ) {
+			        identer {
+			            ident
+			            historisk
+			            gruppe
+			        }
+			    }
 			}
-		""".trimIndent()
+			""".trimIndent()
 
 		data class Response(
 			override val errors: List<PdlError>?,
@@ -235,15 +243,15 @@ object PdlQueries {
 		data class ResponseData(
 			val hentIdenter: HentIdenter?,
 		)
+
 		data class HentIdenter(
 			val identer: List<Attribute.Ident>,
 		)
-
 	}
 
 	object Attribute {
 		data class Adressebeskyttelse(
-			val gradering: String
+			val gradering: String,
 		)
 
 		data class Navn(
@@ -253,7 +261,7 @@ object PdlQueries {
 		)
 
 		data class Foedselsdato(
-			val foedselsaar: Int
+			val foedselsaar: Int,
 		)
 
 		data class Ident(
@@ -261,6 +269,7 @@ object PdlQueries {
 			val historisk: Boolean,
 			val gruppe: String,
 		)
+
 		data class Telefonnummer(
 			val landskode: String,
 			val nummer: String,
@@ -270,19 +279,19 @@ object PdlQueries {
 		data class Bostedsadresse(
 			val coAdressenavn: String?,
 			val vegadresse: Vegadresse?,
-			val matrikkeladresse: Matrikkeladresse?
+			val matrikkeladresse: Matrikkeladresse?,
 		)
 
 		data class Oppholdsadresse(
 			val coAdressenavn: String?,
 			val vegadresse: Vegadresse?,
-			val matrikkeladresse: Matrikkeladresse?
+			val matrikkeladresse: Matrikkeladresse?,
 		)
 
 		data class Kontaktadresse(
 			val coAdressenavn: String?,
 			val vegadresse: Vegadresse?,
-			val postboksadresse: Postboksadresse?
+			val postboksadresse: Postboksadresse?,
 		)
 
 		data class Vegadresse(
@@ -290,22 +299,21 @@ object PdlQueries {
 			val husbokstav: String?,
 			val adressenavn: String?,
 			val tilleggsnavn: String?,
-			val postnummer: String?
+			val postnummer: String?,
 		)
 
 		data class Matrikkeladresse(
 			val tilleggsnavn: String?,
-			val postnummer: String?
+			val postnummer: String?,
 		)
 
 		data class Postboksadresse(
 			val postboks: String,
-			val postnummer: String?
+			val postnummer: String?,
 		)
 	}
 
 	data class Variables(
 		val ident: String,
 	)
-
 }

@@ -25,26 +25,19 @@ class PersonService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentPerson(id: UUID): Person {
-		return repository.get(id).toModel()
-	}
+	fun hentPerson(id: UUID): Person = repository.get(id).toModel()
 
-	fun hentPerson(personident: String): Person? {
-		return repository.get(personident)?.toModel()
-	}
+	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
 
 	@Retryable(maxAttempts = 2)
-	fun hentEllerOpprettPerson(personident: String): Person {
-		return repository.get(personident)?.toModel() ?: opprettPerson(personident)
-	}
+	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
 
-	fun hentEllerOpprettPerson(personident: String, personOpplysninger: PdlPerson): Person {
-		return repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
-	}
+	fun hentEllerOpprettPerson(
+		personident: String,
+		personOpplysninger: PdlPerson,
+	): Person = repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
 
-	fun hentPersoner(personidenter: List<String>): List<Person> {
-		return repository.getPersoner(personidenter).map { it.toModel() }
-	}
+	fun hentPersoner(personidenter: List<String>): List<Person> = repository.getPersoner(personidenter).map { it.toModel() }
 
 	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
 
@@ -67,24 +60,23 @@ class PersonService(
 			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
 		}
-
 	}
 
 	fun oppdaterNavn(person: Person) {
-		val personOpplysninger = try {
-			pdlClient.hentPerson(person.personident)
-		} catch (e: Exception) {
-			val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
+		val personOpplysninger =
+			try {
+				pdlClient.hentPerson(person.personident)
+			} catch (e: Exception) {
+				val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
 
-			if (EnvUtils.isDev()) {
-				log.info(feilmelding)
-				return
+				if (EnvUtils.isDev()) {
+					log.info(feilmelding)
+					return
+				} else {
+					log.error(feilmelding, e)
+					throw RuntimeException(feilmelding, e)
+				}
 			}
-			else {
-				log.error(feilmelding, e)
-				throw RuntimeException(feilmelding, e)
-			}
-		}
 
 		if (
 			person.fornavn == personOpplysninger.fornavn &&
@@ -95,11 +87,13 @@ class PersonService(
 			return
 		}
 
-		upsert(person.copy(
-			fornavn = personOpplysninger.fornavn,
-			mellomnavn = personOpplysninger.mellomnavn,
-			etternavn = personOpplysninger.etternavn,
-		))
+		upsert(
+			person.copy(
+				fornavn = personOpplysninger.fornavn,
+				mellomnavn = personOpplysninger.mellomnavn,
+				etternavn = personOpplysninger.etternavn,
+			),
+		)
 
 		log.info("Oppdaterte navn på person ${person.id}")
 	}
@@ -122,13 +116,14 @@ class PersonService(
 	private fun opprettPerson(pdlPerson: PdlPerson): Person {
 		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
 
-		val person = Person(
-			id = UUID.randomUUID(),
-			personident = gjeldendeIdent.ident,
-			fornavn = pdlPerson.fornavn,
-			mellomnavn = pdlPerson.mellomnavn,
-			etternavn = pdlPerson.etternavn,
-		)
+		val person =
+			Person(
+				id = UUID.randomUUID(),
+				personident = gjeldendeIdent.ident,
+				fornavn = pdlPerson.fornavn,
+				mellomnavn = pdlPerson.mellomnavn,
+				etternavn = pdlPerson.etternavn,
+			)
 
 		upsert(person)
 		personidentRepository.upsert(person.id, pdlPerson.identer)
@@ -138,13 +133,13 @@ class PersonService(
 		return person
 	}
 
-	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
-		return pdlClient.hentAdressebeskyttelse(personident)
-	}
+	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? = pdlClient.hentAdressebeskyttelse(personident)
 
-	fun hentAlleMedRolle(offset: Int, limit: Int = 500, rolle: Rolle) =
-		repository.getAllWithRolle(offset, limit, rolle)
-			.map { it.toModel() }
-
-
+	fun hentAlleMedRolle(
+		offset: Int,
+		limit: Int = 500,
+		rolle: Rolle,
+	) = repository
+		.getAllWithRolle(offset, limit, rolle)
+		.map { it.toModel() }
 }

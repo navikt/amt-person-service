@@ -1,11 +1,9 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.data.TestData.lagNavBruker
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.nav_bruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
@@ -20,19 +18,19 @@ import java.util.UUID
 
 class OppfolgingsperiodeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService
+	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
-
 	@ParameterizedTest
 	@ValueSource(booleans = [true, false])
 	fun `ingest - bruker finnes, ny oppfolgingsperiode - oppdaterer`(useEndDate: Boolean) {
 		val navBruker = lagNavBruker(oppfolgingsperioder = emptyList())
 		testDataRepository.insertNavBruker(navBruker)
 
-		val sisteOppfolgingsperiodeV1 = createSisteOppfolgingsperiodeV1(
-			personIdent = navBruker.person.personident,
-			useEndDate = useEndDate
-		)
+		val sisteOppfolgingsperiodeV1 =
+			createSisteOppfolgingsperiodeV1(
+				personIdent = navBruker.person.personident,
+				useEndDate = useEndDate,
+			)
 
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, navBruker.person.personident)
 
@@ -57,12 +55,13 @@ class OppfolgingsperiodeConsumerTest(
 
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
-		val sisteOppfolgingsperiodeV1 = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
-			uuid = UUID.randomUUID(),
-			aktorId = AKTOR_ID_IN_TEST,
-			startDato = ZonedDateTime.now().minusWeeks(1),
-			sluttDato = null
-		)
+		val sisteOppfolgingsperiodeV1 =
+			OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
+				uuid = UUID.randomUUID(),
+				aktorId = AKTOR_ID_IN_TEST,
+				startDato = ZonedDateTime.now().minusWeeks(1),
+				sluttDato = null,
+			)
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(toJsonString(sisteOppfolgingsperiodeV1))
 
@@ -79,13 +78,14 @@ class OppfolgingsperiodeConsumerTest(
 		private const val AKTOR_ID_IN_TEST = "1234"
 
 		private val nowAsZonedDateTimeUtc: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-		private val nowAsLocalDateTime: LocalDateTime = nowAsZonedDateTimeUtc
-			.withZoneSameInstant(ZoneId.systemDefault())
-			.toLocalDateTime()
+		private val nowAsLocalDateTime: LocalDateTime =
+			nowAsZonedDateTimeUtc
+				.withZoneSameInstant(ZoneId.systemDefault())
+				.toLocalDateTime()
 
 		private fun createSisteOppfolgingsperiodeV1(
 			personIdent: String,
-			useEndDate: Boolean
+			useEndDate: Boolean,
 		) = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
 			uuid = UUID.randomUUID(),
 			aktorId = personIdent,

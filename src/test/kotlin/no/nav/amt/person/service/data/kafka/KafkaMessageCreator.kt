@@ -29,7 +29,7 @@ object KafkaMessageCreator {
 	) = TildeltVeilederMsg(
 		aktorId = aktorId,
 		veilederId = veilederId,
-		tilordnet = tilordnet
+		tilordnet = tilordnet,
 	)
 
 	fun lagPersonhendelseAdressebeskyttelse(
@@ -49,14 +49,21 @@ object KafkaMessageCreator {
 		etternavn: String,
 	) = lagPersonhendelse(
 		personidenter = personidenter,
-		navn = Navn(
-			/* fornavn = */ fornavn,
-			/* mellomnavn = */ mellomnavn,
-			/* etternavn = */ etternavn,
-			/* forkortetNavn = */ "forkortetNavn",
-			/* originaltNavn = */ null,
-			/* gyldigFraOgMed = */ LocalDate.now()
-		),
+		navn =
+			Navn(
+				// fornavn =
+				fornavn,
+				// mellomnavn =
+				mellomnavn,
+				// etternavn =
+				etternavn,
+				// forkortetNavn =
+				"forkortetNavn",
+				// originaltNavn =
+				null,
+				// gyldigFraOgMed =
+				LocalDate.now(),
+			),
 		adressebeskyttelse = null,
 		opplysningsType = OpplysningsType.NAVN_V1,
 	)
@@ -65,17 +72,25 @@ object KafkaMessageCreator {
 		personidenter: List<String>,
 		navn: Navn?,
 		adressebeskyttelse: Adressebeskyttelse?,
-		opplysningsType: OpplysningsType
+		opplysningsType: OpplysningsType,
 	) = Personhendelse(
-		/* hendelseId = */ UUID.randomUUID().toString(),
-		/* personidenter = */ personidenter,
-		/* master = */ "FREG",
-		/* opprettet = */ ZonedDateTime.now().toInstant(),
-		/* opplysningstype = */ opplysningsType.toString(),
-		/* endringstype = */ Endringstype.OPPRETTET,
-		/* tidligereHendelseId = */ null,
-		/* adressebeskyttelse = */ adressebeskyttelse,
-		/* navn = */ navn,
+		// hendelseId =
+		UUID.randomUUID().toString(),
+		// personidenter =
+		personidenter,
+		// master =
+		"FREG",
+		// opprettet =
+		ZonedDateTime.now().toInstant(),
+		// opplysningstype =
+		opplysningsType.toString(),
+		// endringstype =
+		Endringstype.OPPRETTET,
+		// tidligereHendelseId =
+		null,
+		// adressebeskyttelse =
+		adressebeskyttelse,
+		// navn =
+		navn,
 	)
 }
-

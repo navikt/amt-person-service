@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.kafka.producer.dto
 
-import java.util.*
+import java.util.UUID
 
 data class NavEnhetDtoV1(
 	val id: UUID,

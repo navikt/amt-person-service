@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service
 
 @Service
 class AktorV2Consumer(
-	private val personService: PersonService
+	private val personService: PersonService,
 ) {
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(key: String, value: Aktor?) {
+	fun ingest(
+		key: String,
+		value: Aktor?,
+	) {
 		if (value == null) {
 			TeamLogs.warn("Fikk tombstone for record med key=$key.")
 			log.warn("Fikk tombstone for kafka record. Se team logs for key. Behandler ikke meldingen.")
@@ -36,10 +38,9 @@ class AktorV2Consumer(
 	}
 }
 
-private fun Type.toModel(): IdentType {
-	return when(this) {
+private fun Type.toModel(): IdentType =
+	when (this) {
 		Type.FOLKEREGISTERIDENT -> IdentType.FOLKEREGISTERIDENT
 		Type.NPID -> IdentType.NPID
 		Type.AKTORID -> IdentType.AKTORID
 	}
-}

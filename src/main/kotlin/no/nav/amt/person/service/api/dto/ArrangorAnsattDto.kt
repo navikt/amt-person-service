@@ -3,7 +3,7 @@ package no.nav.amt.person.service.api.dto
 import no.nav.amt.person.service.person.model.Person
 import java.util.UUID
 
-data class ArrangorAnsattDto (
+data class ArrangorAnsattDto(
 	val id: UUID,
 	val personident: String,
 	val fornavn: String,
@@ -11,10 +11,11 @@ data class ArrangorAnsattDto (
 	val etternavn: String,
 )
 
-fun Person.toArrangorAnsattDto() = ArrangorAnsattDto(
-	id = id,
-	personident = personident,
-	fornavn = fornavn,
-	mellomnavn = mellomnavn,
-	etternavn = etternavn,
-)
+fun Person.toArrangorAnsattDto() =
+	ArrangorAnsattDto(
+		id = id,
+		personident = personident,
+		fornavn = fornavn,
+		mellomnavn = mellomnavn,
+		etternavn = etternavn,
+	)

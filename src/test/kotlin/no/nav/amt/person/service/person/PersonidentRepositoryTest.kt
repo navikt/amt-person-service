@@ -12,16 +12,16 @@ import org.springframework.boot.test.context.SpringBootTest
 class PersonidentRepositoryTest(
 	private val personidentRepository: PersonidentRepository,
 ) : RepositoryTestBase() {
-
 	@Test
 	fun `upsertPersonident - nye identer - inserter`() {
 		val person = TestData.lagPerson()
 		testDataRepository.insertPerson(person)
 
-		val identer = listOf(
-			Personident(TestData.randomIdent(), true, IdentType.AKTORID),
-			Personident(TestData.randomIdent(), true, IdentType.NPID),
-		)
+		val identer =
+			listOf(
+				Personident(TestData.randomIdent(), true, IdentType.AKTORID),
+				Personident(TestData.randomIdent(), true, IdentType.NPID),
+			)
 
 		personidentRepository.upsert(person.id, identer)
 
@@ -36,10 +36,11 @@ class PersonidentRepositoryTest(
 		val person = TestData.lagPerson()
 		testDataRepository.insertPerson(person)
 
-		val identer = listOf(
-			TestData.lagPersonident(person.personident, historisk = true),
-			TestData.lagPersonident(TestData.randomIdent(), historisk = false),
-		)
+		val identer =
+			listOf(
+				TestData.lagPersonident(person.personident, historisk = true),
+				TestData.lagPersonident(TestData.randomIdent(), historisk = false),
+			)
 
 		personidentRepository.upsert(person.id, identer.map { it.toModel() })
 

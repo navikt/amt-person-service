@@ -7,11 +7,12 @@ data class TildeltVeilederMsg(
 	val veilederId: String,
 	val tilordnet: ZonedDateTime,
 ) {
-	fun toJson() = """
+	fun toJson() =
+		"""
 		{
 			"aktorId": "$aktorId",
 			"veilederId": "$veilederId",
 			"tilordnet": "${tilordnet.toOffsetDateTime()}"
 		}
-	""".trimIndent()
+		""".trimIndent()
 }

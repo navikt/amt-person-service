@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.clients.veilarboppfolging
 
-import no.nav.amt.person.service.nav_bruker.Oppfolgingsperiode
+import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
@@ -26,12 +26,14 @@ class VeilarboppfolgingClient(
 
 	fun hentVeilederIdent(fnr: String): String? {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
-		val request = Request.Builder()
-			.url("$apiUrl/api/v3/hent-veileder")
-			.header("Accept", "application/json; charset=utf-8")
-			.header("Authorization", "Bearer ${veilarboppfolgingTokenProvider.get()}")
-			.post(personRequestJson.toRequestBody(mediaTypeJson))
-			.build()
+		val request =
+			Request
+				.Builder()
+				.url("$apiUrl/api/v3/hent-veileder")
+				.header("Accept", "application/json; charset=utf-8")
+				.header("Authorization", "Bearer ${veilarboppfolgingTokenProvider.get()}")
+				.post(personRequestJson.toRequestBody(mediaTypeJson))
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
 			if (!response.isSuccessful) {
@@ -47,12 +49,14 @@ class VeilarboppfolgingClient(
 
 	fun hentOppfolgingperioder(fnr: String): List<Oppfolgingsperiode> {
 		val personRequestJson = toJsonString(PersonRequest(fnr))
-		val request = Request.Builder()
-			.url("$apiUrl/api/v3/oppfolging/hent-perioder")
-			.header(HttpHeaders.ACCEPT, "application/json; charset=utf-8")
-			.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider.get()}")
-			.post(personRequestJson.toRequestBody(mediaTypeJson))
-			.build()
+		val request =
+			Request
+				.Builder()
+				.url("$apiUrl/api/v3/oppfolging/hent-perioder")
+				.header(HttpHeaders.ACCEPT, "application/json; charset=utf-8")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider.get()}")
+				.post(personRequestJson.toRequestBody(mediaTypeJson))
+				.build()
 
 		httpClient.newCall(request).execute().use { response ->
 			if (!response.isSuccessful) {
@@ -65,22 +69,23 @@ class VeilarboppfolgingClient(
 	}
 
 	data class HentBrukersVeilederResponse(
-		val veilederIdent: String
+		val veilederIdent: String,
 	)
 
 	private data class PersonRequest(
-		val fnr: String
+		val fnr: String,
 	)
 
 	data class OppfolgingPeriodeDTO(
 		val uuid: UUID,
 		val startDato: ZonedDateTime,
-		val sluttDato: ZonedDateTime?
+		val sluttDato: ZonedDateTime?,
 	) {
-		fun toOppfolgingsperiode() = Oppfolgingsperiode(
-			id = uuid,
-			startdato = startDato.toSystemZoneLocalDateTime(),
-			sluttdato = sluttDato?.toSystemZoneLocalDateTime()
-		)
+		fun toOppfolgingsperiode() =
+			Oppfolgingsperiode(
+				id = uuid,
+				startdato = startDato.toSystemZoneLocalDateTime(),
+				sluttdato = sluttDato?.toSystemZoneLocalDateTime(),
+			)
 	}
 }

@@ -7,6 +7,4 @@ enum class AdressebeskyttelseGradering {
 	UGRADERT,
 }
 
-fun AdressebeskyttelseGradering?.erBeskyttet(): Boolean {
-	return this != AdressebeskyttelseGradering.UGRADERT && this != null
-}
+fun AdressebeskyttelseGradering?.erBeskyttet(): Boolean = this != AdressebeskyttelseGradering.UGRADERT && this != null

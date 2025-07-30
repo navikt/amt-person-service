@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
+    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
 }
 
 group = "no.nav.amt-person-service"
@@ -33,6 +34,7 @@ val avroVersion = "1.12.0"
 val jacksonVersion = "2.19.2"
 val mockOauth2ServerVersion = "2.2.1"
 val logstashEncoderVersion = "8.1"
+val ktLintVersion = "1.6.0"
 
 dependencyManagement {
     imports {
@@ -97,9 +99,17 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
-            "-Xannotation-default-target=param-property"
+            "-Xannotation-default-target=param-property",
         )
     }
+}
+
+ktlint {
+    version = ktLintVersion
+}
+
+tasks.runKtlintCheckOverTestSourceSet {
+    dependsOn("generateTestAvroJava")
 }
 
 tasks.jar {
@@ -110,6 +120,6 @@ tasks.test {
     useJUnitPlatform()
     jvmArgs(
         "-Xshare:off",
-        "-XX:+EnableDynamicAgentLoading"
+        "-XX:+EnableDynamicAgentLoading",
     )
 }

@@ -11,9 +11,8 @@ import java.util.UUID
 
 @SpringBootTest(classes = [PoststedRepository::class])
 class PoststedRepositoryTest(
-	private val poststedRepository: PoststedRepository
+	private val poststedRepository: PoststedRepository,
 ) : RepositoryTestBase() {
-
 	@BeforeEach
 	fun before() {
 		lagrePostnummerForTest(
@@ -22,8 +21,8 @@ class PoststedRepositoryTest(
 				Postnummer("5341", "STRAUME"),
 				Postnummer("5365", "TURØY"),
 				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND")
-			)
+				Postnummer("9609", "NORDRE SEILAND"),
+			),
 		)
 	}
 
@@ -60,9 +59,9 @@ class PoststedRepositoryTest(
 				Postnummer("0484", "OSLO"),
 				Postnummer("5365", "TURØY"),
 				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND")
+				Postnummer("9609", "NORDRE SEILAND"),
 			),
-			UUID.randomUUID()
+			UUID.randomUUID(),
 		)
 
 		val allePoststeder = poststedRepository.getAllePoststeder()
@@ -80,9 +79,9 @@ class PoststedRepositoryTest(
 				Postnummer("5341", "STRAUME"),
 				Postnummer("5365", "TURØY"),
 				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND")
+				Postnummer("9609", "NORDRE SEILAND"),
 			),
-			UUID.randomUUID()
+			UUID.randomUUID(),
 		)
 
 		val allePoststeder = poststedRepository.getAllePoststeder()
@@ -99,9 +98,9 @@ class PoststedRepositoryTest(
 				Postnummer("0502", "OSLO"),
 				Postnummer("5341", "STRAUME"),
 				Postnummer("5365", "TURØY"),
-				Postnummer("9609", "SENJA")
+				Postnummer("9609", "SENJA"),
 			),
-			UUID.randomUUID()
+			UUID.randomUUID(),
 		)
 
 		val allePoststeder = poststedRepository.getAllePoststeder()
@@ -122,9 +121,9 @@ class PoststedRepositoryTest(
 				Postnummer("5341", "STRAUME"),
 				Postnummer("5365", "TURØY"),
 				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND")
+				Postnummer("9609", "NORDRE SEILAND"),
 			),
-			UUID.randomUUID()
+			UUID.randomUUID(),
 		)
 
 		val allePoststederOppdatert = poststedRepository.getAllePoststeder()
@@ -140,8 +139,8 @@ class PoststedRepositoryTest(
         """,
 				mapOf(
 					"postnummer" to it.postnummer,
-					"poststed" to it.poststed
-				)
+					"poststed" to it.poststed,
+				),
 			)
 		}
 	}

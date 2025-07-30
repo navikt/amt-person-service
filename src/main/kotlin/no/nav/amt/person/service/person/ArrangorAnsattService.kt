@@ -28,6 +28,8 @@ class ArrangorAnsattService(
 		}
 	}
 
-	fun getAll(offset: Int, batchSize: Int) = personService.hentAlleMedRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
-
+	fun getAll(
+		offset: Int,
+		batchSize: Int,
+	) = personService.hentAlleMedRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
 }

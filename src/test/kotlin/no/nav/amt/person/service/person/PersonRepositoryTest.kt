@@ -18,9 +18,8 @@ import java.util.UUID
 
 @SpringBootTest(classes = [PersonRepository::class])
 class PersonRepositoryTest(
-	private val personRepository: PersonRepository
+	private val personRepository: PersonRepository,
 ) : RepositoryTestBase() {
-
 	@Test
 	fun `get(uuid) - person finnes - returnerer person`() {
 		val person = TestData.lagPerson()
@@ -58,13 +57,14 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(person1)
 		testDataRepository.insertPerson(person2)
 
-		val personer = personRepository.getPersoner(
-			listOf(
-				person1.personident,
-				person2.personident,
-				TestData.randomIdent()
+		val personer =
+			personRepository.getPersoner(
+				listOf(
+					person1.personident,
+					person2.personident,
+					TestData.randomIdent(),
+				),
 			)
-		)
 
 		personer shouldHaveSize 2
 		personer.any { it.id == person1.id } shouldBe true
@@ -96,13 +96,14 @@ class PersonRepositoryTest(
 
 	@Test
 	fun `upsert - ny person - inserter person`() {
-		val person = Person(
-			id = UUID.randomUUID(),
-			personident = TestData.randomIdent(),
-			fornavn = "Fornavn",
-			mellomnavn = "Mellomnavn",
-			etternavn = "Etternavn",
-		)
+		val person =
+			Person(
+				id = UUID.randomUUID(),
+				personident = TestData.randomIdent(),
+				fornavn = "Fornavn",
+				mellomnavn = "Mellomnavn",
+				etternavn = "Etternavn",
+			)
 
 		personRepository.upsert(person)
 
@@ -119,20 +120,22 @@ class PersonRepositoryTest(
 
 	@Test
 	fun `upsert - eksisterende person - oppdaterer person`() {
-		val originalPerson = TestData.lagPerson(
-			createdAt = LocalDateTime.now().minusMonths(6),
-			modifiedAt = LocalDateTime.now().minusMonths(6),
-		)
+		val originalPerson =
+			TestData.lagPerson(
+				createdAt = LocalDateTime.now().minusMonths(6),
+				modifiedAt = LocalDateTime.now().minusMonths(6),
+			)
 
 		testDataRepository.insertPerson(originalPerson)
 
-		val oppdatertPerson = Person(
-			id = originalPerson.id,
-			personident = originalPerson.personident,
-			fornavn = "Nytt",
-			mellomnavn = "Navn",
-			etternavn = "Med Mer",
-		)
+		val oppdatertPerson =
+			Person(
+				id = originalPerson.id,
+				personident = originalPerson.personident,
+				fornavn = "Nytt",
+				mellomnavn = "Navn",
+				etternavn = "Med Mer",
+			)
 
 		personRepository.upsert(oppdatertPerson)
 
@@ -151,20 +154,22 @@ class PersonRepositoryTest(
 
 	@Test
 	fun `upsert - ny ident - oppdaterer person`() {
-		val originalPerson = TestData.lagPerson(
-			createdAt = LocalDateTime.now().minusMonths(6),
-			modifiedAt = LocalDateTime.now().minusMonths(6),
-		)
+		val originalPerson =
+			TestData.lagPerson(
+				createdAt = LocalDateTime.now().minusMonths(6),
+				modifiedAt = LocalDateTime.now().minusMonths(6),
+			)
 
 		testDataRepository.insertPerson(originalPerson)
 
-		val oppdatertPerson = Person(
-			id = originalPerson.id,
-			personident = "ny ident",
-			fornavn = "Nytt",
-			mellomnavn = "Navn",
-			etternavn = "Med Mer",
-		)
+		val oppdatertPerson =
+			Person(
+				id = originalPerson.id,
+				personident = "ny ident",
+				fornavn = "Nytt",
+				mellomnavn = "Navn",
+				etternavn = "Med Mer",
+			)
 
 		personRepository.upsert(oppdatertPerson)
 
