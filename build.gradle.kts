@@ -109,6 +109,14 @@ ktlint {
     version = ktLintVersion
 }
 
+tasks.compileKotlin {
+    dependsOn("generateAvroJava")
+}
+
+tasks.runKtlintCheckOverMainSourceSet {
+    dependsOn("generateAvroJava")
+}
+
 tasks.runKtlintCheckOverTestSourceSet {
     dependsOn("generateTestAvroJava")
 }
