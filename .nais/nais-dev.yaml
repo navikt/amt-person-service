@@ -128,7 +128,7 @@ spec:
       - name: amt-person-service
         tier: db-f1-micro
         collation: nb_NO.UTF8
-        type: POSTGRES_14
+        type: POSTGRES_17
         databases:
           - name: amt-person-service
             envVarPrefix: DB
