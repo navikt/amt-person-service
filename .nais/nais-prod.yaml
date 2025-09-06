@@ -129,7 +129,7 @@ spec:
     sqlInstances:
       - name: amt-person-service
         collation: nb_NO.UTF8
-        type: POSTGRES_16
+        type: POSTGRES_17
         tier: db-custom-1-3840
         diskAutoresize: true
         highAvailability: true
