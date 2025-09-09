@@ -21,8 +21,8 @@ import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -340,7 +340,7 @@ class NavBrukerService(
 		}
 	}
 
-	@TransactionalEventListener
+	@EventListener
 	fun onPersonUpdate(personUpdateEvent: PersonUpdateEvent) {
 		repository.get(personUpdateEvent.person.personident)?.let {
 			kafkaProducerService.publiserNavBruker(it.toModel())

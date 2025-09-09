@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
 
@@ -45,6 +46,7 @@ class PersonService(
 
 	fun hentGjeldendeIdent(personident: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personident)).getOrThrow()
 
+	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
 		val personer = repository.getPersoner(identer.map { it.ident })
 
@@ -57,8 +59,8 @@ class PersonService(
 
 		personer.firstOrNull()?.let { person ->
 			log.info("Oppdaterer personident for person ${person.id}")
-			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
+			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 		}
 	}
 
@@ -99,12 +101,10 @@ class PersonService(
 	}
 
 	fun upsert(person: Person) {
-		transactionTemplate.executeWithoutResult {
-			repository.upsert(person)
-			applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
+		repository.upsert(person)
+		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 
-			log.info("Upsertet person med id: ${person.id}")
-		}
+		log.info("Upsertet person med id: ${person.id}")
 	}
 
 	private fun opprettPerson(personident: String): Person {
