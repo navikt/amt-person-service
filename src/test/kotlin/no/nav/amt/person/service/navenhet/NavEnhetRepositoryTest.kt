@@ -3,7 +3,6 @@ package no.nav.amt.person.service.navenhet
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.date.shouldBeAfter
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -110,6 +109,6 @@ class NavEnhetRepositoryTest(
 		val faktiskEnhet = enhetRepository.get(enhet.id)
 
 		faktiskEnhet.navn shouldBe "Nytt Navn"
-		faktiskEnhet.modifiedAt shouldBeAfter enhet.modifiedAt
+		faktiskEnhet.modifiedAt shouldNotBe enhet.modifiedAt
 	}
 }

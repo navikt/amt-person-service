@@ -13,7 +13,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
 
 @Service
@@ -22,7 +21,6 @@ class PersonService(
 	val repository: PersonRepository,
 	val personidentRepository: PersonidentRepository,
 	val applicationEventPublisher: ApplicationEventPublisher,
-	val transactionTemplate: TransactionTemplate,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -31,8 +29,10 @@ class PersonService(
 	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
 
 	@Retryable(maxAttempts = 2)
+	@Transactional
 	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
 
+	@Transactional
 	fun hentEllerOpprettPerson(
 		personident: String,
 		personOpplysninger: PdlPerson,
@@ -64,6 +64,7 @@ class PersonService(
 		}
 	}
 
+	@Transactional
 	fun oppdaterNavn(person: Person) {
 		val personOpplysninger =
 			try {
