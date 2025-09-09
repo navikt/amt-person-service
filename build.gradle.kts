@@ -20,19 +20,19 @@ repositories {
     maven { url = uri("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2025.08.19_06.12-48301d0f4239"
+val commonVersion = "3.2025.09.03_08.33-728ff4acbfdb"
 val okhttp3Version = "5.1.0"
-val kotestVersion = "5.9.1"
+val kotestVersion = "6.0.3"
 val poaoTilgangVersion = "2025.07.04_08.56-814fa50f6740"
 val testcontainersVersion = "1.21.3"
-val tokenSupportVersion = "5.0.34"
+val tokenSupportVersion = "5.0.36"
 val mockkVersion = "1.14.5"
 val lang3Version = "3.18.0"
 val shedlockVersion = "6.10.0"
 val confluentVersion = "8.0.0"
 val avroVersion = "1.12.0"
-val jacksonVersion = "2.19.2"
-val mockOauth2ServerVersion = "2.2.1"
+val jacksonVersion = "2.20.0"
+val mockOauth2ServerVersion = "2.3.0"
 val logstashEncoderVersion = "8.1"
 val ktLintVersion = "1.6.0"
 
