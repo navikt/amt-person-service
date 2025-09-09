@@ -57,7 +57,6 @@ class AktorV2ConsumerTest(
 
 			assertNavBrukerProducedMedNyIdent(person, nyttFnr)
 		}
-
 	}
 
 	@Test
@@ -95,17 +94,16 @@ class AktorV2ConsumerTest(
 		}
 	}
 
-
 	private fun assertNavBrukerProducedMedNyIdent(
 		person: PersonDbo,
 		nyttFnr: String,
 	) {
 		val navbrukerRecords = KafkaMessageConsumer.consume(kafkaTopicProperties.amtNavBrukerTopic)
 		navbrukerRecords.shouldNotBeNull()
-		val navBrukerRecord = fromJsonString<NavBrukerDtoV1>(
-			navbrukerRecords.first { it.key() == person.id.toString() }.value()
-		)
+		val navBrukerRecord =
+			fromJsonString<NavBrukerDtoV1>(
+				navbrukerRecords.first { it.key() == person.id.toString() }.value(),
+			)
 		navBrukerRecord.personident shouldBe nyttFnr
 	}
-
 }
