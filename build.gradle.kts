@@ -122,6 +122,14 @@ tasks.runKtlintCheckOverTestSourceSet {
     dependsOn("generateTestAvroJava")
 }
 
+tasks.runKtlintFormatOverMainSourceSet {
+    dependsOn("generateAvroJava")
+}
+
+tasks.runKtlintFormatOverTestSourceSet {
+    dependsOn("generateTestAvroJava")
+}
+
 tasks.jar {
     enabled = false
 }

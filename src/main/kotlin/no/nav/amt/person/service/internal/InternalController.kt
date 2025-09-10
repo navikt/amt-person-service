@@ -12,6 +12,7 @@ import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.ArrangorAnsattService
 import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.utils.EnvUtils.isDev
 import no.nav.common.job.JobRunner
@@ -44,6 +45,7 @@ class InternalController(
 	private val kafkaProducerService: KafkaProducerService,
 	private val navAnsattUpdater: NavAnsattUpdater,
 	private val navEnhetUpdateJob: NavEnhetUpdateJob,
+	private val personidentRepository: PersonidentRepository,
 ) {
 	private val log = LoggerFactory.getLogger(InternalController::class.java)
 
@@ -314,6 +316,21 @@ class InternalController(
 				navBrukerService.hentNavBruker(request.personident)
 					?: throw IllegalArgumentException("Fant ikke person")
 			navBrukerService.oppdaterKontaktinformasjon(navBruker)
+		} else {
+			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+		}
+	}
+
+	@Unprotected
+	@GetMapping("/nav-brukere/republiser-ny-ident")
+	fun republiserNavBrukereMedNyIdent(servlet: HttpServletRequest) {
+		if (isInternal(servlet)) {
+			val personidenter = personidentRepository.getPersonIderMedFlerePersonidenter()
+			personidenter.forEach {
+				navBrukerRepository.getByPersonId(it)?.let { nb ->
+					kafkaProducerService.publiserNavBruker(nb.toModel())
+				}
+			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}

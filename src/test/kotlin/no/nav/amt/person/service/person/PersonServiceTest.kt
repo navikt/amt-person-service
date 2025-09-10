@@ -10,19 +10,16 @@ import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.transaction.support.TransactionTemplate
 
 class PersonServiceTest {
 	private val pdlClient: PdlClient = mockk(relaxUnitFun = true)
 	private val personRepository: PersonRepository = mockk(relaxUnitFun = true)
 	private val personidentRepository: PersonidentRepository = mockk(relaxUnitFun = true)
 	private val applicationEventPublisher: ApplicationEventPublisher = mockk(relaxUnitFun = true)
-	private val transactionTemplate: TransactionTemplate = mockk()
 
 	private val service =
 		PersonService(
@@ -30,7 +27,6 @@ class PersonServiceTest {
 			repository = personRepository,
 			personidentRepository = personidentRepository,
 			applicationEventPublisher = applicationEventPublisher,
-			transactionTemplate = transactionTemplate,
 		)
 
 	@BeforeEach
@@ -57,7 +53,6 @@ class PersonServiceTest {
 
 		every { pdlClient.hentPerson(personident) } returns pdlPerson
 		every { personRepository.get(personident) } returns null
-		mockExecuteWithoutResult(transactionTemplate)
 
 		val person = service.hentEllerOpprettPerson(personident)
 		assertSoftly(person) {
@@ -79,7 +74,6 @@ class PersonServiceTest {
 
 		every { personRepository.getPersoner(identer.map { it.ident }) } returns
 			identer.map { TestData.lagPerson(personident = it.ident) }
-		mockExecuteWithoutResult(transactionTemplate)
 
 		assertThrows<IllegalStateException> {
 			service.oppdaterPersonIdent(identer)

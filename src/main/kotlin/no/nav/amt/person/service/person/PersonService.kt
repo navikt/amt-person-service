@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -21,7 +21,6 @@ class PersonService(
 	val repository: PersonRepository,
 	val personidentRepository: PersonidentRepository,
 	val applicationEventPublisher: ApplicationEventPublisher,
-	val transactionTemplate: TransactionTemplate,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -30,8 +29,10 @@ class PersonService(
 	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
 
 	@Retryable(maxAttempts = 2)
+	@Transactional
 	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
 
+	@Transactional
 	fun hentEllerOpprettPerson(
 		personident: String,
 		personOpplysninger: PdlPerson,
@@ -45,6 +46,7 @@ class PersonService(
 
 	fun hentGjeldendeIdent(personident: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personident)).getOrThrow()
 
+	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
 		val personer = repository.getPersoner(identer.map { it.ident })
 
@@ -57,11 +59,12 @@ class PersonService(
 
 		personer.firstOrNull()?.let { person ->
 			log.info("Oppdaterer personident for person ${person.id}")
-			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 			personidentRepository.upsert(person.id, identer)
+			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
 		}
 	}
 
+	@Transactional
 	fun oppdaterNavn(person: Person) {
 		val personOpplysninger =
 			try {
@@ -99,12 +102,10 @@ class PersonService(
 	}
 
 	fun upsert(person: Person) {
-		transactionTemplate.executeWithoutResult {
-			repository.upsert(person)
-			applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
+		repository.upsert(person)
+		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 
-			log.info("Upsertet person med id: ${person.id}")
-		}
+		log.info("Upsertet person med id: ${person.id}")
 	}
 
 	private fun opprettPerson(personident: String): Person {
