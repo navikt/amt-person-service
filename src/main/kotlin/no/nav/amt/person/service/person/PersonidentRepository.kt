@@ -83,4 +83,18 @@ class PersonidentRepository(
 			}
 		template.batchUpdate(sql, parameters.toTypedArray())
 	}
+
+	fun getPersonIderMedFlerePersonidenter(): List<UUID> {
+		val sql =
+			"""
+			select distinct person_id
+			from personident
+			where historisk = true
+				and type = 'FOLKEREGISTERIDENT'
+				and modified_at > '2025-01-01'
+				-- Antakelsen er at vi har reprodusert navbrukere etter denne datoen så vi kan snevre inn søket
+			""".trimIndent()
+
+		return template.query(sql) { rs, _ -> rs.getUUID("person_id") }
+	}
 }
