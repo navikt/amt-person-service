@@ -325,11 +325,17 @@ class InternalController(
 	@GetMapping("/nav-brukere/republiser-ny-ident")
 	fun republiserNavBrukereMedNyIdent(servlet: HttpServletRequest) {
 		if (isInternal(servlet)) {
-			val personidenter = personidentRepository.getPersonIderMedFlerePersonidenter()
-			personidenter.forEach {
-				navBrukerRepository.getByPersonId(it)?.let { nb ->
-					kafkaProducerService.publiserNavBruker(nb.toModel())
+			JobRunner.runAsync("republiser-nav-brukere-med-ny-ident") {
+				val personidenter = personidentRepository.getPersonIderMedFlerePersonidenter()
+
+				log.info("Starter republisering av navbrukere med ny ident. Antall: ${personidenter.size}")
+
+				personidenter.forEach {
+					navBrukerRepository.getByPersonId(it)?.let { nb ->
+						kafkaProducerService.publiserNavBruker(nb.toModel())
+					}
 				}
+				log.info("Ferdig med republisering av navbrukere med ny ident")
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
