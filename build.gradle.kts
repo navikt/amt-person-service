@@ -1,7 +1,7 @@
 plugins {
     val kotlinVersion = "2.2.20"
 
-    id("org.springframework.boot") version "3.5.5"
+    id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
     kotlin("plugin.serialization") version kotlinVersion
@@ -25,14 +25,14 @@ val okhttp3Version = "5.1.0"
 val kotestVersion = "6.0.3"
 val poaoTilgangVersion = "2025.09.15_11.12-54be8ac278c0"
 val testcontainersVersion = "1.21.3"
-val tokenSupportVersion = "5.0.36"
+val tokenSupportVersion = "5.0.37"
 val mockkVersion = "1.14.5"
 val lang3Version = "3.18.0"
 val shedlockVersion = "6.10.0"
 val confluentVersion = "8.0.0"
 val avroVersion = "1.12.0"
 val jacksonVersion = "2.20.0"
-val mockOauth2ServerVersion = "2.3.0"
+val mockOauth2ServerVersion = "3.0.0"
 val logstashEncoderVersion = "8.1"
 val ktLintVersion = "1.6.0"
 
