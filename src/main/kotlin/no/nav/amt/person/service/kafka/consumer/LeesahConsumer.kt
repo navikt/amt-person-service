@@ -57,9 +57,11 @@ class LeesahConsumer(
 
 		if (personer.isEmpty()) return
 
-		personer.forEach { person ->
-			personService.oppdaterNavn(person)
-		}
+		personer
+			.filter { person -> person.id.toString() !in personerMedFalskIdentitet }
+			.forEach { person ->
+				personService.oppdaterNavn(person)
+			}
 	}
 
 	private fun handterAdresse(personidenter: List<String>) {
@@ -68,5 +70,13 @@ class LeesahConsumer(
 		if (lagredePersonidenter.isEmpty()) return
 
 		navBrukerService.oppdaterAdresse(lagredePersonidenter)
+	}
+
+	companion object {
+		private val personerMedFalskIdentitet =
+			setOf(
+				"15c58a43-9fdd-4c05-98dc-30395760afa5",
+				"5d4e6416-5c82-48ec-a80e-04304f6d300d",
+			)
 	}
 }
