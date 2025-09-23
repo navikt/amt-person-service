@@ -8,6 +8,7 @@ import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
+import no.nav.amt.person.service.kafka.consumer.LeesahConsumer.Companion.personerMedFalskIdentitet
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsatt
 import no.nav.amt.person.service.navansatt.NavAnsattService
@@ -277,6 +278,11 @@ class NavBrukerService(
 	fun oppdaterAdressebeskyttelse(personident: String) {
 		val bruker = repository.get(personident)?.toModel() ?: return
 
+		if (bruker.person.id.toString() in personerMedFalskIdentitet) {
+			log.info("Skipper oppdaterAdressebeskyttelse for ${bruker.person.id}")
+			return
+		}
+
 		val personOpplysninger =
 			try {
 				pdlClient.hentPerson(personident)
@@ -307,6 +313,11 @@ class NavBrukerService(
 
 	private fun oppdaterAdresse(personident: String) {
 		val bruker = repository.get(personident)?.toModel() ?: return
+
+		if (bruker.person.id.toString() in personerMedFalskIdentitet) {
+			log.info("Skipper oppdaterAdresse for ${bruker.person.id}")
+			return
+		}
 
 		val personOpplysninger =
 			try {
