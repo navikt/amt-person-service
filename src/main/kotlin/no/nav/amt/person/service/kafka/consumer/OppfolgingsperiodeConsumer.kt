@@ -31,7 +31,7 @@ class OppfolgingsperiodeConsumer(
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
-			log.info("Oppfølgingsperiode endret. NavBruker finnes ikke, hopper over kafka melding")
+			log.info("Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering")
 			return
 		}
 
