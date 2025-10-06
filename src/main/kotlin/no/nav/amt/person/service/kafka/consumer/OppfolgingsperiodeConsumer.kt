@@ -20,7 +20,14 @@ class OppfolgingsperiodeConsumer(
 	fun ingest(value: String) {
 		val sisteOppfolgingsperiode = fromJsonString<SisteOppfolgingsperiodeV1>(value)
 
-		val gjeldendeIdent = personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
+		val gjeldendeIdent =
+			runCatching {
+				personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
+			}.getOrElse { throwable ->
+				log.warn(throwable.message, throwable)
+				return
+			}
+
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
