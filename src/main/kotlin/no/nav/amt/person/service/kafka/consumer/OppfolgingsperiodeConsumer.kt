@@ -20,11 +20,23 @@ class OppfolgingsperiodeConsumer(
 	fun ingest(value: String) {
 		val sisteOppfolgingsperiode = fromJsonString<SisteOppfolgingsperiodeV1>(value)
 
-		val gjeldendeIdent = personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
+		val gjeldendeIdent =
+			runCatching {
+				personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
+			}.getOrElse { throwable ->
+				// midlertidig fiks i og med at GraphQL ikke returnerer 404
+				if (throwable.message?.contains("Fant ikke person") == true) {
+					log.warn(throwable.message, throwable)
+					return
+				} else {
+					throw throwable
+				}
+			}
+
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
-			log.info("Oppfølgingsperiode endret. NavBruker finnes ikke, hopper over kafka melding")
+			log.info("Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering")
 			return
 		}
 

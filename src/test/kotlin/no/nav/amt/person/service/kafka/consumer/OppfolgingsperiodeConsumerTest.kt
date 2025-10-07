@@ -70,7 +70,7 @@ class OppfolgingsperiodeConsumerTest(
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {
 				getLogs().any {
-					it.message == "Oppfølgingsperiode endret. NavBruker finnes ikke, hopper over kafka melding"
+					it.message == "Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering"
 				} shouldBe true
 			}
 		}
