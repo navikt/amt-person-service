@@ -24,8 +24,13 @@ class OppfolgingsperiodeConsumer(
 			runCatching {
 				personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
 			}.getOrElse { throwable ->
-				log.warn(throwable.message, throwable)
-				return
+				// midlertidig fiks i og med at GraphQL ikke returnerer 404
+				if (throwable.message?.contains("Fant ikke person") == true) {
+					log.warn(throwable.message, throwable)
+					return
+				} else {
+					throw throwable
+				}
 			}
 
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
