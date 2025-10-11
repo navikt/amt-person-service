@@ -20,8 +20,8 @@ spec:
     path: /internal/health/liveness
     initialDelay: 30
   replicas:
-    min: 0
-    max: 0
+    min: 2
+    max: 4
     scalingStrategy:
       cpu:
         thresholdPercentage: 400
@@ -127,7 +127,7 @@ spec:
 
   gcp:
     sqlInstances:
-      - name: amt-person-service
+      - name: amt-person-service-2
         collation: nb_NO.UTF8
         type: POSTGRES_17
         tier: db-custom-1-3840
