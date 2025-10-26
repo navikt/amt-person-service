@@ -12,7 +12,7 @@ plugins {
 
 group = "no.nav.amt-person-service"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_24
 
 repositories {
     mavenCentral()
@@ -96,7 +96,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(24)
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
