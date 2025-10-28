@@ -33,7 +33,7 @@ val confluentVersion = "8.1.0"
 val avroVersion = "1.12.1"
 val jacksonVersion = "2.20.0"
 val mockOauth2ServerVersion = "3.0.0"
-val logstashEncoderVersion = "8.1"
+val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.6.0"
 
 dependencyManagement {
