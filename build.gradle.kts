@@ -1,9 +1,11 @@
+import org.apache.avro.tool.IdlTool
+import org.apache.avro.tool.SpecificCompilerTool
+
 plugins {
     val kotlinVersion = "2.2.21"
 
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -12,7 +14,7 @@ plugins {
 
 group = "no.nav.amt-person-service"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_24
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -96,7 +98,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(24)
+    jvmToolchain(21)
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
@@ -110,34 +112,99 @@ ktlint {
     version = ktLintVersion
 }
 
-tasks.compileKotlin {
+tasks.named("compileKotlin") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintCheckOverMainSourceSet {
+tasks.named("runKtlintCheckOverMainSourceSet") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintCheckOverTestSourceSet {
-    dependsOn("generateTestAvroJava")
-}
-
-tasks.runKtlintFormatOverMainSourceSet {
+tasks.named("runKtlintFormatOverMainSourceSet") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintFormatOverTestSourceSet {
-    dependsOn("generateTestAvroJava")
-}
-
-tasks.jar {
+tasks.named("jar") {
     enabled = false
 }
 
-tasks.test {
+tasks.named<Test>("test") {
     useJUnitPlatform()
     jvmArgs(
         "-Xshare:off",
         "-XX:+EnableDynamicAgentLoading",
     )
+}
+
+// ////////////
+// Avro fra her
+// ////////////
+
+buildscript {
+    dependencies {
+        classpath("org.apache.avro:avro-tools:1.12.1") {
+            exclude(group = "org.apache.avro", module = "trevni-avro")
+            exclude(group = "org.apache.avro", module = "trevni-core")
+        }
+        classpath("org.apache.avro:avro:1.12.1")
+    }
+}
+
+val buildDir: String = layout.buildDirectory.get().toString()
+
+val avroSchemasDir = "src/main/avro"
+val avroProtocolOutputDir = "$buildDir/generated/avro/protocols"
+val avroCodeGenerationDir = "$buildDir/generated-main-avro-custom-java"
+
+sourceSets {
+    main {
+        java {
+            srcDir(file(avroCodeGenerationDir))
+        }
+    }
+}
+
+tasks.register("generateAvroJava") {
+    inputs.dir(avroSchemasDir)
+    outputs.dir(avroCodeGenerationDir)
+
+    doLast {
+        // 1️⃣ Konverter alle .avdl til .avpr
+        file(avroSchemasDir)
+            .walkTopDown()
+            .filter { it.isFile && it.extension == "avdl" }
+            .forEach { idlFile ->
+                val outputFile = File(avroProtocolOutputDir, idlFile.nameWithoutExtension + ".avpr")
+                outputFile.parentFile.mkdirs()
+                IdlTool().run(
+                    System.`in`,
+                    System.out,
+                    System.err,
+                    listOf(idlFile.absolutePath, outputFile.absolutePath),
+                )
+            }
+
+        // 2️⃣ Generer Java fra alle .avpr
+        file(avroProtocolOutputDir)
+            .walkTopDown()
+            .filter { it.isFile && it.extension == "avpr" }
+            .forEach { protocolFile ->
+                SpecificCompilerTool().run(
+                    System.`in`,
+                    System.out,
+                    System.err,
+                    listOf(
+                        "protocol",
+                        protocolFile.absolutePath,
+                        File(avroCodeGenerationDir).absolutePath,
+                        "-encoding",
+                        "UTF-8",
+                        "-string",
+                        "-fieldVisibility",
+                        "private",
+                        "-noSetters",
+                    ),
+                )
+            }
+    }
 }
