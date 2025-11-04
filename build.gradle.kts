@@ -21,18 +21,18 @@ repositories {
 }
 
 val commonVersion = "3.2025.10.10_08.21-bb7c7830d93c"
-val okhttp3Version = "5.2.1"
+val okhttp3Version = "5.3.0"
 val kotestVersion = "6.0.4"
-val poaoTilgangVersion = "2025.10.16_11.29-aaf8578da14c"
+val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
 val testcontainersVersion = "2.0.1"
-val tokenSupportVersion = "5.0.37"
+val tokenSupportVersion = "5.0.39"
 val mockkVersion = "1.14.6"
 val lang3Version = "3.19.0"
 val shedlockVersion = "6.10.0"
 val confluentVersion = "8.1.0"
 val avroVersion = "1.12.1"
-val jacksonVersion = "2.20.0"
-val mockOauth2ServerVersion = "3.0.0"
+val jacksonVersion = "2.20.1"
+val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.6.0"
 
