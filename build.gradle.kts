@@ -107,8 +107,8 @@ ktlint {
 }
 
 tasks.register<GenerateAvroTask>("generateAvroJava") {
-    avroSchemasDir.set(layout.projectDirectory.dir("src/main/avro"))
-    avroCodeGenerationDir.set(layout.buildDirectory.dir("generated/avro/java"))
+    avroSchemasDir = layout.projectDirectory.dir("src/main/avro")
+    avroCodeGenerationDir = layout.buildDirectory.dir("generated/avro/java")
 }
 
 sourceSets.named("main") {
