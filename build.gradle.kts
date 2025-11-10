@@ -1,7 +1,7 @@
 plugins {
-    id("avro-plugin")
     val kotlinVersion = "2.2.21"
 
+    kotlin("jvm") // versjon settes i buildSrc
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
@@ -104,6 +104,19 @@ kotlin {
 
 ktlint {
     version = ktLintVersion
+}
+
+tasks.register<GenerateAvroTask>("generateAvroJava") {
+    avroSchemasDir.set(layout.projectDirectory.dir("src/main/avro"))
+    avroCodeGenerationDir.set(layout.buildDirectory.dir("generated/avro/java"))
+}
+
+sourceSets.named("main") {
+    java.srcDir(
+        tasks
+            .named<GenerateAvroTask>("generateAvroJava")
+            .flatMap { it.avroCodeGenerationDir },
+    )
 }
 
 tasks.named("compileKotlin") {
