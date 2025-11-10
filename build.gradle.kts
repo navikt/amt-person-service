@@ -1,13 +1,10 @@
-import org.apache.avro.tool.IdlTool
-import org.apache.avro.tool.SpecificCompilerTool
-
 plugins {
+    id("avro-plugin")
     val kotlinVersion = "2.2.21"
 
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
 }
@@ -70,9 +67,7 @@ dependencies {
     implementation("no.nav.common:kafka:$commonVersion")
 
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
-
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-    implementation("org.apache.avro:avro:$avroVersion")
 
     implementation("no.nav.poao-tilgang:client:$poaoTilgangVersion")
 
@@ -134,77 +129,4 @@ tasks.named<Test>("test") {
         "-Xshare:off",
         "-XX:+EnableDynamicAgentLoading",
     )
-}
-
-// ////////////
-// Avro fra her
-// ////////////
-
-buildscript {
-    dependencies {
-        classpath("org.apache.avro:avro-tools:1.12.1") {
-            exclude(group = "org.apache.avro", module = "trevni-avro")
-            exclude(group = "org.apache.avro", module = "trevni-core")
-        }
-        classpath("org.apache.avro:avro:1.12.1")
-    }
-}
-
-val buildDir: String = layout.buildDirectory.get().toString()
-
-val avroSchemasDir = "src/main/avro"
-val avroProtocolOutputDir = "$buildDir/generated/avro/protocols"
-val avroCodeGenerationDir = "$buildDir/generated-main-avro-custom-java"
-
-sourceSets {
-    main {
-        java {
-            srcDir(file(avroCodeGenerationDir))
-        }
-    }
-}
-
-tasks.register("generateAvroJava") {
-    inputs.dir(avroSchemasDir)
-    outputs.dir(avroCodeGenerationDir)
-
-    doLast {
-        // 1️⃣ Konverter alle .avdl til .avpr
-        file(avroSchemasDir)
-            .walkTopDown()
-            .filter { it.isFile && it.extension == "avdl" }
-            .forEach { idlFile ->
-                val outputFile = File(avroProtocolOutputDir, idlFile.nameWithoutExtension + ".avpr")
-                outputFile.parentFile.mkdirs()
-                IdlTool().run(
-                    System.`in`,
-                    System.out,
-                    System.err,
-                    listOf(idlFile.absolutePath, outputFile.absolutePath),
-                )
-            }
-
-        // 2️⃣ Generer Java fra alle .avpr
-        file(avroProtocolOutputDir)
-            .walkTopDown()
-            .filter { it.isFile && it.extension == "avpr" }
-            .forEach { protocolFile ->
-                SpecificCompilerTool().run(
-                    System.`in`,
-                    System.out,
-                    System.err,
-                    listOf(
-                        "protocol",
-                        protocolFile.absolutePath,
-                        File(avroCodeGenerationDir).absolutePath,
-                        "-encoding",
-                        "UTF-8",
-                        "-string",
-                        "-fieldVisibility",
-                        "private",
-                        "-noSetters",
-                    ),
-                )
-            }
-    }
 }
