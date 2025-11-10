@@ -1,18 +1,17 @@
 plugins {
     val kotlinVersion = "2.2.21"
 
+    kotlin("jvm") // versjon settes i buildSrc
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
 }
 
 group = "no.nav.amt-person-service"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_24
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -30,7 +29,6 @@ val mockkVersion = "1.14.6"
 val lang3Version = "3.19.0"
 val shedlockVersion = "6.10.0"
 val confluentVersion = "8.1.0"
-val avroVersion = "1.12.1"
 val jacksonVersion = "2.20.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
@@ -68,9 +66,7 @@ dependencies {
     implementation("no.nav.common:kafka:$commonVersion")
 
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
-
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-    implementation("org.apache.avro:avro:$avroVersion")
 
     implementation("no.nav.poao-tilgang:client:$poaoTilgangVersion")
 
@@ -96,7 +92,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(24)
+    jvmToolchain(21)
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
@@ -110,31 +106,36 @@ ktlint {
     version = ktLintVersion
 }
 
-tasks.compileKotlin {
+tasks.register<GenerateAvroTask>("generateAvroJava") {
+    avroSchemasDir = layout.projectDirectory.dir("src/main/avro")
+    avroCodeGenerationDir = layout.buildDirectory.dir("generated/avro/java")
+}
+
+sourceSets.named("main") {
+    java.srcDir(
+        tasks
+            .named<GenerateAvroTask>("generateAvroJava")
+            .flatMap { it.avroCodeGenerationDir },
+    )
+}
+
+tasks.named("compileKotlin") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintCheckOverMainSourceSet {
+tasks.named("runKtlintCheckOverMainSourceSet") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintCheckOverTestSourceSet {
-    dependsOn("generateTestAvroJava")
-}
-
-tasks.runKtlintFormatOverMainSourceSet {
+tasks.named("runKtlintFormatOverMainSourceSet") {
     dependsOn("generateAvroJava")
 }
 
-tasks.runKtlintFormatOverTestSourceSet {
-    dependsOn("generateTestAvroJava")
-}
-
-tasks.jar {
+tasks.named("jar") {
     enabled = false
 }
 
-tasks.test {
+tasks.named<Test>("test") {
     useJUnitPlatform()
     jvmArgs(
         "-Xshare:off",
