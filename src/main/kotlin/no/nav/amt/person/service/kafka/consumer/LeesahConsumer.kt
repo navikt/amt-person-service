@@ -77,6 +77,7 @@ class LeesahConsumer(
 			setOf(
 				"15c58a43-9fdd-4c05-98dc-30395760afa5",
 				"5d4e6416-5c82-48ec-a80e-04304f6d300d",
+				"aeba3431-5a7c-42ff-b7e4-a464746e519e",
 			)
 	}
 }
