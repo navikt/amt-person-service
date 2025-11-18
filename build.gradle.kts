@@ -20,13 +20,13 @@ repositories {
 }
 
 val commonVersion = "3.2025.10.10_08.21-bb7c7830d93c"
-val okhttp3Version = "5.3.0"
+val okhttp3Version = "5.3.1"
 val kotestVersion = "6.0.4"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
-val testcontainersVersion = "2.0.1"
+val testcontainersVersion = "2.0.2"
 val tokenSupportVersion = "5.0.39"
 val mockkVersion = "1.14.6"
-val lang3Version = "3.19.0"
+val lang3Version = "3.20.0"
 val shedlockVersion = "6.10.0"
 val confluentVersion = "8.1.0"
 val jacksonVersion = "2.20.1"
