@@ -66,6 +66,8 @@ spec:
         - host: veilarbarena.prod-fss-pub.nais.io
         - host: kodeverk-api.nav.no
   env:
+    - name: JDK_JAVA_OPTIONS
+      value: "-XX:MaxRAMPercentage=60.0"
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
     - name: PDL_URL
