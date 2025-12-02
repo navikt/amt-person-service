@@ -15,20 +15,20 @@ class EndringPaaBrukerConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
-		val brukerRecord = fromJsonString<EndringPaaBrukerDto>(value)
+		val endringPaaBrukerPayload = fromJsonString<EndringPaaBrukerDto>(value)
 
 		// Det er ikke mulig å fjerne nav kontor i arena men det kan legges meldinger på topicen som endrer andre ting
 		// og derfor ikke er relevante
-		if (brukerRecord.oppfolgingsenhet == null) return
+		if (endringPaaBrukerPayload.oppfolgingsenhet == null) return
 
-		val navBruker = navBrukerService.hentNavBruker(brukerRecord.fodselsnummer) ?: return
+		val navBruker = navBrukerService.hentNavBruker(endringPaaBrukerPayload.fodselsnummer) ?: return
 
-		if (navBruker.navEnhet?.enhetId == brukerRecord.oppfolgingsenhet) return
+		if (navBruker.navEnhet?.enhetId == endringPaaBrukerPayload.oppfolgingsenhet) return
 
 		log.info("Endrer oppfølgingsenhet på NavBruker med id=${navBruker.id}")
 
-		val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(brukerRecord.oppfolgingsenhet)
+		val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(endringPaaBrukerPayload.oppfolgingsenhet)
 
-		navBrukerService.oppdaterNavEnhet(navBruker, navEnhet)
+		navBrukerService.oppdaterNavEnhet(navBruker, navEnhet?.id)
 	}
 }

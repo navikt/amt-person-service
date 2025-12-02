@@ -12,7 +12,6 @@ import no.nav.amt.person.service.kafka.consumer.LeesahConsumer.Companion.persone
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsatt
 import no.nav.amt.person.service.navansatt.NavAnsattService
-import no.nav.amt.person.service.navenhet.NavEnhet
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
@@ -143,9 +142,14 @@ class NavBrukerService(
 
 	fun oppdaterNavEnhet(
 		navBruker: NavBruker,
-		navEnhet: NavEnhet?,
+		navEnhetId: UUID?,
 	) {
-		upsert(navBruker.copy(navEnhet = navEnhet))
+		transactionTemplate.executeWithoutResult {
+			repository.updateNavEnhet(navBruker.id, navEnhetId)
+			rolleService.opprettRolle(navBruker.person.id, Rolle.NAV_BRUKER)
+			// publiser oppdatert Nav-bruker
+			kafkaProducerService.publiserNavBruker(repository.get(navBruker.id).toModel())
+		}
 	}
 
 	fun finnBrukerId(gjeldendeIdent: String): UUID? = repository.finnBrukerId(gjeldendeIdent)
