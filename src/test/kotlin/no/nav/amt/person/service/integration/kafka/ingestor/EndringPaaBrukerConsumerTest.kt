@@ -16,11 +16,11 @@ class EndringPaaBrukerConsumerTest(
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
 	@Test
-	fun `ingest - bruker finnes, har ikke nav kontor - oppretter og oppdaterer nav kontor`() {
+	fun `ingest - bruker finnes, har ikke Nav-kontor - oppretter og oppdaterer Nav-kontor`() {
 		val navEnhet = TestData.lagNavEnhet()
 		val navBruker = TestData.lagNavBruker(navEnhet = null)
 
-		val msg =
+		val kafkaPayload =
 			KafkaMessageCreator.lagEndringPaaBrukerMsg(
 				fodselsnummer = navBruker.person.personident,
 				oppfolgingsenhet = navEnhet.enhetId,
@@ -29,7 +29,7 @@ class EndringPaaBrukerConsumerTest(
 		testDataRepository.insertNavBruker(navBruker)
 
 		mockNorgHttpServer.addNavEnhet(navEnhet.enhetId, navEnhet.navn)
-		kafkaMessageSender.sendTilEndringPaaBrukerTopic(msg.toJson())
+		kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload.toJson())
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
