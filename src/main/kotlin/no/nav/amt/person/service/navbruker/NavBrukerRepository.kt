@@ -191,7 +191,7 @@ class NavBrukerRepository(
 			FROM nav_bruker
 					 INNER JOIN person ON nav_bruker.person_id = person.id
 			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
-			ORDER BY siste_krr_sync asc nulls first, nav_bruker.modified_at
+			ORDER BY siste_krr_sync nulls first, nav_bruker.modified_at
 			OFFSET :offset
 			LIMIT :limit
 			"""
@@ -215,6 +215,30 @@ class NavBrukerRepository(
 		val parameters = sqlParameters("siste_personident" to sistePersonident, "limit" to limit)
 
 		return template.query(sql, parameters) { rs, _ -> rs.getString("person.personident") }
+	}
+
+	fun updateNavEnhet(
+		navBrukerId: UUID,
+		navEnhetId: UUID?,
+	) {
+		val sql =
+			"""
+			UPDATE
+				nav_bruker
+			SET
+				nav_enhet_id = :nav_enhet_id,
+				modified_at = CURRENT_TIMESTAMP
+			WHERE
+				nav_bruker.id = :id
+			""".trimIndent()
+
+		val parameters =
+			sqlParameters(
+				"id" to navBrukerId,
+				"nav_enhet_id" to navEnhetId,
+			)
+
+		template.update(sql, parameters)
 	}
 
 	fun upsert(bruker: NavBrukerUpsert) {
