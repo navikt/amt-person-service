@@ -51,6 +51,7 @@ class KafkaProducerService(
 		log.info("Publiserte navbruker med personId ${navBrukerDto.personId} til topic")
 	}
 
+	// brukes kun av tester
 	fun publiserSlettNavBruker(personId: UUID) {
 		val record = ProducerRecord<String, String?>(kafkaTopicProperties.amtNavBrukerTopic, personId.toString(), null)
 
