@@ -124,8 +124,6 @@ spec:
       value: api://prod-gcp.obo.veilarbvedtaksstotte/.default
     - name: VEILARBVEDTAKSSTOTTE_URL
       value: http://veilarbvedtaksstotte.obo
-    - name: INNSATSGRUPPE_TOPIC
-      value: pto.siste-14a-vedtak-v1
     - name: GJELDENDE_14A_VEDTAK_TOPIC
       value: obo.gjeldende-14a-vedtak-v1
 

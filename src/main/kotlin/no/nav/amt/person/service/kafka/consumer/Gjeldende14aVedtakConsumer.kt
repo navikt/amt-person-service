@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
 
 @Service
-class InnsatsgruppeV2Consumer(
+class Gjeldende14aVedtakConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
 ) {
@@ -25,7 +25,7 @@ class InnsatsgruppeV2Consumer(
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
-			log.info("Innsatsgruppe endret. NavBruker finnes ikke, hopper over kafkamelding")
+			log.info("Innsatsgruppe endret, men Nav-bruker finnes ikke. Hopper over Kafka-melding")
 			return
 		}
 
@@ -33,7 +33,7 @@ class InnsatsgruppeV2Consumer(
 			brukerId,
 			siste14aVedtak.innsatsgruppe.toV1(),
 		)
-		log.info("Oppdatert innsatsgruppe for bruker $brukerId")
+		log.info("Oppdatert innsatsgruppe for Nav-bruker $brukerId")
 	}
 
 	data class Gjeldende14aVedtakKafkaPayload(

@@ -13,7 +13,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 
-class InnsatsgruppeV2ConsumerTest(
+class Gjeldende14aVedtakConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
@@ -39,7 +39,7 @@ class InnsatsgruppeV2ConsumerTest(
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {
 				getLogs().any {
-					it.message == "Innsatsgruppe endret. NavBruker finnes ikke, hopper over kafkamelding"
+					it.message == "Innsatsgruppe endret, men Nav-bruker finnes ikke. Hopper over Kafka-melding"
 				} shouldBe true
 			}
 		}
@@ -49,7 +49,7 @@ class InnsatsgruppeV2ConsumerTest(
 		private val navBruker = TestData.lagNavBruker(innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS)
 
 		private val siste14aVedtak =
-			InnsatsgruppeV2Consumer.Gjeldende14aVedtakKafkaPayload(
+			Gjeldende14aVedtakConsumer.Gjeldende14aVedtakKafkaPayload(
 				aktorId = navBruker.person.personident,
 				innsatsgruppe = InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
 				hovedmal = null,

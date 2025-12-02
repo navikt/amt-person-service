@@ -199,7 +199,7 @@ class NavBrukerService(
 					innsatsgruppe = innsatsgruppe,
 				),
 			)
-			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for navbruker med id ${navBruker.id}")
+			log.info("Oppdatert innsatsgruppe og oppfølgingsperiode for Nav-bruker med id ${navBruker.id}")
 		}
 	}
 
