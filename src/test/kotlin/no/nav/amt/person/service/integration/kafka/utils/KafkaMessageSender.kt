@@ -19,22 +19,24 @@ import java.util.UUID
 @Component
 class KafkaMessageSender(
 	properties: KafkaProperties,
-	@Value("\${kafka.schema.registry.url}")
+	@Value($$"${kafka.schema.registry.url}")
 	private val schemaRegistryUrl: String,
-	@Value("\${app.env.endringPaaBrukerTopic}")
+	@Value($$"${app.env.endringPaaBrukerTopic}")
 	private val endringPaaBrukerTopic: String,
-	@Value("\${app.env.sisteTilordnetVeilederTopic}")
+	@Value($$"${app.env.sisteTilordnetVeilederTopic}")
 	private val sisteTilordnetVeilederTopic: String,
-	@Value("\${app.env.aktorV2Topic}")
+	@Value($$"${app.env.aktorV2Topic}")
 	private val aktorV2Topic: String,
-	@Value("\${app.env.skjermedePersonerTopic}")
+	@Value($$"${app.env.skjermedePersonerTopic}")
 	private val skjermedePersonerTopic: String,
-	@Value("\${app.env.leesahTopic}")
+	@Value($$"${app.env.leesahTopic}")
 	private val leesahTopic: String,
-	@Value("\${app.env.oppfolgingsperiodeTopic}")
+	@Value($$"${app.env.oppfolgingsperiodeTopic}")
 	private val oppfolgingsperiodeTopic: String,
-	@Value("\${app.env.innsatsgruppeTopic}")
+	@Value($$"${app.env.innsatsgruppeTopic}")
 	private val innsatsgruppeTopic: String,
+	@Value($$"${app.env.gjeldende14aVedtakTopic}")
+	private val gjeldende14aVedtakTopic: String,
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
@@ -72,6 +74,16 @@ class KafkaMessageSender(
 		kafkaProducer.send(
 			ProducerRecord(
 				innsatsgruppeTopic,
+				UUID.randomUUID().toString(),
+				jsonString,
+			),
+		)
+	}
+
+	fun sendTilGjeldende14aVedtakTopic(jsonString: String) {
+		kafkaProducer.send(
+			ProducerRecord(
+				gjeldende14aVedtakTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
 			),

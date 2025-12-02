@@ -12,6 +12,7 @@ data class KafkaTopicProperties(
 	val deltakerV2Topic: String,
 	val oppfolgingsperiodeTopic: String,
 	val innsatsgruppeTopic: String,
+	val gjeldende14aVedtakTopic: String,
 	// Producer topics:
 	val amtNavBrukerTopic: String,
 	val amtArrangorAnsattPersonaliaTopic: String,

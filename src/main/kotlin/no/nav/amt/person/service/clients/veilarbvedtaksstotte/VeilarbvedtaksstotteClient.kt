@@ -1,7 +1,8 @@
 package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
-import no.nav.amt.person.service.navbruker.Innsatsgruppe
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV2.Companion.toV1
 import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.rest.client.RestClient.baseClient
@@ -52,15 +53,6 @@ class VeilarbvedtaksstotteClient(
 	)
 
 	data class Gjeldende14aVedtakDTO(
-		val innsatsgruppe: Innsatsgruppe,
+		val innsatsgruppe: InnsatsgruppeV2,
 	)
 }
-
-fun Innsatsgruppe.toV1(): InnsatsgruppeV1 =
-	when (this) {
-		Innsatsgruppe.GODE_MULIGHETER -> InnsatsgruppeV1.STANDARD_INNSATS
-		Innsatsgruppe.TRENGER_VEILEDNING -> InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
-		Innsatsgruppe.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE -> InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
-		Innsatsgruppe.JOBBE_DELVIS -> InnsatsgruppeV1.GRADERT_VARIG_TILPASSET_INNSATS
-		Innsatsgruppe.LITEN_MULIGHET_TIL_A_JOBBE -> InnsatsgruppeV1.VARIG_TILPASSET_INNSATS
-	}

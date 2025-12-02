@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
-import no.nav.amt.person.service.navbruker.Innsatsgruppe
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
@@ -11,7 +11,7 @@ import okhttp3.mockwebserver.RecordedRequest
 class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbvedtaksstotteHttpServer") {
 	fun mockHentInnsatsgruppe(
 		fnr: String,
-		innsatsgruppe: Innsatsgruppe?,
+		innsatsgruppe: InnsatsgruppeV2?,
 	) {
 		val url = "/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"
 		val predicate = { req: RecordedRequest ->

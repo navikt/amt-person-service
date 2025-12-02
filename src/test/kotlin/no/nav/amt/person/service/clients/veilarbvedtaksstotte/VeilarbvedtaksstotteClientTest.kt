@@ -1,8 +1,8 @@
 package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.navbruker.Innsatsgruppe
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.utils.JsonUtils
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -31,7 +31,7 @@ class VeilarbvedtaksstotteClientTest {
 	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
 		val siste14aVedtakDTORespons =
 			VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
-				innsatsgruppe = Innsatsgruppe.JOBBE_DELVIS,
+				innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
 			)
 		server.enqueue(MockResponse().setBody(JsonUtils.toJsonString(siste14aVedtakDTORespons)))
 
