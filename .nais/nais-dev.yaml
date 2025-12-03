@@ -122,8 +122,6 @@ spec:
       value: api://dev-gcp.obo.veilarbvedtaksstotte/.default
     - name: VEILARBVEDTAKSSTOTTE_URL
       value: http://veilarbvedtaksstotte.obo
-    - name: GJELDENDE_14A_VEDTAK_TOPIC
-      value: obo.gjeldende-14a-vedtak-v1
 
   gcp:
     sqlInstances:

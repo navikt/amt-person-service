@@ -33,8 +33,6 @@ class KafkaMessageSender(
 	private val leesahTopic: String,
 	@Value($$"${app.env.oppfolgingsperiodeTopic}")
 	private val oppfolgingsperiodeTopic: String,
-	@Value($$"${app.env.gjeldende14aVedtakTopic}")
-	private val gjeldende14aVedtakTopic: String,
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
@@ -62,16 +60,6 @@ class KafkaMessageSender(
 		kafkaProducer.send(
 			ProducerRecord(
 				oppfolgingsperiodeTopic,
-				UUID.randomUUID().toString(),
-				jsonString,
-			),
-		)
-	}
-
-	fun sendTilGjeldende14aVedtakTopic(jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				gjeldende14aVedtakTopic,
 				UUID.randomUUID().toString(),
 				jsonString,
 			),
