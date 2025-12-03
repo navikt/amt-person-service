@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData.lagNavBruker
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
+import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
+import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.LogUtils
@@ -35,6 +37,10 @@ class OppfolgingsperiodeConsumerTest(
 			)
 
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, navBruker.person.personident)
+		mockVeilarbvedtaksstotteHttpServer.mockHentInnsatsgruppe(
+			navBruker.person.personident,
+			InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
+		)
 
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(toJsonString(sisteOppfolgingsperiodeV1))
 
@@ -58,7 +64,7 @@ class OppfolgingsperiodeConsumerTest(
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
 		val sisteOppfolgingsperiodeV1 =
-			OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
+			SisteOppfolgingsperiodeKafkaPayload(
 				uuid = UUID.randomUUID(),
 				aktorId = AKTOR_ID_IN_TEST,
 				startDato = ZonedDateTime.now().minusWeeks(1),
@@ -88,7 +94,7 @@ class OppfolgingsperiodeConsumerTest(
 		private fun createSisteOppfolgingsperiodeV1(
 			personIdent: String,
 			useEndDate: Boolean,
-		) = OppfolgingsperiodeConsumer.SisteOppfolgingsperiodeV1(
+		) = SisteOppfolgingsperiodeKafkaPayload(
 			uuid = UUID.randomUUID(),
 			aktorId = personIdent,
 			startDato = nowAsZonedDateTimeUtc,

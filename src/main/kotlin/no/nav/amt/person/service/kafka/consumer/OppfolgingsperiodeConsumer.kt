@@ -1,14 +1,12 @@
 package no.nav.amt.person.service.kafka.consumer
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
+import no.nav.amt.person.service.utils.JsonUtils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.ZonedDateTime
-import java.util.UUID
 
 @Service
 class OppfolgingsperiodeConsumer(
@@ -18,7 +16,7 @@ class OppfolgingsperiodeConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
-		val sisteOppfolgingsperiode = fromJsonString<SisteOppfolgingsperiodeV1>(value)
+		val sisteOppfolgingsperiode = objectMapper.readValue<SisteOppfolgingsperiodeKafkaPayload>(value)
 
 		val gjeldendeIdent =
 			runCatching {
@@ -40,21 +38,11 @@ class OppfolgingsperiodeConsumer(
 			return
 		}
 
-		navBrukerService.oppdaterOppfolgingsperiode(
+		navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(
 			brukerId,
-			Oppfolgingsperiode(
-				id = sisteOppfolgingsperiode.uuid,
-				startdato = sisteOppfolgingsperiode.startDato.toSystemZoneLocalDateTime(),
-				sluttdato = sisteOppfolgingsperiode.sluttDato?.toSystemZoneLocalDateTime(),
-			),
+			sisteOppfolgingsperiode.toOppfolgingsperiode(),
 		)
+
 		log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
 	}
-
-	data class SisteOppfolgingsperiodeV1(
-		val uuid: UUID,
-		val aktorId: String,
-		val startDato: ZonedDateTime,
-		val sluttDato: ZonedDateTime?,
-	)
 }

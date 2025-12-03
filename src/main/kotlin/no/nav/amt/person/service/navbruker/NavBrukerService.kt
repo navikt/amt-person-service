@@ -164,16 +164,26 @@ class NavBrukerService(
 		}
 	}
 
-	fun oppdaterOppfolgingsperiode(
+	fun oppdaterOppfolgingsperiodeOgInnsatsgruppe(
 		navBrukerId: UUID,
 		oppfolgingsperiode: Oppfolgingsperiode,
 	) {
 		val bruker = repository.get(navBrukerId).toModel()
 		val oppfolgingsperioder =
-			bruker.oppfolgingsperioder.filter { it.id != oppfolgingsperiode.id }.plus(oppfolgingsperiode)
+			bruker.oppfolgingsperioder
+				.filter { it.id != oppfolgingsperiode.id }
+				.plus(oppfolgingsperiode)
 
 		if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
-			upsert(bruker.copy(oppfolgingsperioder = oppfolgingsperioder))
+			upsert(
+				bruker.copy(
+					oppfolgingsperioder = oppfolgingsperioder,
+					innsatsgruppe =
+						veilarbvedtaksstotteClient.hentInnsatsgruppe(
+							bruker.person.personident,
+						),
+				),
+			)
 		}
 	}
 
