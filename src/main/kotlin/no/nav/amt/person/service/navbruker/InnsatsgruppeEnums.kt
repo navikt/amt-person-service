@@ -27,9 +27,3 @@ enum class InnsatsgruppeV2 {
 			}
 	}
 }
-
-enum class HovedmalMedOkeDeltakelse {
-	SKAFFE_ARBEID,
-	BEHOLDE_ARBEID,
-	OKE_DELTAKELSE,
-}
