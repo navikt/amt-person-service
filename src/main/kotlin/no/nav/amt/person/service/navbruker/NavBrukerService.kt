@@ -164,6 +164,21 @@ class NavBrukerService(
 		}
 	}
 
+	fun oppdaterInnsatsgruppe(
+		navBrukerId: UUID,
+		innsatsgruppe: InnsatsgruppeV1,
+	) {
+		val bruker = repository.get(navBrukerId).toModel()
+
+		if (innsatsgruppe != bruker.innsatsgruppe) {
+			if (harAktivOppfolgingsperiode(bruker.oppfolgingsperioder)) {
+				upsert(bruker.copy(innsatsgruppe = innsatsgruppe))
+			} else if (bruker.innsatsgruppe != null) {
+				upsert(bruker.copy(innsatsgruppe = null))
+			}
+		}
+	}
+
 	fun oppdaterOppfolgingsperiodeOgInnsatsgruppe(
 		navBrukerId: UUID,
 		oppfolgingsperiode: Oppfolgingsperiode,
@@ -198,7 +213,7 @@ class NavBrukerService(
 					innsatsgruppe = innsatsgruppe,
 				),
 			)
-			log.info("Oppdatert innsatsgruppe og oppfølgingsperiode for Nav-bruker med id ${navBruker.id}")
+			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for navbruker med id ${navBruker.id}")
 		}
 	}
 

@@ -3,6 +3,7 @@ package no.nav.amt.person.service.kafka.config
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
 import no.nav.amt.person.service.kafka.consumer.AktorV2Consumer
 import no.nav.amt.person.service.kafka.consumer.EndringPaaBrukerConsumer
+import no.nav.amt.person.service.kafka.consumer.InnsatsgruppeConsumer
 import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
 import no.nav.amt.person.service.kafka.consumer.OppfolgingsperiodeConsumer
 import no.nav.amt.person.service.kafka.consumer.SkjermetPersonConsumer
@@ -39,6 +40,7 @@ class KafkaConfiguration(
 	skjermetPersonConsumer: SkjermetPersonConsumer,
 	leesahConsumer: LeesahConsumer,
 	oppfolgingsperiodeConsumer: OppfolgingsperiodeConsumer,
+	innsatsgruppeConsumer: InnsatsgruppeConsumer,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 	private val consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
@@ -78,6 +80,16 @@ class KafkaConfiguration(
 						Deserializers.stringDeserializer(),
 						Deserializers.stringDeserializer(),
 						Consumer { oppfolgingsperiodeConsumer.ingest(it.value()) },
+					),
+				KafkaConsumerClientBuilder
+					.TopicConfig<String, String>()
+					.withLogging()
+					.withStoreOnFailure(consumerRepository)
+					.withConsumerConfig(
+						kafkaTopicProperties.innsatsgruppeTopic,
+						Deserializers.stringDeserializer(),
+						Deserializers.stringDeserializer(),
+						Consumer { innsatsgruppeConsumer.ingest(it.value()) },
 					),
 				KafkaConsumerClientBuilder
 					.TopicConfig<String, Aktor>()
