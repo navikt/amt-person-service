@@ -175,13 +175,13 @@ class NavBrukerService(
 				.plus(oppfolgingsperiode)
 
 		if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
+			val oppdatertInnsatsgruppe =
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(bruker.person.personident)
+
 			upsert(
 				bruker.copy(
 					oppfolgingsperioder = oppfolgingsperioder,
-					innsatsgruppe =
-						veilarbvedtaksstotteClient.hentInnsatsgruppe(
-							bruker.person.personident,
-						),
+					innsatsgruppe = oppdatertInnsatsgruppe,
 				),
 			)
 		}
