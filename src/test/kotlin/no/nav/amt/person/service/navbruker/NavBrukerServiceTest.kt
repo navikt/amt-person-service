@@ -23,6 +23,7 @@ import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
@@ -409,27 +410,9 @@ class NavBrukerServiceTest {
 		verify(exactly = 0) { brukerRepository.upsert(any()) }
 	}
 
-	@Test
-	fun `oppdaterOppfolgingsperiode - har ingen oppfolgingsperioder - lagrer`() {
-		val bruker = TestData.lagNavBruker(oppfolgingsperioder = emptyList())
-		every { brukerRepository.get(bruker.id) } returns bruker
-		mockExecuteWithoutResult(transactionTemplate)
-		val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
-
-		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
-
-		verify(exactly = 1) {
-			brukerRepository.upsert(
-				match {
-					it.oppfolgingsperioder == listOf(oppfolgingsperiode)
-				},
-			)
-		}
-	}
-
-	@Test
-	fun `oppdaterOppfolgingsperiode - har eldre oppfolgingsperiode - lagrer`() {
-		val bruker =
+	@Nested
+	inner class OppdaterOppfolgingsperiodeOgInnsatsgruppeTests {
+		val brukerInTest =
 			TestData.lagNavBruker(
 				oppfolgingsperioder =
 					listOf(
@@ -440,74 +423,84 @@ class NavBrukerServiceTest {
 						),
 					),
 			)
-		every { brukerRepository.get(bruker.id) } returns bruker
-		mockExecuteWithoutResult(transactionTemplate)
-		val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
 
-		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+		@BeforeEach
+		fun setup() {
+			mockExecuteWithoutResult(transactionTemplate)
 
-		verify(exactly = 1) {
-			brukerRepository.upsert(
-				match {
-					it.oppfolgingsperioder.size == 2 &&
-						it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == bruker.oppfolgingsperioder.first().id } ==
-						bruker.oppfolgingsperioder.first() &&
-						it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == oppfolgingsperiode.id } == oppfolgingsperiode
-				},
-			)
+			every { brukerRepository.get(brukerInTest.id) } returns brukerInTest
+			every {
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(brukerInTest.person.personident)
+			} returns InnsatsgruppeV1.STANDARD_INNSATS
 		}
-	}
 
-	@Test
-	fun `oppdaterOppfolgingsperiode - har samme oppfolgingsperiode, annen sluttdato - oppdaterer`() {
-		val bruker =
-			TestData.lagNavBruker(
-				oppfolgingsperioder =
-					listOf(
-						Oppfolgingsperiode(
-							id = UUID.randomUUID(),
-							startdato = LocalDateTime.now().minusYears(3),
-							sluttdato = LocalDateTime.now().minusYears(1),
-						),
-					),
-			)
-		every { brukerRepository.get(bruker.id) } returns bruker
-		mockExecuteWithoutResult(transactionTemplate)
-		val oppfolgingsperiode = bruker.oppfolgingsperioder.first().copy(sluttdato = null)
+		@Test
+		fun `oppdaterOppfolgingsperiode - har ingen oppfolgingsperioder - lagrer`() {
+			val bruker = brukerInTest.copy(oppfolgingsperioder = emptyList())
+			val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
 
-		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+			every { brukerRepository.get(bruker.id) } returns bruker
 
-		verify(exactly = 1) {
-			brukerRepository.upsert(
-				match {
-					it.oppfolgingsperioder.size == 1 &&
-						it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == bruker.oppfolgingsperioder.first().id } ==
-						oppfolgingsperiode
-				},
-			)
+			service.oppdaterOppfolgingsperiodeOgInnsatsgruppe(bruker.id, oppfolgingsperiode)
+
+			verify(exactly = 1) {
+				brukerRepository.upsert(
+					match {
+						it.oppfolgingsperioder == listOf(oppfolgingsperiode)
+					},
+				)
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(bruker.person.personident)
+			}
 		}
-	}
 
-	@Test
-	fun `oppdaterOppfolgingsperiode - har samme oppfolgingsperiode, ingen endring - oppdaterer ikke`() {
-		val bruker =
-			TestData.lagNavBruker(
-				oppfolgingsperioder =
-					listOf(
-						Oppfolgingsperiode(
-							id = UUID.randomUUID(),
-							startdato = LocalDateTime.now().minusYears(3),
-							sluttdato = LocalDateTime.now().minusYears(1),
-						),
-					),
-			)
-		every { brukerRepository.get(bruker.id) } returns bruker
-		mockExecuteWithoutResult(transactionTemplate)
-		val oppfolgingsperiode = bruker.oppfolgingsperioder.first()
+		@Test
+		fun `har eldre oppfolgingsperiode - lagrer`() {
+			val oppfolgingsperiode = TestData.lagOppfolgingsperiode()
 
-		service.oppdaterOppfolgingsperiode(bruker.id, oppfolgingsperiode)
+			service.oppdaterOppfolgingsperiodeOgInnsatsgruppe(brukerInTest.id, oppfolgingsperiode)
 
-		verify(exactly = 0) { brukerRepository.upsert(any()) }
+			verify(exactly = 1) {
+				brukerRepository.upsert(
+					match {
+						it.oppfolgingsperioder.size == 2 &&
+							it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == brukerInTest.oppfolgingsperioder.first().id } ==
+							brukerInTest.oppfolgingsperioder.first() &&
+							it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == oppfolgingsperiode.id } == oppfolgingsperiode
+					},
+				)
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(brukerInTest.person.personident)
+			}
+		}
+
+		@Test
+		fun `har samme oppfolgingsperiode, annen sluttdato - oppdaterer`() {
+			val oppfolgingsperiode = brukerInTest.oppfolgingsperioder.first().copy(sluttdato = null)
+
+			service.oppdaterOppfolgingsperiodeOgInnsatsgruppe(brukerInTest.id, oppfolgingsperiode)
+
+			verify(exactly = 1) {
+				brukerRepository.upsert(
+					match {
+						it.oppfolgingsperioder.size == 1 &&
+							it.oppfolgingsperioder.find { oppfolgingsPeriode -> oppfolgingsPeriode.id == brukerInTest.oppfolgingsperioder.first().id } ==
+							oppfolgingsperiode
+					},
+				)
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(brukerInTest.person.personident)
+			}
+		}
+
+		@Test
+		fun `har samme oppfolgingsperiode, ingen endring - oppdaterer ikke`() {
+			val oppfolgingsperiode = brukerInTest.oppfolgingsperioder.first()
+
+			service.oppdaterOppfolgingsperiodeOgInnsatsgruppe(brukerInTest.id, oppfolgingsperiode)
+
+			verify(exactly = 0) {
+				brukerRepository.upsert(any())
+				veilarbvedtaksstotteClient.hentInnsatsgruppe(any())
+			}
+		}
 	}
 
 	@Test

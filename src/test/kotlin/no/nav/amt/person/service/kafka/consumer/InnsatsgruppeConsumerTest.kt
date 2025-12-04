@@ -11,7 +11,7 @@ import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
-class InnsatsgruppeV1ConsumerTest(
+class InnsatsgruppeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
