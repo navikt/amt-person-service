@@ -3,19 +3,21 @@ package no.nav.amt.person.service.kafka.consumer
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @Service
 class InnsatsgruppeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
-		val siste14aVedtak = fromJsonString<Siste14aVedtak>(value)
+		val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
 		val gjeldendeIdent = personService.hentGjeldendeIdent(siste14aVedtak.aktorId)
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)

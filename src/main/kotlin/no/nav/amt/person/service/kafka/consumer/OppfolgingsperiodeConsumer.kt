@@ -1,17 +1,18 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.utils.JsonUtils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @Service
 class OppfolgingsperiodeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 

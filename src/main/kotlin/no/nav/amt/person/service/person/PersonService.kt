@@ -10,7 +10,7 @@ import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import no.nav.amt.person.service.utils.EnvUtils
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -28,7 +28,7 @@ class PersonService(
 
 	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
 
-	@Retryable(maxAttempts = 2)
+	@Retryable(maxRetries = 2)
 	@Transactional
 	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
 

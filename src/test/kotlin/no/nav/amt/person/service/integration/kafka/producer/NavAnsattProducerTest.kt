@@ -11,7 +11,6 @@ import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.navansatt.NavAnsatt
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import org.junit.jupiter.api.Test
 
 class NavAnsattProducerTest(
@@ -76,7 +75,7 @@ class NavAnsattProducerTest(
 	}
 
 	private fun ansattTilV1Json(ansatt: NavAnsatt): String =
-		toJsonString(
+		objectMapper.writeValueAsString(
 			NavAnsattDtoV1(
 				id = ansatt.id,
 				navident = ansatt.navIdent,

@@ -12,7 +12,6 @@ import no.nav.amt.person.service.kafka.producer.dto.ArrangorAnsattDtoV1
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import org.junit.jupiter.api.Test
 
 class ArrangorAnsattProducerTest(
@@ -86,7 +85,7 @@ class ArrangorAnsattProducerTest(
 	}
 
 	private fun ansattTilV1Json(ansatt: Person): String =
-		toJsonString(
+		objectMapper.writeValueAsString(
 			ArrangorAnsattDtoV1(
 				id = ansatt.id,
 				personident = ansatt.personident,

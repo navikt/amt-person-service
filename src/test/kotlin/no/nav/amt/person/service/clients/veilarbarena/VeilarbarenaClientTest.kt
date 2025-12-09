@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.clients.veilarbarena
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
@@ -17,6 +18,7 @@ class VeilarbarenaClientTest {
 			VeilarbarenaClient(
 				baseUrl = server.url("").toString().removeSuffix("/"),
 				tokenProvider = { "VEILARBARENA_TOKEN" },
+				objectMapper = staticObjectMapper,
 			)
 	}
 

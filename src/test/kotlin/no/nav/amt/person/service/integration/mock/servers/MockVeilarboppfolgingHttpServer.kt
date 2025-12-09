@@ -2,7 +2,7 @@ package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
@@ -59,7 +59,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 		val response =
 			MockResponse()
 				.setResponseCode(200)
-				.setBody(toJsonString(oppfolgingsperioderRespons))
+				.setBody(staticObjectMapper.writeValueAsString(oppfolgingsperioderRespons))
 		addResponseHandler(predicate, response)
 	}
 }

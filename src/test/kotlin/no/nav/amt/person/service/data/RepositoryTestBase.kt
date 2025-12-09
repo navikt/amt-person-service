@@ -3,19 +3,21 @@ package no.nav.amt.person.service.data
 import no.nav.amt.person.service.utils.DbTestDataUtils.cleanDatabase
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureJdbc
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureJdbc
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestConstructor
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import javax.sql.DataSource
 
 @ActiveProfiles("test")
 @AutoConfigureJdbc
+@AutoConfigureJson
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @Import(TestDataRepository::class)
 abstract class RepositoryTestBase {
@@ -37,7 +39,7 @@ abstract class RepositoryTestBase {
 		@ServiceConnection
 		@Suppress("unused")
 		private val postgres =
-			PostgreSQLContainer<Nothing>(
+			PostgreSQLContainer(
 				DockerImageName
 					.parse(POSTGRES_DOCKER_IMAGE_NAME)
 					.asCompatibleSubstituteFor("postgres"),

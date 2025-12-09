@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import java.util.Properties
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class KafkaBeans {
 	@Bean
 	@Profile("default")

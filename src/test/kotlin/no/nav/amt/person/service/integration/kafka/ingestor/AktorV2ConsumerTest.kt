@@ -12,12 +12,12 @@ import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.aktor.v2.Identifikator
 import no.nav.person.pdl.aktor.v2.Type
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 class AktorV2ConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
@@ -101,7 +101,7 @@ class AktorV2ConsumerTest(
 		val navbrukerRecords = KafkaMessageConsumer.consume(kafkaTopicProperties.amtNavBrukerTopic)
 		navbrukerRecords.shouldNotBeNull()
 		val navBrukerRecord =
-			fromJsonString<NavBrukerDtoV1>(
+			objectMapper.readValue<NavBrukerDtoV1>(
 				navbrukerRecords.first { it.key() == person.id.toString() }.value(),
 			)
 		navBrukerRecord.personident shouldBe nyttFnr

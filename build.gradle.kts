@@ -2,7 +2,7 @@ plugins {
     val kotlinVersion = "2.2.21"
 
     kotlin("jvm") // versjon settes i buildSrc
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.0.0"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -23,22 +23,15 @@ val commonVersion = "3.2025.10.10_08.21-bb7c7830d93c"
 val okhttp3Version = "5.3.2"
 val kotestVersion = "6.0.5"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
-val testcontainersVersion = "2.0.2"
-val tokenSupportVersion = "5.0.39"
+val tokenSupportVersion = "6.0.0"
 val mockkVersion = "1.14.6"
 val lang3Version = "3.20.0"
 val shedlockVersion = "7.2.0"
 val confluentVersion = "8.1.0"
-val jacksonVersion = "2.20.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.6.0"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
-    }
-}
+val jacksonModuleKotlinVersion = "3.0.3"
 
 // fjernes ved neste release av org.apache.kafka:kafka-clients
 configurations.configureEach {
@@ -53,20 +46,16 @@ configurations.configureEach {
 
 dependencies {
     implementation("at.yawk.lz4:lz4-java:1.10.1") // fjernes ved neste release av org.apache.kafka:kafka-clients
-    implementation("org.springframework.boot:spring-boot-starter")
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-flyway")
 
-    implementation("org.springframework.retry:spring-retry")
-    implementation("org.springframework:spring-aspects")
-
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-kotlin:$jacksonModuleKotlinVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3Version")
-    implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql")
 
@@ -82,23 +71,23 @@ dependencies {
 
     implementation("no.nav.poao-tilgang:client:$poaoTilgangVersion")
 
-    implementation("org.apache.commons:commons-lang3:$lang3Version")
-
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
 
     implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
 
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-data-jdbc-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-json-jvm:$kotestVersion")
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttp3Version")
 
-    testImplementation("org.testcontainers:postgresql")
-    testImplementation("org.testcontainers:kafka")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("org.testcontainers:testcontainers-kafka")
+
     testImplementation("io.mockk:mockk-jvm:$mockkVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOauth2ServerVersion")
 }

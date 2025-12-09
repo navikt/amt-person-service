@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.integration.controller
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -20,9 +19,11 @@ import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.utils.JsonUtils.objectMapper
+import no.nav.amt.person.service.utils.StringUtils.emptyRequest
+import no.nav.amt.person.service.utils.StringUtils.toJsonRequestBody
 import okhttp3.Request
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class PersonAPITest(

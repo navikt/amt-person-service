@@ -4,19 +4,19 @@ import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.ObjectMapper
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class KrrProxyClientConfig {
-	@Value("\${digdir-krr-proxy.url}")
-	lateinit var url: String
-
-	@Value("\${digdir-krr-proxy.scope}")
-	lateinit var scope: String
-
 	@Bean
-	fun krrProxyClient(machineToMachineTokenClient: MachineToMachineTokenClient) =
-		KrrProxyClient(
-			baseUrl = url,
-			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		)
+	fun krrProxyClient(
+		@Value($$"${digdir-krr-proxy.url}") url: String,
+		@Value($$"${digdir-krr-proxy.scope}") scope: String,
+		machineToMachineTokenClient: MachineToMachineTokenClient,
+		objectMapper: ObjectMapper,
+	) = KrrProxyClient(
+		baseUrl = url,
+		tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+		objectMapper = objectMapper,
+	)
 }

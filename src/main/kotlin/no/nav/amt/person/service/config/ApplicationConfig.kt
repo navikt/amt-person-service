@@ -11,26 +11,28 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.retry.annotation.EnableRetry
+import org.springframework.resilience.annotation.EnableResilientMethods
 
-@Configuration
-@EnableRetry
+@EnableResilientMethods
 @EnableJwtTokenValidation
+@Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
 	@Bean
 	fun logFilterRegistrationBean(): FilterRegistrationBean<LogRequestFilter> {
-		val registration = FilterRegistrationBean<LogRequestFilter>()
-		registration.filter = LogRequestFilter("amt-person-service", false)
-		registration.order = 1
-		registration.addUrlPatterns("/*")
+		val registration =
+			FilterRegistrationBean<LogRequestFilter>().apply {
+				setFilter(LogRequestFilter("amt-person-service", false))
+				order = 1
+				addUrlPatterns("/*")
+			}
 		return registration
 	}
 
 	@Bean
 	fun machineToMachineTokenClient(
-		@Value("\${nais.env.azureAppClientId}") azureAdClientId: String,
-		@Value("\${nais.env.azureOpenIdConfigTokenEndpoint}") azureTokenEndpoint: String,
-		@Value("\${nais.env.azureAppJWK}") azureAdJWK: String,
+		@Value($$"${nais.env.azureAppClientId}") azureAdClientId: String,
+		@Value($$"${nais.env.azureOpenIdConfigTokenEndpoint}") azureTokenEndpoint: String,
+		@Value($$"${nais.env.azureAppJWK}") azureAdJWK: String,
 	): MachineToMachineTokenClient =
 		AzureAdTokenClientBuilder
 			.builder()
@@ -41,8 +43,8 @@ class ApplicationConfig {
 
 	@Bean
 	fun poaoTilgangClient(
-		@Value("\${poao-tilgang.url}") poaoTilgangUrl: String,
-		@Value("\${poao-tilgang.scope}") poaoTilgangScope: String,
+		@Value($$"${poao-tilgang.url}") poaoTilgangUrl: String,
+		@Value($$"${poao-tilgang.scope}") poaoTilgangScope: String,
 		machineToMachineTokenClient: MachineToMachineTokenClient,
 	): PoaoTilgangClient =
 		PoaoTilgangCachedClient(

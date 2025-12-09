@@ -1,13 +1,13 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.amt.person.service.clients.nom.NomQueries
 import no.nav.amt.person.service.navansatt.NavAnsatt
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
@@ -43,8 +43,8 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 		req: RecordedRequest,
 		identifier: String,
 	): Boolean {
-		val body = fromJsonString<JsonNode>(req.body.readUtf8())
-		val identer = fromJsonString<List<String>>(body.get("variables").get("identer").toString())
+		val body = staticObjectMapper.readValue<JsonNode>(req.body.readUtf8())
+		val identer = staticObjectMapper.readValue<List<String>>(body.get("variables").get("identer").toString())
 		return identer.contains(identifier)
 	}
 
@@ -73,7 +73,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 					),
 			)
 
-		return MockResponse().setResponseCode(200).setBody(toJsonString(body))
+		return MockResponse().setResponseCode(200).setBody(staticObjectMapper.writeValueAsString(body))
 	}
 
 	data class NomClientResponseInput(

@@ -3,7 +3,7 @@ package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.utils.JsonUtils
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +24,7 @@ class VeilarbvedtaksstotteClientTest {
 			VeilarbvedtaksstotteClient(
 				apiUrl = serverUrl,
 				veilarbvedtaksstotteTokenProvider = { "VEILARBVEDTAKSSTOTTE_TOKEN" },
+				objectMapper = staticObjectMapper,
 			)
 	}
 
@@ -33,7 +34,7 @@ class VeilarbvedtaksstotteClientTest {
 			VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
 				innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
 			)
-		server.enqueue(MockResponse().setBody(JsonUtils.toJsonString(siste14aVedtakDTORespons)))
+		server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(siste14aVedtakDTORespons)))
 
 		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
