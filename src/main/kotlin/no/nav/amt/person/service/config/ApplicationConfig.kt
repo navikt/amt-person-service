@@ -18,15 +18,12 @@ import org.springframework.resilience.annotation.EnableResilientMethods
 @Configuration(proxyBeanMethods = false)
 class ApplicationConfig {
 	@Bean
-	fun logFilterRegistrationBean(): FilterRegistrationBean<LogRequestFilter> {
-		val registration =
-			FilterRegistrationBean<LogRequestFilter>().apply {
-				setFilter(LogRequestFilter("amt-person-service", false))
-				order = 1
-				addUrlPatterns("/*")
-			}
-		return registration
-	}
+	fun logFilterRegistrationBean(): FilterRegistrationBean<LogRequestFilter> =
+		FilterRegistrationBean<LogRequestFilter>().apply {
+			setFilter(LogRequestFilter("amt-person-service", false))
+			order = 1
+			addUrlPatterns("/*")
+		}
 
 	@Bean
 	fun machineToMachineTokenClient(
