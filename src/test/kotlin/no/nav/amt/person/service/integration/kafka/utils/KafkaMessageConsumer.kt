@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.integration.kafka.utils
 
+import no.nav.amt.person.service.integration.IntegrationTestBase.Companion.kafkaContainer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -12,7 +13,7 @@ object KafkaMessageConsumer {
 		val consumer =
 			KafkaConsumer<String, String>(
 				Properties().apply {
-					put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, SingletonKafkaProvider.getHost())
+					put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
 					put(ConsumerConfig.GROUP_ID_CONFIG, "CONSUMER_ID")
 					put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 					put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
