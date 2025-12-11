@@ -1,15 +1,15 @@
 package no.nav.amt.person.service.clients.nom
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.amt.person.service.utils.GraphqlUtils
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 
 object NomQueries {
 	object HentRessurser {
 		val query =
-			"""
-			query(${"$"}identer: [String!]!) {
-				ressurser(where: { navidenter: ${"$"}identer }){
+			$$"""
+			query($identer: [String!]!) {
+				ressurser(where: { navidenter: $identer }){
 					code
 					ressurs {
 						navident

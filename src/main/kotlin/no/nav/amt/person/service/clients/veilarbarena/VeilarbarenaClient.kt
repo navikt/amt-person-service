@@ -1,30 +1,27 @@
 package no.nav.amt.person.service.clients.veilarbarena
 
 import no.nav.amt.person.service.config.TeamLogs
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.function.Supplier
 
 class VeilarbarenaClient(
 	private val baseUrl: String,
 	private val tokenProvider: Supplier<String>,
+	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 	private val consumerId: String = "amt-person-service",
 ) {
-	companion object {
-		private val mediaTypeJson = "application/json".toMediaType()
-	}
-
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun hentBrukerOppfolgingsenhetId(fnr: String): String? {
-		val personRequestJson = toJsonString(PersonRequest(fnr))
+		val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
 		val request =
 			Request
 				.Builder()
@@ -45,7 +42,7 @@ class VeilarbarenaClient(
 				throw RuntimeException("Klarte ikke å hente status fra veilarbarena. Status: ${response.code}")
 			}
 
-			val statusDto = fromJsonString<BrukerArenaStatusDto>(response.body.string())
+			val statusDto = objectMapper.readValue<BrukerArenaStatusDto>(response.body.string())
 
 			return statusDto.oppfolgingsenhet
 		}

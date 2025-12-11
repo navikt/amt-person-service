@@ -4,27 +4,25 @@ import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.ObjectMapper
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class NomConfig {
-	@Value("\${nom.url}")
-	lateinit var url: String
-
-	@Value("\${nom.scope}")
-	lateinit var scope: String
-
-	@Value("\${nom.mock:false}")
-	var mock: Boolean = false
-
 	@Bean
-	fun nomClient(machineToMachineTokenClient: MachineToMachineTokenClient): NomClient {
+	fun nomClient(
+		@Value($$"${nom.url}") url: String,
+		@Value($$"${nom.scope}") scope: String,
+		@Value($$"${nom.mock:false}") mock: Boolean,
+		machineToMachineTokenClient: MachineToMachineTokenClient,
+		objectMapper: ObjectMapper,
+	): NomClient =
 		if (mock) {
-			return NomClientMock()
+			NomClientMock()
+		} else {
+			NomClientImpl(
+				url = url,
+				tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+				objectMapper = objectMapper,
+			)
 		}
-
-		return NomClientImpl(
-			url = url,
-			tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		)
-	}
 }

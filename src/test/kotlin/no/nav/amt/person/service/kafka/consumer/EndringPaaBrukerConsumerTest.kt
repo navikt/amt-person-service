@@ -6,13 +6,19 @@ import io.mockk.verify
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndringPaaBrukerConsumerTest {
 	private val navBrukerService: NavBrukerService = mockk()
 	private val navEnhetService: NavEnhetService = mockk()
-	private val endringPaaBrukerConsumer = EndringPaaBrukerConsumer(navBrukerService, navEnhetService)
+	private val endringPaaBrukerConsumer =
+		EndringPaaBrukerConsumer(
+			navBrukerService = navBrukerService,
+			navEnhetService = navEnhetService,
+			objectMapper = staticObjectMapper,
+		)
 
 	@BeforeEach
 	fun setup() = clearAllMocks()

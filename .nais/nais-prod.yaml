@@ -21,10 +21,10 @@ spec:
     initialDelay: 30
   replicas:
     min: 2
-    max: 4
+    max: 3
     scalingStrategy:
       cpu:
-        thresholdPercentage: 300
+        thresholdPercentage: 200
   resources:
     requests:
       cpu: 20m
@@ -67,7 +67,7 @@ spec:
         - host: kodeverk-api.nav.no
   env:
     - name: JDK_JAVA_OPTIONS
-      value: "-XX:MaxRAMPercentage=60.0"
+      value: "-XX:MaxRAMPercentage=70.0"
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
     - name: PDL_URL

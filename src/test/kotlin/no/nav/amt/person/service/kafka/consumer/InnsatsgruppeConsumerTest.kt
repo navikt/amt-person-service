@@ -6,7 +6,6 @@ import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.JsonUtils
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -27,7 +26,7 @@ class InnsatsgruppeConsumerTest(
 			)
 
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(JsonUtils.toJsonString(siste14aVedtak))
+		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
@@ -44,7 +43,7 @@ class InnsatsgruppeConsumerTest(
 				innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
 			)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(JsonUtils.toJsonString(siste14aVedtak))
+		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
 
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {

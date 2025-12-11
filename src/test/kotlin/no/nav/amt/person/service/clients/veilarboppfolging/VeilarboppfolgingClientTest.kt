@@ -4,7 +4,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
@@ -30,6 +30,7 @@ class VeilarboppfolgingClientTest {
 			VeilarboppfolgingClient(
 				apiUrl = server.url("/api").toString(),
 				veilarboppfolgingTokenProvider = { "VEILARBOPPFOLGING_TOKEN" },
+				objectMapper = staticObjectMapper,
 			)
 	}
 
@@ -109,7 +110,7 @@ class VeilarboppfolgingClientTest {
 		@ValueSource(booleans = [true, false])
 		fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`(useEndDate: Boolean) {
 			val expected = createOppfolgingPeriodeDTO(useEndDate)
-			server.enqueue(MockResponse().setBody(toJsonString(listOf(expected))))
+			server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(listOf(expected))))
 
 			val oppfolgingsperioder = client.hentOppfolgingperioder(FNR_IN_TEST)
 

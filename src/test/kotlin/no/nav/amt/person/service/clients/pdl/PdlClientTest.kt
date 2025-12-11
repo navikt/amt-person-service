@@ -16,6 +16,7 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.poststed.PoststedRepository
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -61,6 +62,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(gyldigRespons))
@@ -130,6 +132,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(
@@ -163,6 +166,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
@@ -224,6 +228,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(minimalFeilRespons))
@@ -244,6 +249,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(flereFeilRespons))
@@ -267,6 +273,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(telefonResponse))
@@ -283,6 +290,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(fodselsarRespons))
@@ -299,6 +307,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
+				objectMapper = staticObjectMapper,
 			)
 
 		server.enqueue(

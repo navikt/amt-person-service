@@ -3,6 +3,7 @@ package no.nav.amt.person.service.integration.kafka.utils
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
+import no.nav.amt.person.service.integration.IntegrationTestBase.Companion.kafkaContainer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.person.pdl.aktor.v2.Aktor
@@ -116,7 +117,7 @@ class KafkaMessageSender(
 	private fun <K, V> sendAvroRecord(record: ProducerRecord<K, V>) {
 		KafkaProducer<K, V>(
 			Properties().apply {
-				put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, SingletonKafkaProvider.getHost())
+				put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.bootstrapServers)
 				put(KafkaAvroDeserializerConfig.AUTO_REGISTER_SCHEMAS, true)
 				put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl)
 				put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)

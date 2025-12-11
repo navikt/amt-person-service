@@ -13,12 +13,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Component
 class TestDataRepository(
 	private val template: NamedParameterJdbcTemplate,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -251,9 +253,9 @@ class TestDataRepository(
 				"epost" to bruker.epost,
 				"erSkjermet" to bruker.erSkjermet,
 				"sisteKrrSync" to bruker.sisteKrrSync,
-				"adresse" to toPGObject(bruker.adresse),
+				"adresse" to toPGObject(bruker.adresse, objectMapper),
 				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
+				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder, objectMapper),
 				"innsatsgruppe" to bruker.innsatsgruppe?.name,
 				"createdAt" to bruker.createdAt,
 				"modifiedAt" to bruker.modifiedAt,

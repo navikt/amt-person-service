@@ -10,17 +10,18 @@ import no.nav.amt.person.service.navansatt.NavAnsatt
 import no.nav.amt.person.service.navbruker.NavBruker
 import no.nav.amt.person.service.navenhet.NavEnhet
 import no.nav.amt.person.service.person.model.Person
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.common.kafka.producer.KafkaProducerClient
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
 import java.util.UUID
 
 @Service
 class KafkaProducerService(
 	private val kafkaTopicProperties: KafkaTopicProperties,
 	private val kafkaProducerClient: KafkaProducerClient<String, String>,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -44,7 +45,7 @@ class KafkaProducerService(
 			)
 
 		val key = navBruker.person.id.toString()
-		val value = toJsonString(navBrukerDto)
+		val value = objectMapper.writeValueAsString(navBrukerDto)
 		val record = ProducerRecord(kafkaTopicProperties.amtNavBrukerTopic, key, value)
 
 		kafkaProducerClient.sendSync(record)
@@ -61,7 +62,7 @@ class KafkaProducerService(
 	fun publiserArrangorAnsatt(ansatt: Person) {
 		val key = ansatt.id.toString()
 		val value =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				ArrangorAnsattDtoV1(
 					id = ansatt.id,
 					personident = ansatt.personident,
@@ -77,7 +78,7 @@ class KafkaProducerService(
 	fun publiserNavAnsatt(ansatt: NavAnsatt) {
 		val key = ansatt.id.toString()
 		val value =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				NavAnsattDtoV1(
 					id = ansatt.id,
 					navident = ansatt.navIdent,
@@ -93,7 +94,7 @@ class KafkaProducerService(
 
 	fun publiserNavEnhet(navEnhet: NavEnhet) {
 		val key = navEnhet.id.toString()
-		val value = toJsonString(navEnhet.toDto())
+		val value = objectMapper.writeValueAsString(navEnhet.toDto())
 
 		kafkaProducerClient.sendSync(ProducerRecord(kafkaTopicProperties.amtNavEnhetTopic, key, value))
 		log.info("Publiserte nav enhet med id ${navEnhet.id} til topic")

@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class KodeverkClientConfig {
 	@Bean
 	fun kodeverkHttpClient(): OkHttpClient = RestClient.baseClient()

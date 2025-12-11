@@ -8,7 +8,6 @@ import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -42,7 +41,7 @@ class OppfolgingsperiodeConsumerTest(
 			InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
 		)
 
-		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(toJsonString(sisteOppfolgingsperiodeV1))
+		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
@@ -71,7 +70,7 @@ class OppfolgingsperiodeConsumerTest(
 				sluttDato = null,
 			)
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(toJsonString(sisteOppfolgingsperiodeV1))
+		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {

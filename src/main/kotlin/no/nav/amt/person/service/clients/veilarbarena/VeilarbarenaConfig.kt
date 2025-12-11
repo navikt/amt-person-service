@@ -4,19 +4,19 @@ import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.ObjectMapper
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class VeilarbarenaConfig {
-	@Value("\${veilarbarena.url}")
-	lateinit var url: String
-
-	@Value("\${veilarbarena.scope}")
-	lateinit var scope: String
-
 	@Bean
-	fun veilarbarenaClient(machineToMachineTokenClient: MachineToMachineTokenClient): VeilarbarenaClient =
-		VeilarbarenaClient(
-			baseUrl = url,
-			tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		)
+	fun veilarbarenaClient(
+		@Value($$"${veilarbarena.url}") url: String,
+		@Value($$"${veilarbarena.scope}") scope: String,
+		machineToMachineTokenClient: MachineToMachineTokenClient,
+		objectMapper: ObjectMapper,
+	) = VeilarbarenaClient(
+		baseUrl = url,
+		tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+		objectMapper = objectMapper,
+	)
 }

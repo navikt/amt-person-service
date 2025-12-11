@@ -1,21 +1,22 @@
 package no.nav.amt.person.service.clients.krr
 
 import no.nav.amt.person.service.config.TeamLogs
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClientBuilder
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 class KrrProxyClient(
 	private val baseUrl: String,
 	private val tokenProvider: Supplier<String>,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val httpClient =
 		baseClientBuilder()
@@ -27,7 +28,6 @@ class KrrProxyClient(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	companion object {
-		private val mediaTypeJson = "application/json".toMediaType()
 		private const val INCREASED_TIMEOUT_SECONDS = 20L
 	}
 
@@ -37,7 +37,7 @@ class KrrProxyClient(
 		}
 
 	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
-		val requestBody = toJsonString(PostPersonerRequest(personidenter))
+		val requestBody = objectMapper.writeValueAsString(PostPersonerRequest(personidenter))
 
 		val request: Request =
 			Request
@@ -53,7 +53,7 @@ class KrrProxyClient(
 				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
 			}
 
-			val responseDto = fromJsonString<PostPersonerResponse>(response.body.string())
+			val responseDto = objectMapper.readValue<PostPersonerResponse>(response.body.string())
 
 			if (responseDto.feil.isNotEmpty()) {
 				TeamLogs.error(responseDto.feil.toString())

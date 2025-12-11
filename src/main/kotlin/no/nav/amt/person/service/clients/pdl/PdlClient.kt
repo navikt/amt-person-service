@@ -14,14 +14,14 @@ import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.poststed.PoststedRepository
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.function.Supplier
 
 class PdlClient(
@@ -29,17 +29,18 @@ class PdlClient(
 	private val tokenProvider: Supplier<String>,
 	private val httpClient: OkHttpClient = baseClient(),
 	private val poststedRepository: PoststedRepository,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	private val mediaTypeJson = "application/json".toMediaType()
-
-	private val behandlingsnummer =
-		"B446" // https://behandlingskatalog.nais.adeo.no/process/team/5345bce7-e076-4b37-8bf4-49030901a4c3/b3003849-c4bb-4c60-a4cb-e07ce6025623
+	companion object {
+		private const val BEHANDLINGSNUMMER =
+			"B446" // https://behandlingskatalog.nais.adeo.no/process/team/5345bce7-e076-4b37-8bf4-49030901a4c3/b3003849-c4bb-4c60-a4cb-e07ce6025623
+	}
 
 	fun hentPerson(personident: String): PdlPerson {
 		val requestBody =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentPerson.query,
 					PdlQueries.Variables(personident),
@@ -53,7 +54,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val gqlResponse = fromJsonString<PdlQueries.HentPerson.Response>(response.body.string())
+			val gqlResponse = objectMapper.readValue<PdlQueries.HentPerson.Response>(response.body.string())
 
 			// respons kan inneholde feil selv om den ikke er tom
 			// ref: https://pdldocs-navno.msappproxy.net/ekstern/index.html#appendix-graphql-feilhandtering
@@ -71,7 +72,7 @@ class PdlClient(
 
 	fun hentPersonFodselsar(personident: String): Int {
 		val requestBody =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentPersonFodselsar.query,
 					PdlQueries.Variables(personident),
@@ -85,7 +86,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val gqlResponse = fromJsonString<PdlQueries.HentPersonFodselsar.Response>(response.body.string())
+			val gqlResponse = objectMapper.readValue<PdlQueries.HentPersonFodselsar.Response>(response.body.string())
 
 			// respons kan inneholde feil selv om den ikke er tom
 			// ref: https://pdldocs-navno.msappproxy.net/ekstern/index.html#appendix-graphql-feilhandtering
@@ -107,7 +108,7 @@ class PdlClient(
 
 	fun hentIdenter(ident: String): List<Personident> {
 		val requestBody =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentIdenter.query,
 					PdlQueries.Variables(ident),
@@ -121,7 +122,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val gqlResponse = fromJsonString<PdlQueries.HentIdenter.Response>(response.body.string())
+			val gqlResponse = objectMapper.readValue<PdlQueries.HentIdenter.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 
@@ -143,7 +144,7 @@ class PdlClient(
 
 	fun hentTelefon(ident: String): String? {
 		val requestBody =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentTelefon.query,
 					PdlQueries.Variables(ident),
@@ -157,7 +158,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val gqlResponse = fromJsonString<PdlQueries.HentTelefon.Response>(response.body.string())
+			val gqlResponse = objectMapper.readValue<PdlQueries.HentTelefon.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 			logPdlWarnings(gqlResponse.extensions?.warnings)
@@ -172,7 +173,7 @@ class PdlClient(
 
 	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
 		val requestBody =
-			toJsonString(
+			objectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentAdressebeskyttelse.query,
 					PdlQueries.Variables(personident),
@@ -186,7 +187,7 @@ class PdlClient(
 				throw RuntimeException("Klarte ikke å hente informasjon fra PDL. Status: ${response.code}")
 			}
 
-			val gqlResponse = fromJsonString<PdlQueries.HentAdressebeskyttelse.Response>(response.body.string())
+			val gqlResponse = objectMapper.readValue<PdlQueries.HentAdressebeskyttelse.Response>(response.body.string())
 
 			throwPdlApiErrors(gqlResponse)
 			logPdlWarnings(gqlResponse.extensions?.warnings)
@@ -205,7 +206,7 @@ class PdlClient(
 			.url("$baseUrl/graphql")
 			.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
 			.addHeader("Tema", "GEN")
-			.addHeader("behandlingsnummer", behandlingsnummer)
+			.addHeader("behandlingsnummer", BEHANDLINGSNUMMER)
 			.post(jsonPayload.toRequestBody(mediaTypeJson))
 			.build()
 

@@ -1,12 +1,14 @@
 package no.nav.amt.person.service.clients.norg
 
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class NorgClient(
 	private val url: String,
+	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
 	fun hentNavEnhet(enhetId: String): NorgNavEnhet? {
@@ -28,7 +30,8 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return fromJsonString<NavEnhetDto>(body)
+			return objectMapper
+				.readValue<NavEnhetDto>(body)
 				.let { NorgNavEnhet(it.enhetNr, it.navn) }
 		}
 	}
@@ -48,7 +51,7 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return fromJsonString<List<NavEnhetDto>>(body).map { NorgNavEnhet(it.enhetNr, it.navn) }
+			return objectMapper.readValue<List<NavEnhetDto>>(body).map { NorgNavEnhet(it.enhetNr, it.navn) }
 		}
 	}
 

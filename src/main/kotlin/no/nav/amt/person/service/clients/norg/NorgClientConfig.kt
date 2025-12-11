@@ -3,12 +3,16 @@ package no.nav.amt.person.service.clients.norg
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.ObjectMapper
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class NorgClientConfig {
-	@Value("\${norg.url}")
-	lateinit var url: String
-
 	@Bean
-	fun norgClient(): NorgClient = NorgClient(url)
+	fun norgClient(
+		@Value($$"${norg.url}") url: String,
+		objectMapper: ObjectMapper,
+	) = NorgClient(
+		url = url,
+		objectMapper = objectMapper,
+	)
 }

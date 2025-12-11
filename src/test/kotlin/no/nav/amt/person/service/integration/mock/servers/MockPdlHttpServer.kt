@@ -8,7 +8,7 @@ import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.utils.GraphqlUtils
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
@@ -22,7 +22,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		mockPdlPerson: PdlPerson,
 	) {
 		val request =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentPerson.query,
 					PdlQueries.Variables(brukerFnr),
@@ -43,7 +43,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		personident: String,
 	) {
 		val request =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentIdenter.query,
 					PdlQueries.Variables(ident),
@@ -67,7 +67,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		telefon: String?,
 	) {
 		val request =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentTelefon.query,
 					PdlQueries.Variables(ident),
@@ -88,7 +88,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		gradering: AdressebeskyttelseGradering?,
 	) {
 		val request =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				GraphqlUtils.GraphqlQuery(
 					PdlQueries.HentAdressebeskyttelse.query,
 					PdlQueries.Variables(ident),
@@ -106,7 +106,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
 	private fun createHentAdressebeskyttelseResponse(gradering: AdressebeskyttelseGradering?): MockResponse {
 		val body =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				PdlQueries.HentAdressebeskyttelse.Response(
 					errors = null,
 					data =
@@ -131,7 +131,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		val telefonnummer = telefon?.let { listOf(PdlQueries.Attribute.Telefonnummer("47", it, 1)) } ?: emptyList()
 
 		val body =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				PdlQueries.HentTelefon.Response(
 					errors = null,
 					data =
@@ -149,13 +149,20 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 
 	private fun createHentIdenterResponse(ident: Personident): MockResponse {
 		val body =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				PdlQueries.HentIdenter.Response(
 					errors = null,
 					data =
 						PdlQueries.HentIdenter.ResponseData(
 							PdlQueries.HentIdenter.HentIdenter(
-								identer = listOf(PdlQueries.Attribute.Ident(ident.ident, ident.historisk, ident.type.name)),
+								identer =
+									listOf(
+										PdlQueries.Attribute.Ident(
+											ident.ident,
+											ident.historisk,
+											ident.type.name,
+										),
+									),
 							),
 						),
 					extensions = null,
@@ -170,7 +177,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 		mockPdlPerson: PdlPerson,
 	): MockResponse {
 		val body =
-			toJsonString(
+			staticObjectMapper.writeValueAsString(
 				PdlQueries.HentPerson.Response(
 					errors = null,
 					data =
