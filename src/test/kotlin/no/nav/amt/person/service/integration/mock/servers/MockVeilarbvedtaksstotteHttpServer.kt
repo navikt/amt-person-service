@@ -2,7 +2,7 @@ package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
@@ -23,7 +23,13 @@ class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbved
 		}
 
 		val body =
-			innsatsgruppe?.let { toJsonString(VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(innsatsgruppe = it)) }
+			innsatsgruppe?.let {
+				staticObjectMapper.writeValueAsString(
+					VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
+						innsatsgruppe = it,
+					),
+				)
+			}
 		val response =
 			body?.let {
 				MockResponse()

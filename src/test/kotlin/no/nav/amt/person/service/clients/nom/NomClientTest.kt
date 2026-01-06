@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -23,6 +24,7 @@ class NomClientTest {
 			NomClientImpl(
 				url = server.url("").toString().removeSuffix("/"),
 				tokenSupplier = { token },
+				objectMapper = staticObjectMapper,
 			)
 	}
 

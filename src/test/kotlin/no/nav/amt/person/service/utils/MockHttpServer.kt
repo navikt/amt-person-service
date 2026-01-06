@@ -35,7 +35,7 @@ abstract class MockHttpServer(
 										"	Body: ${request.getBodyAsString()}",
 								)
 
-						response.count = response.count + 1
+						response.count += 1
 
 						log.info("Responding [${request.method}: ${request.path}]: $response")
 						return response.response.invoke(request)

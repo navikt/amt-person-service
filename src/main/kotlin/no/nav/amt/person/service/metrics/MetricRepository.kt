@@ -1,9 +1,9 @@
 package no.nav.amt.person.service.metrics
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 
-@Component
+@Repository
 class MetricRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {

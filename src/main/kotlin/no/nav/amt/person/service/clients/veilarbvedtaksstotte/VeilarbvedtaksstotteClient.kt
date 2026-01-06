@@ -3,32 +3,31 @@ package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2.Companion.toV1
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
-import no.nav.amt.person.service.utils.JsonUtils.toJsonString
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.function.Supplier
 
 class VeilarbvedtaksstotteClient(
 	private val apiUrl: String,
 	private val veilarbvedtaksstotteTokenProvider: Supplier<String>,
+	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
-	companion object {
-		private val mediaTypeJson = "application/json".toMediaType()
-	}
-
 	fun hentInnsatsgruppe(fnr: String): InnsatsgruppeV1? {
-		val personRequestJson = toJsonString(PersonRequest(fnr))
+		val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
 		val request =
 			Request
 				.Builder()
 				.url("$apiUrl/api/hent-gjeldende-14a-vedtak")
-				.header("Accept", "application/json; charset=utf-8")
-				.header("Authorization", "Bearer ${veilarbvedtaksstotteTokenProvider.get()}")
+				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider.get()}")
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 
@@ -42,7 +41,7 @@ class VeilarbvedtaksstotteClient(
 				return null
 			}
 
-			val gjeldende14aVedtakRespons = fromJsonString<Gjeldende14aVedtakDTO>(body)
+			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakDTO>(body)
 
 			return gjeldende14aVedtakRespons.innsatsgruppe.toV1()
 		}

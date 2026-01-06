@@ -8,9 +8,9 @@ import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class AktorV2Consumer(
 	private val personService: PersonService,
 ) {

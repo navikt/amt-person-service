@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.clients.norg
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -17,6 +18,7 @@ class NorgClientTest {
 		client =
 			NorgClient(
 				url = server.url("").toString().removeSuffix("/"),
+				objectMapper = staticObjectMapper,
 			)
 	}
 

@@ -35,9 +35,9 @@ object PdlQueries {
 
 	object HentPerson {
 		val query =
-			"""
-			query(${"$"}ident: ID!) {
-			    hentPerson(ident: ${"$"}ident) {
+			$$"""
+			query($ident: ID!) {
+			    hentPerson(ident: $ident) {
 			        navn(historikk: false) {
 			            fornavn
 			            mellomnavn
@@ -95,7 +95,7 @@ object PdlQueries {
 			        }
 			    }
 			    hentIdenter(
-			        ident: ${"$"}ident,
+			        ident: $ident,
 			        grupper: [FOLKEREGISTERIDENT, AKTORID, NPID],
 			        historikk: true
 			    ) {
@@ -135,9 +135,9 @@ object PdlQueries {
 
 	object HentPersonFodselsar {
 		val query =
-			"""
-			query(${"$"}ident: ID!) {
-			  hentPerson(ident: ${"$"}ident) {
+			$$"""
+			query($ident: ID!) {
+			  hentPerson(ident: $ident) {
 				foedselsdato {
 				  foedselsaar
 				}
@@ -162,9 +162,9 @@ object PdlQueries {
 
 	object HentAdressebeskyttelse {
 		val query =
-			"""
-			query(${"$"}ident: ID!) {
-			  hentPerson(ident: ${"$"}ident) {
+			$$"""
+			query($ident: ID!) {
+			  hentPerson(ident: $ident) {
 				adressebeskyttelse(historikk: false) {
 				  gradering
 				}
@@ -189,9 +189,9 @@ object PdlQueries {
 
 	object HentTelefon {
 		val query =
-			"""
-			query(${"$"}ident: ID!) {
-			  hentPerson(ident: ${"$"}ident) {
+			$$"""
+			query($ident: ID!) {
+			  hentPerson(ident: $ident) {
 				telefonnummer {
 				  landskode
 				  nummer
@@ -218,10 +218,10 @@ object PdlQueries {
 
 	object HentIdenter {
 		val query =
-			"""
-			query(${"$"}ident: ID!) {
+			$$"""
+			query($ident: ID!) {
 			    hentIdenter(
-			        ident: ${"$"}ident,
+			        ident: $ident,
 			        grupper: [FOLKEREGISTERIDENT, AKTORID, NPID],
 			        historikk: true
 			    ) {

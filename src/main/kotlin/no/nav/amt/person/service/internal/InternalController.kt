@@ -33,6 +33,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Suppress("SpringMvcPathVariableDeclarationInspection")
 @RestController
 @RequestMapping("/internal")
 class InternalController(

@@ -25,12 +25,12 @@ import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
 import java.util.function.Consumer
 
-@Configuration
 @EnableConfigurationProperties(KafkaTopicProperties::class)
+@Configuration(proxyBeanMethods = false)
 class KafkaConfiguration(
-	@Value("\${kafka.schema.registry.url}") schemaRegistryUrl: String,
-	@Value("\${kafka.schema.registry.username}") schemaRegistryUsername: String,
-	@Value("\${kafka.schema.registry.password}") schemaRegistryPassword: String,
+	@Value($$"${kafka.schema.registry.url}") schemaRegistryUrl: String,
+	@Value($$"${kafka.schema.registry.username}") schemaRegistryUsername: String,
+	@Value($$"${kafka.schema.registry.password}") schemaRegistryPassword: String,
 	kafkaTopicProperties: KafkaTopicProperties,
 	kafkaProperties: KafkaProperties,
 	jdbcTemplate: JdbcTemplate,
@@ -140,8 +140,8 @@ class KafkaConfiguration(
 	}
 
 	@EventListener
-	fun onApplicationEvent(_event: ContextRefreshedEvent?) {
-		log.info("Starting kafka consumer and stored record processor...")
+	fun onApplicationEvent(event: ContextRefreshedEvent?) {
+		log.info("Starting Kafka consumer and stored record processor...")
 		client.start()
 		consumerRecordProcessor.start()
 	}

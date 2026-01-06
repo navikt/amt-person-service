@@ -13,7 +13,6 @@ import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.NavBruker
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -83,7 +82,7 @@ class NavBrukerProducerTest(
 	}
 
 	private fun brukerTilV1Json(navBruker: NavBruker): String =
-		JsonUtils.toJsonString(
+		objectMapper.writeValueAsString(
 			NavBrukerDtoV1(
 				personId = navBruker.person.id,
 				personident = navBruker.person.personident,

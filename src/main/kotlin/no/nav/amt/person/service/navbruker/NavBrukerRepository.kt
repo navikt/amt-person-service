@@ -6,21 +6,23 @@ import no.nav.amt.person.service.navbruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Adresse
-import no.nav.amt.person.service.utils.JsonUtils.fromJsonString
 import no.nav.amt.person.service.utils.getNullableUUID
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import no.nav.amt.person.service.utils.toPGObject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@Component
+@Repository
 class NavBrukerRepository(
 	private val template: NamedParameterJdbcTemplate,
+	private val objectMapper: ObjectMapper,
 ) {
 	private val rowMapper =
 		RowMapper { rs, _ ->
@@ -62,7 +64,10 @@ class NavBrukerRepository(
 				telefon = rs.getString("nav_bruker.telefon"),
 				epost = rs.getString("nav_bruker.epost"),
 				erSkjermet = rs.getBoolean("nav_bruker.er_skjermet"),
-				adresse = rs.getString("nav_bruker.adresse")?.let { fromJsonString<Adresse>(it) },
+				adresse =
+					rs.getString("nav_bruker.adresse")?.let {
+						objectMapper.readValue<Adresse>(it)
+					},
 				sisteKrrSync = rs.getTimestamp("siste_krr_sync")?.toLocalDateTime(),
 				createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
 				modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
@@ -72,9 +77,9 @@ class NavBrukerRepository(
 						?.let { Adressebeskyttelse.valueOf(it) },
 				oppfolgingsperioder =
 					rs
-						.getString(
-							"nav_bruker.oppfolgingsperioder",
-						)?.let { fromJsonString<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
+						.getString("nav_bruker.oppfolgingsperioder")
+						?.let { objectMapper.readValue<List<Oppfolgingsperiode>>(it) }
+						?: emptyList(),
 				innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { InnsatsgruppeV1.valueOf(it) },
 			)
 		}
@@ -294,10 +299,10 @@ class NavBrukerRepository(
 				"telefon" to bruker.telefon,
 				"epost" to bruker.epost,
 				"erSkjermet" to bruker.erSkjermet,
-				"adresse" to toPGObject(bruker.adresse),
+				"adresse" to toPGObject(bruker.adresse, objectMapper),
 				"sisteKrrSync" to bruker.sisteKrrSync,
 				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder),
+				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder, objectMapper),
 				"innsatsgruppe" to bruker.innsatsgruppe?.name,
 			)
 

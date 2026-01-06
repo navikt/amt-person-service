@@ -8,7 +8,6 @@ import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.consume
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
-import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.Test
 
 class NavEnhetProducerTest(
@@ -25,7 +24,7 @@ class NavEnhetProducerTest(
 		records.shouldNotBeNull()
 		val record = records.first { it.key() == navEnhet.id.toString() }
 
-		val forventetValue = JsonUtils.toJsonString(navEnhet.toDto())
+		val forventetValue = objectMapper.writeValueAsString(navEnhet.toDto())
 
 		record.key() shouldBe navEnhet.id.toString()
 		record.value() shouldBe forventetValue

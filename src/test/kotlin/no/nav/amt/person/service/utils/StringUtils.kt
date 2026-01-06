@@ -1,5 +1,9 @@
 package no.nav.amt.person.service.utils
 
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+
 object StringUtils {
 	fun nullableStringJsonValue(str: String?): String =
 		if (str == null) {
@@ -7,4 +11,8 @@ object StringUtils {
 		} else {
 			"\"$str\""
 		}
+
+	fun String.toJsonRequestBody(): RequestBody = this.toRequestBody(mediaTypeJson)
+
+	fun emptyRequest(): RequestBody = "".toRequestBody(mediaTypeJson)
 }
