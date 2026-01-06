@@ -4,11 +4,11 @@ import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
-@Service
+@Component
 class InnsatsgruppeConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,

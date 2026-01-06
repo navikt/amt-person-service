@@ -1,11 +1,11 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
-@Service
+@Component
 class SkjermetPersonConsumer(
 	private val navBrukerService: NavBrukerService,
 	private val objectMapper: ObjectMapper,

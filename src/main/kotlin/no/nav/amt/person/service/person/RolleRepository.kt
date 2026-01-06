@@ -3,10 +3,10 @@ package no.nav.amt.person.service.person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import java.util.UUID
 
-@Component
+@Repository
 class RolleRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {

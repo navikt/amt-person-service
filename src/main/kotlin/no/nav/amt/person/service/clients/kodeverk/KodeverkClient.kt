@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.resilience.annotation.Retryable
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
 
-@Component
+@Service
 class KodeverkClient(
 	@Value($$"${kodeverk.url}") private val url: String,
 	@Value($$"${kodeverk.scope}") private val scope: String,

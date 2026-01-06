@@ -5,9 +5,9 @@ import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.navenhet.NavEnhet
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class NavAnsattUpdater(
 	private val navAnsattService: NavAnsattService,
 	private val nomClient: NomClient,

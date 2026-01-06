@@ -5,9 +5,9 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class PersonUpdater(
 	private val personRepository: PersonRepository,
 	private val personService: PersonService,

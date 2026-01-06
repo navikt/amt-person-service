@@ -5,7 +5,7 @@ import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
 enum class OpplysningsType {
 	NAVN_V1,
@@ -15,7 +15,7 @@ enum class OpplysningsType {
 	OPPHOLDSADRESSE_V1,
 }
 
-@Service
+@Component
 class LeesahConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,

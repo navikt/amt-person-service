@@ -2,13 +2,13 @@ package no.nav.amt.person.service.poststed
 
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.util.UUID
 
 @Transactional
-@Component
+@Repository
 class PoststedRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {

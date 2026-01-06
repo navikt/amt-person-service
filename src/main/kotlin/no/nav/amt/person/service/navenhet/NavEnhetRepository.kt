@@ -4,10 +4,10 @@ import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import java.util.UUID
 
-@Component
+@Repository
 class NavEnhetRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {

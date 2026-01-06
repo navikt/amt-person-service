@@ -12,14 +12,14 @@ import no.nav.amt.person.service.utils.sqlParameters
 import no.nav.amt.person.service.utils.toPGObject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@Component
+@Repository
 class NavBrukerRepository(
 	private val template: NamedParameterJdbcTemplate,
 	private val objectMapper: ObjectMapper,

@@ -4,11 +4,11 @@ import no.nav.amt.person.service.kafka.consumer.dto.EndringPaaBrukerDto
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
-@Service
+@Component
 class EndringPaaBrukerConsumer(
 	private val navBrukerService: NavBrukerService,
 	private val navEnhetService: NavEnhetService,
