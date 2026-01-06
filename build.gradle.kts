@@ -2,7 +2,7 @@ plugins {
     val kotlinVersion = "2.2.21"
 
     kotlin("jvm") // versjon settes i buildSrc
-    id("org.springframework.boot") version "4.0.0"
+    id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -19,11 +19,11 @@ repositories {
     maven { url = uri("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2025.10.10_08.21-bb7c7830d93c"
+val commonVersion = "3.2025.11.10_14.07-a9f44944d7bc"
 val okhttp3Version = "5.3.2"
 val kotestVersion = "6.0.7"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
-val tokenSupportVersion = "6.0.0"
+val tokenSupportVersion = "6.0.1"
 val mockkVersion = "1.14.7"
 val lang3Version = "3.20.0"
 val shedlockVersion = "7.2.1"
