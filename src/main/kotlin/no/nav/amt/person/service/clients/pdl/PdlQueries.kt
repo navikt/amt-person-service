@@ -93,6 +93,10 @@ object PdlQueries {
 			                postnummer
 			            }
 			        }
+					falskIdentitet(historikk: false) {
+						erFalsk
+						rettIdentitetVedIdentifikasjonsnummer
+					}
 			    }
 			    hentIdenter(
 			        ident: $ident,
@@ -126,6 +130,7 @@ object PdlQueries {
 			val bostedsadresse: List<Attribute.Bostedsadresse>,
 			val oppholdsadresse: List<Attribute.Oppholdsadresse>,
 			val kontaktadresse: List<Attribute.Kontaktadresse>,
+			val falskIdentitet: List<Attribute.FalskIdentitet>?,
 		)
 
 		data class HentIdenter(
@@ -275,6 +280,14 @@ object PdlQueries {
 			val nummer: String,
 			val prioritet: Int,
 		)
+
+		class FalskIdentitet {
+			var erFalsk: Boolean? = null
+
+			// 	var rettIdentitetErUkjent: Boolean? = null
+			var rettIdentitetVedIdentifikasjonsnummer: String? = null
+			// 		var rettIdentitetVedOpplysninger: Any? = null
+		}
 
 		data class Bostedsadresse(
 			val coAdressenavn: String?,
