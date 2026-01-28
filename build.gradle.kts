@@ -21,7 +21,7 @@ repositories {
 
 val commonVersion = "3.2025.11.10_14.07-a9f44944d7bc"
 val okhttp3Version = "5.3.2"
-val kotestVersion = "6.0.7"
+val kotestVersion = "6.1.0"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
 val tokenSupportVersion = "6.0.1"
 val mockkVersion = "1.14.7"
