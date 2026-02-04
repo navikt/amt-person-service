@@ -14,6 +14,7 @@ data class PdlPerson(
 	val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
 	val identer: List<Personident>,
 	val adresse: Adresse?,
+	val falskIdentitet: Boolean,
 ) {
 	fun getAdressebeskyttelse(): Adressebeskyttelse? =
 		if (adressebeskyttelseGradering?.erBeskyttet() == true) {
