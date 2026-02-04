@@ -65,7 +65,7 @@ class PdlClient(
 				log.warn("PDL-person inneholder navn: $UNKNOWN_NAME for ident $personident")
 			}
 
-			return gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
+			return pdlPerson
 		}
 	}
 
