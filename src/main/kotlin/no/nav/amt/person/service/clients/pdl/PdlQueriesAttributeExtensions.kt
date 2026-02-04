@@ -14,7 +14,7 @@ import no.nav.amt.person.service.poststed.Postnummer
 
 fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (List<String>) -> List<Postnummer>): PdlPerson {
 	val falskIdentitet = hentPerson.falskIdentitet.any { it.erFalsk }
-	val navn = hentPerson.navn.toNavnMedFallback(falskIdentitet)
+	val navn = hentPerson.navn.toNavnMedFallback()
 
 	return PdlPerson(
 		fornavn = navn.fornavn,
@@ -86,16 +86,12 @@ private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc
 
 const val UNKNOWN_NAME = "Ukjent"
 
-private fun List<PdlQueries.Attribute.Navn>.toNavnMedFallback(falskIdentitet: Boolean): PdlQueries.Attribute.Navn =
-	if (falskIdentitet) {
-		PdlQueries.Attribute.Navn(
-			fornavn = UNKNOWN_NAME,
-			mellomnavn = null,
-			etternavn = UNKNOWN_NAME,
-		)
-	} else {
-		this.firstOrNull() ?: throw RuntimeException("PDL person mangler navn")
-	}
+private fun List<PdlQueries.Attribute.Navn>.toNavnMedFallback(): PdlQueries.Attribute.Navn =
+	this.firstOrNull() ?: PdlQueries.Attribute.Navn(
+		fornavn = UNKNOWN_NAME,
+		mellomnavn = null,
+		etternavn = UNKNOWN_NAME,
+	)
 
 private fun PdlQueries.Attribute.Bostedsadresse.toBostedsadresse(poststeder: List<Postnummer>): Bostedsadresse? {
 	if (vegadresse == null && matrikkeladresse == null) {

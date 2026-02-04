@@ -95,11 +95,6 @@ object PdlQueries {
 			                postnummer
 			            }
 			        }
-					falskIdentitet {
-						erFalsk
-						rettIdentitetVedIdentifikasjonsnummer
-						rettIdentitetErUkjent
-					}
 			    }
 			    hentIdenter(
 			        ident: $ident,
