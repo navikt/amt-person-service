@@ -284,7 +284,7 @@ object PdlQueries {
 
 		class FalskIdentitet(
 			val erFalsk: Boolean,
-			rettIdentitetVedIdentifikasjonsnummer: String?,
+			val rettIdentitetVedIdentifikasjonsnummer: String?,
 			val rettIdentitetErUkjent: Boolean?,
 		)
 
