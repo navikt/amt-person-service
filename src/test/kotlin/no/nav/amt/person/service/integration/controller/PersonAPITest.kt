@@ -359,7 +359,7 @@ class PersonAPITest(
 	}
 
 	@Test
-	internal fun `skal teste token autentisering`() {
+	fun `skal teste token autentisering`() {
 		val requestBuilders =
 			listOf(
 				Request.Builder().post(emptyRequest()).url("${serverUrl()}/api/arrangor-ansatt"),

@@ -20,7 +20,7 @@ class LeesahConsumerTest(
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
 	@Test
-	internal fun `Ingest - nav bruker finnes - oppdaterer navn`() {
+	fun `Ingest - nav bruker finnes - oppdaterer navn`() {
 		val person = TestData.lagPerson()
 		val navBruker = TestData.lagNavBruker(person = person)
 
@@ -62,7 +62,7 @@ class LeesahConsumerTest(
 	}
 
 	@Test
-	internal fun `Ingest - person får adressebeskyttelse - oppdaterer navbruker`() {
+	fun `Ingest - person får adressebeskyttelse - oppdaterer navbruker`() {
 		val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
 		testDataRepository.insertNavBruker(navBruker)
 
