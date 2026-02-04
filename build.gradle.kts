@@ -30,7 +30,7 @@ val shedlockVersion = "7.5.0"
 val confluentVersion = "8.1.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
-val ktLintVersion = "1.6.0"
+val ktLintVersion = "1.8.0"
 val jacksonModuleKotlinVersion = "3.0.3"
 
 // fjernes ved neste release av org.apache.kafka:kafka-clients

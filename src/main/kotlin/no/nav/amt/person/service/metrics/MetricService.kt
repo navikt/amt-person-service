@@ -25,5 +25,5 @@ class MetricService(
 		antallArrangorAnsatte.set(counts.antallArrangorAnsatte)
 	}
 
-	private fun gauge(name: String): AtomicInteger = meterRegistry.gauge(name, AtomicInteger(0))!!
+	private fun gauge(name: String): AtomicInteger = meterRegistry.gauge(name, AtomicInteger(0))
 }

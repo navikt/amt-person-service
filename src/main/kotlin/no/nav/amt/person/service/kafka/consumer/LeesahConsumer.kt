@@ -24,13 +24,25 @@ class LeesahConsumer(
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
-			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter)
-			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
-				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+			OpplysningsType.NAVN_V1.toString() -> {
+				handterNavn(personhendelse.personidenter)
+			}
 
-			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
-			OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
-			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
+			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() -> {
+				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+			}
+
+			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
+
+			OpplysningsType.KONTAKTADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
+
+			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
 		}
 	}
 
