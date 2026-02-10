@@ -13,7 +13,6 @@ import no.nav.amt.person.service.person.model.Vegadresse
 import no.nav.amt.person.service.poststed.Postnummer
 
 fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (List<String>) -> List<Postnummer>): PdlPerson {
-	val falskIdentitet = hentPerson.falskIdentitet.any { it.erFalsk }
 	val navn = hentPerson.navn.toNavnMedFallback()
 
 	return PdlPerson(
@@ -32,7 +31,6 @@ fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (L
 					)
 				},
 		adresse = hentPerson.toAdresse(postnummerTilPoststedFunc),
-		falskIdentitet = falskIdentitet,
 	)
 }
 

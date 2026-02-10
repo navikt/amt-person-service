@@ -49,7 +49,6 @@ class PersonServiceTest {
 						Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
 					),
 				adresse = null,
-				falskIdentitet = false,
 			)
 
 		every { pdlClient.hentPerson(personident) } returns pdlPerson

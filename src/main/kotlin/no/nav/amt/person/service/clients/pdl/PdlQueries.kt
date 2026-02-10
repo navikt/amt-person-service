@@ -1,7 +1,5 @@
 package no.nav.amt.person.service.clients.pdl
 
-import com.fasterxml.jackson.annotation.JsonSetter
-import com.fasterxml.jackson.annotation.Nulls
 import no.nav.amt.person.service.utils.GraphqlUtils
 
 object PdlQueries {
@@ -128,8 +126,6 @@ object PdlQueries {
 			val bostedsadresse: List<Attribute.Bostedsadresse>,
 			val oppholdsadresse: List<Attribute.Oppholdsadresse>,
 			val kontaktadresse: List<Attribute.Kontaktadresse>,
-			@JsonSetter(nulls = Nulls.AS_EMPTY)
-			val falskIdentitet: List<Attribute.FalskIdentitet> = emptyList(),
 		)
 
 		data class HentIdenter(
@@ -278,12 +274,6 @@ object PdlQueries {
 			val landskode: String,
 			val nummer: String,
 			val prioritet: Int,
-		)
-
-		class FalskIdentitet(
-			val erFalsk: Boolean,
-			val rettIdentitetVedIdentifikasjonsnummer: String?,
-			val rettIdentitetErUkjent: Boolean?,
 		)
 
 		data class Bostedsadresse(

@@ -121,7 +121,6 @@ object TestData {
 		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
 		identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
 		adresse: Adresse? = lagAdresse(),
-		falskIdentitet: Boolean = false,
 	) = PdlPerson(
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,
@@ -130,7 +129,6 @@ object TestData {
 		adressebeskyttelseGradering = adressebeskyttelseGradering,
 		identer = identer,
 		adresse = adresse,
-		falskIdentitet = falskIdentitet,
 	)
 
 	fun lagPersonident(
