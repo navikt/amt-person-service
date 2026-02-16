@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -59,7 +60,7 @@ class PersonRepositoryTest(
 
 		val personer =
 			personRepository.getPersoner(
-				listOf(
+				setOf(
 					person1.personident,
 					person2.personident,
 					TestData.randomIdent(),
@@ -79,7 +80,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(person)
 		testDataRepository.insertPersonidenter(listOf(historiskIdent))
 
-		val personer = personRepository.getPersoner(listOf(historiskIdent.ident, person.personident))
+		val personer = personRepository.getPersoner(setOf(historiskIdent.ident, person.personident))
 
 		personer shouldHaveSize 1
 
@@ -91,7 +92,10 @@ class PersonRepositoryTest(
 
 	@Test
 	fun `getPersoner - ingen person med ident - returnerer tom liste`() {
-		personRepository.getPersoner(listOf(TestData.randomIdent(), TestData.randomIdent())) shouldBe emptyList()
+		personRepository
+			.getPersoner(
+				setOf(TestData.randomIdent(), TestData.randomIdent()),
+			).shouldBeEmpty()
 	}
 
 	@Test

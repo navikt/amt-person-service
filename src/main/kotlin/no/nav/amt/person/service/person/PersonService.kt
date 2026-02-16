@@ -38,7 +38,7 @@ class PersonService(
 		personOpplysninger: PdlPerson,
 	): Person = repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
 
-	fun hentPersoner(personidenter: List<String>): List<Person> = repository.getPersoner(personidenter).map { it.toModel() }
+	fun hentPersoner(personidenter: Set<String>): List<Person> = repository.getPersoner(personidenter).map { it.toModel() }
 
 	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
 
@@ -48,7 +48,7 @@ class PersonService(
 
 	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
-		val personer = repository.getPersoner(identer.map { it.ident })
+		val personer = repository.getPersoner(identer.map { it.ident }.toSet())
 
 		if (personer.size > 1) {
 			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")

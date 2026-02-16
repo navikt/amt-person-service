@@ -25,29 +25,32 @@ class LeesahConsumer(
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
 			OpplysningsType.NAVN_V1.toString() -> {
-				handterNavn(personhendelse.personidenter)
+				handterNavn(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() -> {
-				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+				handterAdressebeskyttelse(
+					personidenter = personhendelse.personidenter.toSet(),
+					adressebeskyttelse = personhendelse.adressebeskyttelse,
+				)
 			}
 
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.KONTAKTADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 		}
 	}
 
 	private fun handterAdressebeskyttelse(
-		personidenter: List<String>,
+		personidenter: Set<String>,
 		adressebeskyttelse: Adressebeskyttelse?,
 	) {
 		if (adressebeskyttelse == null) {
@@ -64,7 +67,7 @@ class LeesahConsumer(
 		}
 	}
 
-	private fun handterNavn(personidenter: List<String>) {
+	private fun handterNavn(personidenter: Set<String>) {
 		val personer = personService.hentPersoner(personidenter)
 
 		if (personer.isEmpty()) return
@@ -76,7 +79,7 @@ class LeesahConsumer(
 			}
 	}
 
-	private fun handterAdresse(personidenter: List<String>) {
+	private fun handterAdresse(personidenter: Set<String>) {
 		val lagredePersonidenter = personService.hentPersoner(personidenter).map { it.personident }
 
 		if (lagredePersonidenter.isEmpty()) return

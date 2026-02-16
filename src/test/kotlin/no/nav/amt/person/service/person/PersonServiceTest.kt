@@ -72,7 +72,7 @@ class PersonServiceTest {
 				Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
 			)
 
-		every { personRepository.getPersoner(identer.map { it.ident }) } returns
+		every { personRepository.getPersoner(identer.map { it.ident }.toSet()) } returns
 			identer.map { TestData.lagPerson(personident = it.ident) }
 
 		assertThrows<IllegalStateException> {

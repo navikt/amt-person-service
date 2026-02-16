@@ -355,7 +355,7 @@ class NavBrukerRepository(
 			select nb.id as "nav_bruker.id"
 			from nav_bruker nb join person p on nb.person_id = p.id join personident ident on p.id = ident.person_id
 			where ident.ident = :personident
-			""".trimMargin()
+			""".trimIndent()
 
 		val parameters = sqlParameters("personident" to personident)
 
