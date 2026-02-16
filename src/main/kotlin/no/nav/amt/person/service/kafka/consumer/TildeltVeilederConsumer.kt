@@ -1,9 +1,10 @@
 package no.nav.amt.person.service.kafka.consumer
 
+import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.kafka.consumer.dto.SisteTildeltVeilederDto
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -11,7 +12,7 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class TildeltVeilederConsumer(
-	private val personService: PersonService,
+	private val pdlClient: PdlClient,
 	private val navBrukerService: NavBrukerService,
 	private val navAnsattService: NavAnsattService,
 	private val objectMapper: ObjectMapper,
@@ -21,7 +22,11 @@ class TildeltVeilederConsumer(
 	fun ingest(value: String) {
 		val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederDto>(value)
 
-		val gjeldendeIdent = personService.hentGjeldendeIdent(sisteTildeltVeileder.aktorId)
+		val gjeldendeIdent =
+			finnGjeldendeIdent(
+				pdlClient.hentIdenter(sisteTildeltVeileder.aktorId),
+			).getOrThrow()
+
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {

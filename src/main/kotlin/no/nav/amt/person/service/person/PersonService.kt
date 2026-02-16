@@ -17,38 +17,31 @@ import java.util.UUID
 
 @Service
 class PersonService(
-	val pdlClient: PdlClient,
-	val repository: PersonRepository,
-	val personidentRepository: PersonidentRepository,
-	val applicationEventPublisher: ApplicationEventPublisher,
+	private val pdlClient: PdlClient,
+	private val personRepository: PersonRepository,
+	private val personidentRepository: PersonidentRepository,
+	private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentPerson(id: UUID): Person = repository.get(id).toModel()
-
-	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
-
 	@Retryable(maxRetries = 2)
 	@Transactional
-	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
+	fun hentEllerOpprettPerson(personident: String): Person =
+		personRepository.get(personident)?.toModel() ?: run {
+			val pdlPerson = pdlClient.hentPerson(personident)
+			check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke person" }
+			opprettPerson(pdlPerson)
+		}
 
 	@Transactional
 	fun hentEllerOpprettPerson(
 		personident: String,
-		personOpplysninger: PdlPerson,
-	): Person = repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
-
-	fun hentPersoner(personidenter: Set<String>): List<Person> = repository.getPersoner(personidenter).map { it.toModel() }
-
-	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
-
-	fun hentIdenter(personident: String) = pdlClient.hentIdenter(personident)
-
-	fun hentGjeldendeIdent(personident: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personident)).getOrThrow()
+		pdlPerson: PdlPerson,
+	): Person = personRepository.get(personident)?.toModel() ?: opprettPerson(pdlPerson)
 
 	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
-		val personer = repository.getPersoner(identer.map { it.ident }.toSet())
+		val personer = personRepository.getPersoner(identer.map { it.ident }.toSet())
 
 		if (personer.size > 1) {
 			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")
@@ -66,7 +59,12 @@ class PersonService(
 
 	@Transactional
 	fun oppdaterNavn(person: Person) {
-		val personOpplysninger =
+		if (person.erUkjent()) {
+			log.info("Skipper oppdaterNavn for ${person.id} med ukjent etternavn")
+			return
+		}
+
+		val pdlPerson =
 			try {
 				pdlClient.hentPerson(person.personident)
 			} catch (e: Exception) {
@@ -82,9 +80,9 @@ class PersonService(
 			}
 
 		if (
-			person.fornavn == personOpplysninger.fornavn &&
-			person.mellomnavn == personOpplysninger.mellomnavn &&
-			person.etternavn == personOpplysninger.etternavn
+			person.fornavn == pdlPerson.fornavn &&
+			person.mellomnavn == pdlPerson.mellomnavn &&
+			person.etternavn == pdlPerson.etternavn
 		) {
 			log.info("Navn på person ${person.id} er allerede oppdatert, ingen endringer gjort.")
 			return
@@ -92,9 +90,9 @@ class PersonService(
 
 		upsert(
 			person.copy(
-				fornavn = personOpplysninger.fornavn,
-				mellomnavn = personOpplysninger.mellomnavn,
-				etternavn = personOpplysninger.etternavn,
+				fornavn = pdlPerson.fornavn,
+				mellomnavn = pdlPerson.mellomnavn,
+				etternavn = pdlPerson.etternavn,
 			),
 		)
 
@@ -102,16 +100,10 @@ class PersonService(
 	}
 
 	fun upsert(person: Person) {
-		repository.upsert(person)
+		personRepository.upsert(person)
 		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 
 		log.info("Upsertet person med id: ${person.id}")
-	}
-
-	private fun opprettPerson(personident: String): Person {
-		val pdlPerson = pdlClient.hentPerson(personident)
-
-		return opprettPerson(pdlPerson)
 	}
 
 	private fun opprettPerson(pdlPerson: PdlPerson): Person {
@@ -140,7 +132,7 @@ class PersonService(
 		offset: Int,
 		limit: Int = 500,
 		rolle: Rolle,
-	) = repository
+	) = personRepository
 		.getAllWithRolle(offset, limit, rolle)
 		.map { it.toModel() }
 }

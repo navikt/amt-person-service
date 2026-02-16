@@ -16,7 +16,7 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
-import no.nav.amt.person.service.person.RolleService
+import no.nav.amt.person.service.person.RolleRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.mockExecuteWithoutResult
@@ -34,7 +34,7 @@ class NavBrukerServiceTest {
 	private val personService: PersonService = mockk(relaxUnitFun = true)
 	private val navAnsattService: NavAnsattService = mockk()
 	private val navEnhetService: NavEnhetService = mockk()
-	private val rolleService: RolleService = mockk(relaxUnitFun = true)
+	private val rolleRepository: RolleRepository = mockk(relaxUnitFun = true)
 	private val krrProxyClient: KrrProxyClient = mockk()
 	private val poaoTilgangClient: PoaoTilgangClient = mockk()
 	private val pdlClient: PdlClient = mockk()
@@ -45,11 +45,11 @@ class NavBrukerServiceTest {
 
 	private val service =
 		NavBrukerService(
-			repository = brukerRepository,
+			navBrukerRepository = brukerRepository,
+			rolleRepository = rolleRepository,
 			personService = personService,
 			navAnsattService = navAnsattService,
 			navEnhetService = navEnhetService,
-			rolleService = rolleService,
 			krrProxyClient = krrProxyClient,
 			poaoTilgangClient = poaoTilgangClient,
 			pdlClient = pdlClient,
@@ -86,7 +86,7 @@ class NavBrukerServiceTest {
 				result = erSkjermet,
 				throwable = null,
 			)
-		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 		every { brukerRepository.getByPersonId(person.id) } returns navBruker
 		mockExecuteWithoutResult(transactionTemplate)
 
@@ -127,7 +127,7 @@ class NavBrukerServiceTest {
 				result = erSkjermet,
 				throwable = null,
 			)
-		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 		every { brukerRepository.getByPersonId(person.id) } returns navBruker
 		mockExecuteWithoutResult(transactionTemplate)
 
@@ -176,7 +176,7 @@ class NavBrukerServiceTest {
 				result = erSkjermet,
 				throwable = null,
 			)
-		every { rolleService.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
+		every { rolleRepository.harRolle(person.id, Rolle.NAV_BRUKER) } returns false
 		every { brukerRepository.getByPersonId(person.id) } returns navBruker.copy(innsatsgruppe = null)
 		mockExecuteWithoutResult(transactionTemplate)
 

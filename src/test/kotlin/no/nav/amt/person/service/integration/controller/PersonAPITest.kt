@@ -16,7 +16,8 @@ import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.navbruker.NavBruker
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
-import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.PersonRepository
+import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.utils.StringUtils.emptyRequest
@@ -27,7 +28,8 @@ import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class PersonAPITest(
-	private val personService: PersonService,
+	private val personidentRepository: PersonidentRepository,
+	private val personRepository: PersonRepository,
 	private val navBrukerService: NavBrukerService,
 	private val navAnsattService: NavAnsattService,
 	private val navEnhetService: NavEnhetService,
@@ -50,7 +52,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
-		val faktiskPerson = personService.hentPerson(person.personident)
+		val faktiskPerson = personRepository.get(person.personident)?.toModel()
 
 		assertSoftly(faktiskPerson.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -80,7 +82,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
-		val faktiskPerson = personService.hentPerson(person.personident)
+		val faktiskPerson = personRepository.get(person.personident)?.toModel()
 
 		assertSoftly(faktiskPerson.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -135,7 +137,12 @@ class PersonAPITest(
 
 		sammenlign(faktiskBruker.shouldNotBeNull(), body)
 
-		val ident = personService.hentIdenter(faktiskBruker.person.id).first()
+		val ident =
+			personidentRepository
+				.getAllForPerson(faktiskBruker.person.id)
+				.map { it.toModel() }
+				.first()
+
 		assertSoftly(ident) {
 			it.ident shouldBe body.personident
 			type shouldBe IdentType.FOLKEREGISTERIDENT

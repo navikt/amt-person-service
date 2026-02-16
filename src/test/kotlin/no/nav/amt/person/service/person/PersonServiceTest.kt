@@ -24,7 +24,7 @@ class PersonServiceTest {
 	private val service =
 		PersonService(
 			pdlClient = pdlClient,
-			repository = personRepository,
+			personRepository = personRepository,
 			personidentRepository = personidentRepository,
 			applicationEventPublisher = applicationEventPublisher,
 		)

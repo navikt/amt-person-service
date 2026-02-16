@@ -7,7 +7,7 @@ import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.utils.titlecase
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 
 class LeesahConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val personService: PersonService,
+	private val personRepository: PersonRepository,
 	private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
 	@Test
@@ -53,7 +53,7 @@ class LeesahConsumerTest(
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personService.hentPerson(person.id)
+			val faktiskPerson = personRepository.get(person.id).toModel()
 
 			faktiskPerson.fornavn shouldBe nyttFornavn.titlecase()
 			faktiskPerson.mellomnavn shouldBe nyttMellomnavn.titlecase()

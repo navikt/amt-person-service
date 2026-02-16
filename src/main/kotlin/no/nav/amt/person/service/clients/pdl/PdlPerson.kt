@@ -3,6 +3,7 @@ package no.nav.amt.person.service.clients.pdl
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.model.Person.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.erBeskyttet
 
@@ -21,4 +22,6 @@ data class PdlPerson(
 		} else {
 			null
 		}
+
+	fun erUkjent() = etternavn == UNKNOWN_NAME
 }

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.internal
 
+import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.dbo.PersonDbo
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service
 class PersonUpdater(
 	private val personRepository: PersonRepository,
 	private val personService: PersonService,
+	private val pdlClient: PdlClient,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -22,7 +24,7 @@ class PersonUpdater(
 			personer = personRepository.getAll(offset)
 
 			personer.forEach {
-				val identer = personService.hentIdenter(it.personident)
+				val identer = pdlClient.hentIdenter(it.personident)
 
 				personService.oppdaterPersonIdent(identer)
 

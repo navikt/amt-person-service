@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger
 @Service
 class MetricService(
 	private val repository: MetricRepository,
-	val meterRegistry: MeterRegistry,
+	private val meterRegistry: MeterRegistry,
 ) {
 	private val antallPersoner = gauge("amt_person_antall_personer")
 	private val antallNavBruker = gauge("amt_person_antall_nav_brukere")

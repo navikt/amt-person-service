@@ -1,8 +1,9 @@
 package no.nav.amt.person.service.kafka.consumer
 
+import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -10,7 +11,7 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class OppfolgingsperiodeConsumer(
-	private val personService: PersonService,
+	private val pdlClient: PdlClient,
 	private val navBrukerService: NavBrukerService,
 	private val objectMapper: ObjectMapper,
 ) {
@@ -20,16 +21,15 @@ class OppfolgingsperiodeConsumer(
 		val sisteOppfolgingsperiode = objectMapper.readValue<SisteOppfolgingsperiodeKafkaPayload>(value)
 
 		val gjeldendeIdent =
-			runCatching {
-				personService.hentGjeldendeIdent(sisteOppfolgingsperiode.aktorId)
-			}.getOrElse { throwable ->
-				// midlertidig fiks i og med at GraphQL ikke returnerer 404
-				if (throwable.message?.contains("Fant ikke person") == true) {
-					log.warn(throwable.message, throwable)
+			try {
+				val identer = pdlClient.hentIdenter(sisteOppfolgingsperiode.aktorId)
+				finnGjeldendeIdent(identer).getOrThrow()
+			} catch (e: Exception) {
+				if (e.message?.contains("Fant ikke person") == true) {
+					log.warn(e.message, e)
 					return
-				} else {
-					throw throwable
 				}
+				throw e
 			}
 
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)

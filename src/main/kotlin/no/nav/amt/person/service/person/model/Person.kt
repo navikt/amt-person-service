@@ -15,4 +15,10 @@ data class Person(
 		mellomnavn = mellomnavn?.titlecase()
 		etternavn = etternavn.titlecase()
 	}
+
+	fun erUkjent() = etternavn == UNKNOWN_NAME
+
+	companion object {
+		const val UNKNOWN_NAME = "Ukjent"
+	}
 }

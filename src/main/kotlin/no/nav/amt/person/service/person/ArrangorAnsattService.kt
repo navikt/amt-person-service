@@ -10,22 +10,20 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ArrangorAnsattService(
 	private val personService: PersonService,
-	private val rolleService: RolleService,
+	private val rolleRepository: RolleRepository,
 	private val kafkaProducerService: KafkaProducerService,
 ) {
 	@Transactional
 	fun hentEllerOpprettAnsatt(personident: String): Person {
 		val person = personService.hentEllerOpprettPerson(personident)
-
-		rolleService.opprettRolle(person.id, Rolle.ARRANGOR_ANSATT)
-
+		rolleRepository.insert(person.id, Rolle.ARRANGOR_ANSATT)
 		return person
 	}
 
 	@EventListener
 	fun onPersonUpdate(personUpdateEvent: PersonUpdateEvent) {
 		val person = personUpdateEvent.person
-		if (rolleService.harRolle(person.id, Rolle.ARRANGOR_ANSATT)) {
+		if (rolleRepository.harRolle(person.id, Rolle.ARRANGOR_ANSATT)) {
 			kafkaProducerService.publiserArrangorAnsatt(person)
 		}
 	}

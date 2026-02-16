@@ -7,6 +7,7 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Kontaktadresse
 import no.nav.amt.person.service.person.model.Matrikkeladresse
 import no.nav.amt.person.service.person.model.Oppholdsadresse
+import no.nav.amt.person.service.person.model.Person.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.Postboksadresse
 import no.nav.amt.person.service.person.model.Vegadresse
@@ -81,8 +82,6 @@ private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc
 	}
 	return adresse
 }
-
-const val UNKNOWN_NAME = "Ukjent"
 
 private fun List<PdlQueries.Attribute.Navn>.toNavnMedFallback(): PdlQueries.Attribute.Navn =
 	this.firstOrNull() ?: PdlQueries.Attribute.Navn(

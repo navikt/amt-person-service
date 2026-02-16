@@ -8,14 +8,13 @@ import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
-import no.nav.amt.person.service.kafka.consumer.LeesahConsumer.Companion.personerMedFalskIdentitet
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsatt
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
-import no.nav.amt.person.service.person.RolleService
+import no.nav.amt.person.service.person.RolleRepository
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils
@@ -30,11 +29,11 @@ import java.util.UUID
 
 @Service
 class NavBrukerService(
-	private val repository: NavBrukerRepository,
+	private val navBrukerRepository: NavBrukerRepository,
 	private val personService: PersonService,
 	private val navAnsattService: NavAnsattService,
 	private val navEnhetService: NavEnhetService,
-	private val rolleService: RolleService,
+	private val rolleRepository: RolleRepository,
 	private val krrProxyClient: KrrProxyClient,
 	private val poaoTilgangClient: PoaoTilgangClient,
 	private val pdlClient: PdlClient,
@@ -48,14 +47,14 @@ class NavBrukerService(
 	fun getNavBrukere(
 		offset: Int,
 		limit: Int,
-	): List<NavBruker> = repository.getAllNavBrukere(offset, limit).map { it.toModel() }
+	): List<NavBruker> = navBrukerRepository.getAllNavBrukere(offset, limit).map { it.toModel() }
 
 	fun getNavBrukereModifiedBefore(
 		limit: Int,
 		modifiedBefore: LocalDate,
 		lastId: UUID?,
 	): List<NavBruker> =
-		repository.getAllNavBrukere(limit, modifiedBefore, lastId).map {
+		navBrukerRepository.getAllNavBrukere(limit, modifiedBefore, lastId).map {
 			it.toModel()
 		}
 
@@ -63,23 +62,23 @@ class NavBrukerService(
 		offset: Int,
 		limit: Int,
 		notSyncedSince: LocalDateTime? = null,
-	): List<String> = repository.getPersonidenter(offset, limit, notSyncedSince).distinct()
+	): List<String> = navBrukerRepository.getPersonidenter(offset, limit, notSyncedSince).distinct()
 
 	fun getPersonidenterMedManglendeKontaktinfo(
 		sistePersonident: String?,
 		limit: Int,
-	) = repository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
+	) = navBrukerRepository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
 
-	fun hentNavBruker(id: UUID): NavBruker = repository.get(id).toModel()
+	fun hentNavBruker(id: UUID): NavBruker = navBrukerRepository.get(id).toModel()
 
-	fun hentNavBruker(personident: String): NavBruker? = repository.get(personident)?.toModel()
+	fun hentNavBruker(personident: String): NavBruker? = navBrukerRepository.get(personident)?.toModel()
 
 	fun hentEllerOpprettNavBruker(personident: String): NavBruker {
 		val navBruker =
-			repository.get(personident)?.toModel()?.let {
+			navBrukerRepository.get(personident)?.toModel()?.let {
 				if (it.innsatsgruppe == null) {
 					oppdaterOppfolgingsperiodeOgInnsatsgruppe(it)
-					repository.get(it.id).toModel()
+					navBrukerRepository.get(it.id).toModel()
 				} else {
 					it
 				}
@@ -94,9 +93,10 @@ class NavBrukerService(
 	}
 
 	private fun opprettNavBruker(personident: String): NavBruker {
-		val personOpplysninger = pdlClient.hentPerson(personident)
+		val pdlPerson = pdlClient.hentPerson(personident)
+		check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke Nav-bruker" }
 
-		val person = personService.hentEllerOpprettPerson(personident, personOpplysninger)
+		val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
 		val veileder = navAnsattService.hentBrukersVeileder(personident)
 		val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
 		val kontaktinformasjon =
@@ -113,12 +113,12 @@ class NavBrukerService(
 				person = person,
 				navVeileder = veileder,
 				navEnhet = navEnhet,
-				telefon = kontaktinformasjon?.telefonnummer ?: personOpplysninger.telefonnummer,
+				telefon = kontaktinformasjon?.telefonnummer ?: pdlPerson.telefonnummer,
 				epost = kontaktinformasjon?.epost,
 				erSkjermet = erSkjermet,
-				adresse = getAdresse(personOpplysninger),
+				adresse = getAdresse(pdlPerson),
 				sisteKrrSync = LocalDateTime.now(),
-				adressebeskyttelse = personOpplysninger.getAdressebeskyttelse(),
+				adressebeskyttelse = pdlPerson.getAdressebeskyttelse(),
 				oppfolgingsperioder = oppfolgingsperioder,
 				innsatsgruppe = innsatsgruppe,
 			)
@@ -126,7 +126,7 @@ class NavBrukerService(
 		upsert(navBruker)
 		log.info("Opprettet ny nav bruker med id: ${navBruker.id}")
 
-		return repository.getByPersonId(person.id)?.toModel()
+		return navBrukerRepository.getByPersonId(person.id)?.toModel()
 			?: throw IllegalStateException(
 				"Fant ikke nav-bruker for person ${person.id}, skulle ha opprettet bruker ${navBruker.id}",
 			)
@@ -134,8 +134,8 @@ class NavBrukerService(
 
 	fun upsert(navBruker: NavBruker) {
 		transactionTemplate.executeWithoutResult {
-			repository.upsert(navBruker.toUpsert())
-			rolleService.opprettRolle(navBruker.person.id, Rolle.NAV_BRUKER)
+			navBrukerRepository.upsert(navBruker.toUpsert())
+			rolleRepository.insert(navBruker.person.id, Rolle.NAV_BRUKER)
 			kafkaProducerService.publiserNavBruker(navBruker)
 		}
 	}
@@ -145,20 +145,20 @@ class NavBrukerService(
 		navEnhetId: UUID?,
 	) {
 		transactionTemplate.executeWithoutResult {
-			repository.updateNavEnhet(navBruker.id, navEnhetId)
-			rolleService.opprettRolle(navBruker.person.id, Rolle.NAV_BRUKER)
+			navBrukerRepository.updateNavEnhet(navBruker.id, navEnhetId)
+			rolleRepository.insert(navBruker.person.id, Rolle.NAV_BRUKER)
 			// publiser oppdatert Nav-bruker
-			kafkaProducerService.publiserNavBruker(repository.get(navBruker.id).toModel())
+			kafkaProducerService.publiserNavBruker(navBrukerRepository.get(navBruker.id).toModel())
 		}
 	}
 
-	fun finnBrukerId(gjeldendeIdent: String): UUID? = repository.finnBrukerId(gjeldendeIdent)
+	fun finnBrukerId(gjeldendeIdent: String): UUID? = navBrukerRepository.finnBrukerId(gjeldendeIdent)
 
 	fun oppdaterNavVeileder(
 		navBrukerId: UUID,
 		veileder: NavAnsatt,
 	) {
-		val bruker = repository.get(navBrukerId).toModel()
+		val bruker = navBrukerRepository.get(navBrukerId).toModel()
 		if (bruker.navVeileder?.id != veileder.id) {
 			upsert(bruker.copy(navVeileder = veileder))
 		}
@@ -168,7 +168,7 @@ class NavBrukerService(
 		navBrukerId: UUID,
 		oppfolgingsperiode: Oppfolgingsperiode,
 	) {
-		val bruker = repository.get(navBrukerId).toModel()
+		val bruker = navBrukerRepository.get(navBrukerId).toModel()
 		val oppfolgingsperioder =
 			bruker.oppfolgingsperioder
 				.filter { it.id != oppfolgingsperiode.id }
@@ -191,7 +191,7 @@ class NavBrukerService(
 		navBrukerId: UUID,
 		innsatsgruppe: InnsatsgruppeV1,
 	) {
-		val bruker = repository.get(navBrukerId).toModel()
+		val bruker = navBrukerRepository.get(navBrukerId).toModel()
 
 		if (innsatsgruppe != bruker.innsatsgruppe) {
 			if (harAktivOppfolgingsperiode(bruker.oppfolgingsperioder)) {
@@ -237,7 +237,7 @@ class NavBrukerService(
 		brukerId: UUID,
 		erSkjermet: Boolean,
 	) {
-		val bruker = repository.get(brukerId).toModel()
+		val bruker = navBrukerRepository.get(brukerId).toModel()
 		if (bruker.erSkjermet != erSkjermet) {
 			upsert(bruker.copy(erSkjermet = erSkjermet))
 		}
@@ -262,7 +262,7 @@ class NavBrukerService(
 
 			krrKontaktinfo.forEach kontaktinfoPersoner@{
 				val telefon = it.value.telefonnummer ?: pdlClient.hentTelefon(it.key)
-				val bruker = repository.get(it.key)?.toModel() ?: return@kontaktinfoPersoner
+				val bruker = navBrukerRepository.get(it.key)?.toModel() ?: return@kontaktinfoPersoner
 				oppdaterKontaktinfo(bruker, it.value.copy(telefonnummer = telefon))
 			}
 		}
@@ -278,7 +278,7 @@ class NavBrukerService(
 			.getOrThrow()
 			.mapValues { (ident, info) ->
 				val bruker =
-					repository.get(ident)?.toModel()
+					navBrukerRepository.get(ident)?.toModel()
 						?: throw NoSuchElementException("Kunne ikke oppdatere kontakinformasjon, bruker finnes ikke")
 
 				val tlf = info.telefonnummer ?: pdlClient.hentTelefon(ident)
@@ -290,10 +290,10 @@ class NavBrukerService(
 	}
 
 	fun oppdaterAdressebeskyttelse(personident: String) {
-		val bruker = repository.get(personident)?.toModel() ?: return
+		val bruker = navBrukerRepository.get(personident)?.toModel() ?: return
 
-		if (bruker.person.id.toString() in personerMedFalskIdentitet) {
-			log.info("Skipper oppdaterAdressebeskyttelse for ${bruker.person.id}")
+		if (bruker.person.erUkjent()) {
+			log.info("Skipper oppdaterAdressebeskyttelse for ${bruker.person.id} med ukjent etternavn")
 			return
 		}
 
@@ -326,10 +326,10 @@ class NavBrukerService(
 	}
 
 	private fun oppdaterAdresse(personident: String) {
-		val bruker = repository.get(personident)?.toModel() ?: return
+		val bruker = navBrukerRepository.get(personident)?.toModel() ?: return
 
-		if (bruker.person.id.toString() in personerMedFalskIdentitet) {
-			log.info("Skipper oppdaterAdresse for ${bruker.person.id}")
+		if (bruker.person.erUkjent()) {
+			log.info("Skipper oppdaterAdresse for ${bruker.person.id} med ukjent etternavn")
 			return
 		}
 
@@ -367,7 +367,7 @@ class NavBrukerService(
 
 	@EventListener
 	fun onPersonUpdate(personUpdateEvent: PersonUpdateEvent) {
-		repository.get(personUpdateEvent.person.personident)?.let {
+		navBrukerRepository.get(personUpdateEvent.person.personident)?.let {
 			kafkaProducerService.publiserNavBruker(it.toModel())
 		}
 	}
@@ -377,7 +377,7 @@ class NavBrukerService(
 		kontaktinformasjon: Kontaktinformasjon,
 	) {
 		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
-			repository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
+			navBrukerRepository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
 			log.info("Ingen endring i kontaktinfo for personId ${bruker.person.id}")
 			return
 		}

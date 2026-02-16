@@ -11,6 +11,7 @@ import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.ArrangorAnsattService
+import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.Person
@@ -38,6 +39,7 @@ import java.util.UUID
 @RequestMapping("/internal")
 class InternalController(
 	private val personService: PersonService,
+	private val personRepository: PersonRepository,
 	private val navBrukerService: NavBrukerService,
 	private val personUpdater: PersonUpdater,
 	private val navBrukerRepository: NavBrukerRepository,
@@ -92,7 +94,10 @@ class InternalController(
 		@PathVariable id: UUID,
 	) {
 		if (isInternal(servlet)) {
-			val person = personService.repository.get(id).toModel()
+			val person = personRepository.get(id).toModel()
+			check(!person.erUkjent()) {
+				"Person ${person.id} har ukjent etternavn, kan ikke oppdatere navn"
+			}
 			personService.oppdaterNavn(person)
 		}
 	}

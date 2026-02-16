@@ -61,8 +61,8 @@ class PdlClient(
 
 			val pdlPerson = gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
 
-			if (pdlPerson.etternavn == UNKNOWN_NAME) {
-				log.warn("PDL-person inneholder navn: $UNKNOWN_NAME for ident $personident")
+			if (pdlPerson.erUkjent()) {
+				log.warn("PDL-person har ukjent etternavn")
 			}
 
 			return pdlPerson
