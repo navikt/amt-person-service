@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
@@ -101,7 +101,7 @@ class PersonRepositoryTest(
 	@Test
 	fun `upsert - ny person - inserter person`() {
 		val person =
-			Person(
+			PersonDbo(
 				id = UUID.randomUUID(),
 				personident = TestData.randomIdent(),
 				fornavn = "Fornavn",
@@ -133,7 +133,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(originalPerson)
 
 		val oppdatertPerson =
-			Person(
+			PersonDbo(
 				id = originalPerson.id,
 				personident = originalPerson.personident,
 				fornavn = "Nytt",
@@ -167,7 +167,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(originalPerson)
 
 		val oppdatertPerson =
-			Person(
+			PersonDbo(
 				id = originalPerson.id,
 				personident = "ny ident",
 				fornavn = "Nytt",

@@ -42,14 +42,14 @@ class ArrangorAnsattProducerTest(
 		testDataRepository.insertPerson(ansatt)
 		testDataRepository.insertRolle(ansatt.id, Rolle.ARRANGOR_ANSATT)
 
-		val oppdatertAnsatt = ansatt.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn").toModel()
+		val oppdatertAnsatt = ansatt.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn")
 		personService.upsert(oppdatertAnsatt)
 
 		val record =
 			consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
 				?.first { it.key() == ansatt.id.toString() }
 
-		val forventetValue = ansattTilV1Json(oppdatertAnsatt)
+		val forventetValue = ansattTilV1Json(oppdatertAnsatt.toModel())
 
 		record.shouldNotBeNull()
 		record.key() shouldBe ansatt.id.toString()
@@ -62,7 +62,7 @@ class ArrangorAnsattProducerTest(
 		testDataRepository.insertPerson(navBruker)
 		testDataRepository.insertRolle(navBruker.id, Rolle.NAV_BRUKER)
 
-		val oppdaterNavBruker = navBruker.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn").toModel()
+		val oppdaterNavBruker = navBruker.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn")
 		personService.upsert(oppdaterNavBruker)
 
 		consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)
@@ -77,7 +77,7 @@ class ArrangorAnsattProducerTest(
 		val person = navBruker.person
 		testDataRepository.insertRolle(person.id, Rolle.ARRANGOR_ANSATT)
 
-		val oppdatertPerson = person.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn").toModel()
+		val oppdatertPerson = person.copy(fornavn = "Nytt", mellomnavn = null, etternavn = "Navn")
 		personService.upsert(oppdatertPerson)
 
 		consume(kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic)

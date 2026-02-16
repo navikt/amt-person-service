@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ArrangorAnsattService(
+	private val personRepository: PersonRepository,
 	private val personService: PersonService,
 	private val rolleRepository: RolleRepository,
 	private val kafkaProducerService: KafkaProducerService,
@@ -31,5 +32,8 @@ class ArrangorAnsattService(
 	fun getAll(
 		offset: Int,
 		batchSize: Int,
-	) = personService.hentAlleMedRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
+	): List<Person> =
+		personRepository
+			.getAllWithRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
+			.map { it.toModel() }
 }

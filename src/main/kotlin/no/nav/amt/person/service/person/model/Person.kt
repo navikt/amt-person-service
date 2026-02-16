@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.person.model
 
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.utils.titlecase
 import java.util.UUID
 
@@ -17,6 +18,15 @@ data class Person(
 	}
 
 	fun erUkjent() = etternavn == UNKNOWN_NAME
+
+	fun toDbo() =
+		PersonDbo(
+			id = id,
+			personident = personident,
+			fornavn = fornavn,
+			mellomnavn = mellomnavn,
+			etternavn = etternavn,
+		)
 
 	companion object {
 		const val UNKNOWN_NAME = "Ukjent"

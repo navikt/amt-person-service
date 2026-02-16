@@ -16,11 +16,11 @@ import no.nav.amt.person.service.api.request.NavAnsattRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.api.request.NavEnhetRequest
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
+import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.ArrangorAnsattService
-import no.nav.amt.person.service.person.PersonService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -33,11 +33,11 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api")
 class PersonAPI(
-	private val personService: PersonService,
 	private val navAnsattService: NavAnsattService,
 	private val navBrukerService: NavBrukerService,
 	private val navEnhetService: NavEnhetService,
 	private val arrangorAnsattService: ArrangorAnsattService,
+	private val pdlClient: PdlClient,
 	private val authService: AuthService,
 ) {
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
@@ -121,6 +121,6 @@ class PersonAPI(
 		@RequestBody request: AdressebeskyttelseRequest,
 	): AdressebeskyttelseDto {
 		authService.verifyRequestIsMachineToMachine()
-		return personService.hentAdressebeskyttelse(request.personident).toDto()
+		return pdlClient.hentAdressebeskyttelse(request.personident).toDto()
 	}
 }

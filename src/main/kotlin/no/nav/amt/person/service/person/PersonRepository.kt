@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -44,7 +43,7 @@ class PersonRepository(
 			).firstOrNull()
 	}
 
-	fun upsert(person: Person) {
+	fun upsert(person: PersonDbo) {
 		val sql =
 			"""
 			INSERT INTO person (

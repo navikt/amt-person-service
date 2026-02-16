@@ -2,10 +2,9 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.person.model.finnGjeldendeIdent
 import no.nav.amt.person.service.utils.EnvUtils
 import org.slf4j.LoggerFactory
@@ -53,12 +52,12 @@ class PersonService(
 		personer.firstOrNull()?.let { person ->
 			log.info("Oppdaterer personident for person ${person.id}")
 			personidentRepository.upsert(person.id, identer)
-			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
+			upsert(person.copy(personident = gjeldendeIdent.ident))
 		}
 	}
 
 	@Transactional
-	fun oppdaterNavn(person: Person) {
+	fun oppdaterNavn(person: PersonDbo) {
 		if (person.erUkjent()) {
 			log.info("Skipper oppdaterNavn for ${person.id} med ukjent etternavn")
 			return
@@ -99,9 +98,9 @@ class PersonService(
 		log.info("Oppdaterte navn på person ${person.id}")
 	}
 
-	fun upsert(person: Person) {
+	fun upsert(person: PersonDbo) {
 		personRepository.upsert(person)
-		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
+		applicationEventPublisher.publishEvent(PersonUpdateEvent(person.toModel()))
 
 		log.info("Upsertet person med id: ${person.id}")
 	}
@@ -110,7 +109,7 @@ class PersonService(
 		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
 
 		val person =
-			Person(
+			PersonDbo(
 				id = UUID.randomUUID(),
 				personident = gjeldendeIdent.ident,
 				fornavn = pdlPerson.fornavn,
@@ -123,16 +122,6 @@ class PersonService(
 
 		log.info("Opprettet ny person med id ${person.id}")
 
-		return person
+		return person.toModel()
 	}
-
-	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? = pdlClient.hentAdressebeskyttelse(personident)
-
-	fun hentAlleMedRolle(
-		offset: Int,
-		limit: Int = 500,
-		rolle: Rolle,
-	) = personRepository
-		.getAllWithRolle(offset, limit, rolle)
-		.map { it.toModel() }
 }

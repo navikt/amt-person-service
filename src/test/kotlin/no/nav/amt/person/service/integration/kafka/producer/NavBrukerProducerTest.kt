@@ -57,7 +57,7 @@ class NavBrukerProducerTest(
 		testDataRepository.insertNavBruker(bruker)
 
 		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn")).toModel()
-		personService.upsert(oppdatertBruker.person)
+		personService.upsert(oppdatertBruker.person.toDbo())
 
 		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
 		records.shouldNotBeNull()

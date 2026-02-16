@@ -94,7 +94,7 @@ class InternalController(
 		@PathVariable id: UUID,
 	) {
 		if (isInternal(servlet)) {
-			val person = personRepository.get(id).toModel()
+			val person = personRepository.get(id)
 			check(!person.erUkjent()) {
 				"Person ${person.id} har ukjent etternavn, kan ikke oppdatere navn"
 			}

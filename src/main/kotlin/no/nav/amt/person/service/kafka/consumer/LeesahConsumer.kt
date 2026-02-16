@@ -70,7 +70,7 @@ class LeesahConsumer(
 	private fun handterNavn(personidenter: Set<String>) =
 		personRepository
 			.getPersoner(personidenter)
-			.forEach { personDbo -> personService.oppdaterNavn(personDbo.toModel()) }
+			.forEach { personDbo -> personService.oppdaterNavn(personDbo) }
 
 	private fun handterAdresse(personidenter: Set<String>) {
 		val lagredePersonidenter = personRepository.getPersoner(personidenter).map { it.personident }

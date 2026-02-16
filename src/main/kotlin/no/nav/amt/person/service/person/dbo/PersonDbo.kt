@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person.dbo
 
 import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.model.Person.Companion.UNKNOWN_NAME
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -10,9 +11,11 @@ data class PersonDbo(
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
-	val createdAt: LocalDateTime,
-	val modifiedAt: LocalDateTime,
+	val createdAt: LocalDateTime = LocalDateTime.now(),
+	val modifiedAt: LocalDateTime = LocalDateTime.now(),
 ) {
+	fun erUkjent() = etternavn == UNKNOWN_NAME
+
 	fun toModel(): Person =
 		Person(
 			id,
