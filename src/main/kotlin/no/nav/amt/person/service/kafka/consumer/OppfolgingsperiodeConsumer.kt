@@ -2,6 +2,7 @@ package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import tools.jackson.module.kotlin.readValue
 @Component
 class OppfolgingsperiodeConsumer(
 	private val pdlClient: PdlClient,
+	private val navBrukerRepository: NavBrukerRepository,
 	private val navBrukerService: NavBrukerService,
 	private val objectMapper: ObjectMapper,
 ) {
@@ -34,7 +36,7 @@ class OppfolgingsperiodeConsumer(
 				throw e
 			}
 
-		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
+		val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
 			log.info("Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering")

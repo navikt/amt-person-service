@@ -149,7 +149,7 @@ class NavBrukerServiceTest {
 
 			mockExecuteWithoutResult(transactionTemplate)
 
-			sut.syncKontaktinfoBulk(listOf(navBruker.person.personident))
+			sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
 			val expectedData =
 				navBruker
@@ -201,7 +201,7 @@ class NavBrukerServiceTest {
 
 			mockExecuteWithoutResult(transactionTemplate)
 
-			sut.syncKontaktinfoBulk(listOf(navBruker.person.personident))
+			sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
 			val expectedData =
 				navBruker
@@ -243,7 +243,7 @@ class NavBrukerServiceTest {
 					RuntimeException(),
 				)
 
-			sut.syncKontaktinfoBulk(listOf(navBruker.person.personident))
+			sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
 			verify(exactly = 1) { krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident)) }
 			verify(exactly = 0) { navBrukerRepository.upsert(any()) }

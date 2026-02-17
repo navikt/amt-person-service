@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.navbruker
 
-import no.nav.amt.person.service.api.dto.NavBrukerFodselsdatoDto
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
@@ -59,11 +58,6 @@ class NavBrukerService(
 		return navBruker
 	}
 
-	fun hentNavBrukerFodselsar(personident: String): NavBrukerFodselsdatoDto {
-		val fodselsar = pdlClient.hentPersonFodselsar(personident)
-		return NavBrukerFodselsdatoDto(fodselsar)
-	}
-
 	private fun opprettNavBruker(personident: String): NavBrukerDbo {
 		val pdlPerson = pdlClient.hentPerson(personident)
 		check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke Nav-bruker" }
@@ -107,25 +101,10 @@ class NavBrukerService(
 	fun upsert(navBruker: NavBrukerUpsert) {
 		transactionTemplate.executeWithoutResult {
 			navBrukerRepository.upsert(navBruker)
-			val upsertedNavBrukerDbo = navBrukerRepository.get(navBruker.id)
 			rolleRepository.insert(navBruker.personId, Rolle.NAV_BRUKER)
-			kafkaProducerService.publiserNavBruker(upsertedNavBrukerDbo)
-		}
-	}
-
-	fun oppdaterNavEnhet(
-		navBruker: NavBrukerDbo,
-		navEnhetId: UUID?,
-	) {
-		transactionTemplate.executeWithoutResult {
-			navBrukerRepository.updateNavEnhet(navBruker.id, navEnhetId)
-			rolleRepository.insert(navBruker.person.id, Rolle.NAV_BRUKER)
-			// publiser oppdatert Nav-bruker
 			kafkaProducerService.publiserNavBruker(navBrukerRepository.get(navBruker.id))
 		}
 	}
-
-	fun finnBrukerId(gjeldendeIdent: String): UUID? = navBrukerRepository.finnBrukerId(gjeldendeIdent)
 
 	fun oppdaterNavVeileder(
 		navBrukerId: UUID,
@@ -215,7 +194,7 @@ class NavBrukerService(
 		}
 	}
 
-	fun syncKontaktinfoBulk(personident: List<String>) {
+	fun syncKontaktinfoBulk(personident: Set<String>) {
 		val personerChunks =
 			personident.chunked(250) // maksgrense på 500 hos krr, vi spør på færre for å redusere timeout-problematikk
 
@@ -297,10 +276,8 @@ class NavBrukerService(
 		)
 	}
 
-	fun oppdaterAdresse(personidenter: List<String>) {
-		personidenter.forEach {
-			oppdaterAdresse(it)
-		}
+	fun oppdaterAdresse(personidenter: Set<String>) {
+		personidenter.forEach { oppdaterAdresse(it) }
 	}
 
 	private fun oppdaterAdresse(personident: String) {

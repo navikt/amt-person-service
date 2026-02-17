@@ -33,6 +33,6 @@ class EndringPaaBrukerConsumer(
 
 		val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(endringPaaBrukerPayload.oppfolgingsenhet)
 
-		navBrukerService.oppdaterNavEnhet(navBruker, navEnhet?.id)
+		navBrukerService.upsert(navBruker.toUpsert().copy(navEnhetId = navEnhet?.id))
 	}
 }

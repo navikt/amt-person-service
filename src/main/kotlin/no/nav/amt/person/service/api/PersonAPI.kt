@@ -59,7 +59,7 @@ class PersonAPI(
 		@RequestBody request: NavBrukerRequest,
 	): NavBrukerFodselsdatoDto {
 		authService.verifyRequestIsMachineToMachine()
-		return navBrukerService.hentNavBrukerFodselsar(request.personident)
+		return NavBrukerFodselsdatoDto(pdlClient.hentPersonFodselsar(request.personident))
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)

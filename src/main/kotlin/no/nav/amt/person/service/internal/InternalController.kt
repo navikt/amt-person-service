@@ -147,7 +147,7 @@ class InternalController(
 		if (isInternal(servlet)) {
 			log.info("Oppdaterer adresse for Nav-bruker $id")
 			val navBruker = navBrukerRepository.get(id)
-			navBrukerService.oppdaterAdresse(listOf(navBruker.person.personident))
+			navBrukerService.oppdaterAdresse(setOf(navBruker.person.personident))
 			log.info("Oppdaterte adresse for Nav-bruker $id")
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -271,11 +271,13 @@ class InternalController(
 				val offset = startFromOffset ?: 0
 				val limit = batchSize ?: 5000
 				val personidenter =
-					navBrukerRepository.getPersonidenter(
-						offset = offset,
-						limit = limit,
-						notSyncedSince = LocalDateTime.now().minusDays(3),
-					)
+					navBrukerRepository
+						.getPersonidenter(
+							offset = offset,
+							limit = limit,
+							notSyncedSince = LocalDateTime.now().minusDays(3),
+						).toSet()
+
 				navBrukerService.syncKontaktinfoBulk(personidenter)
 			}
 		} else {
@@ -294,11 +296,13 @@ class InternalController(
 			JobRunner.runAsync(jobName) {
 				val limit = batchSize ?: 200
 				var batchNumber = 1
-				var personidenter: List<String>
+				var personidenter: Set<String>
 				var sistePersonident: String? = null
 
 				do {
-					personidenter = navBrukerRepository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
+					personidenter =
+						navBrukerRepository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit).toSet()
+
 					if (personidenter.isNotEmpty()) {
 						log.info("Processing $jobName batch #$batchNumber count=${personidenter.size}")
 						navBrukerService.syncKontaktinfoBulk(personidenter)
@@ -440,8 +444,9 @@ class InternalController(
 
 		do {
 			navbrukere = navBrukerRepository.getAllUtenAdresse(batchSize, modifiedBefore, lastId)
-			val personidenter = navbrukere.map { it.person.personident }
+			val personidenter = navbrukere.map { it.person.personident }.toSet()
 			navBrukerService.oppdaterAdresse(personidenter)
+
 			lastId = navbrukere.lastOrNull()?.id
 			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste Nav-bruker-id: $lastId")
 		} while (navbrukere.isNotEmpty())

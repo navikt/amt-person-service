@@ -34,6 +34,6 @@ class EndringPaaBrukerConsumerTest {
 
 		verify(exactly = 0) { navBrukerRepository.get(any<String>()) }
 		verify(exactly = 0) { navEnhetService.hentEllerOpprettNavEnhet(any()) }
-		verify(exactly = 0) { navBrukerService.oppdaterNavEnhet(any(), any()) }
+		verify(exactly = 0) { navBrukerService.upsert(any()) }
 	}
 }
