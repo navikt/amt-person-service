@@ -31,13 +31,13 @@ class TildeltVeilederConsumer(
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
-			log.info("Tildelt veileder endret. NavBruker finnes ikke, hopper over kafka melding")
+			log.info("Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
 			return
 		}
 
 		val veileder = navAnsattService.hentEllerOpprettAnsatt(sisteTildeltVeileder.veilederId)
 
 		navBrukerService.oppdaterNavVeileder(brukerId, veileder)
-		log.info("Tildelt veileder endret. Veileder ${veileder.id} tildelt til bruker $brukerId")
+		log.info("Tildelt veileder endret. Veileder ${veileder.id} tildelt til Nav-bruker $brukerId")
 	}
 }

@@ -59,7 +59,7 @@ class TildeltVeilederConsumerTest(
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {
 				getLogs().any {
-					it.message == "Tildelt veileder endret. NavBruker finnes ikke, hopper over kafka melding"
+					it.message == "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 				} shouldBe true
 
 				navAnsattRepository.get(msg.veilederId) shouldBe null

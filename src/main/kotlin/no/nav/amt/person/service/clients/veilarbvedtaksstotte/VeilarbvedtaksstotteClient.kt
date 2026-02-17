@@ -36,9 +36,7 @@ class VeilarbvedtaksstotteClient(
 			}
 			val body = response.body.string()
 
-			if (body.isEmpty()) {
-				return null
-			}
+			if (body.isEmpty()) return null
 
 			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakDTO>(body)
 

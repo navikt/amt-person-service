@@ -262,10 +262,10 @@ class NavBrukerService(
 	}
 
 	fun oppdaterAdressebeskyttelse(personident: String) {
-		val bruker = navBrukerRepository.get(personident) ?: return
+		val navBruker = navBrukerRepository.get(personident) ?: return
 
-		if (bruker.person.erUkjent()) {
-			log.info("Skipper oppdaterAdressebeskyttelse for ${bruker.person.id} med ukjent etternavn")
+		if (navBruker.person.erUkjent()) {
+			log.info("Skipper oppdaterAdressebeskyttelse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med ukjent etternavn")
 			return
 		}
 
@@ -286,10 +286,10 @@ class NavBrukerService(
 
 		val oppdatertAdressebeskyttelse = personOpplysninger.getAdressebeskyttelse()
 
-		if (bruker.adressebeskyttelse == oppdatertAdressebeskyttelse) return
+		if (navBruker.adressebeskyttelse == oppdatertAdressebeskyttelse) return
 
 		upsert(
-			bruker
+			navBruker
 				.copy(
 					adressebeskyttelse = oppdatertAdressebeskyttelse,
 					adresse = getAdresse(personOpplysninger),
@@ -304,10 +304,10 @@ class NavBrukerService(
 	}
 
 	private fun oppdaterAdresse(personident: String) {
-		val bruker = navBrukerRepository.get(personident) ?: return
+		val navBruker = navBrukerRepository.get(personident) ?: return
 
-		if (bruker.person.erUkjent()) {
-			log.info("Skipper oppdaterAdresse for ${bruker.person.id} med ukjent etternavn")
+		if (navBruker.person.erUkjent()) {
+			log.info("Skipper oppdaterAdresse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med ukjent etternavn")
 			return
 		}
 
@@ -328,10 +328,10 @@ class NavBrukerService(
 
 		val oppdatertAdresse = getAdresse(personOpplysninger)
 
-		if (bruker.adresse == oppdatertAdresse) return
+		if (navBruker.adresse == oppdatertAdresse) return
 
-		upsert(bruker.copy(adresse = oppdatertAdresse).toUpsert())
-		log.info("Oppdatert adresse for navbruker med personId ${bruker.person.id}")
+		upsert(navBruker.copy(adresse = oppdatertAdresse).toUpsert())
+		log.info("Oppdatert adresse for navbruker med personId ${navBruker.person.id}")
 	}
 
 	private fun getAdresse(personopplysninger: PdlPerson): Adresse? {

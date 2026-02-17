@@ -66,9 +66,7 @@ private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc
 
 	val poststeder = postnummerTilPoststedFunc(unikePostnummer)
 
-	if (poststeder.isEmpty()) {
-		return null
-	}
+	if (poststeder.isEmpty()) return null
 
 	val adresse =
 		Adresse(

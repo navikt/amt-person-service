@@ -17,11 +17,7 @@ class PoststedRepository(
 	fun getPoststed(postnummer: String): String? =
 		template
 			.query(
-				"""
-				SELECT poststed
-				FROM postnummer
-				WHERE postnummer = :postnummer;
-				""".trimIndent(),
+				"SELECT poststed FROM postnummer WHERE postnummer = :postnummer;",
 				mapOf("postnummer" to postnummer),
 			) { resultSet, _ -> resultSet.getString("poststed") }
 			.firstOrNull()
@@ -69,7 +65,7 @@ class PoststedRepository(
 			"SELECT postnummer, poststed FROM postnummer",
 		) { resultSet, _ -> resultSet.toPostnummer() }
 
-	fun getPoststeder(postnummer: List<String>): List<Postnummer> {
+	fun getPoststeder(postnummer: Set<String>): List<Postnummer> {
 		if (postnummer.isEmpty()) return emptyList()
 
 		return template.query(

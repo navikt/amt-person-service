@@ -59,7 +59,7 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			val pdlPerson = gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
+			val pdlPerson = gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer.toSet()) }
 
 			if (pdlPerson.erUkjent()) {
 				log.warn("PDL-person har ukjent etternavn")
