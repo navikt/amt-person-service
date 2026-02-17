@@ -10,6 +10,8 @@ import no.nav.amt.person.service.api.dto.NavBrukerDto
 import no.nav.amt.person.service.api.dto.NavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
+import no.nav.amt.person.service.integration.mock.responses.MockNavAnsattRespomse
+import no.nav.amt.person.service.integration.mock.responses.MockNavEnhetResponse
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
@@ -20,8 +22,6 @@ import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.testmodels.NavAnsatt
-import no.nav.amt.person.service.testmodels.NavEnhet
 import no.nav.amt.person.service.utils.StringUtils.emptyRequest
 import no.nav.amt.person.service.utils.StringUtils.toJsonRequestBody
 import okhttp3.Request
@@ -120,8 +120,8 @@ class PersonAPITest(
 			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
-		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(navAnsatt))
+		mockNorgHttpServer.mockHentNavEnhet(MockNavEnhetResponse.fromDbo(navEnhet))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -203,8 +203,8 @@ class PersonAPITest(
 			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
-		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(navAnsatt))
+		mockNorgHttpServer.mockHentNavEnhet(MockNavEnhetResponse.fromDbo(navEnhet))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -227,7 +227,7 @@ class PersonAPITest(
 	fun `hentEllerOpprettNavAnsatt - nav ansatt er ikke lagret - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
 
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(navAnsatt))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -256,7 +256,7 @@ class PersonAPITest(
 	fun `hentEllerOpprettNavEnhet - nav enhet finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val navEnhet = TestData.lagNavEnhet()
 
-		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
+		mockNorgHttpServer.mockHentNavEnhet(MockNavEnhetResponse.fromDbo(navEnhet))
 
 		val response =
 			sendRequest(

@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.nom.NomQueries
-import no.nav.amt.person.service.testmodels.NavAnsatt
+import no.nav.amt.person.service.integration.mock.responses.MockNavAnsattRespomse
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
@@ -11,7 +11,7 @@ import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
-	fun mockHentNavAnsatt(ansatt: NavAnsatt) {
+	fun mockHentNavAnsatt(ansatt: MockNavAnsattRespomse) {
 		val predicate = { req: RecordedRequest ->
 			req.path == "/graphql" &&
 				req.method == "POST" &&

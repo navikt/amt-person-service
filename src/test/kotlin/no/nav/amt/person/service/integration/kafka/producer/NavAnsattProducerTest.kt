@@ -5,13 +5,13 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.consume
+import no.nav.amt.person.service.integration.mock.responses.MockNavAnsattRespomse
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
-import no.nav.amt.person.service.testmodels.NavAnsatt
 import org.junit.jupiter.api.Test
 
 class NavAnsattProducerTest(
@@ -64,8 +64,8 @@ class NavAnsattProducerTest(
 		val uendretAnsatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(uendretAnsatt)
 
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(endretAnsatt.copy(navn = "nytt navn")))
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(uendretAnsatt))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(endretAnsatt.copy(navn = "nytt navn")))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(uendretAnsatt))
 
 		navAnsattUpdater.oppdaterAlle()
 

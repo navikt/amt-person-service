@@ -1,9 +1,9 @@
-package no.nav.amt.person.service.testmodels
+package no.nav.amt.person.service.integration.mock.responses
 
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import java.util.UUID
 
-data class NavAnsatt(
+data class MockNavAnsattRespomse(
 	val id: UUID,
 	val navIdent: String,
 	val navn: String,
@@ -13,7 +13,7 @@ data class NavAnsatt(
 ) {
 	companion object {
 		fun fromDbo(source: NavAnsattDbo) =
-			NavAnsatt(
+			MockNavAnsattRespomse(
 				id = source.id,
 				navIdent = source.navIdent,
 				navn = source.navn,

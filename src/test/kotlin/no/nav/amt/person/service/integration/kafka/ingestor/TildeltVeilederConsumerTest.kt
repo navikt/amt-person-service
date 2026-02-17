@@ -7,9 +7,9 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
+import no.nav.amt.person.service.integration.mock.responses.MockNavAnsattRespomse
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
-import no.nav.amt.person.service.testmodels.NavAnsatt
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ class TildeltVeilederConsumerTest(
 		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
 
 		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
-		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
+		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(navAnsatt))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())

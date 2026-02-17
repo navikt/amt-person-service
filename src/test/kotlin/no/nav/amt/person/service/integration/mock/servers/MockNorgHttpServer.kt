@@ -1,13 +1,13 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import no.nav.amt.person.service.testmodels.NavEnhet
+import no.nav.amt.person.service.integration.mock.responses.MockNavEnhetResponse
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 
 class MockNorgHttpServer : MockHttpServer(name = "MockNorgHttpServer") {
 	private val baseUrl = "/norg2/api/v1/enhet"
 
-	fun mockHentNavEnhet(navEnhet: NavEnhet) {
+	fun mockHentNavEnhet(navEnhet: MockNavEnhetResponse) {
 		addNavEnhet(navEnhet.enhetId, navEnhet.navn)
 	}
 
