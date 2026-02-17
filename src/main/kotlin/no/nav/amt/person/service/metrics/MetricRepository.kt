@@ -10,11 +10,12 @@ class MetricRepository(
 	fun getCounts(): Counts {
 		val sql =
 			"""
-			select (select count(*) from person) as antall_personer,
-				   (select count(*) from nav_bruker) as antall_nav_brukere,
-				   (select count(*) from nav_ansatt) as antall_nav_ansatte,
-				   (select count(*) from nav_enhet) as antall_nav_enheter,
-				   (select count(*) from person_rolle where type = 'ARRANGOR_ANSATT') as antall_arrangor_ansatte
+			SELECT
+				(SELECT count(*) FROM person) AS antall_personer,
+				(SELECT count(*) FROM nav_bruker) AS antall_nav_brukere,
+				(SELECT count(*) FROM nav_ansatt) AS antall_nav_ansatte,
+				(SELECT count(*) FROM nav_enhet) AS antall_nav_enheter,
+				(SELECT count(*) FROM person_rolle WHERE type = 'ARRANGOR_ANSATT') AS antall_arrangor_ansatte
 			""".trimIndent()
 
 		return template
@@ -28,12 +29,4 @@ class MetricRepository(
 				)
 			}.first()
 	}
-
-	data class Counts(
-		val antallPersoner: Int,
-		val antallNavBrukere: Int,
-		val antallNavAnsatte: Int,
-		val antallNavEnheter: Int,
-		val antallArrangorAnsatte: Int,
-	)
 }

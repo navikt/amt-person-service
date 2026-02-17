@@ -5,14 +5,14 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
-import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class InnsatsgruppeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes, ny innsatsgruppe - oppdaterer`() {
@@ -29,7 +29,7 @@ class InnsatsgruppeConsumerTest(
 		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
 
 		await().untilAsserted {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
 			faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
 		}

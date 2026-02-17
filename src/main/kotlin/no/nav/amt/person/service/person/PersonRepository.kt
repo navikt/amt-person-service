@@ -65,7 +65,7 @@ class PersonRepository(
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
 				personident = :personident,
-				modified_at = current_timestamp
+				modified_at = CURRENT_TIMESTAMP
 			""".trimIndent()
 
 		val parameters =

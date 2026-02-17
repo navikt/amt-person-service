@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.nom.NomQueries
-import no.nav.amt.person.service.navansatt.NavAnsatt
+import no.nav.amt.person.service.testmodels.NavAnsatt
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse

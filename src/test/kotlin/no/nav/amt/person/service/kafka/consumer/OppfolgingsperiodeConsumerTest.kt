@@ -7,7 +7,7 @@ import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ import java.util.UUID
 
 class OppfolgingsperiodeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@ParameterizedTest
 	@ValueSource(booleans = [true, false])
@@ -44,7 +44,7 @@ class OppfolgingsperiodeConsumerTest(
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
 		await().untilAsserted {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 			faktiskBruker.oppfolgingsperioder.size shouldBe 1
 
 			assertSoftly(faktiskBruker.oppfolgingsperioder.first()) {

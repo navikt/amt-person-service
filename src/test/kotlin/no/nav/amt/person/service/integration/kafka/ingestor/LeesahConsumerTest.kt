@@ -1,12 +1,13 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
-import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.utils.titlecase
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.Test
 class LeesahConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
 	private val personRepository: PersonRepository,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `Ingest - nav bruker finnes - oppdaterer navn`() {
@@ -53,16 +54,16 @@ class LeesahConsumerTest(
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personRepository.get(person.id).toModel()
-
-			faktiskPerson.fornavn shouldBe nyttFornavn.titlecase()
-			faktiskPerson.mellomnavn shouldBe nyttMellomnavn.titlecase()
-			faktiskPerson.etternavn shouldBe nyttEtternavn.titlecase()
+			assertSoftly(personRepository.get(person.id)) {
+				fornavn shouldBe nyttFornavn.titlecase()
+				mellomnavn shouldBe nyttMellomnavn.titlecase()
+				etternavn shouldBe nyttEtternavn.titlecase()
+			}
 		}
 	}
 
 	@Test
-	fun `Ingest - person får adressebeskyttelse - oppdaterer navbruker`() {
+	fun `Ingest - person far adressebeskyttelse - oppdaterer navbruker`() {
 		val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
 		testDataRepository.insertNavBruker(navBruker)
 
@@ -86,7 +87,7 @@ class LeesahConsumerTest(
 		kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val oppdatertNavBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
+			val oppdatertNavBruker = navBrukerRepository.get(navBruker.person.personident)
 
 			oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
 			oppdatertNavBruker?.adresse shouldBe null

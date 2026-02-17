@@ -3,7 +3,7 @@ package no.nav.amt.person.service.kafka.consumer
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -21,9 +21,10 @@ class InnsatsgruppeConsumer(
 		val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
 		val gjeldendeIdent =
-			finnGjeldendeIdent(
-				pdlClient.hentIdenter(siste14aVedtak.aktorId),
-			).getOrThrow()
+			pdlClient
+				.hentIdenter(siste14aVedtak.aktorId)
+				.finnGjeldendeIdent()
+				.getOrThrow()
 
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 

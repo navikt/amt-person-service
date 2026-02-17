@@ -6,7 +6,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 /**
- * Should be used to check equality, 1 second skew is allowed to work around different precision on milliseconds
+ * Should be used to check equality, 1-second skew is allowed to work around different precision on milliseconds
  */
 infix fun LocalDateTime.shouldBeEqualTo(expected: LocalDateTime?) {
 	expected shouldNotBe null

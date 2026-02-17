@@ -97,10 +97,11 @@ class KafkaMessageSender(
 		value: Aktor,
 		schemaId: Int,
 	) {
-		val record = ProducerRecord(aktorV2Topic, key, value)
-		record.headers().add("schemaId", schemaId.toString().toByteArray())
-
-		sendAvroRecord(record)
+		sendAvroRecord(
+			ProducerRecord(aktorV2Topic, key, value).apply {
+				headers().add("schemaId", schemaId.toString().toByteArray())
+			},
+		)
 	}
 
 	fun sendTilLeesahTopic(
@@ -108,10 +109,14 @@ class KafkaMessageSender(
 		value: Personhendelse,
 		schemaId: Int,
 	) {
-		val record = ProducerRecord(leesahTopic, key, value)
-		record.headers().add("schemaId", schemaId.toString().toByteArray())
-
-		sendAvroRecord(record)
+		sendAvroRecord(
+			ProducerRecord(leesahTopic, key, value).apply {
+				headers().add(
+					"schemaId",
+					schemaId.toString().toByteArray(),
+				)
+			},
+		)
 	}
 
 	private fun <K, V> sendAvroRecord(record: ProducerRecord<K, V>) {

@@ -3,8 +3,8 @@ package no.nav.amt.person.service.person
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestData.lagPersonident
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.person.model.Personident
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -19,11 +19,11 @@ class PersonidentRepositoryTest(
 
 		val identer =
 			listOf(
-				Personident(TestData.randomIdent(), true, IdentType.AKTORID),
-				Personident(TestData.randomIdent(), true, IdentType.NPID),
+				lagPersonident(personId = person.id, historisk = true, type = IdentType.AKTORID),
+				lagPersonident(personId = person.id, historisk = true, type = IdentType.NPID),
 			)
 
-		personidentRepository.upsert(person.id, identer)
+		personidentRepository.upsert(identer.toSet())
 
 		val faktiskeIdenter = personidentRepository.getAllForPerson(person.id)
 
@@ -38,11 +38,11 @@ class PersonidentRepositoryTest(
 
 		val identer =
 			listOf(
-				TestData.lagPersonident(person.personident, historisk = true),
-				TestData.lagPersonident(TestData.randomIdent(), historisk = false),
+				lagPersonident(personId = person.id, historisk = true),
+				lagPersonident(personId = person.id, historisk = false),
 			)
 
-		personidentRepository.upsert(person.id, identer.map { it.toModel() })
+		personidentRepository.upsert(identer.toSet())
 
 		val faktiskeIdenter = personidentRepository.getAllForPerson(person.id)
 

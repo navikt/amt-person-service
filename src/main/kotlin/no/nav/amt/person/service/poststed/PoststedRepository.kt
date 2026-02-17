@@ -20,12 +20,11 @@ class PoststedRepository(
 				"""
 				SELECT poststed
 				FROM postnummer
-				where postnummer = :postnummer;
-            """,
+				WHERE postnummer = :postnummer;
+				""".trimIndent(),
 				mapOf("postnummer" to postnummer),
-			) { resultSet, _ ->
-				resultSet.getString("poststed")
-			}.firstOrNull()
+			) { resultSet, _ -> resultSet.getString("poststed") }
+			.firstOrNull()
 
 	fun oppdaterPoststed(
 		oppdatertePostnummer: List<Postnummer>,
@@ -46,20 +45,17 @@ class PoststedRepository(
 
 		slettesfraDb.forEach {
 			template.update(
-				"""
-					DELETE FROM postnummer
-					where postnummer = :postnummer;
-					""",
+				"DELETE FROM postnummer WHERE postnummer = :postnummer",
 				mapOf("postnummer" to it),
 			)
 		}
 		oppdateresIDb.forEach {
 			template.update(
 				"""
-					INSERT INTO postnummer(postnummer, poststed)
-					VALUES (:postnummer, :poststed)
-					ON CONFLICT (postnummer) DO UPDATE SET poststed = :poststed;
-					""",
+				INSERT INTO postnummer(postnummer, poststed)
+				VALUES (:postnummer, :poststed)
+				ON CONFLICT (postnummer) DO UPDATE SET poststed = :poststed;
+				""".trimIndent(),
 				mapOf(
 					"postnummer" to it.key,
 					"poststed" to it.value.poststed,
@@ -70,34 +66,23 @@ class PoststedRepository(
 
 	fun getAllePoststeder(): List<Postnummer> =
 		template.query(
-			"""
-				SELECT postnummer,
-				poststed
-				FROM postnummer;
-				""",
-		) { resultSet, _ ->
-			resultSet.toPostnummer()
-		}
+			"SELECT postnummer, poststed FROM postnummer",
+		) { resultSet, _ -> resultSet.toPostnummer() }
 
 	fun getPoststeder(postnummer: List<String>): List<Postnummer> {
-		if (postnummer.isEmpty()) {
-			return emptyList()
-		}
+		if (postnummer.isEmpty()) return emptyList()
+
 		return template.query(
-			"""
-				SELECT postnummer,
-				poststed
-				FROM postnummer WHERE postnummer in (:postnummer);
-				""",
+			"SELECT postnummer, poststed FROM postnummer WHERE postnummer IN (:postnummer)",
 			mapOf("postnummer" to postnummer),
-		) { resultSet, _ ->
-			resultSet.toPostnummer()
-		}
+		) { resultSet, _ -> resultSet.toPostnummer() }
+	}
+
+	companion object {
+		private fun ResultSet.toPostnummer() =
+			Postnummer(
+				postnummer = getString("postnummer"),
+				poststed = getString("poststed"),
+			)
 	}
 }
-
-private fun ResultSet.toPostnummer(): Postnummer =
-	Postnummer(
-		postnummer = getString("postnummer"),
-		poststed = getString("poststed"),
-	)

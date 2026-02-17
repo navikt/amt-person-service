@@ -7,16 +7,14 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
-import no.nav.amt.person.service.clients.nom.NomQueries
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestData.navGrunerlokka
+import no.nav.amt.person.service.data.TestData.orgTilknytning
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
-import no.nav.amt.person.service.navenhet.NavEnhet
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.UUID
 
 class NavAnsattServiceTest {
 	private val navAnsattRepository: NavAnsattRepository = mockk(relaxUnitFun = true)
@@ -62,20 +60,3 @@ class NavAnsattServiceTest {
 		}
 	}
 }
-
-val orgTilknytning =
-	listOf(
-		NomQueries.HentRessurser.OrgTilknytning(
-			gyldigFom = LocalDate.of(2020, 1, 1),
-			gyldigTom = null,
-			orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
-			erDagligOppfolging = true,
-		),
-	)
-
-val navGrunerlokka =
-	NavEnhet(
-		id = UUID(0L, 0L),
-		navn = "Nav Grünerløkka",
-		enhetId = "0315",
-	)

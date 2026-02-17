@@ -51,8 +51,8 @@ class NavEnhetServiceTest {
 
 	@Test
 	fun `oppdaterNavEnheter - enhet med nytt navn - oppdaterer enhet`() {
-		val enhet1 = TestData.lagNavEnhet(navn = "NAV Test 1").toModel()
-		val enhet2 = TestData.lagNavEnhet(navn = "NAV Test 2").toModel()
+		val enhet1 = TestData.lagNavEnhet(navn = "NAV Test 1")
+		val enhet2 = TestData.lagNavEnhet(navn = "NAV Test 2")
 
 		val oppdatertEnhet1 = NorgNavEnhet(enhet1.enhetId, "Nytt Navn")
 

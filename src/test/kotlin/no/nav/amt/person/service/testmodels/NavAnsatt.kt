@@ -1,9 +1,9 @@
-package no.nav.amt.person.service.api.dto
+package no.nav.amt.person.service.testmodels
 
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import java.util.UUID
 
-data class NavAnsattDto(
+data class NavAnsatt(
 	val id: UUID,
 	val navIdent: String,
 	val navn: String,
@@ -13,7 +13,7 @@ data class NavAnsattDto(
 ) {
 	companion object {
 		fun fromDbo(source: NavAnsattDbo) =
-			NavAnsattDto(
+			NavAnsatt(
 				id = source.id,
 				navIdent = source.navIdent,
 				navn = source.navn,

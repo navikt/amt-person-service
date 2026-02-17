@@ -4,7 +4,7 @@ import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
@@ -26,9 +26,11 @@ class AktorV2Consumer(
 			return
 		}
 
-		val identer = value.identifikatorer.map { Personident(it.idnummer, !it.gjeldende, it.type.toModel()) }
+		val identer =
+			value.identifikatorer
+				.map { Personident(it.idnummer, !it.gjeldende, it.type.toIdentType()) }
 
-		if (finnGjeldendeIdent(identer).isFailure) {
+		if (identer.finnGjeldendeIdent().isFailure) {
 			TeamLogs.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")
 			log.error("AktorV2 ingestor mottok bruker med 0 gjeldende ident(er). Se team logs for detaljer")
 			throw IllegalStateException("Kan ikke ingeste bruker med 0 gjeldende ident(er)")
@@ -38,7 +40,7 @@ class AktorV2Consumer(
 	}
 }
 
-private fun Type.toModel(): IdentType =
+private fun Type.toIdentType(): IdentType =
 	when (this) {
 		Type.FOLKEREGISTERIDENT -> IdentType.FOLKEREGISTERIDENT
 		Type.NPID -> IdentType.NPID

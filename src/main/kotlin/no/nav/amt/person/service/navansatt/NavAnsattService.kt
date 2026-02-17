@@ -18,27 +18,21 @@ class NavAnsattService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentNavAnsatt(navAnsattId: UUID): NavAnsatt = navAnsattRepository.get(navAnsattId).toModel()
-
-	fun hentNavAnsatt(navIdent: String): NavAnsatt? = navAnsattRepository.get(navIdent)?.toModel()
-
-	fun upsert(navAnsatt: NavAnsatt): NavAnsatt {
-		val ansatt = navAnsattRepository.upsert(navAnsatt).toModel()
-		kafkaProducerService.publiserNavAnsatt(ansatt)
-		return ansatt
+	fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo {
+		val upsertedNavAnsatt = navAnsattRepository.upsert(navAnsatt)
+		kafkaProducerService.publiserNavAnsatt(upsertedNavAnsatt)
+		return upsertedNavAnsatt
 	}
 
-	fun upsertMany(ansatte: List<NavAnsatt>) {
+	fun upsertMany(ansatte: Set<NavAnsattDbo>) {
 		navAnsattRepository.upsertMany(ansatte)
 		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
 	}
 
-	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
+	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsattDbo {
 		val navAnsatt = navAnsattRepository.get(navIdent)
 
-		if (navAnsatt != null) {
-			return navAnsatt.toModel()
-		}
+		if (navAnsatt != null) return navAnsatt
 
 		val nyNavAnsatt = nomClient.hentNavAnsatt(navIdent)
 
@@ -52,7 +46,7 @@ class NavAnsattService(
 		val navEnhet = nyNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
 
 		val ansatt =
-			NavAnsatt(
+			NavAnsattDbo(
 				id = UUID.randomUUID(),
 				navIdent = nyNavAnsatt.navIdent,
 				navn = nyNavAnsatt.navn,
@@ -64,10 +58,8 @@ class NavAnsattService(
 		return upsert(ansatt)
 	}
 
-	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsatt? =
+	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsattDbo? =
 		veilarboppfolgingClient.hentVeilederIdent(brukersPersonIdent)?.let {
 			hentEllerOpprettAnsatt(it)
 		}
-
-	fun getAll() = navAnsattRepository.getAll().map { it.toModel() }
 }

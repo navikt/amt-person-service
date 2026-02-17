@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.navbruker.InnsatsgruppeV2.Companion.toV1
 import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.OkHttpClient

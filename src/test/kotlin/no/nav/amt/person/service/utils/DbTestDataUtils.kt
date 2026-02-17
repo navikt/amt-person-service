@@ -11,33 +11,26 @@ object DbTestDataUtils {
 	fun cleanDatabase(dataSource: DataSource) {
 		val jdbcTemplate = JdbcTemplate(dataSource)
 
-		val tables = getAllTables(jdbcTemplate, SCHEMA).filter { it != FLYWAY_SCHEMA_HISTORY_TABLE_NAME }
-		val sequences = getAllSequences(jdbcTemplate, SCHEMA)
-
-		tables.forEach {
+		getAllTables(jdbcTemplate).filter { it != FLYWAY_SCHEMA_HISTORY_TABLE_NAME }.forEach {
 			jdbcTemplate.update("TRUNCATE TABLE $it CASCADE")
 		}
 
-		sequences.forEach {
+		getAllSequences(jdbcTemplate).forEach {
 			jdbcTemplate.update("ALTER SEQUENCE $it RESTART WITH 1")
 		}
 	}
 
-	private fun getAllTables(
-		jdbcTemplate: JdbcTemplate,
-		schema: String,
-	): List<String> {
-		val sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = ?"
+	private fun getAllTables(jdbcTemplate: JdbcTemplate): List<String> =
+		jdbcTemplate.query(
+			"SELECT table_name FROM information_schema.tables WHERE table_schema = ?",
+			{ rs, _ -> rs.getString(1) },
+			SCHEMA,
+		)
 
-		return jdbcTemplate.query(sql, { rs, _ -> rs.getString(1) }, schema)
-	}
-
-	private fun getAllSequences(
-		jdbcTemplate: JdbcTemplate,
-		schema: String,
-	): List<String> {
-		val sql = "SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = ?"
-
-		return jdbcTemplate.query(sql, { rs, _ -> rs.getString(1) }, schema)
-	}
+	private fun getAllSequences(jdbcTemplate: JdbcTemplate): List<String> =
+		jdbcTemplate.query(
+			"SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = ?",
+			{ rs, _ -> rs.getString(1) },
+			SCHEMA,
+		)
 }

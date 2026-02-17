@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import no.nav.amt.person.service.navenhet.NavEnhet
+import no.nav.amt.person.service.testmodels.NavEnhet
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 

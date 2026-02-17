@@ -11,15 +11,17 @@ import no.nav.amt.person.service.api.dto.NavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.mock.servers.MockKontaktinformasjon
-import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.navbruker.NavBruker
-import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.navenhet.NavEnhetService
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
+import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navenhet.NavEnhetRepository
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.testmodels.NavAnsatt
+import no.nav.amt.person.service.testmodels.NavEnhet
 import no.nav.amt.person.service.utils.StringUtils.emptyRequest
 import no.nav.amt.person.service.utils.StringUtils.toJsonRequestBody
 import okhttp3.Request
@@ -30,9 +32,9 @@ import java.util.UUID
 class PersonAPITest(
 	private val personidentRepository: PersonidentRepository,
 	private val personRepository: PersonRepository,
-	private val navBrukerService: NavBrukerService,
-	private val navAnsattService: NavAnsattService,
-	private val navEnhetService: NavEnhetService,
+	private val navBrukerRepository: NavBrukerRepository,
+	private val navAnsattRepository: NavAnsattRepository,
+	private val navEnhetRepository: NavEnhetRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `hentEllerOpprettArrangorAnsatt - ansatt finnes ikke - skal ha status 200 og returnere riktig response`() {
@@ -52,7 +54,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
-		val faktiskPerson = personRepository.get(person.personident)?.toModel()
+		val faktiskPerson = personRepository.get(person.personident)
 
 		assertSoftly(faktiskPerson.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -82,7 +84,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
-		val faktiskPerson = personRepository.get(person.personident)?.toModel()
+		val faktiskPerson = personRepository.get(person.personident)
 
 		assertSoftly(faktiskPerson.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -118,8 +120,8 @@ class PersonAPITest(
 			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
-		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
+		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
+		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -133,14 +135,13 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<NavBrukerDto>(response.body.string())
-		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
+		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
 
 		sammenlign(faktiskBruker.shouldNotBeNull(), body)
 
 		val ident =
 			personidentRepository
 				.getAllForPerson(faktiskBruker.person.id)
-				.map { it.toModel() }
 				.first()
 
 		assertSoftly(ident) {
@@ -166,7 +167,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body.string())
-		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
+		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
 
 		sammenlign(faktiskBruker.shouldNotBeNull(), navBrukerDto)
 	}
@@ -202,8 +203,8 @@ class PersonAPITest(
 			),
 		)
 		mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
-		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
+		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
+		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -217,7 +218,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body.string())
-		val faktiskBruker = navBrukerService.hentNavBruker(navBruker.person.personident)
+		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
 
 		sammenlign(faktiskBruker.shouldNotBeNull(), navBrukerDto)
 	}
@@ -226,7 +227,7 @@ class PersonAPITest(
 	fun `hentEllerOpprettNavAnsatt - nav ansatt er ikke lagret - skal ha status 200 og returnere riktig response`() {
 		val navAnsatt = TestData.lagNavAnsatt()
 
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		val response =
@@ -240,7 +241,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<NavAnsattDto>(response.body.string())
-		val faktiskNavAnsatt = navAnsattService.hentNavAnsatt(navAnsatt.navIdent)
+		val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
 
 		assertSoftly(faktiskNavAnsatt.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -255,7 +256,7 @@ class PersonAPITest(
 	fun `hentEllerOpprettNavEnhet - nav enhet finnes ikke - skal ha status 200 og returnere riktig response`() {
 		val navEnhet = TestData.lagNavEnhet()
 
-		mockNorgHttpServer.mockHentNavEnhet(navEnhet.toModel())
+		mockNorgHttpServer.mockHentNavEnhet(NavEnhet.fromDbo(navEnhet))
 
 		val response =
 			sendRequest(
@@ -268,7 +269,7 @@ class PersonAPITest(
 		response.code shouldBe 200
 
 		val body = objectMapper.readValue<NavEnhetDto>(response.body.string())
-		val faktiskNavEnhet = navEnhetService.hentNavEnhet(navEnhet.enhetId)
+		val faktiskNavEnhet = navEnhetRepository.get(navEnhet.enhetId)
 
 		assertSoftly(faktiskNavEnhet.shouldNotBeNull()) {
 			id shouldBe body.id
@@ -397,7 +398,7 @@ class PersonAPITest(
 	}
 
 	private fun sammenlign(
-		faktiskBruker: NavBruker,
+		faktiskBruker: NavBrukerDbo,
 		brukerDto: NavBrukerDto,
 	) {
 		assertSoftly(faktiskBruker) {

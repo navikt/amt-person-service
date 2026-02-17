@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.kafka.consumer.dto.EndringPaaBrukerDto
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
@@ -10,6 +11,7 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class EndringPaaBrukerConsumer(
+	private val navBrukerRepository: NavBrukerRepository,
 	private val navBrukerService: NavBrukerService,
 	private val navEnhetService: NavEnhetService,
 	private val objectMapper: ObjectMapper,
@@ -23,7 +25,7 @@ class EndringPaaBrukerConsumer(
 		// og derfor ikke er relevante
 		if (endringPaaBrukerPayload.oppfolgingsenhet == null) return
 
-		val navBruker = navBrukerService.hentNavBruker(endringPaaBrukerPayload.fodselsnummer) ?: return
+		val navBruker = navBrukerRepository.get(endringPaaBrukerPayload.fodselsnummer) ?: return
 
 		if (navBruker.navEnhet?.enhetId == endringPaaBrukerPayload.oppfolgingsenhet) return
 

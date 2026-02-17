@@ -4,7 +4,7 @@ import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -23,17 +23,19 @@ class PersonUpdater(
 		do {
 			personer = personRepository.getAll(offset)
 
-			personer.forEach {
-				val identer = pdlClient.hentIdenter(it.personident)
+			for (person in personer) {
+				val identer = pdlClient.hentIdenter(person.personident)
+				if (identer.isEmpty()) continue
 
 				personService.oppdaterPersonIdent(identer)
 
-				finnGjeldendeIdent(identer).onSuccess { ident ->
-					if (ident.ident != it.personident) {
-						log.info("Ny gjeldende ident for person ${it.id}")
+				identer.finnGjeldendeIdent().onSuccess { ident ->
+					if (ident.ident != person.personident) {
+						log.info("Ny gjeldende ident for person ${person.id}")
 					}
 				}
 			}
+
 			log.info("Oppdaterte personidenter for personer fra offset $offset til ${offset + personer.size}")
 			offset += personer.size
 		} while (personer.isNotEmpty())

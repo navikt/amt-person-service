@@ -24,6 +24,269 @@ class NavBrukerRepository(
 	private val template: NamedParameterJdbcTemplate,
 	private val objectMapper: ObjectMapper,
 ) {
+	fun get(id: UUID): NavBrukerDbo =
+		template
+			.query(
+				selectNavBrukerQuery("WHERE nav_bruker.id = :id"),
+				sqlParameters("id" to id),
+				rowMapper,
+			).first()
+
+	fun get(personident: String): NavBrukerDbo? =
+		template
+			.query(
+				selectNavBrukerQuery(
+					"""
+					LEFT JOIN personident ON nav_bruker.person_id = personident.person_id
+					WHERE personident.ident = :personident
+					""".trimIndent(),
+				),
+				sqlParameters("personident" to personident),
+				rowMapper,
+			).firstOrNull()
+
+	fun get(personidenter: Set<String>): List<NavBrukerDbo> =
+		template.query(
+			selectNavBrukerQuery(
+				"""
+				LEFT JOIN personident ON nav_bruker.person_id = personident.person_id
+				WHERE personident.ident = ANY (:personidenter)
+				""".trimIndent(),
+			),
+			sqlParameters("personidenter" to personidenter.toTypedArray()),
+			rowMapper,
+		)
+
+	fun getByPersonId(personId: UUID): NavBrukerDbo? =
+		template
+			.query(
+				selectNavBrukerQuery("WHERE person_id = :personId"),
+				sqlParameters("personId" to personId),
+				rowMapper,
+			).firstOrNull()
+
+	fun getAllUtenAdresse(
+		limit: Int,
+		modifiedBefore: LocalDateTime,
+		lastId: UUID?,
+	): List<NavBrukerDbo> {
+		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
+
+		return template.query(
+			selectNavBrukerQuery(
+				"""
+				WHERE
+					nav_bruker.adresse IS NULL
+					AND nav_bruker.adressebeskyttelse IS NULL
+					AND nav_bruker.modified_at < :modified_before $andLastId
+				ORDER BY nav_bruker.id
+				LIMIT :limit
+				""".trimIndent(),
+			),
+			sqlParameters(
+				"modified_before" to modifiedBefore,
+				"last_id" to lastId,
+				"limit" to limit,
+			),
+			rowMapper,
+		)
+	}
+
+	fun getAllNavBrukere(
+		offset: Int,
+		limit: Int,
+	): List<NavBrukerDbo> =
+		template.query(
+			selectNavBrukerQuery("ORDER BY nav_bruker.created_at OFFSET :offset LIMIT :limit"),
+			sqlParameters("offset" to offset, "limit" to limit),
+			rowMapper,
+		)
+
+	fun getAllNavBrukere(
+		limit: Int,
+		modifiedBefore: LocalDate,
+		lastId: UUID?,
+	): List<NavBrukerDbo> {
+		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
+
+		return template.query(
+			selectNavBrukerQuery(
+				"""
+				WHERE nav_bruker.modified_at < :modified_before $andLastId
+				ORDER BY nav_bruker.id
+				LIMIT :limit
+				""".trimIndent(),
+			),
+			sqlParameters(
+				"modified_before" to modifiedBefore,
+				"limit" to limit,
+				"last_id" to lastId,
+			),
+			rowMapper,
+		)
+	}
+
+	fun getPersonidenter(
+		offset: Int,
+		limit: Int,
+		notSyncedSince: LocalDateTime? = null,
+	): List<String> {
+		val sql =
+			"""
+			SELECT DISTINCT person.personident
+			FROM
+				nav_bruker
+				JOIN person ON nav_bruker.person_id = person.id
+			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
+			ORDER BY siste_krr_sync nulls first, nav_bruker.modified_at
+			OFFSET :offset
+			LIMIT :limit
+			""".trimIndent()
+
+		val parameters =
+			sqlParameters(
+				"offset" to offset,
+				"limit" to limit,
+				"notSyncedSince" to notSyncedSince,
+			)
+
+		return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
+	}
+
+	fun getPersonidenterMedManglendeKontaktinfo(
+		sistePersonident: String?,
+		limit: Int,
+	): List<String> {
+		val sql =
+			"""
+			SELECT DISTINCT person.personident
+			FROM
+				nav_bruker
+				JOIN person ON nav_bruker.person_id = person.id
+			WHERE ${sistePersonident?.let { "personident < :siste_personident AND" } ?: ""}
+			(nav_bruker.telefon IS NULL OR nav_bruker.epost IS NULL)
+			ORDER BY personident DESC
+			LIMIT :limit
+			""".trimIndent()
+
+		val parameters =
+			sqlParameters(
+				"siste_personident" to sistePersonident,
+				"limit" to limit,
+			)
+
+		return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
+	}
+
+	fun updateNavEnhet(
+		navBrukerId: UUID,
+		navEnhetId: UUID?,
+	) {
+		val sql =
+			"""
+			UPDATE nav_bruker
+			SET
+				nav_enhet_id = :nav_enhet_id,
+				modified_at = CURRENT_TIMESTAMP
+			WHERE nav_bruker.id = :id
+			""".trimIndent()
+
+		val parameters =
+			sqlParameters(
+				"id" to navBrukerId,
+				"nav_enhet_id" to navEnhetId,
+			)
+
+		template.update(sql, parameters)
+	}
+
+	fun upsert(bruker: NavBrukerUpsert) {
+		val sql =
+			"""
+			INSERT INTO nav_bruker (
+				id,
+				person_id,
+				nav_veileder_id,
+				nav_enhet_id,
+				telefon,
+				epost,
+				er_skjermet,
+				adresse,
+				siste_krr_sync,
+				adressebeskyttelse,
+				oppfolgingsperioder,
+				innsatsgruppe
+			)
+			VALUES (
+				:id,
+				:personId,
+				:navVeilederId,
+				:navEnhetId,
+				:telefon,
+				:epost,
+				:erSkjermet,
+				:adresse,
+				:sisteKrrSync,
+				:adressebeskyttelse,
+				:oppfolgingsperioder,
+				:innsatsgruppe
+			)
+			ON CONFLICT (person_id) DO UPDATE SET
+				nav_veileder_id = :navVeilederId,
+				nav_enhet_id = :navEnhetId,
+				telefon = :telefon,
+				epost = :epost,
+				er_skjermet = :erSkjermet,
+				adresse = :adresse,
+				siste_krr_sync = :sisteKrrSync,
+				adressebeskyttelse = :adressebeskyttelse,
+				oppfolgingsperioder = :oppfolgingsperioder,
+				innsatsgruppe = :innsatsgruppe,
+				modified_at = CURRENT_TIMESTAMP
+			""".trimIndent()
+
+		val parameters =
+			sqlParameters(
+				"id" to bruker.id,
+				"personId" to bruker.personId,
+				"navVeilederId" to bruker.navVeilederId,
+				"navEnhetId" to bruker.navEnhetId,
+				"telefon" to bruker.telefon,
+				"epost" to bruker.epost,
+				"erSkjermet" to bruker.erSkjermet,
+				"adresse" to toPGObject(bruker.adresse, objectMapper),
+				"sisteKrrSync" to bruker.sisteKrrSync,
+				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
+				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder, objectMapper),
+				"innsatsgruppe" to bruker.innsatsgruppe?.name,
+			)
+
+		template.update(sql, parameters)
+	}
+
+	fun finnBrukerId(personident: String): UUID? {
+		val sql =
+			"""
+			SELECT nb.id AS "nav_bruker.id"
+			FROM
+				nav_bruker nb
+				JOIN person p ON nb.person_id = p.id
+				JOIN personident ident ON p.id = ident.person_id
+			WHERE ident.ident = :personident
+			""".trimIndent()
+
+		val parameters = sqlParameters("personident" to personident)
+
+		return template.query(sql, parameters) { rs, _ -> rs.getNullableUUID("nav_bruker.id") }.firstOrNull()
+	}
+
+	fun delete(id: UUID) {
+		template.update(
+			"DELETE FROM nav_bruker WHERE id = :id",
+			sqlParameters("id" to id),
+		)
+	}
+
 	private val rowMapper =
 		RowMapper { rs, _ ->
 			NavBrukerDbo(
@@ -84,293 +347,47 @@ class NavBrukerRepository(
 			)
 		}
 
-	fun get(id: UUID): NavBrukerDbo {
-		val sql = selectNavBrukerQuery("where nav_bruker.id = :id")
-		val parameters = sqlParameters("id" to id)
-
-		return template.query(sql, parameters, rowMapper).first()
-	}
-
-	fun get(personident: String): NavBrukerDbo? {
-		val sql =
-			selectNavBrukerQuery(
-				"""
-				left join personident on nav_bruker.person_id = personident.person_id
-				where personident.ident = :personident
-				""".trimIndent(),
-			)
-		val parameters = sqlParameters("personident" to personident)
-
-		return template.query(sql, parameters, rowMapper).firstOrNull()
-	}
-
-	fun get(personidenter: Set<String>): List<NavBrukerDbo> {
-		val sql =
-			selectNavBrukerQuery(
-				"""
-				left join personident on nav_bruker.person_id = personident.person_id
-				where personident.ident = any (:personidenter)
-				""".trimIndent(),
-			)
-		val parameters = sqlParameters("personidenter" to personidenter.toTypedArray())
-
-		return template.query(sql, parameters, rowMapper)
-	}
-
-	fun getByPersonId(personId: UUID): NavBrukerDbo? {
-		val sql = selectNavBrukerQuery("where person_id = :personId")
-		val parameters = sqlParameters("personId" to personId)
-
-		return template.query(sql, parameters, rowMapper).firstOrNull()
-	}
-
-	fun getAllUtenAdresse(
-		limit: Int,
-		modifiedBefore: LocalDateTime,
-		lastId: UUID?,
-	): List<NavBrukerDbo> {
-		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
-		val sql =
-			selectNavBrukerQuery(
-				"""
-			WHERE nav_bruker.adresse is null
-				AND nav_bruker.adressebeskyttelse is null
-				AND nav_bruker.modified_at < :modified_before $andLastId
-			ORDER BY nav_bruker.id
-			LIMIT :limit
-			""",
-			)
-		val parameters =
-			sqlParameters(
-				"modified_before" to modifiedBefore,
-				"last_id" to lastId,
-				"limit" to limit,
-			)
-
-		return template.query(sql, parameters, rowMapper)
-	}
-
-	fun getAllNavBrukere(
-		offset: Int,
-		limit: Int,
-	): List<NavBrukerDbo> {
-		val sql =
-			selectNavBrukerQuery(
-				"""
-			ORDER BY nav_bruker.created_at
-			OFFSET :offset
-			LIMIT :limit
-			""",
-			)
-		val parameters = sqlParameters("offset" to offset, "limit" to limit)
-
-		return template.query(sql, parameters, rowMapper)
-	}
-
-	fun getAllNavBrukere(
-		limit: Int,
-		modifiedBefore: LocalDate,
-		lastId: UUID?,
-	): List<NavBrukerDbo> {
-		val andLastId = lastId?.let { "AND nav_bruker.id > :last_id" } ?: ""
-		val sql =
-			selectNavBrukerQuery(
-				"""
-			WHERE nav_bruker.modified_at < :modified_before $andLastId
-			ORDER BY nav_bruker.id
-			LIMIT :limit
-			""",
-			)
-		val parameters = sqlParameters("modified_before" to modifiedBefore, "limit" to limit, "last_id" to lastId)
-
-		return template.query(sql, parameters, rowMapper)
-	}
-
-	fun getPersonidenter(
-		offset: Int,
-		limit: Int,
-		notSyncedSince: LocalDateTime? = null,
-	): List<String> {
-		val sql = """
-			SELECT person.personident AS "person.personident"
-			FROM nav_bruker
-					 INNER JOIN person ON nav_bruker.person_id = person.id
-			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
-			ORDER BY siste_krr_sync nulls first, nav_bruker.modified_at
-			OFFSET :offset
-			LIMIT :limit
+	companion object {
+		private fun selectNavBrukerQuery(where: String): String =
 			"""
-		val parameters = sqlParameters("offset" to offset, "limit" to limit, "notSyncedSince" to notSyncedSince)
-
-		return template.query(sql, parameters) { rs, _ -> rs.getString("person.personident") }
-	}
-
-	fun getPersonidenterMedManglendeKontaktinfo(
-		sistePersonident: String?,
-		limit: Int,
-	): List<String> {
-		val sql = """
-			SELECT person.personident AS "person.personident"
-			FROM nav_bruker
-					 INNER JOIN person ON nav_bruker.person_id = person.id
-			where ${sistePersonident?.let { "personident < :siste_personident and" } ?: ""} (nav_bruker.telefon is null or nav_bruker.epost is null)
-			order by personident desc
-			LIMIT :limit
-			"""
-		val parameters = sqlParameters("siste_personident" to sistePersonident, "limit" to limit)
-
-		return template.query(sql, parameters) { rs, _ -> rs.getString("person.personident") }
-	}
-
-	fun updateNavEnhet(
-		navBrukerId: UUID,
-		navEnhetId: UUID?,
-	) {
-		val sql =
-			"""
-			UPDATE
+			SELECT
+				nav_bruker.id AS "nav_bruker.id",
+				nav_bruker.person_id AS "nav_bruker.person_id",
+				nav_bruker.nav_veileder_id AS "nav_bruker.nav_veileder_id",
+				nav_bruker.nav_enhet_id AS "nav_bruker.nav_enhet_id",
+				nav_bruker.telefon AS "nav_bruker.telefon",
+				nav_bruker.epost AS "nav_bruker.epost",
+				nav_bruker.er_skjermet AS "nav_bruker.er_skjermet",
+				nav_bruker.adresse AS "nav_bruker.adresse",
+				nav_bruker.adressebeskyttelse AS "nav_bruker.adressebeskyttelse",
+				nav_bruker.oppfolgingsperioder AS "nav_bruker.oppfolgingsperioder",
+				nav_bruker.innsatsgruppe AS "nav_bruker.innsatsgruppe",
+				nav_bruker.siste_krr_sync,
+				nav_bruker.created_at AS "nav_bruker.created_at",
+				nav_bruker.modified_at AS "nav_bruker.modified_at",
+				person.personident AS "person.personident",
+				person.fornavn AS "person.fornavn",
+				person.mellomnavn AS "person.mellomnavn",
+				person.etternavn AS "person.etternavn",
+				person.created_at AS "person.created_at",
+				person.modified_at AS "person.modified_at",
+				nav_ansatt.nav_ident AS "nav_ansatt.nav_ident",
+				nav_ansatt.navn AS "nav_ansatt.navn",
+				nav_ansatt.telefon AS "nav_ansatt.telefon",
+				nav_ansatt.epost AS "nav_ansatt.epost",
+				nav_ansatt.nav_enhet_id AS "nav_ansatt.nav_enhet_id",
+				nav_ansatt.created_at AS "nav_ansatt.created_at",
+				nav_ansatt.modified_at AS "nav_ansatt.modified_at",
+				nav_enhet.nav_enhet_id AS "nav_enhet.nav_enhet_id",
+				nav_enhet.navn AS "nav_enhet.navn",
+				nav_enhet.created_at AS "nav_enhet.created_at",
+				nav_enhet.modified_at AS "nav_enhet.modified_at"
+			FROM
 				nav_bruker
-			SET
-				nav_enhet_id = :nav_enhet_id,
-				modified_at = CURRENT_TIMESTAMP
-			WHERE
-				nav_bruker.id = :id
+				LEFT JOIN person ON nav_bruker.person_id = person.id
+				LEFT JOIN nav_ansatt ON nav_bruker.nav_veileder_id = nav_ansatt.id
+				LEFT JOIN nav_enhet ON nav_bruker.nav_enhet_id = nav_enhet.id
+			$where
 			""".trimIndent()
-
-		val parameters =
-			sqlParameters(
-				"id" to navBrukerId,
-				"nav_enhet_id" to navEnhetId,
-			)
-
-		template.update(sql, parameters)
-	}
-
-	fun upsert(bruker: NavBrukerUpsert) {
-		val sql =
-			"""
-			insert into nav_bruker(
-				id,
-				person_id,
-				nav_veileder_id,
-				nav_enhet_id,
-				telefon,
-				epost,
-				er_skjermet,
-				adresse,
-				siste_krr_sync,
-				adressebeskyttelse,
-				oppfolgingsperioder,
-				innsatsgruppe
-			) values (
-				:id,
-				:personId,
-				:navVeilederId,
-				:navEnhetId,
-				:telefon,
-				:epost,
-				:erSkjermet,
-				:adresse,
-				:sisteKrrSync,
-				:adressebeskyttelse,
-				:oppfolgingsperioder,
-				:innsatsgruppe
-			) on conflict(person_id) do update set
-				nav_veileder_id = :navVeilederId,
-				nav_enhet_id = :navEnhetId,
-				telefon = :telefon,
-				epost = :epost,
-				er_skjermet = :erSkjermet,
-				adresse = :adresse,
-				siste_krr_sync = :sisteKrrSync,
-				adressebeskyttelse = :adressebeskyttelse,
-				oppfolgingsperioder = :oppfolgingsperioder,
-				innsatsgruppe = :innsatsgruppe,
-				modified_at = current_timestamp
-				where nav_bruker.id = :id
-			""".trimIndent()
-
-		val parameters =
-			sqlParameters(
-				"id" to bruker.id,
-				"personId" to bruker.personId,
-				"navVeilederId" to bruker.navVeilederId,
-				"navEnhetId" to bruker.navEnhetId,
-				"telefon" to bruker.telefon,
-				"epost" to bruker.epost,
-				"erSkjermet" to bruker.erSkjermet,
-				"adresse" to toPGObject(bruker.adresse, objectMapper),
-				"sisteKrrSync" to bruker.sisteKrrSync,
-				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder, objectMapper),
-				"innsatsgruppe" to bruker.innsatsgruppe?.name,
-			)
-
-		template.update(sql, parameters)
-	}
-
-	private fun selectNavBrukerQuery(where: String): String =
-		"""
-		select nav_bruker.id as "nav_bruker.id",
-			   nav_bruker.person_id as "nav_bruker.person_id",
-			   nav_bruker.nav_veileder_id as "nav_bruker.nav_veileder_id",
-			   nav_bruker.nav_enhet_id as "nav_bruker.nav_enhet_id",
-			   nav_bruker.telefon as "nav_bruker.telefon",
-			   nav_bruker.epost as "nav_bruker.epost",
-			   nav_bruker.er_skjermet as "nav_bruker.er_skjermet",
-			   nav_bruker.adresse as "nav_bruker.adresse",
-			   nav_bruker.adressebeskyttelse as "nav_bruker.adressebeskyttelse",
-			   nav_bruker.oppfolgingsperioder as "nav_bruker.oppfolgingsperioder",
-			   nav_bruker.innsatsgruppe as "nav_bruker.innsatsgruppe",
-			   nav_bruker.siste_krr_sync,
-			   nav_bruker.created_at as "nav_bruker.created_at",
-			   nav_bruker.modified_at as "nav_bruker.modified_at",
-			   person.personident as "person.personident",
-			   person.fornavn as "person.fornavn",
-			   person.mellomnavn as "person.mellomnavn",
-			   person.etternavn as "person.etternavn",
-			   person.created_at as "person.created_at",
-			   person.modified_at as "person.modified_at",
-			   nav_ansatt.nav_ident as "nav_ansatt.nav_ident",
-			   nav_ansatt.navn as "nav_ansatt.navn",
-			   nav_ansatt.telefon as "nav_ansatt.telefon",
-			   nav_ansatt.epost as "nav_ansatt.epost",
-			   nav_ansatt.nav_enhet_id as "nav_ansatt.nav_enhet_id",
-			   nav_ansatt.created_at as "nav_ansatt.created_at",
-			   nav_ansatt.modified_at as "nav_ansatt.modified_at",
-			   nav_enhet.nav_enhet_id as "nav_enhet.nav_enhet_id",
-			   nav_enhet.navn as "nav_enhet.navn",
-			   nav_enhet.created_at as "nav_enhet.created_at",
-			   nav_enhet.modified_at as "nav_enhet.modified_at"
-		from nav_bruker
-				 left join person on nav_bruker.person_id = person.id
-				 left join nav_ansatt on nav_bruker.nav_veileder_id = nav_ansatt.id
-				 left join nav_enhet on nav_bruker.nav_enhet_id = nav_enhet.id
-		$where
-		""".trimIndent()
-
-	fun finnBrukerId(personident: String): UUID? {
-		val sql =
-			"""
-			select nb.id as "nav_bruker.id"
-			from nav_bruker nb join person p on nb.person_id = p.id join personident ident on p.id = ident.person_id
-			where ident.ident = :personident
-			""".trimIndent()
-
-		val parameters = sqlParameters("personident" to personident)
-
-		return template.query(sql, parameters) { rs, _ -> rs.getNullableUUID("nav_bruker.id") }.firstOrNull()
-	}
-
-	fun delete(id: UUID) {
-		val sql =
-			"""
-			delete from nav_bruker
-			where id = :id
-			""".trimIndent()
-
-		val parameters = sqlParameters("id" to id)
-
-		template.update(sql, parameters)
 	}
 }

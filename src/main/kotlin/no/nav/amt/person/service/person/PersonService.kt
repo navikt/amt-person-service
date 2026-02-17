@@ -3,16 +3,15 @@ package no.nav.amt.person.service.person
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import no.nav.amt.person.service.utils.EnvUtils
+import no.nav.amt.person.service.utils.titlecase
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Service
 class PersonService(
@@ -25,8 +24,8 @@ class PersonService(
 
 	@Retryable(maxRetries = 2)
 	@Transactional
-	fun hentEllerOpprettPerson(personident: String): Person =
-		personRepository.get(personident)?.toModel() ?: run {
+	fun hentEllerOpprettPerson(personident: String): PersonDbo =
+		personRepository.get(personident) ?: run {
 			val pdlPerson = pdlClient.hentPerson(personident)
 			check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke person" }
 			opprettPerson(pdlPerson)
@@ -36,7 +35,7 @@ class PersonService(
 	fun hentEllerOpprettPerson(
 		personident: String,
 		pdlPerson: PdlPerson,
-	): Person = personRepository.get(personident)?.toModel() ?: opprettPerson(pdlPerson)
+	): PersonDbo = personRepository.get(personident) ?: opprettPerson(pdlPerson)
 
 	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
@@ -47,11 +46,11 @@ class PersonService(
 			throw IllegalStateException("Vi har flere personer knyttet til samme identer")
 		}
 
-		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
+		val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
 			log.info("Oppdaterer personident for person ${person.id}")
-			personidentRepository.upsert(person.id, identer)
+			personidentRepository.upsert(identer.map { it.toDbo(person.id) }.toSet())
 			upsert(person.copy(personident = gjeldendeIdent.ident))
 		}
 	}
@@ -89,9 +88,9 @@ class PersonService(
 
 		upsert(
 			person.copy(
-				fornavn = pdlPerson.fornavn,
-				mellomnavn = pdlPerson.mellomnavn,
-				etternavn = pdlPerson.etternavn,
+				fornavn = pdlPerson.fornavn.titlecase(),
+				mellomnavn = pdlPerson.mellomnavn?.titlecase(),
+				etternavn = pdlPerson.etternavn.titlecase(),
 			),
 		)
 
@@ -100,28 +99,18 @@ class PersonService(
 
 	fun upsert(person: PersonDbo) {
 		personRepository.upsert(person)
-		applicationEventPublisher.publishEvent(PersonUpdateEvent(person.toModel()))
+		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 
 		log.info("Upsertet person med id: ${person.id}")
 	}
 
-	private fun opprettPerson(pdlPerson: PdlPerson): Person {
-		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
-
-		val person =
-			PersonDbo(
-				id = UUID.randomUUID(),
-				personident = gjeldendeIdent.ident,
-				fornavn = pdlPerson.fornavn,
-				mellomnavn = pdlPerson.mellomnavn,
-				etternavn = pdlPerson.etternavn,
-			)
-
+	private fun opprettPerson(pdlPerson: PdlPerson): PersonDbo {
+		val person = pdlPerson.toPersonDbo()
 		upsert(person)
-		personidentRepository.upsert(person.id, pdlPerson.identer)
+		personidentRepository.upsert(pdlPerson.identer.map { it.toDbo(person.id) }.toSet())
 
 		log.info("Opprettet ny person med id ${person.id}")
 
-		return person.toModel()
+		return person
 	}
 }

@@ -128,7 +128,7 @@ class NomClientTest {
 					"code": "NOT_FOUND",
 					"ressurs": null
 				}
-			"""
+				""".trimIndent()
 			}
 
 		val veilederRespons =

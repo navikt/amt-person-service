@@ -69,7 +69,7 @@ class NavAnsattRepositoryTest(
 
 	@Test
 	fun `upsert - ansatt finnes ikke - oppretter ny ansatt`() {
-		val ansatt = TestData.lagNavAnsatt().toModel()
+		val ansatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavGrunerlokka()
 
 		ansattRepository.upsert(ansatt)
@@ -93,7 +93,7 @@ class NavAnsattRepositoryTest(
 			)
 
 		val oppdatertAnsatt =
-			NavAnsatt(
+			NavAnsattDbo(
 				id = ansatt.id,
 				navIdent = ansatt.navIdent,
 				navn = "Nytt Navn",
@@ -138,7 +138,7 @@ class NavAnsattRepositoryTest(
 		testDataRepository.insertNavAnsatt(ansatt2)
 
 		val oppdatertAnsatt1 =
-			NavAnsatt(
+			NavAnsattDbo(
 				id = ansatt1.id,
 				navIdent = ansatt1.navIdent,
 				navn = "nytt navn 1",
@@ -148,7 +148,7 @@ class NavAnsattRepositoryTest(
 			)
 
 		val oppdatertAnsatt2 =
-			NavAnsatt(
+			NavAnsattDbo(
 				id = ansatt2.id,
 				navIdent = ansatt2.navIdent,
 				navn = "nytt navn 2",
@@ -157,7 +157,7 @@ class NavAnsattRepositoryTest(
 				navEnhetId = null,
 			)
 
-		ansattRepository.upsertMany(listOf(oppdatertAnsatt1, oppdatertAnsatt2))
+		ansattRepository.upsertMany(setOf(oppdatertAnsatt1, oppdatertAnsatt2))
 
 		ansattRepository.get(oppdatertAnsatt1.navIdent)!!.navn shouldBe oppdatertAnsatt1.navn
 		ansattRepository.get(oppdatertAnsatt2.navIdent)!!.navn shouldBe oppdatertAnsatt2.navn

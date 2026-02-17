@@ -5,6 +5,7 @@ enum class AdressebeskyttelseGradering {
 	FORTROLIG,
 	STRENGT_FORTROLIG_UTLAND,
 	UGRADERT,
-}
+	;
 
-fun AdressebeskyttelseGradering?.erBeskyttet(): Boolean = this != AdressebeskyttelseGradering.UGRADERT && this != null
+	fun erBeskyttet(): Boolean = this != UGRADERT
+}

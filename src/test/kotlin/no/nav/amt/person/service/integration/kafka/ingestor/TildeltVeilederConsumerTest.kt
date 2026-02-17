@@ -7,16 +7,17 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.navansatt.NavAnsattService
-import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navansatt.NavAnsattRepository
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
+import no.nav.amt.person.service.testmodels.NavAnsatt
 import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class TildeltVeilederConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
-	private val navAnsattService: NavAnsattService,
+	private val navBrukerRepository: NavBrukerRepository,
+	private val navAnsattRepository: NavAnsattRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes, ny veileder - oppretter og oppdaterer nav veileder`() {
@@ -27,13 +28,13 @@ class TildeltVeilederConsumerTest(
 		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
 
 		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
+		mockNomHttpServer.mockHentNavAnsatt(NavAnsatt.fromDbo(navAnsatt))
 		mockNorgHttpServer.addNavAnsattEnhet()
 
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
 
 		await().untilAsserted {
-			val faktiskNavAnsatt = navAnsattService.hentNavAnsatt(navAnsatt.navIdent)
+			val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
 
 			assertSoftly(faktiskNavAnsatt.shouldNotBeNull()) {
 				navIdent shouldBe navAnsatt.navIdent
@@ -42,7 +43,7 @@ class TildeltVeilederConsumerTest(
 				telefon shouldBe navAnsatt.telefon
 			}
 
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
 			faktiskBruker.navVeileder.shouldNotBeNull()
 			faktiskBruker.navVeileder.navIdent shouldBe navAnsatt.navIdent
@@ -61,7 +62,7 @@ class TildeltVeilederConsumerTest(
 					it.message == "Tildelt veileder endret. NavBruker finnes ikke, hopper over kafka melding"
 				} shouldBe true
 
-				navAnsattService.hentNavAnsatt(msg.veilederId) shouldBe null
+				navAnsattRepository.get(msg.veilederId) shouldBe null
 			}
 		}
 	}

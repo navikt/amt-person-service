@@ -17,7 +17,7 @@ class NavEnhetService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentNavEnhetForBruker(personident: String): NavEnhet? {
+	fun hentNavEnhetForBruker(personident: String): NavEnhetDbo? {
 		val oppfolgingsenhetId = veilarbarenaClient.hentBrukerOppfolgingsenhetId(personident) ?: return null
 
 		return hentEllerOpprettNavEnhet(oppfolgingsenhetId)
@@ -28,17 +28,13 @@ class NavEnhetService(
 			}
 	}
 
-	fun hentEllerOpprettNavEnhet(enhetId: String) = navEnhetRepository.get(enhetId)?.toModel() ?: opprettEnhet(enhetId)
+	fun hentEllerOpprettNavEnhet(enhetId: String): NavEnhetDbo? = navEnhetRepository.get(enhetId) ?: opprettEnhet(enhetId)
 
-	fun hentNavEnhet(enhetId: String) = navEnhetRepository.get(enhetId)?.toModel()
-
-	fun hentNavEnhet(id: UUID) = navEnhetRepository.get(id).toModel()
-
-	private fun opprettEnhet(enhetId: String): NavEnhet? {
+	private fun opprettEnhet(enhetId: String): NavEnhetDbo? {
 		val norgEnhet = norgClient.hentNavEnhet(enhetId) ?: return null
 
 		val enhet =
-			NavEnhet(
+			NavEnhetDbo(
 				id = UUID.randomUUID(),
 				enhetId = enhetId,
 				navn = norgEnhet.navn,
@@ -50,10 +46,10 @@ class NavEnhetService(
 		return enhet
 	}
 
-	fun hentNavEnheter() = navEnhetRepository.getAll().map { it.toModel() }
+	fun oppdaterNavEnheter(enheter: List<NavEnhetDbo>) {
+		val oppdaterteEnheter =
+			norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetId }
 
-	fun oppdaterNavEnheter(enheter: List<NavEnhet>) {
-		val oppdaterteEnheter = norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetId }
 		enheter.forEach { opprinneligEnhet ->
 			val oppdatertEnhet = oppdaterteEnheter[opprinneligEnhet.enhetId]
 

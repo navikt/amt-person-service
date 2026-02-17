@@ -1,11 +1,12 @@
 package no.nav.amt.person.service.clients.pdl
 
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
-import no.nav.amt.person.service.person.model.Person.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.person.model.erBeskyttet
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
+import java.util.UUID
 
 data class PdlPerson(
 	val fornavn: String,
@@ -24,4 +25,20 @@ data class PdlPerson(
 		}
 
 	fun erUkjent() = etternavn == UNKNOWN_NAME
+
+	fun toPersonDbo(): PersonDbo {
+		val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
+
+		return PersonDbo(
+			id = UUID.randomUUID(),
+			personident = gjeldendeIdent.ident,
+			fornavn = fornavn,
+			mellomnavn = mellomnavn,
+			etternavn = etternavn,
+		)
+	}
+
+	companion object {
+		const val UNKNOWN_NAME = "Ukjent"
+	}
 }

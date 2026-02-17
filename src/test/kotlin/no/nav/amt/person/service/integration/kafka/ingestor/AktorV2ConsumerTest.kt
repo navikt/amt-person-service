@@ -48,12 +48,9 @@ class AktorV2ConsumerTest(
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personRepository.get(nyttFnr)?.toModel().shouldNotBeNull()
+			val faktiskPerson = personRepository.get(nyttFnr).shouldNotBeNull()
 
-			val identer =
-				personidentRepository
-					.getAllForPerson(faktiskPerson.id)
-					.map { it.toModel() }
+			val identer = personidentRepository.getAllForPerson(faktiskPerson.id)
 
 			assertSoftly(identer.first { it.ident == person.personident }) {
 				it.historisk shouldBe true
@@ -65,7 +62,7 @@ class AktorV2ConsumerTest(
 	}
 
 	@Test
-	fun `ingest - bruker får flere gjeldende identer - skal lagre FOLKEREGISTERIDENT`() {
+	fun `ingest - bruker far flere gjeldende identer - skal lagre FOLKEREGISTERIDENT`() {
 		val person = TestData.lagPerson()
 		testDataRepository.insertPerson(person)
 
@@ -86,16 +83,12 @@ class AktorV2ConsumerTest(
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personRepository.get(nyttFnr)?.toModel().shouldNotBeNull()
+			val faktiskPerson = personRepository.get(nyttFnr).shouldNotBeNull()
 			faktiskPerson.personident shouldBe nyttFnr
 
-			val identer =
-				personidentRepository
-					.getAllForPerson(faktiskPerson.id)
-					.map { it.toModel() }
+			val identer = personidentRepository.getAllForPerson(faktiskPerson.id)
 
 			identer shouldHaveSize 3
-
 			identer.first { it.ident == person.personident }.historisk shouldBe true
 		}
 	}

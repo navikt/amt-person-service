@@ -12,52 +12,25 @@ import java.util.UUID
 class NavAnsattRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {
-	private val rowMapper =
-		RowMapper { rs, _ ->
-			NavAnsattDbo(
-				id = rs.getUUID("id"),
-				navIdent = rs.getString("nav_ident"),
-				navn = rs.getString("navn"),
-				telefon = rs.getString("telefon"),
-				epost = rs.getString("epost"),
-				navEnhetId = rs.getNullableUUID("nav_enhet_id"),
-				createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-				modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-			)
-		}
+	fun get(id: UUID): NavAnsattDbo =
+		template
+			.query(
+				"SELECT * FROM nav_ansatt WHERE id = :id",
+				sqlParameters("id" to id),
+				rowMapper,
+			).first()
 
-	fun get(id: UUID): NavAnsattDbo {
-		val sql =
-			"""
-			select * from nav_ansatt where id = :id
-			""".trimIndent()
+	fun get(navIdent: String): NavAnsattDbo? =
+		template
+			.query(
+				"SELECT * FROM nav_ansatt WHERE nav_ident = :navIdent",
+				sqlParameters("navIdent" to navIdent),
+				rowMapper,
+			).firstOrNull()
 
-		val parameters = sqlParameters("id" to id)
+	fun getAll(): List<NavAnsattDbo> = template.query("SELECT * FROM nav_ansatt", rowMapper)
 
-		return template.query(sql, parameters, rowMapper).first()
-	}
-
-	fun get(navIdent: String): NavAnsattDbo? {
-		val sql =
-			"""
-			select * from nav_ansatt where nav_ident = :navIdent
-			""".trimIndent()
-
-		val parameters = sqlParameters("navIdent" to navIdent)
-
-		return template.query(sql, parameters, rowMapper).firstOrNull()
-	}
-
-	fun getAll(): List<NavAnsattDbo> {
-		val sql =
-			"""
-			select * from nav_ansatt
-			""".trimIndent()
-
-		return template.jdbcTemplate.query(sql, rowMapper)
-	}
-
-	fun upsert(navAnsatt: NavAnsatt): NavAnsattDbo {
+	fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo {
 		val parameters =
 			sqlParameters(
 				"id" to navAnsatt.id,
@@ -68,10 +41,10 @@ class NavAnsattRepository(
 				"nav_enhet_id" to navAnsatt.navEnhetId,
 			)
 
-		return template.query("$upsertSql returning *", parameters, rowMapper).first()
+		return template.queryForObject("$UPSERT_SQL RETURNING *", parameters, rowMapper)
 	}
 
-	fun upsertMany(ansatte: List<NavAnsatt>) {
+	fun upsertMany(ansatte: Set<NavAnsattDbo>) {
 		val parameters =
 			ansatte.map { navAnsatt ->
 				sqlParameters(
@@ -84,18 +57,48 @@ class NavAnsattRepository(
 				)
 			}
 
-		template.batchUpdate(upsertSql, parameters.toTypedArray())
+		template.batchUpdate(UPSERT_SQL, parameters.toTypedArray())
 	}
 
-	private val upsertSql =
-		"""
-		insert into nav_ansatt(id, nav_ident, navn, telefon, epost, nav_enhet_id)
-		values (:id, :navIdent, :navn, :telefon, :epost, :nav_enhet_id)
-		on conflict (nav_ident) do update set
-			navn = :navn,
-			telefon = :telefon,
-			epost = :epost,
-			modified_at = current_timestamp,
-			nav_enhet_id = :nav_enhet_id
-		""".trimIndent()
+	companion object {
+		private val rowMapper =
+			RowMapper { rs, _ ->
+				NavAnsattDbo(
+					id = rs.getUUID("id"),
+					navIdent = rs.getString("nav_ident"),
+					navn = rs.getString("navn"),
+					telefon = rs.getString("telefon"),
+					epost = rs.getString("epost"),
+					navEnhetId = rs.getNullableUUID("nav_enhet_id"),
+					createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+					modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+				)
+			}
+
+		private val UPSERT_SQL =
+			"""
+			INSERT INTO nav_ansatt (
+				id,
+				nav_ident,
+				navn,
+				telefon,
+				epost,
+				nav_enhet_id
+			)
+			VALUES (
+				:id,
+				:navIdent,
+				:navn,
+				:telefon,
+				:epost,
+				:nav_enhet_id
+			)
+			ON CONFLICT (nav_ident) DO UPDATE SET
+				navn = :navn,
+				telefon = :telefon,
+				epost = :epost,
+				nav_enhet_id = :nav_enhet_id,
+				modified_at = CURRENT_TIMESTAMP
+			""".trimIndent()
+	}
 }

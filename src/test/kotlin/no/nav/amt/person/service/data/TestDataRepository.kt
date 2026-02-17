@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.data
 
+import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
-import no.nav.amt.person.service.navansatt.navGrunerlokka
 import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo

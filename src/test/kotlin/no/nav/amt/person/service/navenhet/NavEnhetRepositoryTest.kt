@@ -62,7 +62,7 @@ class NavEnhetRepositoryTest(
 	@Test
 	fun `insert - ny enhet - inserter ny enhet`() {
 		val enhet =
-			NavEnhet(
+			NavEnhetDbo(
 				id = UUID.randomUUID(),
 				enhetId = "0001",
 				navn = "Ny Nav Enhet",
@@ -104,7 +104,7 @@ class NavEnhetRepositoryTest(
 
 		val oppdatertEnhet = enhet.copy(navn = "Nytt Navn")
 
-		enhetRepository.update(oppdatertEnhet.toModel())
+		enhetRepository.update(oppdatertEnhet)
 
 		val faktiskEnhet = enhetRepository.get(enhet.id)
 

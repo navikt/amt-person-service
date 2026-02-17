@@ -3,7 +3,7 @@ package no.nav.amt.person.service.kafka.consumer
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -22,8 +22,10 @@ class OppfolgingsperiodeConsumer(
 
 		val gjeldendeIdent =
 			try {
-				val identer = pdlClient.hentIdenter(sisteOppfolgingsperiode.aktorId)
-				finnGjeldendeIdent(identer).getOrThrow()
+				pdlClient
+					.hentIdenter(sisteOppfolgingsperiode.aktorId)
+					.finnGjeldendeIdent()
+					.getOrThrow()
 			} catch (e: Exception) {
 				if (e.message?.contains("Fant ikke person") == true) {
 					log.warn(e.message, e)
