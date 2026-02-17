@@ -133,12 +133,17 @@ class NavBrukerRepository(
 	): List<String> {
 		val sql =
 			"""
-			SELECT DISTINCT person.personident
+			SELECT DISTINCT ON (person.personident) person.personident
 			FROM
 				nav_bruker
 				JOIN person ON nav_bruker.person_id = person.id
-			WHERE (siste_krr_sync is null OR siste_krr_sync < :notSyncedSince)
-			ORDER BY siste_krr_sync nulls first, nav_bruker.modified_at
+			WHERE
+				nav_bruker.siste_krr_sync IS NULL
+				${notSyncedSince?.let { "OR nav_bruker.siste_krr_sync < :notSyncedSince" } ?: ""}
+			ORDER BY
+				person.personident,
+				nav_bruker.siste_krr_sync NULLS FIRST,
+				nav_bruker.modified_at
 			OFFSET :offset
 			LIMIT :limit
 			""".trimIndent()
@@ -176,28 +181,6 @@ class NavBrukerRepository(
 			)
 
 		return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
-	}
-
-	fun updateNavEnhet(
-		navBrukerId: UUID,
-		navEnhetId: UUID?,
-	) {
-		val sql =
-			"""
-			UPDATE nav_bruker
-			SET
-				nav_enhet_id = :nav_enhet_id,
-				modified_at = CURRENT_TIMESTAMP
-			WHERE nav_bruker.id = :id
-			""".trimIndent()
-
-		val parameters =
-			sqlParameters(
-				"id" to navBrukerId,
-				"nav_enhet_id" to navEnhetId,
-			)
-
-		template.update(sql, parameters)
 	}
 
 	fun upsert(bruker: NavBrukerUpsert) {
@@ -341,8 +324,7 @@ class NavBrukerRepository(
 				oppfolgingsperioder =
 					rs
 						.getString("nav_bruker.oppfolgingsperioder")
-						?.let { objectMapper.readValue<List<Oppfolgingsperiode>>(it) }
-						?: emptyList(),
+						?.let { objectMapper.readValue<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
 				innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { InnsatsgruppeV1.valueOf(it) },
 			)
 		}
