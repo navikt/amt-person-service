@@ -73,7 +73,7 @@ class PersonidentRepository(
 				historisk IS TRUE
 				AND type = 'FOLKEREGISTERIDENT'
 				AND modified_at > '2025-01-01'
-				-- Antakelsen er at vi har reprodusert navbrukere etter denne datoen så vi kan snevre inn søket
+				-- Antakelsen er at vi har reprodusert Nav-brukere etter denne datoen så vi kan snevre inn søket
 			""".trimIndent()
 
 		return template.query(sql) { rs, _ -> rs.getUUID("person_id") }

@@ -109,7 +109,7 @@ class PersonAPI(
 		return navEnhetService
 			.hentEllerOpprettNavEnhet(request.enhetId)
 			?.let { NavEnhetDto.fromDbo(it) }
-			?: throw NoSuchElementException("Klarte ikke å hente Nav enhet med enhet id: ${request.enhetId}")
+			?: throw NoSuchElementException("Klarte ikke å hente Nav-enhet med enhet-id: ${request.enhetId}")
 	}
 
 	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)

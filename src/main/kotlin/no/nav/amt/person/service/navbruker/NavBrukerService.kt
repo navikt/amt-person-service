@@ -185,7 +185,7 @@ class NavBrukerService(
 						innsatsgruppe = innsatsgruppe,
 					).toUpsert(),
 			)
-			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for navbruker med id ${navBruker.id}")
+			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for Nav-bruker med id ${navBruker.id}")
 		}
 	}
 
@@ -331,7 +331,7 @@ class NavBrukerService(
 		if (navBruker.adresse == oppdatertAdresse) return
 
 		upsert(navBruker.copy(adresse = oppdatertAdresse).toUpsert())
-		log.info("Oppdatert adresse for navbruker med personId ${navBruker.person.id}")
+		log.info("Oppdatert adresse for Nav-bruker med personId ${navBruker.person.id}")
 	}
 
 	private fun getAdresse(personopplysninger: PdlPerson): Adresse? {

@@ -48,7 +48,7 @@ class InnsatsgruppeConsumerTest(
 		LogUtils.withLogs { getLogs ->
 			await().untilAsserted {
 				getLogs().any {
-					it.message == "Innsatsgruppe endret. NavBruker finnes ikke, hopper over kafkamelding"
+					it.message == "Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 				} shouldBe true
 			}
 		}

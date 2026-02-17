@@ -29,7 +29,7 @@ class InnsatsgruppeConsumer(
 		val brukerId = navBrukerService.finnBrukerId(gjeldendeIdent.ident)
 
 		if (brukerId == null) {
-			log.info("Innsatsgruppe endret. NavBruker finnes ikke, hopper over kafkamelding")
+			log.info("Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
 			return
 		}
 

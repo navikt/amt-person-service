@@ -130,7 +130,7 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-adr-republiser-nav-brukere") {
-				log.info("Oppdaterer adresse for alle navbrukere som mangler adresse")
+				log.info("Oppdaterer adresse for alle Nav-brukere som mangler adresse")
 				oppdaterAdresseHvisManglerOgRepubliser(modifiedBefore, batchSize, lastId)
 			}
 		} else {
@@ -145,10 +145,10 @@ class InternalController(
 		@PathVariable("id") id: UUID,
 	) {
 		if (isInternal(servlet)) {
-			log.info("Oppdaterer adresse for navbruker-id $id")
+			log.info("Oppdaterer adresse for Nav-bruker $id")
 			val navBruker = navBrukerRepository.get(id)
 			navBrukerService.oppdaterAdresse(listOf(navBruker.person.personident))
-			log.info("Oppdaterte adresse for navbruker-id $id")
+			log.info("Oppdaterte adresse for Nav-bruker $id")
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
@@ -337,14 +337,14 @@ class InternalController(
 			JobRunner.runAsync("republiser-nav-brukere-med-ny-ident") {
 				val personidenter = personidentRepository.getPersonIderMedFlerePersonidenter()
 
-				log.info("Starter republisering av navbrukere med ny ident. Antall: ${personidenter.size}")
+				log.info("Starter republisering av Nav-brukere med ny ident. Antall: ${personidenter.size}")
 
 				personidenter.forEach {
 					navBrukerRepository.getByPersonId(it)?.let { navBrukerDbo ->
 						kafkaProducerService.publiserNavBruker(navBrukerDbo)
 					}
 				}
-				log.info("Ferdig med republisering av navbrukere med ny ident")
+				log.info("Ferdig med republisering av Nav-brukere med ny ident")
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -443,7 +443,7 @@ class InternalController(
 			val personidenter = navbrukere.map { it.person.personident }
 			navBrukerService.oppdaterAdresse(personidenter)
 			lastId = navbrukere.lastOrNull()?.id
-			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste navbrukerid: $lastId")
+			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste Nav-bruker-id: $lastId")
 		} while (navbrukere.isNotEmpty())
 	}
 

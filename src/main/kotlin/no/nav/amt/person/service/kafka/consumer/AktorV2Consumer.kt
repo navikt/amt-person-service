@@ -22,7 +22,7 @@ class AktorV2Consumer(
 	) {
 		if (value == null) {
 			TeamLogs.warn("Fikk tombstone for record med key=$key.")
-			log.warn("Fikk tombstone for kafka record. Se team logs for key. Behandler ikke meldingen.")
+			log.warn("Fikk tombstone for Kafka-record. Se team logs for key. Behandler ikke meldingen.")
 			return
 		}
 

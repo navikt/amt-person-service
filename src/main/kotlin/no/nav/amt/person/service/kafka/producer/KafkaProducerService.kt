@@ -32,7 +32,7 @@ class KafkaProducerService(
 				objectMapper.writeValueAsString(NavBrukerDtoV1.fromDbo(navBruker)),
 			),
 		)
-		log.info("Publiserte navbruker med personId ${navBruker.person.id} til topic")
+		log.info("Publiserte Nav-bruker med personId ${navBruker.person.id} til topic")
 	}
 
 	fun publiserArrangorAnsatt(ansatt: PersonDbo) {
