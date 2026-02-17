@@ -19,11 +19,13 @@ class NavBrukerUpdateJob(
 
 	private fun oppdaterBrukere() {
 		val personidenter =
-			navBrukerRepository.getPersonidenter(
-				offset = 0,
-				limit = 10000,
-				notSyncedSince = LocalDateTime.now().minusDays(14),
-			)
+			navBrukerRepository
+				.getPersonidenter(
+					offset = 0,
+					limit = 10000,
+					notSyncedSince = LocalDateTime.now().minusDays(14),
+				).toSet()
+
 		navBrukerService.syncKontaktinfoBulk(personidenter)
 	}
 }
