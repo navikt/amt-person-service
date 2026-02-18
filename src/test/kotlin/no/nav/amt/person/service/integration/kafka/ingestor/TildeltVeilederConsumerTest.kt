@@ -3,13 +3,14 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
+import no.nav.amt.person.service.kafka.consumer.TildeltVeilederConsumer
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
-import no.nav.amt.person.service.utils.LogUtils
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
@@ -55,13 +56,13 @@ class TildeltVeilederConsumerTest(
 		mockPdlHttpServer.mockHentIdenter(msg.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				getLogs().any {
+				navAnsattRepository.get(msg.veilederId) shouldBe null
+
+				loggingEvents.any {
 					it.message == "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 				} shouldBe true
-
-				navAnsattRepository.get(msg.veilederId) shouldBe null
 			}
 		}
 	}

@@ -14,16 +14,8 @@ class PoststedRepository(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun getPoststed(postnummer: String): String? =
-		template
-			.query(
-				"SELECT poststed FROM postnummer WHERE postnummer = :postnummer;",
-				mapOf("postnummer" to postnummer),
-			) { resultSet, _ -> resultSet.getString("poststed") }
-			.firstOrNull()
-
 	fun oppdaterPoststed(
-		oppdatertePostnummer: List<Postnummer>,
+		oppdatertePostnummer: Set<Postnummer>,
 		sporingsId: UUID,
 	) {
 		val postnummerFraDb = getAllePoststeder()
@@ -45,12 +37,13 @@ class PoststedRepository(
 				mapOf("postnummer" to it),
 			)
 		}
+
 		oppdateresIDb.forEach {
 			template.update(
 				"""
 				INSERT INTO postnummer(postnummer, poststed)
 				VALUES (:postnummer, :poststed)
-				ON CONFLICT (postnummer) DO UPDATE SET poststed = :poststed;
+				ON CONFLICT (postnummer) DO UPDATE SET poststed = :poststed
 				""".trimIndent(),
 				mapOf(
 					"postnummer" to it.key,

@@ -50,7 +50,7 @@ class RolleRepository(
 				"rolle" to rolle.name,
 			),
 			Boolean::class.java,
-		)!!
+		) ?: throw IllegalStateException("Kall til harRolle $rolle feilet")
 
 	fun delete(
 		personId: UUID,

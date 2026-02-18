@@ -29,7 +29,7 @@ class NomClientTest {
 	}
 
 	@AfterEach
-	fun cleanup() = server.shutdown()
+	fun tearDown() = server.shutdown()
 
 	@Test
 	fun `hentVeileder - veileder finnes ikke - returnerer null`() {

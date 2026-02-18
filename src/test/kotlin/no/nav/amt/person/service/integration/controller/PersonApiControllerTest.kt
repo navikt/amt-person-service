@@ -25,10 +25,11 @@ import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
-class PersonAPITest(
+class PersonApiControllerTest(
 	private val personidentRepository: PersonidentRepository,
 	private val personRepository: PersonRepository,
 	private val navBrukerRepository: NavBrukerRepository,
@@ -50,7 +51,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
 		val faktiskPerson = personRepository.get(person.personident)
@@ -80,7 +81,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<ArrangorAnsattDto>(response.body.string())
 		val faktiskPerson = personRepository.get(person.personident)
@@ -125,7 +126,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<NavBrukerDto>(response.body.string())
 		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
@@ -157,7 +158,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body.string())
 		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
@@ -202,7 +203,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val navBrukerDto = objectMapper.readValue<NavBrukerDto>(response.body.string())
 		val faktiskBruker = navBrukerRepository.get(navBruker.person.personident)
@@ -225,7 +226,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<NavAnsattDto>(response.body.string())
 		val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
@@ -253,7 +254,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<NavEnhetDto>(response.body.string())
 		val faktiskNavEnhet = navEnhetRepository.get(navEnhet.enhetId)
@@ -280,7 +281,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		objectMapper.readValue<AdressebeskyttelseDto>(response.body.string()).gradering shouldBe gradering
 	}
@@ -300,7 +301,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		objectMapper.readValue<AdressebeskyttelseDto>(response.body.string()).gradering shouldBe gradering
 	}
@@ -317,7 +318,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<NavAnsattDto>(response.body.string())
 
@@ -342,7 +343,7 @@ class PersonAPITest(
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
-		response.code shouldBe 200
+		response.code shouldBe HttpStatus.OK.value()
 
 		val body = objectMapper.readValue<NavEnhetDto>(response.body.string())
 
@@ -380,7 +381,7 @@ class PersonAPITest(
 								value = "Bearer ${mockOAuthServer.issueToken(issuer = "ikke-azuread")}",
 							).build(),
 					).execute()
-			feilTokenResponse.code shouldBe 401
+			feilTokenResponse.code shouldBe HttpStatus.UNAUTHORIZED.value()
 		}
 	}
 

@@ -32,6 +32,7 @@ val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.8.0"
 val jacksonModuleKotlinVersion = "3.0.4"
+val amtLibVersion = "1.2026.02.17_13.55-de9b1752e174"
 
 // fjernes ved neste release av org.apache.kafka:kafka-clients
 configurations.configureEach {
@@ -92,6 +93,7 @@ dependencies {
 
     testImplementation("io.mockk:mockk-jvm:$mockkVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOauth2ServerVersion")
+    testImplementation("no.nav.amt.lib:testing:$amtLibVersion")
 }
 
 kotlin {

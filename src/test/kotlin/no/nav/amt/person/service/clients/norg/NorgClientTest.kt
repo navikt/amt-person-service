@@ -23,7 +23,7 @@ class NorgClientTest {
 	}
 
 	@AfterEach
-	fun cleanup() = server.shutdown()
+	fun tearDown() = server.shutdown()
 
 	@Test
 	fun `hentNavEnhetNavn skal lage riktig request og parse respons`() {

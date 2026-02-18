@@ -45,18 +45,6 @@ class NavBrukerRepository(
 				rowMapper,
 			).firstOrNull()
 
-	fun get(personidenter: Set<String>): List<NavBrukerDbo> =
-		template.query(
-			selectNavBrukerQuery(
-				"""
-				LEFT JOIN personident ON nav_bruker.person_id = personident.person_id
-				WHERE personident.ident = ANY (:personidenter)
-				""".trimIndent(),
-			),
-			sqlParameters("personidenter" to personidenter.toTypedArray()),
-			rowMapper,
-		)
-
 	fun getByPersonId(personId: UUID): NavBrukerDbo? =
 		template
 			.query(
@@ -261,13 +249,6 @@ class NavBrukerRepository(
 		val parameters = sqlParameters("personident" to personident)
 
 		return template.query(sql, parameters) { rs, _ -> rs.getNullableUUID("nav_bruker.id") }.firstOrNull()
-	}
-
-	fun delete(id: UUID) {
-		template.update(
-			"DELETE FROM nav_bruker WHERE id = :id",
-			sqlParameters("id" to id),
-		)
 	}
 
 	private val rowMapper =

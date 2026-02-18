@@ -11,23 +11,8 @@ import java.util.UUID
 
 @Repository
 class PersonidentRepository(
-	val template: NamedParameterJdbcTemplate,
+	private val template: NamedParameterJdbcTemplate,
 ) {
-	fun get(ident: String): PersonidentDbo? =
-		template
-			.query(
-				"SELECT * FROM personident WHERE ident = :ident",
-				sqlParameters("ident" to ident),
-				rowMapper,
-			).firstOrNull()
-
-	fun getAllForPerson(personId: UUID): List<PersonidentDbo> =
-		template.query(
-			"SELECT * FROM personident WHERE person_id = :personId",
-			sqlParameters("personId" to personId),
-			rowMapper,
-		)
-
 	fun upsert(identer: Set<PersonidentDbo>) {
 		if (identer.isEmpty()) return
 
@@ -78,6 +63,14 @@ class PersonidentRepository(
 
 		return template.query(sql) { rs, _ -> rs.getUUID("person_id") }
 	}
+
+	// benyttes kun i tester
+	internal fun getAllForPerson(personId: UUID): List<PersonidentDbo> =
+		template.query(
+			"SELECT * FROM personident WHERE person_id = :personId",
+			sqlParameters("personId" to personId),
+			rowMapper,
+		)
 
 	companion object {
 		private val rowMapper =

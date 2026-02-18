@@ -32,7 +32,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api")
-class PersonAPI(
+class PersonApiController(
 	private val navAnsattRepository: NavAnsattRepository,
 	private val navAnsattService: NavAnsattService,
 	private val navBrukerService: NavBrukerService,

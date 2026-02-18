@@ -144,18 +144,6 @@ class NavBrukerRepositoryTest(
 		}
 	}
 
-	@Test
-	fun `get(personidenter) - brukere finnes - returnerer brukere`() {
-		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
-		val bruker2 = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker2)
-
-		val faktiskBrukere = brukerRepository.get(setOf(bruker.person.personident, bruker2.person.personident))
-
-		faktiskBrukere.size shouldBe 2
-	}
-
 	@Nested
 	inner class GetByPersonIdTests {
 		@Test
@@ -357,16 +345,6 @@ class NavBrukerRepositoryTest(
 
 			brukerRepository.finnBrukerId(historiskIdent.ident) shouldBe bruker.id
 		}
-	}
-
-	@Test
-	fun `delete- bruker finnes - sletter bruker`() {
-		val bruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(bruker)
-
-		brukerRepository.delete(bruker.id)
-
-		brukerRepository.get(bruker.person.personident) shouldBe null
 	}
 
 	private fun sammenlign(

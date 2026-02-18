@@ -5,13 +5,13 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.data.TestData.orgTilknytning
 import no.nav.amt.person.service.navenhet.NavEnhetService
-import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -43,15 +43,15 @@ class NavAnsattUpdaterTest {
 			)
 		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(NavAnsattUpdater::class.java.name) { loggingEvents ->
 			updater.oppdaterAlle()
 
-			getLogs().any {
-				it.message == "Fant ikke nav ansatt med ident=${ansatt1.navIdent} id=${ansatt1.id} i NOM"
+			loggingEvents.any {
+				it.message == "Fant ikke Nav-ansatt med id ${ansatt1.id} i NOM"
 			} shouldBe false
 
-			getLogs().any {
-				it.message == "Fant ikke nav ansatt med ident=${ansatt2.navIdent} id=${ansatt2.id} i NOM"
+			loggingEvents.any {
+				it.message == "Fant ikke Nav-ansatt med id ${ansatt2.id} i NOM"
 			} shouldBe true
 		}
 	}

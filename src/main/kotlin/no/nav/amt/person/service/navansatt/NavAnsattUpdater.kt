@@ -39,9 +39,9 @@ class NavAnsattUpdater(
 
 			navAnsattService.upsertMany(oppdaterteAnsatte)
 
-			ansatte.forEach { (navIdent, ansatt) ->
+			ansatte.forEach { (_, ansatt) ->
 				if (!ansatt.erSjekket) {
-					log.warn("Fant ikke nav ansatt med ident=$navIdent id=${ansatt.lagretAnsatt.id} i NOM")
+					log.warn("Fant ikke Nav-ansatt med id ${ansatt.lagretAnsatt.id} i NOM")
 				}
 			}
 		}

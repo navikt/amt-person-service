@@ -16,8 +16,8 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.poststed.PoststedRepository
+import no.nav.amt.person.service.utils.DbTestDataUtils.postnumreInTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.util.UUID
 
 class PdlClientTest(
@@ -41,22 +40,13 @@ class PdlClientTest(
 		serverUrl = server.url("").toString().removeSuffix("/")
 
 		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
+			postnumreInTest,
 			UUID.randomUUID(),
 		)
 	}
 
 	@AfterEach
-	fun cleanup() {
-		template.update("DELETE FROM postnummer", MapSqlParameterSource())
-		server.shutdown()
-	}
+	fun tearDownLocal() = server.shutdown()
 
 	@Test
 	fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
