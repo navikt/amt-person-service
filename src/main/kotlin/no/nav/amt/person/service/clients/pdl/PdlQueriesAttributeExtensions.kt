@@ -13,7 +13,7 @@ import no.nav.amt.person.service.person.model.Postboksadresse
 import no.nav.amt.person.service.person.model.Vegadresse
 import no.nav.amt.person.service.poststed.Postnummer
 
-fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (List<String>) -> List<Postnummer>): PdlPerson {
+fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>): PdlPerson {
 	val navn = hentPerson.navn.toNavnMedFallback()
 
 	return PdlPerson(
@@ -49,20 +49,20 @@ fun List<PdlQueries.Attribute.Telefonnummer>.toTelefonnummer(): String? {
 	return "${prioritertNummer.landskode}${prioritertNummer.nummer}"
 }
 
-private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc: (List<String>) -> List<Postnummer>): Adresse? {
+private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>): Adresse? {
 	val kontaktadresseFraPdl = kontaktadresse.firstOrNull()
 	val bostedsadresseFraPdl = bostedsadresse.firstOrNull()
 	val oppholdsadresseFraPdl = oppholdsadresse.firstOrNull()
 
 	val unikePostnummer =
-		listOfNotNull(
+		setOfNotNull(
 			kontaktadresseFraPdl?.vegadresse?.postnummer,
 			kontaktadresseFraPdl?.postboksadresse?.postnummer,
 			bostedsadresseFraPdl?.vegadresse?.postnummer,
 			bostedsadresseFraPdl?.matrikkeladresse?.postnummer,
 			oppholdsadresseFraPdl?.vegadresse?.postnummer,
 			oppholdsadresseFraPdl?.matrikkeladresse?.postnummer,
-		).distinct()
+		)
 
 	val poststeder = postnummerTilPoststedFunc(unikePostnummer)
 
