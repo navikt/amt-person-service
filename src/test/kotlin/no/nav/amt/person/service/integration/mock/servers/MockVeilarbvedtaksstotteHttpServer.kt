@@ -7,6 +7,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbvedtaksstotteHttpServer") {
@@ -19,7 +20,7 @@ class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbved
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 

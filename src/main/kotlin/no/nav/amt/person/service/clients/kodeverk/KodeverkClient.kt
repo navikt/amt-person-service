@@ -1,5 +1,7 @@
 package no.nav.amt.person.service.clients.kodeverk
 
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CALL_ID_HEADER
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import okhttp3.OkHttpClient
@@ -32,8 +34,8 @@ class KodeverkClient(
 				.Builder()
 				.url("$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb")
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-				.header("Nav-Call-Id", callId.toString())
-				.header("Nav-Consumer-Id", "amt-person-service")
+				.header(NAV_CALL_ID_HEADER, callId.toString())
+				.header(NAV_CONSUMER_ID_HEADER, "amt-person-service")
 				.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
 				.get()
 				.build()

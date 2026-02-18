@@ -7,6 +7,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import java.time.ZoneId
 
@@ -20,7 +21,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 
@@ -44,7 +45,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 

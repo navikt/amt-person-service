@@ -1,5 +1,8 @@
 package no.nav.amt.person.service.clients.pdl
 
+import no.nav.amt.person.service.clients.HeaderConstants.BEHANDLINGSNUMMER_HEADER
+import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
+import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
@@ -206,8 +209,8 @@ class PdlClient(
 			.Builder()
 			.url("$baseUrl/graphql")
 			.addHeader(HttpHeaders.AUTHORIZATION, "Bearer ${tokenProvider()}")
-			.addHeader("Tema", "GEN")
-			.addHeader("behandlingsnummer", BEHANDLINGSNUMMER)
+			.addHeader(TEMA_HEADER, GEN_TEMA_HEADER_VALUE)
+			.addHeader(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER)
 			.post(jsonPayload.toRequestBody(mediaTypeJson))
 			.build()
 

@@ -6,6 +6,7 @@ import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.readValue
@@ -15,7 +16,7 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 	fun mockHentNavAnsatt(navAnsatt: NavAnsattDbo) {
 		val predicate = { req: RecordedRequest ->
 			req.path == "/graphql" &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				containsIdentifier(req, navAnsatt.navIdent)
 		}
 

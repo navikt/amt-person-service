@@ -4,6 +4,7 @@ import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServer") {
@@ -14,7 +15,7 @@ class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServ
 			val body = req.body.readUtf8()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				data.keys.map { body.contains(it) }.all { true }
 		}
 

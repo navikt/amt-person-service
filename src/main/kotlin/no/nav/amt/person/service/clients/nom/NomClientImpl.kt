@@ -35,7 +35,7 @@ class NomClientImpl(
 			Request
 				.Builder()
 				.url("$url/graphql")
-				.header("Accept", mediaTypeJson.toString())
+				.header(HttpHeaders.ACCEPT, mediaTypeJson.toString())
 				.header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenSupplier()}")
 				.post(requestBody.toRequestBody(mediaTypeJson))
 				.build()

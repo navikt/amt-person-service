@@ -3,6 +3,8 @@ package no.nav.amt.person.service.clients.pdl
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
+import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.ERROR_PREFIX
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.NULL_ERROR
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.util.UUID
 
@@ -109,9 +112,9 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
-		request.getHeader("Tema") shouldBe "GEN"
+		request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
 
 		val expectedJson =
 			"""
@@ -156,7 +159,7 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 	}
 
 	@Test
@@ -205,9 +208,9 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
-		request.getHeader("Tema") shouldBe "GEN"
+		request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
 
 		val expectedJson =
 			"""
@@ -331,6 +334,6 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 	}
 }

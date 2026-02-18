@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.veilarbarena
 
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
@@ -27,7 +28,7 @@ class VeilarbarenaClient(
 				.Builder()
 				.url("$baseUrl/veilarbarena/api/v2/arena/hent-status")
 				.addHeader(HttpHeaders.AUTHORIZATION, "Bearer ${tokenProvider()}")
-				.addHeader("Nav-Consumer-Id", consumerId)
+				.addHeader(NAV_CONSUMER_ID_HEADER, consumerId)
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 

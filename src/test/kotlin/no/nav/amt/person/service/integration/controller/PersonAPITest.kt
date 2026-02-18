@@ -24,6 +24,7 @@ import no.nav.amt.person.service.utils.StringUtils.toJsonRequestBody
 import okhttp3.Request
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
@@ -43,7 +44,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/arrangor-ansatt",
 				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
@@ -73,7 +74,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/arrangor-ansatt",
 				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
@@ -118,7 +119,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
 				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -150,7 +151,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
 				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -195,7 +196,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
 				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -218,7 +219,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/nav-ansatt",
 				body = """{"navIdent": "${navAnsatt.navIdent}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -246,7 +247,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/nav-enhet",
 				body = """{"enhetId": "${navEnhet.enhetId}"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -273,7 +274,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/person/adressebeskyttelse",
 				body = """{"personident": "$personident"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
@@ -293,7 +294,7 @@ class PersonAPITest(
 
 		val response =
 			sendRequest(
-				method = "POST",
+				method = HttpMethod.POST.name(),
 				path = "/api/person/adressebeskyttelse",
 				body = """{"personident": "$personident"}""".toJsonRequestBody(),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
