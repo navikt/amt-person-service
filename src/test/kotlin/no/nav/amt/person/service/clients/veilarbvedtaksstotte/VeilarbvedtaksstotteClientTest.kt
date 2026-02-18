@@ -9,6 +9,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
 
 class VeilarbvedtaksstotteClientTest {
 	private lateinit var server: MockWebServer
@@ -31,7 +32,7 @@ class VeilarbvedtaksstotteClientTest {
 	@Test
 	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
 		val siste14aVedtakDTORespons =
-			VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
+			VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
 				innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
 			)
 		server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(siste14aVedtakDTORespons)))
@@ -52,7 +53,7 @@ class VeilarbvedtaksstotteClientTest {
 
 	@Test
 	fun `hentInnsatsgruppe - manglende tilgang - kaster exception`() {
-		server.enqueue(MockResponse().setResponseCode(401))
+		server.enqueue(MockResponse().setResponseCode(HttpStatus.FORBIDDEN.value()))
 		assertThrows<RuntimeException> { client.hentInnsatsgruppe("123") }
 	}
 }

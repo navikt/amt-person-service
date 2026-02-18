@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -59,7 +60,7 @@ class VeilarboppfolgingClientTest {
 
 		@Test
 		fun `HentVeilederIdent - Manglende tilgang - Kaster exception`() {
-			server.enqueue(MockResponse().setResponseCode(401))
+			server.enqueue(MockResponse().setResponseCode(HttpStatus.FORBIDDEN.value()))
 
 			val thrown =
 				shouldThrow<RuntimeException> {
@@ -84,7 +85,7 @@ class VeilarboppfolgingClientTest {
 
 		@Test
 		fun `HentVeilederIdent - Bruker finnes ikke - returnerer null`() {
-			server.enqueue(MockResponse().setResponseCode(204))
+			server.enqueue(MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value()))
 
 			val veilederIdent = client.hentVeilederIdent(FNR_IN_TEST)
 
@@ -96,7 +97,7 @@ class VeilarboppfolgingClientTest {
 	inner class HentOppfolgingperioder {
 		@Test
 		fun `hentOppfolgingperioder - manglende tilgang - kaster exception`() {
-			server.enqueue(MockResponse().setResponseCode(401))
+			server.enqueue(MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value()))
 
 			val thrown =
 				shouldThrow<RuntimeException> {
@@ -109,7 +110,7 @@ class VeilarboppfolgingClientTest {
 		@ParameterizedTest
 		@ValueSource(booleans = [true, false])
 		fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`(useEndDate: Boolean) {
-			val expected = createOppfolgingPeriodeDTO(useEndDate)
+			val expected = createOppfolgingPeriodeDto(useEndDate)
 			server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(listOf(expected))))
 
 			val oppfolgingsperioder = client.hentOppfolgingperioder(FNR_IN_TEST)
@@ -138,8 +139,8 @@ class VeilarboppfolgingClientTest {
 				.withZoneSameInstant(ZoneId.systemDefault())
 				.toLocalDateTime()
 
-		private fun createOppfolgingPeriodeDTO(useEndDate: Boolean) =
-			VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+		private fun createOppfolgingPeriodeDto(useEndDate: Boolean) =
+			VeilarboppfolgingClient.OppfolgingPeriodeDto(
 				uuid = UUID.randomUUID(),
 				startDato = nowAsZonedDateTimeUtc,
 				sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,

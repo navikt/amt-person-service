@@ -5,29 +5,32 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestData.navGrunerlokka
+import no.nav.amt.person.service.data.TestData.orgTilknytning
 import no.nav.amt.person.service.navenhet.NavEnhetService
-import no.nav.amt.person.service.utils.LogUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class NavAnsattUpdaterTest {
+	private val navAnsattRepository: NavAnsattRepository = mockk(relaxUnitFun = true)
 	private val navAnsattService: NavAnsattService = mockk(relaxUnitFun = true)
 	private val nomClient: NomClientImpl = mockk()
 	private val navEnhetService: NavEnhetService = mockk()
-	private val updater = NavAnsattUpdater(navAnsattService, nomClient, navEnhetService)
+	private val updater = NavAnsattUpdater(navAnsattRepository, navAnsattService, nomClient, navEnhetService)
 
 	@BeforeEach
 	fun setup() = clearAllMocks()
 
 	@Test
 	fun `oppdaterAlle - navIdent mangler hos Nom - logger warning`() {
-		val ansatt1 = TestData.lagNavAnsatt().toModel()
-		val ansatt2 = TestData.lagNavAnsatt().toModel()
+		val ansatt1 = TestData.lagNavAnsatt()
+		val ansatt2 = TestData.lagNavAnsatt()
 
-		every { navAnsattService.getAll() } returns listOf(ansatt1, ansatt2)
+		every { navAnsattRepository.getAll() } returns listOf(ansatt1, ansatt2)
 		every { nomClient.hentNavAnsatte(listOf(ansatt1.navIdent, ansatt2.navIdent)) } returns
 			listOf(
 				NomNavAnsatt(
@@ -40,24 +43,24 @@ class NavAnsattUpdaterTest {
 			)
 		every { navEnhetService.hentEllerOpprettNavEnhet(any()) } returns navGrunerlokka
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(NavAnsattUpdater::class.java.name) { loggingEvents ->
 			updater.oppdaterAlle()
 
-			getLogs().any {
-				it.message == "Fant ikke nav ansatt med ident=${ansatt1.navIdent} id=${ansatt1.id} i NOM"
+			loggingEvents.any {
+				it.message == "Fant ikke Nav-ansatt med id ${ansatt1.id} i NOM"
 			} shouldBe false
 
-			getLogs().any {
-				it.message == "Fant ikke nav ansatt med ident=${ansatt2.navIdent} id=${ansatt2.id} i NOM"
+			loggingEvents.any {
+				it.message == "Fant ikke Nav-ansatt med id ${ansatt2.id} i NOM"
 			} shouldBe true
 		}
 	}
 
 	@Test
 	fun `oppdaterAlle - ansatt er ikke endret - oppdaterer ikke`() {
-		val ansatt = TestData.lagNavAnsatt().toModel()
+		val ansatt = TestData.lagNavAnsatt()
 
-		every { navAnsattService.getAll() } returns listOf(ansatt)
+		every { navAnsattRepository.getAll() } returns listOf(ansatt)
 		every { nomClient.hentNavAnsatte(listOf(ansatt.navIdent)) } returns
 			listOf(
 				NomNavAnsatt(
@@ -72,15 +75,15 @@ class NavAnsattUpdaterTest {
 
 		updater.oppdaterAlle()
 
-		verify(exactly = 0) { navAnsattService.upsertMany(listOf(ansatt)) }
+		verify(exactly = 0) { navAnsattService.upsertMany(setOf(ansatt)) }
 	}
 
 	@Test
 	fun `oppdaterAlle - ansatt er endret - oppdaterer ansatt`() {
-		val ansatt = TestData.lagNavAnsatt().toModel()
+		val ansatt = TestData.lagNavAnsatt()
 		val oppdatertAnsatt = ansatt.copy(navn = "Foo Bar")
 
-		every { navAnsattService.getAll() } returns listOf(ansatt)
+		every { navAnsattRepository.getAll() } returns listOf(ansatt)
 		every { nomClient.hentNavAnsatte(listOf(ansatt.navIdent)) } returns
 			listOf(
 				NomNavAnsatt(

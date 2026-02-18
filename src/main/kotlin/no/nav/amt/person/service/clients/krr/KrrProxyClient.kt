@@ -11,13 +11,16 @@ import org.springframework.http.MediaType
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.util.concurrent.TimeUnit
-import java.util.function.Supplier
 
 class KrrProxyClient(
 	private val baseUrl: String,
-	private val tokenProvider: Supplier<String>,
+	private val tokenProvider: () -> String,
 	private val objectMapper: ObjectMapper,
 ) {
+	private data class PostPersonerRequest(
+		val personidenter: Set<String>,
+	)
+
 	private val httpClient =
 		baseClientBuilder()
 			.connectTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -44,7 +47,7 @@ class KrrProxyClient(
 				.Builder()
 				.url("$baseUrl/rest/v1/personer?inkluderSikkerDigitalPost=false")
 				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider.get())
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider())
 				.post(requestBody.toRequestBody(mediaTypeJson))
 				.build()
 
@@ -67,19 +70,4 @@ class KrrProxyClient(
 			)
 		}
 	}
-
-	private data class PostPersonerRequest(
-		val personidenter: Set<String>,
-	)
-
-	private data class PostPersonerResponse(
-		val personer: Map<String, KontaktinformasjonDto>,
-		val feil: Map<String, String>,
-	)
-
-	private data class KontaktinformasjonDto(
-		val personident: String,
-		val epostadresse: String?,
-		val mobiltelefonnummer: String?,
-	)
 }

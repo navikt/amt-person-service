@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.amt.person.service.person.model.Person
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.getUUID
 import no.nav.amt.person.service.utils.sqlParameters
@@ -14,58 +13,59 @@ import java.util.UUID
 class PersonRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {
-	private val rowMapper =
-		RowMapper { rs, _ ->
-			PersonDbo(
-				id = rs.getUUID("id"),
-				personident = rs.getString("personident"),
-				fornavn = rs.getString("fornavn"),
-				mellomnavn = rs.getString("mellomnavn"),
-				etternavn = rs.getString("etternavn"),
-				createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-				modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-			)
-		}
-
-	fun get(id: UUID): PersonDbo {
-		val sql = "select * from person where id = :id"
-		val parameters = sqlParameters("id" to id)
-
-		return template.query(sql, parameters, rowMapper).first()
-	}
+	fun get(id: UUID): PersonDbo =
+		template
+			.query(
+				"SELECT * FROM person WHERE id = :id",
+				sqlParameters("id" to id),
+				rowMapper,
+			).first()
 
 	fun get(personident: String): PersonDbo? {
 		val sql =
 			"""
-			select * from person join personident ident on person.id = ident.person_id
-			where ident.ident = :personident
-			""".trimMargin()
-		val parameters = sqlParameters("personident" to personident)
+			SELECT *
+			FROM person
+			WHERE EXISTS (
+				SELECT 1
+				FROM personident
+				WHERE
+				  	personident.ident = :personident
+					AND personident.person_id = person.id
+			)
+			""".trimIndent()
 
-		return template.query(sql, parameters, rowMapper).firstOrNull()
+		return template
+			.query(
+				sql,
+				sqlParameters("personident" to personident),
+				rowMapper,
+			).firstOrNull()
 	}
 
-	fun upsert(person: Person) {
+	fun upsert(person: PersonDbo) {
 		val sql =
 			"""
-			insert into person(
+			INSERT INTO person (
 				id,
 				personident,
 				fornavn,
 				mellomnavn,
 				etternavn
-			) values (
+			)
+			VALUES (
 				:id,
 				:personident,
 				:fornavn,
 				:mellomnavn,
 				:etternavn
-			) on conflict(id) do update set
+			)
+			ON CONFLICT (id) DO UPDATE SET
 				fornavn = :fornavn,
 				mellomnavn = :mellomnavn,
 				etternavn = :etternavn,
 				personident = :personident,
-				modified_at = current_timestamp
+				modified_at = CURRENT_TIMESTAMP
 			""".trimIndent()
 
 		val parameters =
@@ -80,62 +80,42 @@ class PersonRepository(
 		template.update(sql, parameters)
 	}
 
-	fun getPersoner(identer: List<String>): List<PersonDbo> {
+	fun getPersoner(identer: Set<String>): List<PersonDbo> {
 		if (identer.isEmpty()) return emptyList()
 
 		val sql =
 			"""
-			select *
-			from person join personident ident on person.id = ident.person_id
-			where ident.ident in (:identer)
-			""".trimIndent()
-
-		val parameters =
-			sqlParameters(
-				"identer" to identer,
+			SELECT *
+			FROM person
+			WHERE EXISTS (
+				SELECT 1
+				FROM personident
+				WHERE
+				  	personident.ident IN (:identer)
+					AND personident.person_id = person.id
 			)
-
-		return template.query(sql, parameters, rowMapper).distinct()
-	}
-
-	fun delete(id: UUID) {
-		val parameters = sqlParameters("id" to id)
-
-		val identSql =
-			"""
-			delete from personident where person_id = :id
 			""".trimIndent()
 
-		template.update(identSql, parameters)
-
-		val sql =
-			"""
-			delete from person where id = :id
-			""".trimIndent()
-
-		template.update(sql, parameters)
+		return template
+			.query(
+				sql,
+				sqlParameters("identer" to identer),
+				rowMapper,
+			)
 	}
 
 	fun getAll(
 		offset: Int,
 		limit: Int = 500,
-	): List<PersonDbo> {
-		val sql =
-			"""
-			select * from person
-			order by id
-			limit :limit
-			offset :offset
-			""".trimIndent()
-
-		val parameters =
+	): List<PersonDbo> =
+		template.query(
+			"SELECT * FROM person ORDER BY id LIMIT :limit OFFSET :offset",
 			sqlParameters(
 				"offset" to offset,
 				"limit" to limit,
-			)
-
-		return template.query(sql, parameters, rowMapper)
-	}
+			),
+			rowMapper,
+		)
 
 	fun getAllWithRolle(
 		offset: Int,
@@ -144,11 +124,18 @@ class PersonRepository(
 	): List<PersonDbo> {
 		val sql =
 			"""
-			select person.* from person join person_rolle pr on person.id = pr.person_id
-			where pr.type = :rolle
-			order by person.id
-			limit :limit
-			offset :offset
+			SELECT *
+			FROM person
+			WHERE EXISTS (
+				SELECT 1
+				FROM person_rolle
+				WHERE
+					person_rolle.person_id = person.id
+					AND person_rolle.type = :rolle
+			)
+			ORDER by id
+			LIMIT :limit
+			OFFSET :offset
 			""".trimIndent()
 
 		val parameters =
@@ -159,5 +146,35 @@ class PersonRepository(
 			)
 
 		return template.query(sql, parameters, rowMapper)
+	}
+
+	// benyttes kun i tester
+	internal fun delete(id: UUID) {
+		val parameters = sqlParameters("id" to id)
+
+		template.update(
+			"DELETE FROM personident WHERE person_id = :id",
+			parameters,
+		)
+
+		template.update(
+			"DELETE FROM person WHERE id = :id",
+			parameters,
+		)
+	}
+
+	companion object {
+		private val rowMapper =
+			RowMapper { rs, _ ->
+				PersonDbo(
+					id = rs.getUUID("id"),
+					personident = rs.getString("personident"),
+					fornavn = rs.getString("fornavn"),
+					mellomnavn = rs.getString("mellomnavn"),
+					etternavn = rs.getString("etternavn"),
+					createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+					modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+				)
+			}
 	}
 }

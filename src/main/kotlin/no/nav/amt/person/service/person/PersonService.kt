@@ -2,71 +2,66 @@ package no.nav.amt.person.service.person
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
-import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.person.model.Rolle
-import no.nav.amt.person.service.person.model.finnGjeldendeIdent
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import no.nav.amt.person.service.utils.EnvUtils
+import no.nav.amt.person.service.utils.titlecase
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Service
 class PersonService(
-	val pdlClient: PdlClient,
-	val repository: PersonRepository,
-	val personidentRepository: PersonidentRepository,
-	val applicationEventPublisher: ApplicationEventPublisher,
+	private val pdlClient: PdlClient,
+	private val personRepository: PersonRepository,
+	private val personidentRepository: PersonidentRepository,
+	private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentPerson(id: UUID): Person = repository.get(id).toModel()
-
-	fun hentPerson(personident: String): Person? = repository.get(personident)?.toModel()
-
 	@Retryable(maxRetries = 2)
 	@Transactional
-	fun hentEllerOpprettPerson(personident: String): Person = repository.get(personident)?.toModel() ?: opprettPerson(personident)
+	fun hentEllerOpprettPerson(personident: String): PersonDbo =
+		personRepository.get(personident) ?: run {
+			val pdlPerson = pdlClient.hentPerson(personident)
+			opprettPerson(pdlPerson)
+		}
 
 	@Transactional
 	fun hentEllerOpprettPerson(
 		personident: String,
-		personOpplysninger: PdlPerson,
-	): Person = repository.get(personident)?.toModel() ?: opprettPerson(personOpplysninger)
-
-	fun hentPersoner(personidenter: List<String>): List<Person> = repository.getPersoner(personidenter).map { it.toModel() }
-
-	fun hentIdenter(personId: UUID) = personidentRepository.getAllForPerson(personId).map { it.toModel() }
-
-	fun hentIdenter(personident: String) = pdlClient.hentIdenter(personident)
-
-	fun hentGjeldendeIdent(personident: String) = finnGjeldendeIdent(pdlClient.hentIdenter(personident)).getOrThrow()
+		pdlPerson: PdlPerson,
+	): PersonDbo = personRepository.get(personident) ?: opprettPerson(pdlPerson)
 
 	@Transactional
 	fun oppdaterPersonIdent(identer: List<Personident>) {
-		val personer = repository.getPersoner(identer.map { it.ident })
+		val personer = personRepository.getPersoner(identer.map { it.ident }.toSet())
 
 		if (personer.size > 1) {
 			log.error("Vi har flere personer knyttet til samme identer: ${personer.joinToString { it.id.toString() }}")
 			throw IllegalStateException("Vi har flere personer knyttet til samme identer")
 		}
 
-		val gjeldendeIdent = finnGjeldendeIdent(identer).getOrThrow()
+		val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
 
 		personer.firstOrNull()?.let { person ->
 			log.info("Oppdaterer personident for person ${person.id}")
-			personidentRepository.upsert(person.id, identer)
-			upsert(person.copy(personident = gjeldendeIdent.ident).toModel())
+			personidentRepository.upsert(identer.map { it.toDbo(person.id) }.toSet())
+			upsert(person.copy(personident = gjeldendeIdent.ident))
 		}
 	}
 
 	@Transactional
-	fun oppdaterNavn(person: Person) {
-		val personOpplysninger =
+	fun oppdaterNavn(person: PersonDbo) {
+		if (person.erUkjent()) {
+			log.info("Skipper oppdaterNavn for ${person.id} med ukjent etternavn")
+			return
+		}
+
+		val pdlPerson =
 			try {
 				pdlClient.hentPerson(person.personident)
 			} catch (e: Exception) {
@@ -82,9 +77,9 @@ class PersonService(
 			}
 
 		if (
-			person.fornavn == personOpplysninger.fornavn &&
-			person.mellomnavn == personOpplysninger.mellomnavn &&
-			person.etternavn == personOpplysninger.etternavn
+			person.fornavn == pdlPerson.fornavn &&
+			person.mellomnavn == pdlPerson.mellomnavn &&
+			person.etternavn == pdlPerson.etternavn
 		) {
 			log.info("Navn på person ${person.id} er allerede oppdatert, ingen endringer gjort.")
 			return
@@ -92,55 +87,33 @@ class PersonService(
 
 		upsert(
 			person.copy(
-				fornavn = personOpplysninger.fornavn,
-				mellomnavn = personOpplysninger.mellomnavn,
-				etternavn = personOpplysninger.etternavn,
+				fornavn = pdlPerson.fornavn.titlecase(),
+				mellomnavn = pdlPerson.mellomnavn?.titlecase(),
+				etternavn = pdlPerson.etternavn.titlecase(),
 			),
 		)
 
 		log.info("Oppdaterte navn på person ${person.id}")
 	}
 
-	fun upsert(person: Person) {
-		repository.upsert(person)
+	fun upsert(person: PersonDbo) {
+		personRepository.upsert(person)
 		applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 
 		log.info("Upsertet person med id: ${person.id}")
 	}
 
-	private fun opprettPerson(personident: String): Person {
-		val pdlPerson = pdlClient.hentPerson(personident)
-
-		return opprettPerson(pdlPerson)
-	}
-
-	private fun opprettPerson(pdlPerson: PdlPerson): Person {
-		val gjeldendeIdent = finnGjeldendeIdent(pdlPerson.identer).getOrThrow()
-
-		val person =
-			Person(
-				id = UUID.randomUUID(),
-				personident = gjeldendeIdent.ident,
-				fornavn = pdlPerson.fornavn,
-				mellomnavn = pdlPerson.mellomnavn,
-				etternavn = pdlPerson.etternavn,
-			)
-
+	private fun opprettPerson(pdlPerson: PdlPerson): PersonDbo {
+		val person = pdlPerson.toPersonDbo()
 		upsert(person)
-		personidentRepository.upsert(person.id, pdlPerson.identer)
+		personidentRepository.upsert(pdlPerson.identer.map { it.toDbo(person.id) }.toSet())
 
-		log.info("Opprettet ny person med id ${person.id}")
+		if (person.erUkjent()) {
+			log.warn("Opprettet ny person med id ${person.id} og ukjent navn")
+		} else {
+			log.info("Opprettet ny person med id ${person.id}")
+		}
 
 		return person
 	}
-
-	fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? = pdlClient.hentAdressebeskyttelse(personident)
-
-	fun hentAlleMedRolle(
-		offset: Int,
-		limit: Int = 500,
-		rolle: Rolle,
-	) = repository
-		.getAllWithRolle(offset, limit, rolle)
-		.map { it.toModel() }
 }

@@ -16,9 +16,17 @@ class RolleRepository(
 	) {
 		val sql =
 			"""
-			insert into person_rolle(id, person_id, type)
-			values(:id, :personId, :rolle)
-			on conflict (person_id, type) do nothing
+			INSERT INTO person_rolle (
+				id,
+				person_id,
+				type
+			)
+			VALUES (
+				:id,
+				:personId,
+				:rolle
+			)
+			ON CONFLICT (person_id, type) DO NOTHING
 			""".trimIndent()
 
 		val parameters =
@@ -34,39 +42,26 @@ class RolleRepository(
 	fun harRolle(
 		personId: UUID,
 		rolle: Rolle,
-	): Boolean {
-		val sql =
-			"""
-			select count(*)
-			from person_rolle
-			where person_id = :personId and type = :rolle
-			""".trimIndent()
-
-		val parameters =
+	): Boolean =
+		template.queryForObject(
+			"SELECT EXISTS (SELECT 1 FROM person_rolle WHERE person_id = :personId AND type = :rolle)",
 			sqlParameters(
 				"personId" to personId,
 				"rolle" to rolle.name,
-			)
-
-		return template.queryForObject(sql, parameters, Int::class.java)!! > 0
-	}
+			),
+			Boolean::class.java,
+		) ?: throw IllegalStateException("Kall til harRolle $rolle feilet")
 
 	fun delete(
 		personId: UUID,
 		rolle: Rolle,
 	) {
-		val sql =
-			"""
-			delete from person_rolle
-			where person_id = :personId and type = :rolle
-			""".trimIndent()
-
-		val parameters =
+		template.update(
+			"DELETE FROM person_rolle WHERE person_id = :personId AND type = :rolle",
 			sqlParameters(
 				"personId" to personId,
 				"rolle" to rolle.name,
-			)
-
-		template.update(sql, parameters)
+			),
+		)
 	}
 }

@@ -3,6 +3,7 @@ package no.nav.amt.person.service.clients.norg
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.springframework.http.HttpStatus
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
@@ -11,7 +12,7 @@ class NorgClient(
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
-	fun hentNavEnhet(enhetId: String): NorgNavEnhet? {
+	fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
 		val request =
 			Request
 				.Builder()
@@ -20,7 +21,7 @@ class NorgClient(
 				.build()
 
 		httpClient.newCall(request).execute().use { response ->
-			if (response.code == 404) {
+			if (response.code == HttpStatus.NOT_FOUND.value()) {
 				return null
 			}
 
@@ -30,13 +31,11 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return objectMapper
-				.readValue<NavEnhetDto>(body)
-				.let { NorgNavEnhet(it.enhetNr, it.navn) }
+			return objectMapper.readValue<NorgNavEnhetDto>(body)
 		}
 	}
 
-	fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhet> {
+	fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
 		val request =
 			Request
 				.Builder()
@@ -51,12 +50,7 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return objectMapper.readValue<List<NavEnhetDto>>(body).map { NorgNavEnhet(it.enhetNr, it.navn) }
+			return objectMapper.readValue<List<NorgNavEnhetDto>>(body)
 		}
 	}
-
-	private data class NavEnhetDto(
-		val navn: String,
-		val enhetNr: String,
-	)
 }

@@ -1,147 +1,111 @@
 package no.nav.amt.person.service.poststed
 
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.RepositoryTestBase
-import org.junit.jupiter.api.AfterEach
+import no.nav.amt.person.service.data.TestData.postnumreInTest
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.util.UUID
 
 @SpringBootTest(classes = [PoststedRepository::class])
 class PoststedRepositoryTest(
-	private val poststedRepository: PoststedRepository,
+	private val sut: PoststedRepository,
 ) : RepositoryTestBase() {
 	@BeforeEach
-	fun before() {
-		lagrePostnummerForTest(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
-		)
-	}
-
-	@AfterEach
-	fun after() {
-		template.update("DELETE FROM postnummer", MapSqlParameterSource())
-	}
-
-	@Test
-	fun `getPoststed - postnummer finnes - henter riktig poststed`() {
-		val poststed = poststedRepository.getPoststed("5341")
-
-		poststed shouldBe "STRAUME"
-	}
-
-	@Test
-	fun `getPoststed - postnummer finnes ikke - returnerer null`() {
-		val poststed = poststedRepository.getPoststed("0101")
-
-		poststed shouldBe null
-	}
+	fun before() = sut.oppdaterPoststed(postnumreInTest, UUID.randomUUID())
 
 	@Test
 	fun `getAllePoststeder - poststeder finnes - henter alle poststeder`() {
-		val allePoststeder = poststedRepository.getAllePoststeder()
+		val allePoststeder = sut.getAllePoststeder()
 
-		allePoststeder.size shouldBe 5
+		allePoststeder shouldContainAll postnumreInTest
 	}
 
-	@Test
-	fun `oppdaterPoststed - postnummer finnes i db men ikke i oppdatert liste - sletter poststed`() {
-		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
-			UUID.randomUUID(),
-		)
+	@Nested
+	inner class GetPostederTests {
+		@Test
+		fun `getPoststeder - postnummer finnes - returnerer poststeder`() {
+			val postnumreToFetch = setOf("0484", "5341")
+			val poststeder = sut.getPoststeder(postnumreToFetch)
 
-		val allePoststeder = poststedRepository.getAllePoststeder()
+			poststeder.map { it.postnummer } shouldContainAll postnumreToFetch
+		}
 
-		allePoststeder.size shouldBe 4
-		allePoststeder.find { it.postnummer == "5341" } shouldBe null
+		@Test
+		fun `getPoststeder - postnummer finnes ikke - returnerer poststeder`() {
+			val postnumreToFetch = setOf("0484", "9999")
+			val poststeder = sut.getPoststeder(postnumreToFetch)
+
+			poststeder.size shouldBe 1
+		}
 	}
 
-	@Test
-	fun `oppdaterPoststed - postnummer finnes i oppdatert liste men ikke i db - legger til poststed`() {
-		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("0502", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
-			UUID.randomUUID(),
-		)
+	@Nested
+	inner class OppdaterPoststedTests {
+		@Test
+		fun `oppdaterPoststed - postnummer finnes i db men ikke i oppdatert liste - sletter poststed`() {
+			val postnrUtenStraume = postnumreInTest.filterNot { it.postnummer == "5341" }.toSet()
 
-		val allePoststeder = poststedRepository.getAllePoststeder()
+			sut.oppdaterPoststed(postnrUtenStraume, UUID.randomUUID())
 
-		allePoststeder.size shouldBe 6
-		allePoststeder.find { it.postnummer == "0502" }?.poststed shouldBe "OSLO"
-	}
+			val allePoststeder = sut.getAllePoststeder()
 
-	@Test
-	fun `oppdaterPoststed - flere endringer - sletter 1 poststed, lagrer 1 poststed, bytter navn for 1 poststed`() {
-		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("0502", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("9609", "SENJA"),
-			),
-			UUID.randomUUID(),
-		)
+			allePoststeder.size shouldBe 4
+			allePoststeder.find { it.postnummer == "5341" } shouldBe null
+		}
 
-		val allePoststeder = poststedRepository.getAllePoststeder()
+		@Test
+		fun `oppdaterPoststed - postnummer finnes i oppdatert liste men ikke i db - legger til poststed`() {
+			val nyttPostnummer = Postnummer("4567", "ASKER")
 
-		allePoststeder.size shouldBe 5
-		allePoststeder.find { it.postnummer == "0502" }?.poststed shouldBe "OSLO"
-		allePoststeder.find { it.postnummer == "5449" } shouldBe null
-		allePoststeder.find { it.postnummer == "9609" }?.poststed shouldBe "SENJA"
-	}
-
-	@Test
-	fun `oppdaterPoststed - ingen endringer - oppdaterer ingenting`() {
-		val allePoststeder = poststedRepository.getAllePoststeder()
-
-		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
-			UUID.randomUUID(),
-		)
-
-		val allePoststederOppdatert = poststedRepository.getAllePoststeder()
-		allePoststederOppdatert shouldBe allePoststeder
-	}
-
-	private fun lagrePostnummerForTest(postnummer: List<Postnummer>) {
-		postnummer.forEach {
-			template.update(
-				"""
-            INSERT INTO postnummer(postnummer, poststed)
-            VALUES (:postnummer, :poststed);
-        """,
-				mapOf(
-					"postnummer" to it.postnummer,
-					"poststed" to it.poststed,
-				),
+			sut.oppdaterPoststed(
+				postnumreInTest.plus(nyttPostnummer),
+				UUID.randomUUID(),
 			)
+
+			val allePoststeder = sut.getAllePoststeder()
+
+			allePoststeder.size shouldBe 6
+			allePoststeder shouldContain nyttPostnummer
+		}
+
+		@Test
+		fun `oppdaterPoststed - flere endringer - sletter 1 poststed, lagrer 1 poststed, bytter navn for 1 poststed`() {
+			val oppdatertePostnumre =
+				setOf(
+					Postnummer("0484", "OSLO"),
+					Postnummer("0502", "OSLO"),
+					Postnummer("5341", "STRAUME"),
+					Postnummer("5365", "TURØY"),
+					Postnummer("9609", "SENJA"),
+				)
+
+			sut.oppdaterPoststed(
+				oppdatertePostnumre,
+				UUID.randomUUID(),
+			)
+
+			val allePoststeder = sut.getAllePoststeder()
+
+			allePoststeder.size shouldBe 5
+			allePoststeder shouldContainAll oppdatertePostnumre
+		}
+
+		@Test
+		fun `oppdaterPoststed - ingen endringer - oppdaterer ingenting`() {
+			val allePoststeder = sut.getAllePoststeder()
+
+			sut.oppdaterPoststed(
+				postnumreInTest,
+				UUID.randomUUID(),
+			)
+
+			val allePoststederOppdatert = sut.getAllePoststeder()
+			allePoststederOppdatert shouldBe allePoststeder
 		}
 	}
 }

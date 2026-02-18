@@ -14,11 +14,10 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.ZonedDateTime
 import java.util.UUID
-import java.util.function.Supplier
 
 class VeilarboppfolgingClient(
 	private val apiUrl: String,
-	private val veilarboppfolgingTokenProvider: Supplier<String>,
+	private val veilarboppfolgingTokenProvider: () -> String,
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
@@ -29,7 +28,7 @@ class VeilarboppfolgingClient(
 				.Builder()
 				.url("$apiUrl/api/v3/hent-veileder")
 				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider.get()}")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 
@@ -52,7 +51,7 @@ class VeilarboppfolgingClient(
 				.Builder()
 				.url("$apiUrl/api/v3/oppfolging/hent-perioder")
 				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider.get()}")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 
@@ -61,12 +60,12 @@ class VeilarboppfolgingClient(
 				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
 			}
 
-			val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDTO>>(response.body.string())
+			val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDto>>(response.body.string())
 			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
 		}
 	}
 
-	data class HentBrukersVeilederResponse(
+	private data class HentBrukersVeilederResponse(
 		val veilederIdent: String,
 	)
 
@@ -74,7 +73,7 @@ class VeilarboppfolgingClient(
 		val fnr: String,
 	)
 
-	data class OppfolgingPeriodeDTO(
+	data class OppfolgingPeriodeDto(
 		val uuid: UUID,
 		val startDato: ZonedDateTime,
 		val sluttDato: ZonedDateTime?,

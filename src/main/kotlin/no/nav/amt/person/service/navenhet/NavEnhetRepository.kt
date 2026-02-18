@@ -11,80 +11,56 @@ import java.util.UUID
 class NavEnhetRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {
-	private val rowMapper =
-		RowMapper { rs, _ ->
-			NavEnhetDbo(
-				id = rs.getUUID("id"),
-				enhetId = rs.getString("nav_enhet_id"),
-				navn = rs.getString("navn"),
-				createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-				modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-			)
-		}
-
-	fun insert(input: NavEnhet) {
-		val sql =
-			"""
-			INSERT INTO nav_enhet(id, nav_enhet_id, navn) VALUES (:id, :enhetId, :navn)
-			""".trimIndent()
-
-		val parameters =
+	fun insert(input: NavEnhetDbo) {
+		template.update(
+			"INSERT INTO nav_enhet (id, nav_enhet_id, navn) VALUES (:id, :enhetId, :navn)",
 			sqlParameters(
 				"id" to input.id,
 				"enhetId" to input.enhetId,
 				"navn" to input.navn,
-			)
-
-		template.update(sql, parameters)
+			),
+		)
 	}
 
-	fun get(id: UUID): NavEnhetDbo {
-		val sql =
-			"""
-			SELECT * FROM nav_enhet WHERE id = :id
-			""".trimIndent()
-
-		val parameters = sqlParameters("id" to id)
-
-		return template.query(sql, parameters, rowMapper).firstOrNull()
-			?: throw NoSuchElementException("Enhet med id $id eksisterer ikke.")
-	}
-
-	fun get(enhetId: String): NavEnhetDbo? {
-		val sql =
-			"""
-			SELECT * FROM nav_enhet WHERE nav_enhet_id = :enhetId
-			""".trimIndent()
-
-		return template
+	fun get(id: UUID): NavEnhetDbo =
+		template
 			.query(
-				sql,
+				"SELECT * FROM nav_enhet WHERE id = :id",
+				sqlParameters("id" to id),
+				rowMapper,
+			).firstOrNull()
+			?: throw NoSuchElementException("Enhet med id $id eksisterer ikke.")
+
+	fun get(enhetId: String): NavEnhetDbo? =
+		template
+			.query(
+				"SELECT * FROM nav_enhet WHERE nav_enhet_id = :enhetId",
 				sqlParameters("enhetId" to enhetId),
 				rowMapper,
 			).firstOrNull()
-	}
 
-	fun getAll(): List<NavEnhetDbo> {
-		val sql =
-			"""
-			SELECT * FROM nav_enhet
-			""".trimIndent()
+	fun getAll(): List<NavEnhetDbo> = template.query("SELECT * FROM nav_enhet", rowMapper)
 
-		return template.query(sql, rowMapper)
-	}
-
-	fun update(enhet: NavEnhet) {
-		val sql =
-			"""
-			UPDATE nav_enhet SET navn = :navn, modified_at = current_timestamp WHERE id = :id
-			""".trimIndent()
-
-		val parameters =
+	fun update(enhet: NavEnhetDbo) {
+		template.update(
+			"UPDATE nav_enhet SET navn = :navn, modified_at = CURRENT_TIMESTAMP WHERE id = :id",
 			sqlParameters(
 				"navn" to enhet.navn,
 				"id" to enhet.id,
-			)
+			),
+		)
+	}
 
-		template.update(sql, parameters)
+	companion object {
+		private val rowMapper =
+			RowMapper { rs, _ ->
+				NavEnhetDbo(
+					id = rs.getUUID("id"),
+					enhetId = rs.getString("nav_enhet_id"),
+					navn = rs.getString("navn"),
+					createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+					modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+				)
+			}
 	}
 }

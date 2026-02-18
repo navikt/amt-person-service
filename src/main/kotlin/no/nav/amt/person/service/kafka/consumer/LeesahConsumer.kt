@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.adressebeskyttelse.Adressebeskyttelse
@@ -19,35 +20,39 @@ enum class OpplysningsType {
 class LeesahConsumer(
 	private val personService: PersonService,
 	private val navBrukerService: NavBrukerService,
+	private val personRepository: PersonRepository,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
 			OpplysningsType.NAVN_V1.toString() -> {
-				handterNavn(personhendelse.personidenter)
+				handterNavn(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() -> {
-				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+				handterAdressebeskyttelse(
+					personidenter = personhendelse.personidenter.toSet(),
+					adressebeskyttelse = personhendelse.adressebeskyttelse,
+				)
 			}
 
 			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.KONTAKTADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 
 			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> {
-				handterAdresse(personhendelse.personidenter)
+				handterAdresse(personhendelse.personidenter.toSet())
 			}
 		}
 	}
 
 	private fun handterAdressebeskyttelse(
-		personidenter: List<String>,
+		personidenter: Set<String>,
 		adressebeskyttelse: Adressebeskyttelse?,
 	) {
 		if (adressebeskyttelse == null) {
@@ -55,43 +60,27 @@ class LeesahConsumer(
 			return
 		}
 
-		val lagredePersonidenter = personService.hentPersoner(personidenter).map { it.personident }
+		val lagredePersonidenter = personRepository.getPersoner(personidenter).map { it.personident }
 
-		if (lagredePersonidenter.isEmpty()) return
-
-		personidenter.forEach {
+		lagredePersonidenter.forEach {
 			navBrukerService.oppdaterAdressebeskyttelse(it)
 		}
 	}
 
-	private fun handterNavn(personidenter: List<String>) {
-		val personer = personService.hentPersoner(personidenter)
+	private fun handterNavn(personidenter: Set<String>) =
+		personRepository
+			.getPersoner(personidenter)
+			.forEach { personDbo -> personService.oppdaterNavn(personDbo) }
 
-		if (personer.isEmpty()) return
-
-		personer
-			.filter { person -> person.id.toString() !in personerMedFalskIdentitet }
-			.forEach { person ->
-				personService.oppdaterNavn(person)
-			}
-	}
-
-	private fun handterAdresse(personidenter: List<String>) {
-		val lagredePersonidenter = personService.hentPersoner(personidenter).map { it.personident }
+	private fun handterAdresse(personidenter: Set<String>) {
+		val lagredePersonidenter =
+			personRepository
+				.getPersoner(personidenter)
+				.map { it.personident }
+				.toSet()
 
 		if (lagredePersonidenter.isEmpty()) return
 
 		navBrukerService.oppdaterAdresse(lagredePersonidenter)
-	}
-
-	companion object {
-		val personerMedFalskIdentitet =
-			setOf(
-				"15c58a43-9fdd-4c05-98dc-30395760afa5",
-				"5d4e6416-5c82-48ec-a80e-04304f6d300d",
-				"aeba3431-5a7c-42ff-b7e4-a464746e519e",
-				"de7785d4-6c41-41fe-9743-1bd034590ee4",
-				"69d71750-dd78-4254-baf1-21949b398ed8",
-			)
 	}
 }

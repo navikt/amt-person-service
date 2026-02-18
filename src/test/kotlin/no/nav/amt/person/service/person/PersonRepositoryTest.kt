@@ -1,12 +1,13 @@
 package no.nav.amt.person.service.person
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
@@ -59,7 +60,7 @@ class PersonRepositoryTest(
 
 		val personer =
 			personRepository.getPersoner(
-				listOf(
+				setOf(
 					person1.personident,
 					person2.personident,
 					TestData.randomIdent(),
@@ -79,7 +80,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(person)
 		testDataRepository.insertPersonidenter(listOf(historiskIdent))
 
-		val personer = personRepository.getPersoner(listOf(historiskIdent.ident, person.personident))
+		val personer = personRepository.getPersoner(setOf(historiskIdent.ident, person.personident))
 
 		personer shouldHaveSize 1
 
@@ -91,13 +92,16 @@ class PersonRepositoryTest(
 
 	@Test
 	fun `getPersoner - ingen person med ident - returnerer tom liste`() {
-		personRepository.getPersoner(listOf(TestData.randomIdent(), TestData.randomIdent())) shouldBe emptyList()
+		personRepository
+			.getPersoner(
+				setOf(TestData.randomIdent(), TestData.randomIdent()),
+			).shouldBeEmpty()
 	}
 
 	@Test
 	fun `upsert - ny person - inserter person`() {
 		val person =
-			Person(
+			PersonDbo(
 				id = UUID.randomUUID(),
 				personident = TestData.randomIdent(),
 				fornavn = "Fornavn",
@@ -129,7 +133,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(originalPerson)
 
 		val oppdatertPerson =
-			Person(
+			PersonDbo(
 				id = originalPerson.id,
 				personident = originalPerson.personident,
 				fornavn = "Nytt",
@@ -163,7 +167,7 @@ class PersonRepositoryTest(
 		testDataRepository.insertPerson(originalPerson)
 
 		val oppdatertPerson =
-			Person(
+			PersonDbo(
 				id = originalPerson.id,
 				personident = "ny ident",
 				fornavn = "Nytt",

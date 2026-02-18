@@ -30,8 +30,9 @@ val shedlockVersion = "7.6.0"
 val confluentVersion = "8.1.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
-val ktLintVersion = "1.6.0"
+val ktLintVersion = "1.8.0"
 val jacksonModuleKotlinVersion = "3.0.4"
+val amtLibVersion = "1.2026.02.17_13.55-de9b1752e174"
 
 // fjernes ved neste release av org.apache.kafka:kafka-clients
 configurations.configureEach {
@@ -76,7 +77,9 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:$shedlockVersion")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:$shedlockVersion")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "com.vaadin.external.google", module = "android-json")
+    }
     testImplementation("org.springframework.boot:spring-boot-data-jdbc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
@@ -90,6 +93,7 @@ dependencies {
 
     testImplementation("io.mockk:mockk-jvm:$mockkVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOauth2ServerVersion")
+    testImplementation("no.nav.amt.lib:testing:$amtLibVersion")
 }
 
 kotlin {

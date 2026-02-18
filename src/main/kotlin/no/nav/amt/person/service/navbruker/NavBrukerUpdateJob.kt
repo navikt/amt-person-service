@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 @Component
 class NavBrukerUpdateJob(
+	private val navBrukerRepository: NavBrukerRepository,
 	private val navBrukerService: NavBrukerService,
 ) {
 	@Scheduled(cron = "@hourly")
@@ -18,11 +19,13 @@ class NavBrukerUpdateJob(
 
 	private fun oppdaterBrukere() {
 		val personidenter =
-			navBrukerService.getPersonidenter(
-				offset = 0,
-				limit = 10000,
-				notSyncedSince = LocalDateTime.now().minusDays(14),
-			)
+			navBrukerRepository
+				.getPersonidenter(
+					offset = 0,
+					limit = 10000,
+					notSyncedSince = LocalDateTime.now().minusDays(14),
+				).toSet()
+
 		navBrukerService.syncKontaktinfoBulk(personidenter)
 	}
 }

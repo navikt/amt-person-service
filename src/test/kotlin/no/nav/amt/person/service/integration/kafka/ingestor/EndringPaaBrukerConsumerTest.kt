@@ -7,13 +7,13 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.navbruker.NavBrukerService
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class EndringPaaBrukerConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes, har ikke Nav-kontor - oppretter og oppdaterer Nav-kontor`() {
@@ -28,11 +28,11 @@ class EndringPaaBrukerConsumerTest(
 
 		testDataRepository.insertNavBruker(navBruker)
 
-		mockNorgHttpServer.addNavEnhet(navEnhet.enhetId, navEnhet.navn)
-		kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload.toJson())
+		mockNorgHttpServer.addNavEnhet(navEnhet)
+		kafkaMessageSender.sendTilEndringPaaBrukerTopic(objectMapper.writeValueAsString(kafkaPayload))
 
 		await().untilAsserted {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
 			assertSoftly(faktiskBruker.navEnhet.shouldNotBeNull()) {
 				enhetId shouldBe navEnhet.enhetId

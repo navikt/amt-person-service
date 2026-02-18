@@ -3,37 +3,38 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
-import no.nav.amt.person.service.navansatt.NavAnsattService
-import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.LogUtils
+import no.nav.amt.person.service.kafka.consumer.TildeltVeilederConsumer
+import no.nav.amt.person.service.navansatt.NavAnsattRepository
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class TildeltVeilederConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
-	private val navAnsattService: NavAnsattService,
+	private val navBrukerRepository: NavBrukerRepository,
+	private val navAnsattRepository: NavAnsattRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes, ny veileder - oppretter og oppdaterer nav veileder`() {
 		val navBruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(navBruker)
 
-		val msg = KafkaMessageCreator.lagTildeltVeilederMsg()
-		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
+		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+		val navAnsatt = TestData.lagNavAnsatt(navIdent = payload.veilederId)
 
-		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt.toModel())
-		mockNorgHttpServer.addNavAnsattEnhet()
+		mockPdlHttpServer.mockHentIdenter(payload.aktorId, navBruker.person.personident)
+		mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
+		mockNorgHttpServer.addNavEnhetGrunerLokka()
 
-		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
+		kafkaMessageSender.sendTilTildeltVeilederTopic(objectMapper.writeValueAsString(payload))
 
 		await().untilAsserted {
-			val faktiskNavAnsatt = navAnsattService.hentNavAnsatt(navAnsatt.navIdent)
+			val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
 
 			assertSoftly(faktiskNavAnsatt.shouldNotBeNull()) {
 				navIdent shouldBe navAnsatt.navIdent
@@ -42,7 +43,7 @@ class TildeltVeilederConsumerTest(
 				telefon shouldBe navAnsatt.telefon
 			}
 
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
 			faktiskBruker.navVeileder.shouldNotBeNull()
 			faktiskBruker.navVeileder.navIdent shouldBe navAnsatt.navIdent
@@ -51,17 +52,17 @@ class TildeltVeilederConsumerTest(
 
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
-		val msg = KafkaMessageCreator.lagTildeltVeilederMsg()
-		mockPdlHttpServer.mockHentIdenter(msg.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
+		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+		mockPdlHttpServer.mockHentIdenter(payload.aktorId, "ukjent ident")
+		kafkaMessageSender.sendTilTildeltVeilederTopic(objectMapper.writeValueAsString(payload))
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				getLogs().any {
-					it.message == "Tildelt veileder endret. NavBruker finnes ikke, hopper over kafka melding"
-				} shouldBe true
+				navAnsattRepository.get(payload.veilederId) shouldBe null
 
-				navAnsattService.hentNavAnsatt(msg.veilederId) shouldBe null
+				loggingEvents.any {
+					it.message == "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
+				} shouldBe true
 			}
 		}
 	}

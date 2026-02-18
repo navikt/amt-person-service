@@ -1,11 +1,15 @@
 package no.nav.amt.person.service.clients.veilarbarena
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 
 class VeilarbarenaClientTest {
 	lateinit var server: MockWebServer
@@ -45,14 +49,14 @@ class VeilarbarenaClientTest {
 		val request = server.takeRequest()
 
 		request.path shouldBe "/veilarbarena/api/v2/arena/hent-status"
-		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer VEILARBARENA_TOKEN"
-		request.getHeader("Nav-Consumer-Id") shouldBe "amt-person-service"
+		request.method shouldBe HttpMethod.POST.name()
+		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer VEILARBARENA_TOKEN"
+		request.getHeader(NAV_CONSUMER_ID_HEADER) shouldBe "amt-person-service"
 	}
 
 	@Test
 	fun `hentBrukerOppfolgingsenhetId skal returnere null hvis veilarbarena returnerer 404`() {
-		server.enqueue(MockResponse().setResponseCode(404))
+		server.enqueue(MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()))
 
 		client.hentBrukerOppfolgingsenhetId("987654") shouldBe null
 	}

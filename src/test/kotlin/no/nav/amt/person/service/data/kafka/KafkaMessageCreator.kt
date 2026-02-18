@@ -18,7 +18,7 @@ object KafkaMessageCreator {
 		fodselsnummer: String = TestData.randomIdent(),
 		oppfolgingsenhet: String? = TestData.randomEnhetId(),
 	) = EndringPaaBrukerMsg(
-		fodlsesnummer = fodselsnummer,
+		fodselsnummer = fodselsnummer,
 		oppfolgingsenhet = oppfolgingsenhet,
 	)
 

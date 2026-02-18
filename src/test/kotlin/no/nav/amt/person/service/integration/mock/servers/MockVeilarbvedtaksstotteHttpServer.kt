@@ -7,6 +7,8 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 
 class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbvedtaksstotteHttpServer") {
 	fun mockHentInnsatsgruppe(
@@ -18,25 +20,23 @@ class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbved
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 
 		val body =
 			innsatsgruppe?.let {
 				staticObjectMapper.writeValueAsString(
-					VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
+					VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
 						innsatsgruppe = it,
 					),
 				)
 			}
+
 		val response =
 			body?.let {
-				MockResponse()
-					.setResponseCode(200)
-					.setBody(it)
-			} ?: MockResponse()
-				.setResponseCode(200)
+				MockResponse().setResponseCode(HttpStatus.OK.value()).setBody(it)
+			} ?: MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value())
 
 		addResponseHandler(predicate, response)
 	}

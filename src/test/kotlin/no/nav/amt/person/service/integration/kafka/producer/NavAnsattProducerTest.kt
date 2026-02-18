@@ -8,7 +8,7 @@ import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.co
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
-import no.nav.amt.person.service.navansatt.NavAnsatt
+import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ class NavAnsattProducerTest(
 ) : IntegrationTestBase() {
 	@Test
 	fun `publiserNavAnsatt - skal publisere ansatt med riktig key og value`() {
-		val ansatt = TestData.lagNavAnsatt().toModel()
+		val ansatt = TestData.lagNavAnsatt()
 
 		kafkaProducerService.publiserNavAnsatt(ansatt)
 
@@ -41,7 +41,7 @@ class NavAnsattProducerTest(
 		val ansatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(ansatt)
 
-		val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no").toModel()
+		val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no")
 		navAnsattService.upsert(oppdatertAnsatt)
 
 		val record =
@@ -59,11 +59,12 @@ class NavAnsattProducerTest(
 	fun `publiserNavAnsatt - flere ansatte sjekkes for oppdatering - skal publisere melding kun for de med endring`() {
 		val endretAnsatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(endretAnsatt)
+
 		val uendretAnsatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(uendretAnsatt)
 
-		mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.toModel().copy(navn = "nytt navn"))
-		mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt.toModel())
+		mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.copy(navn = "nytt navn"))
+		mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt)
 
 		navAnsattUpdater.oppdaterAlle()
 
@@ -74,7 +75,7 @@ class NavAnsattProducerTest(
 		records.any { it.key() == uendretAnsatt.id.toString() } shouldBe false
 	}
 
-	private fun ansattTilV1Json(ansatt: NavAnsatt): String =
+	private fun ansattTilV1Json(ansatt: NavAnsattDbo): String =
 		objectMapper.writeValueAsString(
 			NavAnsattDtoV1(
 				id = ansatt.id,

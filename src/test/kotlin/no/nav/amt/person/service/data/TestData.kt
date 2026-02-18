@@ -1,12 +1,12 @@
 package no.nav.amt.person.service.data
 
+import no.nav.amt.person.service.clients.nom.NomQueries
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
-import no.nav.amt.person.service.navansatt.navGrunerlokka
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
@@ -18,11 +18,30 @@ import no.nav.amt.person.service.person.model.Kontaktadresse
 import no.nav.amt.person.service.person.model.Matrikkeladresse
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.Vegadresse
+import no.nav.amt.person.service.poststed.Postnummer
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 object TestData {
 	fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
+
+	val navGrunerlokka =
+		NavEnhetDbo(
+			id = UUID(0L, 0L),
+			navn = "Nav Grünerløkka",
+			enhetId = "0315",
+		)
+
+	val orgTilknytning =
+		listOf(
+			NomQueries.HentRessurser.OrgTilknytning(
+				gyldigFom = LocalDate.of(2020, 1, 1),
+				gyldigTom = null,
+				orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+				erDagligOppfolging = true,
+			),
+		)
 
 	fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
 
@@ -89,20 +108,20 @@ object TestData {
 		oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
 		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS,
 	) = NavBrukerDbo(
-		id,
-		person,
-		navVeileder,
-		navEnhet,
-		telefon,
-		epost,
-		erSkjermet,
-		adresse,
-		sisteKrrSync,
-		createdAt,
-		modifiedAt,
-		adressebeskyttelse,
-		oppfolgingsperioder,
-		innsatsgruppe,
+		id = id,
+		person = person,
+		navVeileder = navVeileder,
+		navEnhet = navEnhet,
+		telefon = telefon,
+		epost = epost,
+		erSkjermet = erSkjermet,
+		adresse = adresse,
+		sisteKrrSync = sisteKrrSync,
+		adressebeskyttelse = adressebeskyttelse,
+		oppfolgingsperioder = oppfolgingsperioder,
+		innsatsgruppe = innsatsgruppe,
+		createdAt = createdAt,
+		modifiedAt = modifiedAt,
 	)
 
 	fun lagOppfolgingsperiode(
@@ -168,5 +187,14 @@ object TestData {
 						),
 					postboksadresse = null,
 				),
+		)
+
+	val postnumreInTest =
+		setOf(
+			Postnummer("0484", "OSLO"),
+			Postnummer("5341", "STRAUME"),
+			Postnummer("5365", "TURØY"),
+			Postnummer("5449", "BØMLO"),
+			Postnummer("9609", "NORDRE SEILAND"),
 		)
 }

@@ -5,5 +5,3 @@ import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 data class AdressebeskyttelseDto(
 	val gradering: AdressebeskyttelseGradering?,
 )
-
-fun AdressebeskyttelseGradering?.toDto() = AdressebeskyttelseDto(this)

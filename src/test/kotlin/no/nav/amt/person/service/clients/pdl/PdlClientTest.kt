@@ -3,6 +3,8 @@ package no.nav.amt.person.service.clients.pdl
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
+import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.ERROR_PREFIX
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.NULL_ERROR
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
@@ -11,19 +13,19 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestData.postnumreInTest
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.amt.person.service.poststed.PoststedRepository
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import java.util.UUID
 
 class PdlClientTest(
@@ -38,22 +40,13 @@ class PdlClientTest(
 		serverUrl = server.url("").toString().removeSuffix("/")
 
 		poststedRepository.oppdaterPoststed(
-			listOf(
-				Postnummer("0484", "OSLO"),
-				Postnummer("5341", "STRAUME"),
-				Postnummer("5365", "TURØY"),
-				Postnummer("5449", "BØMLO"),
-				Postnummer("9609", "NORDRE SEILAND"),
-			),
-			UUID.randomUUID(),
+			oppdatertePostnummer = postnumreInTest,
+			sporingsId = UUID.randomUUID(),
 		)
 	}
 
 	@AfterEach
-	fun cleanup() {
-		template.update("DELETE FROM postnummer", MapSqlParameterSource())
-		server.shutdown()
-	}
+	fun tearDownLocal() = server.shutdown()
 
 	@Test
 	fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
@@ -62,7 +55,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(gyldigRespons))
@@ -109,9 +102,9 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
-		request.getHeader("Tema") shouldBe "GEN"
+		request.method shouldBe HttpMethod.POST.name()
+		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
+		request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
 
 		val expectedJson =
 			"""
@@ -132,7 +125,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(
@@ -156,7 +149,7 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 	}
 
 	@Test
@@ -166,7 +159,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
@@ -205,9 +198,9 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
-		request.getHeader("Tema") shouldBe "GEN"
+		request.method shouldBe HttpMethod.POST.name()
+		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
+		request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
 
 		val expectedJson =
 			"""
@@ -228,7 +221,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(minimalFeilRespons))
@@ -249,7 +242,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(flereFeilRespons))
@@ -273,7 +266,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(telefonResponse))
@@ -290,7 +283,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(MockResponse().setBody(fodselsarRespons))
@@ -307,7 +300,7 @@ class PdlClientTest(
 				serverUrl,
 				{ "TOKEN" },
 				poststedRepository = poststedRepository,
-				objectMapper = staticObjectMapper,
+				objectMapper = objectMapper,
 			)
 
 		server.enqueue(
@@ -331,6 +324,6 @@ class PdlClientTest(
 		val request = server.takeRequest()
 
 		request.path shouldBe "/graphql"
-		request.method shouldBe "POST"
+		request.method shouldBe HttpMethod.POST.name()
 	}
 }

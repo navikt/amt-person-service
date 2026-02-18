@@ -7,6 +7,8 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import java.time.ZoneId
 
 class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfolgingHttpServer") {
@@ -19,16 +21,16 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 
 		val response =
 			if (veilederIdent == null) {
-				MockResponse().setResponseCode(204)
+				MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value())
 			} else {
 				MockResponse()
-					.setResponseCode(200)
+					.setResponseCode(HttpStatus.OK.value())
 					.setBody("""{"veilederIdent": "$veilederIdent"}""")
 			}
 		addResponseHandler(predicate, response)
@@ -43,13 +45,13 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 			val body = req.getBodyAsString()
 
 			req.path == url &&
-				req.method == "POST" &&
+				req.method == HttpMethod.POST.name() &&
 				body.contains(fnr)
 		}
 
 		val oppfolgingsperioderRespons =
 			oppfolgingsperioder.map {
-				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+				VeilarboppfolgingClient.OppfolgingPeriodeDto(
 					uuid = it.id,
 					startDato = it.startdato.atZone(ZoneId.systemDefault()),
 					sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault()),
@@ -58,7 +60,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 
 		val response =
 			MockResponse()
-				.setResponseCode(200)
+				.setResponseCode(HttpStatus.OK.value())
 				.setBody(staticObjectMapper.writeValueAsString(oppfolgingsperioderRespons))
 		addResponseHandler(predicate, response)
 	}

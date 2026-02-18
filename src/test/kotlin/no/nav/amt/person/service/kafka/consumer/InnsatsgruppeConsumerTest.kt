@@ -1,18 +1,18 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import io.kotest.matchers.shouldBe
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
-import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.LogUtils
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class InnsatsgruppeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@Test
 	fun `ingest - bruker finnes, ny innsatsgruppe - oppdaterer`() {
@@ -29,7 +29,7 @@ class InnsatsgruppeConsumerTest(
 		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
 
 		await().untilAsserted {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
 			faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
 		}
@@ -45,10 +45,10 @@ class InnsatsgruppeConsumerTest(
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(InnsatsgruppeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				getLogs().any {
-					it.message == "Innsatsgruppe endret. NavBruker finnes ikke, hopper over kafkamelding"
+				loggingEvents.any {
+					it.message == "Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 				} shouldBe true
 			}
 		}

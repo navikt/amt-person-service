@@ -26,12 +26,30 @@ class GlobalExceptionHandler(
 		request: HttpServletRequest,
 	): ResponseEntity<Response> =
 		when (ex) {
-			is NoSuchElementException -> buildResponse(HttpStatus.NOT_FOUND, ex)
-			is IllegalStateException -> buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
-			is NotAuthorizedException -> buildResponse(HttpStatus.UNAUTHORIZED, ex)
-			is JwtTokenUnauthorizedException -> buildResponse(HttpStatus.UNAUTHORIZED, ex)
-			is JwtTokenMissingException -> buildResponse(HttpStatus.UNAUTHORIZED, ex)
-			is HttpMessageNotReadableException -> buildResponse(HttpStatus.BAD_REQUEST, ex)
+			is NoSuchElementException -> {
+				buildResponse(HttpStatus.NOT_FOUND, ex)
+			}
+
+			is IllegalStateException -> {
+				buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
+			}
+
+			is NotAuthorizedException -> {
+				buildResponse(HttpStatus.UNAUTHORIZED, ex)
+			}
+
+			is JwtTokenUnauthorizedException -> {
+				buildResponse(HttpStatus.UNAUTHORIZED, ex)
+			}
+
+			is JwtTokenMissingException -> {
+				buildResponse(HttpStatus.UNAUTHORIZED, ex)
+			}
+
+			is HttpMessageNotReadableException -> {
+				buildResponse(HttpStatus.BAD_REQUEST, ex)
+			}
+
 			else -> {
 				log.error("Internal server error - ${ex.message} - ${request.method}: ${request.requestURI}", ex)
 				buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)

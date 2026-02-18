@@ -1,19 +1,32 @@
 package no.nav.amt.person.service.person.model
 
+import no.nav.amt.person.service.person.dbo.PersonidentDbo
+import java.util.UUID
+
 data class Personident(
 	val ident: String,
 	val historisk: Boolean,
 	val type: IdentType,
-)
+) {
+	fun toDbo(personId: UUID) =
+		PersonidentDbo(
+			ident = ident,
+			personId = personId,
+			historisk = historisk,
+			type = type,
+		)
 
-fun finnGjeldendeIdent(identer: List<Personident>): Result<Personident> {
-	val gjeldendeIdent =
-		identer.firstOrNull {
-			!it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
-		} ?: identer.firstOrNull {
-			!it.historisk && it.type == IdentType.NPID
+	companion object {
+		fun List<Personident>.finnGjeldendeIdent(): Result<Personident> {
+			val gjeldendeIdent =
+				this.firstOrNull {
+					!it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
+				} ?: this.firstOrNull {
+					!it.historisk && it.type == IdentType.NPID
+				}
+
+			return gjeldendeIdent?.let { Result.success(it) }
+				?: Result.failure(NoSuchElementException("Ingen gjeldende personident finnes"))
 		}
-
-	return gjeldendeIdent?.let { Result.success(it) }
-		?: Result.failure(NoSuchElementException("Ingen gjeldende personident finnes"))
+	}
 }

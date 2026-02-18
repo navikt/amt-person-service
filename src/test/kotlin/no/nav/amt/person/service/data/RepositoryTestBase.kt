@@ -31,7 +31,7 @@ abstract class RepositoryTestBase {
 	protected lateinit var testDataRepository: TestDataRepository
 
 	@AfterEach
-	fun cleanDatabase() = cleanDatabase(dataSource)
+	fun tearDown() = cleanDatabase(dataSource)
 
 	companion object {
 		private const val POSTGRES_DOCKER_IMAGE_NAME = "postgres:17-alpine"

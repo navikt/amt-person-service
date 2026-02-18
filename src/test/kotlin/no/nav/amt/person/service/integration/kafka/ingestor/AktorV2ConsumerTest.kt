@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -9,7 +10,8 @@ import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
-import no.nav.amt.person.service.person.PersonService
+import no.nav.amt.person.service.person.PersonRepository
+import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.person.pdl.aktor.v2.Aktor
@@ -21,7 +23,8 @@ import tools.jackson.module.kotlin.readValue
 
 class AktorV2ConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val personService: PersonService,
+	private val personidentRepository: PersonidentRepository,
+	private val personRepository: PersonRepository,
 	private val kafkaTopicProperties: KafkaTopicProperties,
 ) : IntegrationTestBase() {
 	@Test
@@ -45,12 +48,11 @@ class AktorV2ConsumerTest(
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personService.hentPerson(nyttFnr)
+			val faktiskPerson = personRepository.get(nyttFnr).shouldNotBeNull()
 
-			faktiskPerson.shouldNotBeNull()
-			val identer = personService.hentIdenter(faktiskPerson.id)
+			val identer = personidentRepository.getAllForPerson(faktiskPerson.id)
 
-			identer.first { it.ident == person.personident }.let {
+			assertSoftly(identer.first { it.ident == person.personident }) {
 				it.historisk shouldBe true
 				it.type shouldBe IdentType.FOLKEREGISTERIDENT
 			}
@@ -60,7 +62,7 @@ class AktorV2ConsumerTest(
 	}
 
 	@Test
-	fun `ingest - bruker får flere gjeldende identer - skal lagre FOLKEREGISTERIDENT`() {
+	fun `ingest - bruker far flere gjeldende identer - skal lagre FOLKEREGISTERIDENT`() {
 		val person = TestData.lagPerson()
 		testDataRepository.insertPerson(person)
 
@@ -81,15 +83,12 @@ class AktorV2ConsumerTest(
 		kafkaMessageSender.sendTilAktorV2Topic("aktorId", msg, 1)
 
 		await().untilAsserted {
-			val faktiskPerson = personService.hentPerson(nyttFnr)
-
-			faktiskPerson.shouldNotBeNull()
+			val faktiskPerson = personRepository.get(nyttFnr).shouldNotBeNull()
 			faktiskPerson.personident shouldBe nyttFnr
 
-			val identer = personService.hentIdenter(faktiskPerson.id)
+			val identer = personidentRepository.getAllForPerson(faktiskPerson.id)
 
 			identer shouldHaveSize 3
-
 			identer.first { it.ident == person.personident }.historisk shouldBe true
 		}
 	}

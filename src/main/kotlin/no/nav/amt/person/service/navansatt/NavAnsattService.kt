@@ -6,7 +6,6 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class NavAnsattService(
@@ -18,56 +17,35 @@ class NavAnsattService(
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun hentNavAnsatt(navAnsattId: UUID): NavAnsatt = navAnsattRepository.get(navAnsattId).toModel()
-
-	fun hentNavAnsatt(navIdent: String): NavAnsatt? = navAnsattRepository.get(navIdent)?.toModel()
-
-	fun upsert(navAnsatt: NavAnsatt): NavAnsatt {
-		val ansatt = navAnsattRepository.upsert(navAnsatt).toModel()
-		kafkaProducerService.publiserNavAnsatt(ansatt)
-		return ansatt
+	fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo {
+		val upsertedNavAnsatt = navAnsattRepository.upsert(navAnsatt)
+		kafkaProducerService.publiserNavAnsatt(upsertedNavAnsatt)
+		return upsertedNavAnsatt
 	}
 
-	fun upsertMany(ansatte: List<NavAnsatt>) {
+	fun upsertMany(ansatte: Set<NavAnsattDbo>) {
 		navAnsattRepository.upsertMany(ansatte)
 		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
 	}
 
-	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsatt {
-		val navAnsatt = navAnsattRepository.get(navIdent)
+	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsattDbo {
+		navAnsattRepository.get(navIdent)?.let { navAnsatt -> return navAnsatt }
 
-		if (navAnsatt != null) {
-			return navAnsatt.toModel()
-		}
-
-		val nyNavAnsatt = nomClient.hentNavAnsatt(navIdent)
-
-		if (nyNavAnsatt == null) {
-			log.error("Klarte ikke å hente nav ansatt med ident $navIdent")
-			throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident")
-		}
+		val nomNavAnsatt =
+			nomClient.hentNavAnsatt(navIdent)
+				?: throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident $navIdent").also {
+					log.error("Klarte ikke å hente nav ansatt med ident $navIdent")
+				}
 
 		log.info("Oppretter ny nav ansatt for nav ident $navIdent")
 
-		val navEnhet = nyNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
+		val navEnhet = nomNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
 
-		val ansatt =
-			NavAnsatt(
-				id = UUID.randomUUID(),
-				navIdent = nyNavAnsatt.navIdent,
-				navn = nyNavAnsatt.navn,
-				epost = nyNavAnsatt.epost,
-				telefon = nyNavAnsatt.telefonnummer,
-				navEnhetId = navEnhet?.id,
-			)
-
-		return upsert(ansatt)
+		return upsert(nomNavAnsatt.toNavAnsatt(navEnhet?.id))
 	}
 
-	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsatt? =
+	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsattDbo? =
 		veilarboppfolgingClient.hentVeilederIdent(brukersPersonIdent)?.let {
 			hentEllerOpprettAnsatt(it)
 		}
-
-	fun getAll() = navAnsattRepository.getAll().map { it.toModel() }
 }

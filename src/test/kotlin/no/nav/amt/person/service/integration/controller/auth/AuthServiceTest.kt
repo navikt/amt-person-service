@@ -44,7 +44,7 @@ class AuthServiceTest {
 					claims = claims,
 				).serialize()
 
-		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
+		val authService = AuthService(mockContextHolder(token))
 
 		assertDoesNotThrow {
 			authService.verifyRequestIsMachineToMachine()
@@ -67,7 +67,7 @@ class AuthServiceTest {
 					claims = claims,
 				).serialize()
 
-		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
+		val authService = AuthService(mockContextHolder(token))
 
 		assertThrows<JwtTokenUnauthorizedException> {
 			authService.verifyRequestIsMachineToMachine()
@@ -88,24 +88,16 @@ class AuthServiceTest {
 					claims = claims,
 				).serialize()
 
-		val authService = AuthService(mockContextHolder(Issuer.AZURE_AD, token))
+		val authService = AuthService(mockContextHolder(token))
 
 		assertThrows<JwtTokenUnauthorizedException> {
 			authService.verifyRequestIsMachineToMachine()
 		}
 	}
 
-	private fun mockContextHolder(
-		issuer: String,
-		token: String,
-	): TokenValidationContextHolder =
+	private fun mockContextHolder(token: String): TokenValidationContextHolder =
 		object : TokenValidationContextHolder {
-			override fun getTokenValidationContext(): TokenValidationContext =
-				TokenValidationContext(
-					mapOf(
-						issuer to JwtToken(token),
-					),
-				)
+			override fun getTokenValidationContext(): TokenValidationContext = TokenValidationContext(mapOf(Issuer.AZURE_AD to JwtToken(token)))
 
 			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit = throw NotImplementedError()
 		}

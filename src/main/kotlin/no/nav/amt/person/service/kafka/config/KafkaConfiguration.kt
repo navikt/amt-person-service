@@ -140,6 +140,7 @@ class KafkaConfiguration(
 	}
 
 	@EventListener
+	@Suppress("unused")
 	fun onApplicationEvent(event: ContextRefreshedEvent?) {
 		log.info("Starting Kafka consumer and stored record processor...")
 		client.start()

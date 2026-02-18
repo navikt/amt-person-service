@@ -9,17 +9,7 @@ data class NavAnsattDbo(
 	val navn: String,
 	val telefon: String?,
 	val epost: String?,
-	val createdAt: LocalDateTime,
-	val modifiedAt: LocalDateTime,
 	val navEnhetId: UUID?,
-) {
-	fun toModel() =
-		NavAnsatt(
-			id = id,
-			navIdent = navIdent,
-			navn = navn,
-			epost = epost,
-			telefon = telefon,
-			navEnhetId = navEnhetId,
-		)
-}
+	val createdAt: LocalDateTime = LocalDateTime.now(),
+	val modifiedAt: LocalDateTime = LocalDateTime.now(),
+)

@@ -1,6 +1,8 @@
 package no.nav.amt.person.service.clients.nom
 
+import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import java.time.LocalDate
+import java.util.UUID
 
 data class NomNavAnsatt(
 	val navIdent: String,
@@ -16,4 +18,14 @@ data class NomNavAnsatt(
 				.maxByOrNull { it.gyldigFom }
 				?.orgEnhet
 				?.remedyEnhetId
+
+	fun toNavAnsatt(navEnhetId: UUID?) =
+		NavAnsattDbo(
+			id = UUID.randomUUID(),
+			navIdent = navIdent,
+			navn = navn,
+			epost = epost,
+			telefon = telefonnummer,
+			navEnhetId = navEnhetId,
+		)
 }

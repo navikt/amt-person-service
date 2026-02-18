@@ -1,32 +1,34 @@
 package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.nom.NomQueries
-import no.nav.amt.person.service.navansatt.NavAnsatt
+import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
-	fun mockHentNavAnsatt(ansatt: NavAnsatt) {
+	fun mockHentNavAnsatt(navAnsatt: NavAnsattDbo) {
 		val predicate = { req: RecordedRequest ->
 			req.path == "/graphql" &&
-				req.method == "POST" &&
-				containsIdentifier(req, ansatt.navIdent)
+				req.method == HttpMethod.POST.name() &&
+				containsIdentifier(req, navAnsatt.navIdent)
 		}
 
 		val input =
 			NomClientResponseInput(
-				navident = ansatt.navIdent,
-				visningsnavn = ansatt.navn,
-				fornavn = ansatt.navn.split(" ").first(),
-				etternavn = ansatt.navn.split(" ").last(),
-				epost = ansatt.epost,
+				navident = navAnsatt.navIdent,
+				visningsnavn = navAnsatt.navn,
+				fornavn = navAnsatt.navn.split(" ").first(),
+				etternavn = navAnsatt.navn.split(" ").last(),
+				epost = navAnsatt.epost,
 				telefon =
-					ansatt.telefon?.let {
+					navAnsatt.telefon?.let {
 						listOf(
 							NomQueries.HentRessurser.Telefon(
 								nummer = it,
@@ -73,7 +75,9 @@ class MockNomHttpServer : MockHttpServer(name = "MockNomHttpServer") {
 					),
 			)
 
-		return MockResponse().setResponseCode(200).setBody(staticObjectMapper.writeValueAsString(body))
+		return MockResponse()
+			.setResponseCode(HttpStatus.OK.value())
+			.setBody(staticObjectMapper.writeValueAsString(body))
 	}
 
 	data class NomClientResponseInput(

@@ -4,6 +4,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 
 class MockMachineToMachineHttpServer : MockHttpServer(name = "MockMachineToMachineHttpServer") {
@@ -18,7 +19,7 @@ class MockMachineToMachineHttpServer : MockHttpServer(name = "MockMachineToMachi
 
 		val response =
 			MockResponse()
-				.setResponseCode(200)
+				.setResponseCode(HttpStatus.OK.value())
 				.setBody(mockTokenJson)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 

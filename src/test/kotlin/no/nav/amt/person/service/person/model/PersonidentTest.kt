@@ -2,6 +2,7 @@ package no.nav.amt.person.service.person.model
 
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.junit.jupiter.api.Test
 
 class PersonidentTest {
@@ -14,9 +15,20 @@ class PersonidentTest {
 				TestData.lagPersonident(historisk = true, type = IdentType.FOLKEREGISTERIDENT),
 				TestData.lagPersonident(historisk = false, type = IdentType.NPID),
 				TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
-			).map { it.toModel() }
+			).map {
+				Personident(
+					ident = it.ident,
+					historisk = it.historisk,
+					type = it.type,
+				)
+			}
 
-		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent.toModel()
+		identer.finnGjeldendeIdent().getOrThrow() shouldBe
+			Personident(
+				ident = forventetIdent.ident,
+				historisk = forventetIdent.historisk,
+				type = forventetIdent.type,
+			)
 	}
 
 	@Test
@@ -26,9 +38,20 @@ class PersonidentTest {
 			listOf(
 				TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
 				forventetIdent,
-			).map { it.toModel() }
+			).map {
+				Personident(
+					ident = it.ident,
+					historisk = it.historisk,
+					type = it.type,
+				)
+			}
 
-		finnGjeldendeIdent(identer).getOrThrow() shouldBe forventetIdent.toModel()
+		identer.finnGjeldendeIdent().getOrThrow() shouldBe
+			Personident(
+				ident = forventetIdent.ident,
+				historisk = forventetIdent.historisk,
+				type = forventetIdent.type,
+			)
 	}
 
 	@Test
@@ -36,8 +59,14 @@ class PersonidentTest {
 		val identer =
 			listOf(
 				TestData.lagPersonident(historisk = false, type = IdentType.AKTORID),
-			).map { it.toModel() }
+			).map {
+				Personident(
+					ident = it.ident,
+					historisk = it.historisk,
+					type = it.type,
+				)
+			}
 
-		finnGjeldendeIdent(identer).isFailure shouldBe true
+		identer.finnGjeldendeIdent().isFailure shouldBe true
 	}
 }

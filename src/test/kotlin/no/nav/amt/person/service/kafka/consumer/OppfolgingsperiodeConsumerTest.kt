@@ -2,13 +2,13 @@ package no.nav.amt.person.service.kafka.consumer
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
+import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData.lagNavBruker
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.LogUtils
+import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -21,7 +21,7 @@ import java.util.UUID
 
 class OppfolgingsperiodeConsumerTest(
 	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerService: NavBrukerService,
+	private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
 	@ParameterizedTest
 	@ValueSource(booleans = [true, false])
@@ -44,7 +44,7 @@ class OppfolgingsperiodeConsumerTest(
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
 		await().untilAsserted {
-			val faktiskBruker = navBrukerService.hentNavBruker(navBruker.id)
+			val faktiskBruker = navBrukerRepository.get(navBruker.id)
 			faktiskBruker.oppfolgingsperioder.size shouldBe 1
 
 			assertSoftly(faktiskBruker.oppfolgingsperioder.first()) {
@@ -72,9 +72,9 @@ class OppfolgingsperiodeConsumerTest(
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
-		LogUtils.withLogs { getLogs ->
+		withLogCapture(OppfolgingsperiodeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				getLogs().any {
+				loggingEvents.any {
 					it.message == "Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering"
 				} shouldBe true
 			}

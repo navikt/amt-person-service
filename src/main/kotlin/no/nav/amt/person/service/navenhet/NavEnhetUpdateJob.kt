@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class NavEnhetUpdateJob(
+	private val navEnhetRepository: NavEnhetRepository,
 	private val navEnhetService: NavEnhetService,
 ) {
 	@Scheduled(cron = "@daily")
@@ -16,7 +17,7 @@ class NavEnhetUpdateJob(
 	}
 
 	private fun oppdaterEnheter() {
-		val enheter = navEnhetService.hentNavEnheter()
+		val enheter = navEnhetRepository.getAll()
 		navEnhetService.oppdaterNavEnheter(enheter)
 	}
 }

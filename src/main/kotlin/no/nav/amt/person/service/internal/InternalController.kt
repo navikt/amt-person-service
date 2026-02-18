@@ -3,17 +3,17 @@ package no.nav.amt.person.service.internal
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
-import no.nav.amt.person.service.navansatt.NavAnsattService
+import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
-import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
-import no.nav.amt.person.service.person.ArrangorAnsattService
+import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonidentRepository
-import no.nav.amt.person.service.person.model.Person
+import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils.isDev
 import no.nav.common.job.JobRunner
 import no.nav.security.token.support.core.api.Unprotected
@@ -38,11 +38,11 @@ import java.util.UUID
 @RequestMapping("/internal")
 class InternalController(
 	private val personService: PersonService,
+	private val personRepository: PersonRepository,
+	private val navBrukerRepository: NavBrukerRepository,
 	private val navBrukerService: NavBrukerService,
 	private val personUpdater: PersonUpdater,
-	private val navBrukerRepository: NavBrukerRepository,
-	private val arrangorAnsattService: ArrangorAnsattService,
-	private val navAnsattService: NavAnsattService,
+	private val navAnsattRepository: NavAnsattRepository,
 	private val kafkaProducerService: KafkaProducerService,
 	private val navAnsattUpdater: NavAnsattUpdater,
 	private val navEnhetUpdateJob: NavEnhetUpdateJob,
@@ -92,7 +92,10 @@ class InternalController(
 		@PathVariable id: UUID,
 	) {
 		if (isInternal(servlet)) {
-			val person = personService.repository.get(id).toModel()
+			val person = personRepository.get(id)
+
+			if (person.erUkjent()) log.warn("Person $id har ukjent navn")
+
 			personService.oppdaterNavn(person)
 		}
 	}
@@ -106,9 +109,9 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("republiser-nav-brukere") {
-				batchHandterNavBrukere(startFromOffset ?: 0, batchSize ?: 500) {
+				batchHandterNavBrukere(startFromOffset ?: 0, batchSize ?: 500) { navBruker ->
 					kafkaProducerService.publiserNavBruker(
-						it,
+						navBruker,
 					)
 				}
 			}
@@ -127,7 +130,7 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			JobRunner.runAsync("oppdater-adr-republiser-nav-brukere") {
-				log.info("Oppdaterer adresse for alle navbrukere som mangler adresse")
+				log.info("Oppdaterer adresse for alle Nav-brukere som mangler adresse")
 				oppdaterAdresseHvisManglerOgRepubliser(modifiedBefore, batchSize, lastId)
 			}
 		} else {
@@ -142,10 +145,10 @@ class InternalController(
 		@PathVariable("id") id: UUID,
 	) {
 		if (isInternal(servlet)) {
-			log.info("Oppdaterer adresse for navbruker-id $id")
-			val navBruker = navBrukerService.hentNavBruker(id)
-			navBrukerService.oppdaterAdresse(listOf(navBruker.person.personident))
-			log.info("Oppdaterte adresse for navbruker-id $id")
+			log.info("Oppdaterer adresse for Nav-bruker $id")
+			val navBruker = navBrukerRepository.get(id)
+			navBrukerService.oppdaterAdresse(setOf(navBruker.person.personident))
+			log.info("Oppdaterte adresse for Nav-bruker $id")
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
 		}
@@ -185,7 +188,7 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			log.info("Oppdaterer bruker $id")
-			val navBruker = navBrukerService.hentNavBruker(id)
+			val navBruker = navBrukerRepository.get(id)
 			navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBruker)
 			log.info("Oppdaterte bruker $id")
 		} else {
@@ -268,7 +271,13 @@ class InternalController(
 				val offset = startFromOffset ?: 0
 				val limit = batchSize ?: 5000
 				val personidenter =
-					navBrukerService.getPersonidenter(offset, limit, notSyncedSince = LocalDateTime.now().minusDays(3))
+					navBrukerRepository
+						.getPersonidenter(
+							offset = offset,
+							limit = limit,
+							notSyncedSince = LocalDateTime.now().minusDays(3),
+						).toSet()
+
 				navBrukerService.syncKontaktinfoBulk(personidenter)
 			}
 		} else {
@@ -287,11 +296,13 @@ class InternalController(
 			JobRunner.runAsync(jobName) {
 				val limit = batchSize ?: 200
 				var batchNumber = 1
-				var personidenter: List<String>
+				var personidenter: Set<String>
 				var sistePersonident: String? = null
 
 				do {
-					personidenter = navBrukerService.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit)
+					personidenter =
+						navBrukerRepository.getPersonidenterMedManglendeKontaktinfo(sistePersonident, limit).toSet()
+
 					if (personidenter.isNotEmpty()) {
 						log.info("Processing $jobName batch #$batchNumber count=${personidenter.size}")
 						navBrukerService.syncKontaktinfoBulk(personidenter)
@@ -314,8 +325,9 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			val navBruker =
-				navBrukerService.hentNavBruker(request.personident)
-					?: throw IllegalArgumentException("Fant ikke person")
+				navBrukerRepository.get(request.personident)
+					?: throw IllegalArgumentException("Fant ikke Nav-bruker")
+
 			navBrukerService.oppdaterKontaktinformasjon(navBruker)
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -329,14 +341,14 @@ class InternalController(
 			JobRunner.runAsync("republiser-nav-brukere-med-ny-ident") {
 				val personidenter = personidentRepository.getPersonIderMedFlerePersonidenter()
 
-				log.info("Starter republisering av navbrukere med ny ident. Antall: ${personidenter.size}")
+				log.info("Starter republisering av Nav-brukere med ny ident. Antall: ${personidenter.size}")
 
 				personidenter.forEach {
-					navBrukerRepository.getByPersonId(it)?.let { nb ->
-						kafkaProducerService.publiserNavBruker(nb.toModel())
+					navBrukerRepository.getByPersonId(it)?.let { navBrukerDbo ->
+						kafkaProducerService.publiserNavBruker(navBrukerDbo)
 					}
 				}
-				log.info("Ferdig med republisering av navbrukere med ny ident")
+				log.info("Ferdig med republisering av Nav-brukere med ny ident")
 			}
 		} else {
 			throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
@@ -344,7 +356,7 @@ class InternalController(
 	}
 
 	private fun republiserAlleNavAnsatte() {
-		val ansatte = navAnsattService.getAll()
+		val ansatte = navAnsattRepository.getAll()
 		ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
 		log.info("Publiserte ${ansatte.size} navansatte")
 	}
@@ -354,10 +366,11 @@ class InternalController(
 		batchSize: Int,
 	) {
 		var offset = startFromOffset
-		var ansatte: List<Person>
+		var ansatte: List<PersonDbo>
 
 		do {
-			ansatte = arrangorAnsattService.getAll(offset, batchSize)
+			ansatte = personRepository.getAllWithRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
+
 			ansatte.forEach { kafkaProducerService.publiserArrangorAnsatt(it) }
 			log.info("Publiserte arrangøransatte fra offset $offset til ${offset + ansatte.size}")
 			offset += batchSize
@@ -367,26 +380,28 @@ class InternalController(
 	private fun batchHandterNavBrukere(
 		startFromOffset: Int,
 		batchSize: Int,
-		action: (navBruker: NavBruker) -> Unit,
+		action: (navBruker: NavBrukerDbo) -> Unit,
 	) {
 		var currentOffset = startFromOffset
-		var data: List<NavBruker>
+		var navBrukerDbos: List<NavBrukerDbo>
 
 		val start = Instant.now()
 		var totalHandled = 0
 
 		do {
-			data = navBrukerService.getNavBrukere(currentOffset, batchSize)
-			data.forEach { action(it) }
-			totalHandled += data.size
+			navBrukerDbos = navBrukerRepository.getAllNavBrukere(currentOffset, batchSize)
+			navBrukerDbos.forEach { action(it) }
+			totalHandled += navBrukerDbos.size
 			currentOffset += batchSize
 			log.info("Republisering av nav-brukere - offset: $currentOffset, total handled: $totalHandled")
-		} while (data.isNotEmpty())
+		} while (navBrukerDbos.isNotEmpty())
 
 		val duration = Duration.between(start, Instant.now())
 
 		if (totalHandled > 0) {
-			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
+			log.info(
+				"batchHandterNavBrukere handled $totalHandled Nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.",
+			)
 		}
 	}
 
@@ -394,26 +409,28 @@ class InternalController(
 		modifiedBefore: LocalDate,
 		batchSize: Int,
 		startAfterId: UUID?,
-		action: (navBruker: NavBruker) -> Unit,
+		action: (navBruker: NavBrukerDbo) -> Unit,
 	) {
 		var lastId: UUID? = startAfterId
-		var data: List<NavBruker>
+		var navBrukerDbos: List<NavBrukerDbo>
 
 		val start = Instant.now()
 		var totalHandled = 0
 
 		do {
-			data = navBrukerService.getNavBrukereModifiedBefore(batchSize, modifiedBefore, lastId)
-			data.forEach { action(it) }
-			totalHandled += data.size
-			lastId = data.lastOrNull()?.id
+			navBrukerDbos = navBrukerRepository.getAllNavBrukere(batchSize, modifiedBefore, lastId)
+			navBrukerDbos.forEach { action(it) }
+			totalHandled += navBrukerDbos.size
+			lastId = navBrukerDbos.lastOrNull()?.id
 			log.info("Handled nav-bruker batch $totalHandled records. lastId $lastId")
-		} while (data.isNotEmpty())
+		} while (navBrukerDbos.isNotEmpty())
 
 		val duration = Duration.between(start, Instant.now())
 
 		if (totalHandled > 0) {
-			log.info("Handled $totalHandled nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.")
+			log.info(
+				"batchHandterNavBrukereByModifiedBefore handled $totalHandled Nav-bruker records in ${duration.toSeconds()}.${duration.toMillisPart()} seconds.",
+			)
 		}
 	}
 
@@ -427,16 +444,17 @@ class InternalController(
 
 		do {
 			navbrukere = navBrukerRepository.getAllUtenAdresse(batchSize, modifiedBefore, lastId)
-			val personidenter = navbrukere.map { it.person.personident }
+			val personidenter = navbrukere.map { it.person.personident }.toSet()
 			navBrukerService.oppdaterAdresse(personidenter)
+
 			lastId = navbrukere.lastOrNull()?.id
-			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste navbrukerid: $lastId")
+			log.info("Oppdaterte adresse for ${navbrukere.size} personer. Siste Nav-bruker-id: $lastId")
 		} while (navbrukere.isNotEmpty())
 	}
 
 	private fun republiserNavBruker(navBrukerId: UUID) {
 		val bruker = navBrukerRepository.get(navBrukerId)
-		kafkaProducerService.publiserNavBruker(bruker.toModel())
+		kafkaProducerService.publiserNavBruker(bruker)
 	}
 
 	private fun isInternal(servlet: HttpServletRequest): Boolean = servlet.remoteAddr == "127.0.0.1"

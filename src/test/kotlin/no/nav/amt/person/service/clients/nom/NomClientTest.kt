@@ -29,7 +29,7 @@ class NomClientTest {
 	}
 
 	@AfterEach
-	fun cleanup() = server.shutdown()
+	fun tearDown() = server.shutdown()
 
 	@Test
 	fun `hentVeileder - veileder finnes ikke - returnerer null`() {
@@ -128,7 +128,7 @@ class NomClientTest {
 					"code": "NOT_FOUND",
 					"ressurs": null
 				}
-			"""
+				""".trimIndent()
 			}
 
 		val veilederRespons =

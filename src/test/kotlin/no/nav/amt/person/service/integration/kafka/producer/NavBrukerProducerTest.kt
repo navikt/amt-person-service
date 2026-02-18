@@ -10,7 +10,7 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
-import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class NavBrukerProducerTest(
 ) : IntegrationTestBase() {
 	@Test
 	fun `publiserNavBruker - skal publisere bruker med riktig key og value`() {
-		val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG).toModel()
+		val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG)
 
 		kafkaProducerService.publiserNavBruker(navBruker)
 
@@ -56,7 +56,7 @@ class NavBrukerProducerTest(
 		val bruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(bruker)
 
-		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn")).toModel()
+		val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn"))
 		personService.upsert(oppdatertBruker.person)
 
 		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
@@ -71,7 +71,7 @@ class NavBrukerProducerTest(
 		val bruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(bruker)
 
-		val oppdatertBruker = bruker.copy(navEnhet = null).toModel()
+		val oppdatertBruker = bruker.copy(navEnhet = null)
 		navBrukerService.upsert(oppdatertBruker)
 
 		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
@@ -81,7 +81,7 @@ class NavBrukerProducerTest(
 		record.value() shouldBe brukerTilV1Json(oppdatertBruker)
 	}
 
-	private fun brukerTilV1Json(navBruker: NavBruker): String =
+	private fun brukerTilV1Json(navBruker: NavBrukerDbo): String =
 		objectMapper.writeValueAsString(
 			NavBrukerDtoV1(
 				personId = navBruker.person.id,

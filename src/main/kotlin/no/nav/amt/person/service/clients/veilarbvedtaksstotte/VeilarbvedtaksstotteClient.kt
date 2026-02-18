@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
-import no.nav.amt.person.service.navbruker.InnsatsgruppeV2.Companion.toV1
 import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
 import okhttp3.OkHttpClient
@@ -12,11 +11,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.util.function.Supplier
 
 class VeilarbvedtaksstotteClient(
 	private val apiUrl: String,
-	private val veilarbvedtaksstotteTokenProvider: Supplier<String>,
+	private val veilarbvedtaksstotteTokenProvider: () -> String,
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
@@ -27,7 +25,7 @@ class VeilarbvedtaksstotteClient(
 				.Builder()
 				.url("$apiUrl/api/hent-gjeldende-14a-vedtak")
 				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider.get()}")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider()}")
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 
@@ -37,11 +35,9 @@ class VeilarbvedtaksstotteClient(
 			}
 			val body = response.body.string()
 
-			if (body.isEmpty()) {
-				return null
-			}
+			if (body.isEmpty()) return null
 
-			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakDTO>(body)
+			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakResponse>(body)
 
 			return gjeldende14aVedtakRespons.innsatsgruppe.toV1()
 		}
@@ -51,7 +47,7 @@ class VeilarbvedtaksstotteClient(
 		val fnr: String,
 	)
 
-	data class Gjeldende14aVedtakDTO(
+	data class Gjeldende14aVedtakResponse(
 		val innsatsgruppe: InnsatsgruppeV2,
 	)
 }

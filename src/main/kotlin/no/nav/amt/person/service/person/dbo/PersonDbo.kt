@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.person.dbo
 
-import no.nav.amt.person.service.person.model.Person
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -10,15 +9,12 @@ data class PersonDbo(
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
-	val createdAt: LocalDateTime,
-	val modifiedAt: LocalDateTime,
+	val createdAt: LocalDateTime = LocalDateTime.now(),
+	val modifiedAt: LocalDateTime = LocalDateTime.now(),
 ) {
-	fun toModel(): Person =
-		Person(
-			id,
-			personident,
-			fornavn,
-			mellomnavn,
-			etternavn,
-		)
+	fun erUkjent() = etternavn.equals(UNKNOWN_NAME, ignoreCase = true)
+
+	companion object {
+		const val UNKNOWN_NAME = "Ukjent"
+	}
 }

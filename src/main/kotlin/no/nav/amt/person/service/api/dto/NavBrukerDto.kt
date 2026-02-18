@@ -2,9 +2,8 @@ package no.nav.amt.person.service.api.dto
 
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
-import no.nav.amt.person.service.navbruker.NavBruker
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
-import no.nav.amt.person.service.navenhet.NavEnhet
 import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
 
@@ -15,7 +14,7 @@ data class NavBrukerDto(
 	val mellomnavn: String?,
 	val etternavn: String,
 	val navVeilederId: UUID?,
-	val navEnhet: NavEnhet?,
+	val navEnhet: NavEnhetDto?,
 	val telefon: String?,
 	val epost: String?,
 	val erSkjermet: Boolean,
@@ -23,22 +22,24 @@ data class NavBrukerDto(
 	val adressebeskyttelse: Adressebeskyttelse?,
 	val oppfolgingsperioder: List<Oppfolgingsperiode>,
 	val innsatsgruppe: InnsatsgruppeV1?,
-)
-
-fun NavBruker.toDto() =
-	NavBrukerDto(
-		personId = this.person.id,
-		personident = this.person.personident,
-		fornavn = this.person.fornavn,
-		mellomnavn = this.person.mellomnavn,
-		etternavn = this.person.etternavn,
-		navVeilederId = this.navVeileder?.id,
-		navEnhet = this.navEnhet,
-		telefon = this.telefon,
-		epost = this.epost,
-		erSkjermet = this.erSkjermet,
-		adresse = this.adresse,
-		adressebeskyttelse = this.adressebeskyttelse,
-		oppfolgingsperioder = this.oppfolgingsperioder,
-		innsatsgruppe = this.innsatsgruppe,
-	)
+) {
+	companion object {
+		fun fromDbo(source: NavBrukerDbo) =
+			NavBrukerDto(
+				personId = source.person.id,
+				personident = source.person.personident,
+				fornavn = source.person.fornavn,
+				mellomnavn = source.person.mellomnavn,
+				etternavn = source.person.etternavn,
+				navVeilederId = source.navVeileder?.id,
+				navEnhet = source.navEnhet?.let { NavEnhetDto.fromDbo(it) },
+				telefon = source.telefon,
+				epost = source.epost,
+				erSkjermet = source.erSkjermet,
+				adresse = source.adresse,
+				adressebeskyttelse = source.adressebeskyttelse,
+				oppfolgingsperioder = source.oppfolgingsperioder,
+				innsatsgruppe = source.innsatsgruppe,
+			)
+	}
+}
