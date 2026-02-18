@@ -27,7 +27,7 @@ class MockVeilarbvedtaksstotteHttpServer : MockHttpServer(name = "MockVeilarbved
 		val body =
 			innsatsgruppe?.let {
 				staticObjectMapper.writeValueAsString(
-					VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
+					VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
 						innsatsgruppe = it,
 					),
 				)

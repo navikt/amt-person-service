@@ -32,7 +32,7 @@ class VeilarbvedtaksstotteClientTest {
 	@Test
 	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
 		val siste14aVedtakDTORespons =
-			VeilarbvedtaksstotteClient.Gjeldende14aVedtakDTO(
+			VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
 				innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
 			)
 		server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(siste14aVedtakDTORespons)))

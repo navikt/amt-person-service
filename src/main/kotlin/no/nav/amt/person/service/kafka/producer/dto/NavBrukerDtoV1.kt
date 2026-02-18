@@ -2,8 +2,8 @@ package no.nav.amt.person.service.kafka.producer.dto
 
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.person.model.Adresse
 import java.util.UUID
 

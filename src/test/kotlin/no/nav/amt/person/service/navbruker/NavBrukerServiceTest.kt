@@ -15,7 +15,6 @@ import no.nav.amt.person.service.clients.veilarbvedtaksstotte.Veilarbvedtaksstot
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattService
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleRepository
@@ -151,28 +150,27 @@ class NavBrukerServiceTest {
 
 			sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
-			val expectedData =
-				navBruker
-					.copy(
-						telefon = kontaktinfo.telefonnummer,
-						epost = kontaktinfo.epost,
-						sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-					).toUpsert()
+			val expectedNavBruker =
+				navBruker.copy(
+					telefon = kontaktinfo.telefonnummer,
+					epost = kontaktinfo.epost,
+					sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+				)
 
 			verify(exactly = 1) {
 				krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident))
 
 				navBrukerRepository.upsert(
 					match {
-						expectedData.id == it.id &&
-							expectedData.personId == it.personId &&
-							expectedData.navEnhetId == it.navEnhetId &&
-							expectedData.navVeilederId == it.navVeilederId &&
-							expectedData.telefon == it.telefon &&
-							expectedData.epost == it.epost &&
-							expectedData.erSkjermet == it.erSkjermet &&
-							expectedData.adresse == it.adresse &&
-							expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+						expectedNavBruker.id == it.id &&
+							expectedNavBruker.person == it.person &&
+							expectedNavBruker.navEnhet == it.navEnhet &&
+							expectedNavBruker.navVeileder == it.navVeileder &&
+							expectedNavBruker.telefon == it.telefon &&
+							expectedNavBruker.epost == it.epost &&
+							expectedNavBruker.erSkjermet == it.erSkjermet &&
+							expectedNavBruker.adresse == it.adresse &&
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -203,13 +201,12 @@ class NavBrukerServiceTest {
 
 			sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
-			val expectedData =
-				navBruker
-					.copy(
-						telefon = pdlTelefon,
-						epost = krrKontaktinfo.epost,
-						sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-					).toUpsert()
+			val expectedNavBruker =
+				navBruker.copy(
+					telefon = pdlTelefon,
+					epost = krrKontaktinfo.epost,
+					sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+				)
 
 			verify(exactly = 1) {
 				pdlClient.hentTelefon(navBruker.person.personident)
@@ -217,15 +214,15 @@ class NavBrukerServiceTest {
 
 				navBrukerRepository.upsert(
 					match {
-						expectedData.id == it.id &&
-							expectedData.personId == it.personId &&
-							expectedData.navEnhetId == it.navEnhetId &&
-							expectedData.navVeilederId == it.navVeilederId &&
-							expectedData.telefon == it.telefon &&
-							expectedData.epost == it.epost &&
-							expectedData.erSkjermet == it.erSkjermet &&
-							expectedData.adresse == it.adresse &&
-							expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+						expectedNavBruker.id == it.id &&
+							expectedNavBruker.person == it.person &&
+							expectedNavBruker.navEnhet == it.navEnhet &&
+							expectedNavBruker.navVeileder == it.navVeileder &&
+							expectedNavBruker.telefon == it.telefon &&
+							expectedNavBruker.epost == it.epost &&
+							expectedNavBruker.erSkjermet == it.erSkjermet &&
+							expectedNavBruker.adresse == it.adresse &&
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -272,28 +269,28 @@ class NavBrukerServiceTest {
 
 			sut.oppdaterKontaktinformasjon(navBruker)
 
-			val expectedData =
+			val expectedNavBruker =
 				navBruker
 					.copy(
 						telefon = kontaktinfo.telefonnummer,
 						epost = kontaktinfo.epost,
 						sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-					).toUpsert()
+					)
 
 			verify(exactly = 1) {
 				krrProxyClient.hentKontaktinformasjon(navBruker.person.personident)
 
 				navBrukerRepository.upsert(
 					match {
-						expectedData.id == it.id &&
-							expectedData.personId == it.personId &&
-							expectedData.navEnhetId == it.navEnhetId &&
-							expectedData.navVeilederId == it.navVeilederId &&
-							expectedData.telefon == it.telefon &&
-							expectedData.epost == it.epost &&
-							expectedData.erSkjermet == it.erSkjermet &&
-							expectedData.adresse == it.adresse &&
-							expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+						expectedNavBruker.id == it.id &&
+							expectedNavBruker.person == it.person &&
+							expectedNavBruker.navEnhet == it.navEnhet &&
+							expectedNavBruker.navVeileder == it.navVeileder &&
+							expectedNavBruker.telefon == it.telefon &&
+							expectedNavBruker.epost == it.epost &&
+							expectedNavBruker.erSkjermet == it.erSkjermet &&
+							expectedNavBruker.adresse == it.adresse &&
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -322,13 +319,12 @@ class NavBrukerServiceTest {
 
 			sut.oppdaterKontaktinformasjon(navBruker)
 
-			val expectedData =
-				navBruker
-					.copy(
-						telefon = pdlTelefon,
-						epost = krrKontaktinfo.epost,
-						sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-					).toUpsert()
+			val expectedNavBruker =
+				navBruker.copy(
+					telefon = pdlTelefon,
+					epost = krrKontaktinfo.epost,
+					sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+				)
 
 			verify(exactly = 1) {
 				pdlClient.hentTelefon(navBruker.person.personident)
@@ -336,15 +332,15 @@ class NavBrukerServiceTest {
 
 				navBrukerRepository.upsert(
 					match {
-						expectedData.id == it.id &&
-							expectedData.personId == it.personId &&
-							expectedData.navEnhetId == it.navEnhetId &&
-							expectedData.navVeilederId == it.navVeilederId &&
-							expectedData.telefon == it.telefon &&
-							expectedData.epost == it.epost &&
-							expectedData.erSkjermet == it.erSkjermet &&
-							expectedData.adresse == it.adresse &&
-							expectedData.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+						expectedNavBruker.id == it.id &&
+							expectedNavBruker.person == it.person &&
+							expectedNavBruker.navEnhet == it.navEnhet &&
+							expectedNavBruker.navVeileder == it.navVeileder &&
+							expectedNavBruker.telefon == it.telefon &&
+							expectedNavBruker.epost == it.epost &&
+							expectedNavBruker.erSkjermet == it.erSkjermet &&
+							expectedNavBruker.adresse == it.adresse &&
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}

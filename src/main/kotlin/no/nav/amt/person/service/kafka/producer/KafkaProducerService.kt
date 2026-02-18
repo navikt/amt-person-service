@@ -6,7 +6,7 @@ import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.common.kafka.producer.KafkaProducerClient

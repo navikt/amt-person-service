@@ -5,9 +5,9 @@ import no.nav.amt.person.service.api.request.NavBrukerRequest
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService

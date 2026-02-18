@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.integration.mock.servers
 
 import no.nav.amt.person.service.clients.krr.PostPersonerResponse
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse

@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.clients.pdl.PdlClient
-import no.nav.amt.person.service.kafka.consumer.dto.SisteTildeltVeilederDto
+import no.nav.amt.person.service.kafka.consumer.dto.SisteTildeltVeilederPayload
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
@@ -22,7 +22,7 @@ class TildeltVeilederConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
-		val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederDto>(value)
+		val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederPayload>(value)
 
 		val gjeldendeIdent =
 			pdlClient

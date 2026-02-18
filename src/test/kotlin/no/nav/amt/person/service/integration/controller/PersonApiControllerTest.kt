@@ -12,8 +12,8 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetRepository
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository

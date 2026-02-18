@@ -127,6 +127,6 @@ class PersonApiController(
 		@RequestBody request: AdressebeskyttelseRequest,
 	): AdressebeskyttelseDto {
 		authService.verifyRequestIsMachineToMachine()
-		return AdressebeskyttelseDto.fromGradering(pdlClient.hentAdressebeskyttelse(request.personident))
+		return AdressebeskyttelseDto(pdlClient.hentAdressebeskyttelse(request.personident))
 	}
 }

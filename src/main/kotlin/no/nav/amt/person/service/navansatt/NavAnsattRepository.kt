@@ -30,34 +30,20 @@ class NavAnsattRepository(
 
 	fun getAll(): List<NavAnsattDbo> = template.query("SELECT * FROM nav_ansatt", rowMapper)
 
-	fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo {
-		val parameters =
-			sqlParameters(
-				"id" to navAnsatt.id,
-				"navIdent" to navAnsatt.navIdent,
-				"navn" to navAnsatt.navn,
-				"telefon" to navAnsatt.telefon,
-				"epost" to navAnsatt.epost,
-				"nav_enhet_id" to navAnsatt.navEnhetId,
-			)
-
-		return template.queryForObject("$UPSERT_SQL RETURNING *", parameters, rowMapper)
-	}
+	fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo =
+		template.queryForObject(
+			"$UPSERT_SQL RETURNING *",
+			upsertParamsFromNavAnsatt(navAnsatt),
+			rowMapper,
+		)
 
 	fun upsertMany(ansatte: Set<NavAnsattDbo>) {
-		val parameters =
-			ansatte.map { navAnsatt ->
-				sqlParameters(
-					"id" to navAnsatt.id,
-					"navIdent" to navAnsatt.navIdent,
-					"navn" to navAnsatt.navn,
-					"telefon" to navAnsatt.telefon,
-					"epost" to navAnsatt.epost,
-					"nav_enhet_id" to navAnsatt.navEnhetId,
-				)
-			}
-
-		template.batchUpdate(UPSERT_SQL, parameters.toTypedArray())
+		template.batchUpdate(
+			UPSERT_SQL,
+			ansatte
+				.map { navAnsatt -> upsertParamsFromNavAnsatt(navAnsatt) }
+				.toTypedArray(),
+		)
 	}
 
 	companion object {
@@ -74,6 +60,16 @@ class NavAnsattRepository(
 					modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
 				)
 			}
+
+		private fun upsertParamsFromNavAnsatt(navAnsatt: NavAnsattDbo) =
+			sqlParameters(
+				"id" to navAnsatt.id,
+				"navIdent" to navAnsatt.navIdent,
+				"navn" to navAnsatt.navn,
+				"telefon" to navAnsatt.telefon,
+				"epost" to navAnsatt.epost,
+				"nav_enhet_id" to navAnsatt.navEnhetId,
+			)
 
 		private val UPSERT_SQL =
 			"""

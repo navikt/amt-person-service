@@ -1,8 +1,6 @@
 package no.nav.amt.person.service.navbruker
 
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Adresse
@@ -171,7 +169,7 @@ class NavBrukerRepository(
 		return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
 	}
 
-	fun upsert(bruker: NavBrukerUpsert) {
+	fun upsert(navBruker: NavBrukerDbo) {
 		val sql =
 			"""
 			INSERT INTO nav_bruker (
@@ -218,18 +216,18 @@ class NavBrukerRepository(
 
 		val parameters =
 			sqlParameters(
-				"id" to bruker.id,
-				"personId" to bruker.personId,
-				"navVeilederId" to bruker.navVeilederId,
-				"navEnhetId" to bruker.navEnhetId,
-				"telefon" to bruker.telefon,
-				"epost" to bruker.epost,
-				"erSkjermet" to bruker.erSkjermet,
-				"adresse" to toPGObject(bruker.adresse, objectMapper),
-				"sisteKrrSync" to bruker.sisteKrrSync,
-				"adressebeskyttelse" to bruker.adressebeskyttelse?.name,
-				"oppfolgingsperioder" to toPGObject(bruker.oppfolgingsperioder, objectMapper),
-				"innsatsgruppe" to bruker.innsatsgruppe?.name,
+				"id" to navBruker.id,
+				"personId" to navBruker.person.id,
+				"navVeilederId" to navBruker.navVeileder?.id,
+				"navEnhetId" to navBruker.navEnhet?.id,
+				"telefon" to navBruker.telefon,
+				"epost" to navBruker.epost,
+				"erSkjermet" to navBruker.erSkjermet,
+				"adresse" to toPGObject(navBruker.adresse, objectMapper),
+				"sisteKrrSync" to navBruker.sisteKrrSync,
+				"adressebeskyttelse" to navBruker.adressebeskyttelse?.name,
+				"oppfolgingsperioder" to toPGObject(navBruker.oppfolgingsperioder, objectMapper),
+				"innsatsgruppe" to navBruker.innsatsgruppe?.name,
 			)
 
 		template.update(sql, parameters)

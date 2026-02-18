@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import no.nav.amt.person.service.kafka.consumer.dto.EndringPaaBrukerDto
+import no.nav.amt.person.service.kafka.consumer.dto.EndringPaaBrukerPayload
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
@@ -19,7 +19,7 @@ class EndringPaaBrukerConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(value: String) {
-		val endringPaaBrukerPayload = objectMapper.readValue<EndringPaaBrukerDto>(value)
+		val endringPaaBrukerPayload = objectMapper.readValue<EndringPaaBrukerPayload>(value)
 
 		// Det er ikke mulig å fjerne nav kontor i arena men det kan legges meldinger på topicen som endrer andre ting
 		// og derfor ikke er relevante
@@ -33,6 +33,6 @@ class EndringPaaBrukerConsumer(
 
 		val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(endringPaaBrukerPayload.oppfolgingsenhet)
 
-		navBrukerService.upsert(navBruker.toUpsert().copy(navEnhetId = navEnhet?.id))
+		navBrukerService.upsert(navBruker.copy(navEnhet = navEnhet))
 	}
 }

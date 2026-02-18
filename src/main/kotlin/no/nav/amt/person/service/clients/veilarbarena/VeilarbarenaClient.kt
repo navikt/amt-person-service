@@ -9,6 +9,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
@@ -33,7 +34,7 @@ class VeilarbarenaClient(
 				.build()
 
 		httpClient.newCall(request).execute().use { response ->
-			if (response.code == 404) {
+			if (response.code == HttpStatus.NOT_FOUND.value()) {
 				TeamLogs.warn("Fant ikke bruker med fnr=$fnr i veilarbarena")
 				log.warn("Kunne ikke hente oppfølgingsenhet, fant ikke bruker i veilarbarena")
 				return null
@@ -43,13 +44,13 @@ class VeilarbarenaClient(
 				throw RuntimeException("Klarte ikke å hente status fra veilarbarena. Status: ${response.code}")
 			}
 
-			val statusDto = objectMapper.readValue<BrukerArenaStatusDto>(response.body.string())
+			val statusDto = objectMapper.readValue<BrukerArenaStatusResponse>(response.body.string())
 
 			return statusDto.oppfolgingsenhet
 		}
 	}
 
-	private data class BrukerArenaStatusDto(
+	private data class BrukerArenaStatusResponse(
 		var oppfolgingsenhet: String?,
 	)
 

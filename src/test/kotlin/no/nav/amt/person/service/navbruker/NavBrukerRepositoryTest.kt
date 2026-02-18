@@ -7,8 +7,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Kontaktadresse
 import no.nav.amt.person.service.person.model.Vegadresse
@@ -184,80 +182,50 @@ class NavBrukerRepositoryTest(
 	inner class UpsertTests {
 		@Test
 		fun `upsert - bruker finnes ikke - inserter ny bruker`() {
-			val bruker = TestData.lagNavBruker()
+			val navBruker = TestData.lagNavBruker()
 
-			testDataRepository.insertPerson(bruker.person)
-			testDataRepository.insertNavAnsatt(bruker.navVeileder!!)
-			testDataRepository.insertNavEnhet(bruker.navEnhet!!)
+			testDataRepository.insertPerson(navBruker.person)
+			testDataRepository.insertNavAnsatt(navBruker.navVeileder!!)
+			testDataRepository.insertNavEnhet(navBruker.navEnhet!!)
 
-			brukerRepository.upsert(
-				NavBrukerUpsert(
-					id = bruker.id,
-					personId = bruker.person.id,
-					navVeilederId = bruker.navVeileder.id,
-					navEnhetId = bruker.navEnhet.id,
-					telefon = bruker.telefon,
-					epost = bruker.epost,
-					erSkjermet = bruker.erSkjermet,
-					adresse = bruker.adresse,
-					adressebeskyttelse = bruker.adressebeskyttelse,
-					oppfolgingsperioder = bruker.oppfolgingsperioder,
-					innsatsgruppe = bruker.innsatsgruppe,
-				),
-			)
+			brukerRepository.upsert(navBruker)
 
-			val faktiskBruker = brukerRepository.get(bruker.id)
+			val faktiskBruker = brukerRepository.get(navBruker.id)
 
-			sammenlign(faktiskBruker, bruker)
+			sammenlign(faktiskBruker, navBruker)
 		}
 
 		@Test
 		fun `upsert - bruker finnes ikke, har adressebeskyttelse - inserter ny bruker`() {
-			val bruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG, adresse = null)
+			val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG, adresse = null)
 
-			testDataRepository.insertPerson(bruker.person)
-			testDataRepository.insertNavAnsatt(bruker.navVeileder!!)
-			testDataRepository.insertNavEnhet(bruker.navEnhet!!)
+			testDataRepository.insertPerson(navBruker.person)
+			testDataRepository.insertNavAnsatt(navBruker.navVeileder!!)
+			testDataRepository.insertNavEnhet(navBruker.navEnhet!!)
 
-			brukerRepository.upsert(
-				NavBrukerUpsert(
-					id = bruker.id,
-					personId = bruker.person.id,
-					navVeilederId = bruker.navVeileder.id,
-					navEnhetId = bruker.navEnhet.id,
-					telefon = bruker.telefon,
-					epost = bruker.epost,
-					erSkjermet = bruker.erSkjermet,
-					adresse = bruker.adresse,
-					adressebeskyttelse = bruker.adressebeskyttelse,
-					oppfolgingsperioder = bruker.oppfolgingsperioder,
-					innsatsgruppe = bruker.innsatsgruppe,
-				),
-			)
+			brukerRepository.upsert(navBruker)
 
-			val faktiskBruker = brukerRepository.get(bruker.id)
+			val faktiskBruker = brukerRepository.get(navBruker.id)
 
-			sammenlign(faktiskBruker, bruker)
+			sammenlign(faktiskBruker, navBruker)
 		}
 
 		@Test
 		fun `upsert - bruker finnes - oppdaterer bruker`() {
-			val bruker =
+			val navBruker =
 				TestData.lagNavBruker(
 					createdAt = LocalDateTime.now().minusMonths(6),
 					modifiedAt = LocalDateTime.now().minusMonths(6),
 					erSkjermet = false,
 				)
-			testDataRepository.insertNavBruker(bruker)
+			testDataRepository.insertNavBruker(navBruker)
 
-			brukerRepository.get(bruker.id)
+			brukerRepository.get(navBruker.id)
 
 			val upsert =
-				NavBrukerUpsert(
-					id = bruker.id,
-					personId = bruker.person.id,
-					navVeilederId = null,
-					navEnhetId = null,
+				navBruker.copy(
+					navVeileder = null,
+					navEnhet = null,
 					telefon = "ny telefon",
 					epost = "ny@epost.no",
 					erSkjermet = true,
@@ -281,13 +249,13 @@ class NavBrukerRepositoryTest(
 								),
 						),
 					adressebeskyttelse = null,
-					oppfolgingsperioder = bruker.oppfolgingsperioder,
+					oppfolgingsperioder = navBruker.oppfolgingsperioder,
 					innsatsgruppe = InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS,
 				)
 
 			brukerRepository.upsert(upsert)
 
-			val faktiskBruker = brukerRepository.get(bruker.id)
+			val faktiskBruker = brukerRepository.get(navBruker.id)
 
 			faktiskBruker.navVeileder shouldBe null
 			faktiskBruker.navEnhet shouldBe null
@@ -316,7 +284,7 @@ class NavBrukerRepositoryTest(
 			faktiskBruker.oppfolgingsperioder shouldBe upsert.oppfolgingsperioder
 			faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS
 
-			faktiskBruker.createdAt shouldBeEqualTo bruker.createdAt
+			faktiskBruker.createdAt shouldBeEqualTo navBruker.createdAt
 			faktiskBruker.modifiedAt shouldBeCloseTo LocalDateTime.now()
 		}
 	}

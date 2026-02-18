@@ -51,7 +51,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 
 		val oppfolgingsperioderRespons =
 			oppfolgingsperioder.map {
-				VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+				VeilarboppfolgingClient.OppfolgingPeriodeDto(
 					uuid = it.id,
 					startDato = it.startdato.atZone(ZoneId.systemDefault()),
 					sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault()),

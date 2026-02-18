@@ -17,12 +17,12 @@ class NavAnsattUpdater(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun oppdaterAlle(batchSize: Int = 100) {
+		var batchNumber = 1
 		val ansattBatcher =
 			navAnsattRepository
 				.getAll()
 				.also { log.info("Oppdaterer ${it.size} nav-ansatte") }
 				.chunked(batchSize)
-		var batchNumber = 1
 
 		ansattBatcher.forEach { batch ->
 			log.info("Prosesserer batch ${batchNumber++}")
@@ -82,13 +82,15 @@ class NavAnsattUpdater(
 		val lagretAnsatt: NavAnsattDbo,
 		var erSjekket: Boolean,
 	)
-}
 
-private fun NavAnsattDbo.skalOppdateres(
-	nomNavAnsatt: NomNavAnsatt,
-	navEnhet: NavEnhetDbo?,
-): Boolean =
-	this.navn != nomNavAnsatt.navn ||
-		this.epost != nomNavAnsatt.epost ||
-		this.telefon != nomNavAnsatt.telefonnummer ||
-		this.navEnhetId != navEnhet?.id
+	companion object {
+		private fun NavAnsattDbo.skalOppdateres(
+			nomNavAnsatt: NomNavAnsatt,
+			navEnhet: NavEnhetDbo?,
+		): Boolean =
+			this.navn != nomNavAnsatt.navn ||
+				this.epost != nomNavAnsatt.epost ||
+				this.telefon != nomNavAnsatt.telefonnummer ||
+				this.navEnhetId != navEnhet?.id
+	}
+}

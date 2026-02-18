@@ -60,12 +60,12 @@ class VeilarboppfolgingClient(
 				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
 			}
 
-			val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDTO>>(response.body.string())
+			val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDto>>(response.body.string())
 			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
 		}
 	}
 
-	data class HentBrukersVeilederResponse(
+	private data class HentBrukersVeilederResponse(
 		val veilederIdent: String,
 	)
 
@@ -73,7 +73,7 @@ class VeilarboppfolgingClient(
 		val fnr: String,
 	)
 
-	data class OppfolgingPeriodeDTO(
+	data class OppfolgingPeriodeDto(
 		val uuid: UUID,
 		val startDato: ZonedDateTime,
 		val sluttDato: ZonedDateTime?,

@@ -5,8 +5,8 @@ import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo

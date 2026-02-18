@@ -10,8 +10,8 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
+import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.person.PersonService
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -72,7 +72,7 @@ class NavBrukerProducerTest(
 		testDataRepository.insertNavBruker(bruker)
 
 		val oppdatertBruker = bruker.copy(navEnhet = null)
-		navBrukerService.upsert(oppdatertBruker.toUpsert())
+		navBrukerService.upsert(oppdatertBruker)
 
 		val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
 		records.shouldNotBeNull()

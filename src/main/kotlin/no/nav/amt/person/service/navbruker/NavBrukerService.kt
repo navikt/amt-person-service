@@ -10,8 +10,6 @@ import no.nav.amt.person.service.clients.veilarbvedtaksstotte.Veilarbvedtaksstot
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
-import no.nav.amt.person.service.navbruker.dbo.NavBrukerUpsert
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
@@ -73,11 +71,11 @@ class NavBrukerService(
 		val innsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
 
 		val navBruker =
-			NavBrukerUpsert(
+			NavBrukerDbo(
 				id = UUID.randomUUID(),
-				personId = person.id,
-				navVeilederId = veileder?.id,
-				navEnhetId = navEnhet?.id,
+				person = person,
+				navVeileder = veileder,
+				navEnhet = navEnhet,
 				telefon = kontaktinformasjon?.telefonnummer ?: pdlPerson.telefonnummer,
 				epost = kontaktinformasjon?.epost,
 				erSkjermet = erSkjermet,
@@ -102,10 +100,10 @@ class NavBrukerService(
 			)
 	}
 
-	fun upsert(navBruker: NavBrukerUpsert) {
+	fun upsert(navBruker: NavBrukerDbo) {
 		transactionTemplate.executeWithoutResult {
 			navBrukerRepository.upsert(navBruker)
-			rolleRepository.insert(navBruker.personId, Rolle.NAV_BRUKER)
+			rolleRepository.insert(navBruker.person.id, Rolle.NAV_BRUKER)
 			kafkaProducerService.publiserNavBruker(navBrukerRepository.get(navBruker.id))
 		}
 	}
@@ -116,7 +114,7 @@ class NavBrukerService(
 	) {
 		val bruker = navBrukerRepository.get(navBrukerId)
 		if (bruker.navVeileder?.id != veileder.id) {
-			upsert(bruker.copy(navVeileder = veileder).toUpsert())
+			upsert(bruker.copy(navVeileder = veileder))
 		}
 	}
 
@@ -134,9 +132,10 @@ class NavBrukerService(
 			val oppdatertInnsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(bruker.person.personident)
 
 			upsert(
-				bruker
-					.copy(oppfolgingsperioder = oppfolgingsperioder, innsatsgruppe = oppdatertInnsatsgruppe)
-					.toUpsert(),
+				bruker.copy(
+					oppfolgingsperioder = oppfolgingsperioder,
+					innsatsgruppe = oppdatertInnsatsgruppe,
+				),
 			)
 		}
 	}
@@ -149,9 +148,9 @@ class NavBrukerService(
 
 		if (innsatsgruppe != bruker.innsatsgruppe) {
 			if (harAktivOppfolgingsperiode(bruker.oppfolgingsperioder)) {
-				upsert(bruker.copy(innsatsgruppe = innsatsgruppe).toUpsert())
+				upsert(bruker.copy(innsatsgruppe = innsatsgruppe))
 			} else if (bruker.innsatsgruppe != null) {
-				upsert(bruker.copy(innsatsgruppe = null).toUpsert())
+				upsert(bruker.copy(innsatsgruppe = null))
 			}
 		}
 	}
@@ -166,7 +165,7 @@ class NavBrukerService(
 					.copy(
 						oppfolgingsperioder = oppfolgingsperioder,
 						innsatsgruppe = innsatsgruppe,
-					).toUpsert(),
+					),
 			)
 			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for Nav-bruker med id ${navBruker.id}")
 		}
@@ -194,7 +193,7 @@ class NavBrukerService(
 	) {
 		val bruker = navBrukerRepository.get(brukerId)
 		if (bruker.erSkjermet != erSkjermet) {
-			upsert(bruker.copy(erSkjermet = erSkjermet).toUpsert())
+			upsert(bruker.copy(erSkjermet = erSkjermet))
 		}
 	}
 
@@ -276,7 +275,7 @@ class NavBrukerService(
 				.copy(
 					adressebeskyttelse = oppdatertAdressebeskyttelse,
 					adresse = getAdresse(personOpplysninger),
-				).toUpsert(),
+				),
 		)
 	}
 
@@ -311,7 +310,7 @@ class NavBrukerService(
 
 		if (navBruker.adresse == oppdatertAdresse) return
 
-		upsert(navBruker.copy(adresse = oppdatertAdresse).toUpsert())
+		upsert(navBruker.copy(adresse = oppdatertAdresse))
 		log.info("Oppdatert adresse for Nav-bruker med personId ${navBruker.person.id}")
 	}
 
@@ -336,7 +335,7 @@ class NavBrukerService(
 		kontaktinformasjon: Kontaktinformasjon,
 	) {
 		if (bruker.telefon == kontaktinformasjon.telefonnummer && bruker.epost == kontaktinformasjon.epost) {
-			navBrukerRepository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()).toUpsert())
+			navBrukerRepository.upsert(bruker.copy(sisteKrrSync = LocalDateTime.now()))
 			log.info("Ingen endring i kontaktinfo for personId ${bruker.person.id}")
 			return
 		}
@@ -353,7 +352,7 @@ class NavBrukerService(
 					telefon = kontaktinformasjon.telefonnummer,
 					epost = kontaktinformasjon.epost,
 					sisteKrrSync = LocalDateTime.now(),
-				).toUpsert(),
+				),
 		)
 	}
 }

@@ -37,7 +37,7 @@ class VeilarbvedtaksstotteClient(
 
 			if (body.isEmpty()) return null
 
-			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakDTO>(body)
+			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakResponse>(body)
 
 			return gjeldende14aVedtakRespons.innsatsgruppe.toV1()
 		}
@@ -47,7 +47,7 @@ class VeilarbvedtaksstotteClient(
 		val fnr: String,
 	)
 
-	data class Gjeldende14aVedtakDTO(
+	data class Gjeldende14aVedtakResponse(
 		val innsatsgruppe: InnsatsgruppeV2,
 	)
 }

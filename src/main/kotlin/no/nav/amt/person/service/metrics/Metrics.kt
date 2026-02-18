@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.metrics
 
-data class Counts(
+data class Metrics(
 	val antallPersoner: Int,
 	val antallNavBrukere: Int,
 	val antallNavAnsatte: Int,

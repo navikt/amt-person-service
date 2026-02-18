@@ -110,7 +110,7 @@ class VeilarboppfolgingClientTest {
 		@ParameterizedTest
 		@ValueSource(booleans = [true, false])
 		fun `hentOppfolgingperioder - bruker finnes - returnerer oppfolgingsperidoer`(useEndDate: Boolean) {
-			val expected = createOppfolgingPeriodeDTO(useEndDate)
+			val expected = createOppfolgingPeriodeDto(useEndDate)
 			server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(listOf(expected))))
 
 			val oppfolgingsperioder = client.hentOppfolgingperioder(FNR_IN_TEST)
@@ -139,8 +139,8 @@ class VeilarboppfolgingClientTest {
 				.withZoneSameInstant(ZoneId.systemDefault())
 				.toLocalDateTime()
 
-		private fun createOppfolgingPeriodeDTO(useEndDate: Boolean) =
-			VeilarboppfolgingClient.OppfolgingPeriodeDTO(
+		private fun createOppfolgingPeriodeDto(useEndDate: Boolean) =
+			VeilarboppfolgingClient.OppfolgingPeriodeDto(
 				uuid = UUID.randomUUID(),
 				startDato = nowAsZonedDateTimeUtc,
 				sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,

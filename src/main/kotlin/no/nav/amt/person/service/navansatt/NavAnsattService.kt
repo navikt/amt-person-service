@@ -6,7 +6,6 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class NavAnsattService(
@@ -30,32 +29,19 @@ class NavAnsattService(
 	}
 
 	fun hentEllerOpprettAnsatt(navIdent: String): NavAnsattDbo {
-		val navAnsatt = navAnsattRepository.get(navIdent)
+		navAnsattRepository.get(navIdent)?.let { navAnsatt -> return navAnsatt }
 
-		if (navAnsatt != null) return navAnsatt
-
-		val nyNavAnsatt = nomClient.hentNavAnsatt(navIdent)
-
-		if (nyNavAnsatt == null) {
-			log.error("Klarte ikke å hente nav ansatt med ident $navIdent")
-			throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident")
-		}
+		val nomNavAnsatt =
+			nomClient.hentNavAnsatt(navIdent)
+				?: throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident $navIdent").also {
+					log.error("Klarte ikke å hente nav ansatt med ident $navIdent")
+				}
 
 		log.info("Oppretter ny nav ansatt for nav ident $navIdent")
 
-		val navEnhet = nyNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
+		val navEnhet = nomNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
 
-		val ansatt =
-			NavAnsattDbo(
-				id = UUID.randomUUID(),
-				navIdent = nyNavAnsatt.navIdent,
-				navn = nyNavAnsatt.navn,
-				epost = nyNavAnsatt.epost,
-				telefon = nyNavAnsatt.telefonnummer,
-				navEnhetId = navEnhet?.id,
-			)
-
-		return upsert(ansatt)
+		return upsert(nomNavAnsatt.toNavAnsatt(navEnhet?.id))
 	}
 
 	fun hentBrukersVeileder(brukersPersonIdent: String): NavAnsattDbo? =

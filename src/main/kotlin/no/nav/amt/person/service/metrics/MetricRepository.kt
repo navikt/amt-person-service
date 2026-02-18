@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 class MetricRepository(
 	private val template: NamedParameterJdbcTemplate,
 ) {
-	fun getCounts(): Counts {
+	fun getCounts(): Metrics {
 		val sql =
 			"""
 			SELECT
@@ -20,7 +20,7 @@ class MetricRepository(
 
 		return template
 			.query(sql) { rs, _ ->
-				Counts(
+				Metrics(
 					antallPersoner = rs.getInt("antall_personer"),
 					antallNavBrukere = rs.getInt("antall_nav_brukere"),
 					antallNavAnsatte = rs.getInt("antall_nav_ansatte"),
