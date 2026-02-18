@@ -5,6 +5,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import org.apache.avro.Schema
+import org.springframework.http.HttpStatus
 
 class MockSchemaRegistryHttpServer : MockHttpServer(name = "MockSchemaRegistryHttpServer") {
 	fun registerSchema(
@@ -19,11 +20,18 @@ class MockSchemaRegistryHttpServer : MockHttpServer(name = "MockSchemaRegistryHt
 				req.method == "POST"
 		}
 
-		addResponseHandler(requestPredicate, MockResponse().setResponseCode(200).setBody("""{"id":"$id"}"""))
+		addResponseHandler(
+			requestPredicate,
+			MockResponse()
+				.setResponseCode(HttpStatus.OK.value())
+				.setBody("""{"id":"$id"}"""),
+		)
 
 		addResponseHandler(
 			"/schemas/ids/$id?fetchMaxId=false&subject=$topic-value",
-			MockResponse().setResponseCode(200).setBody(schemaString),
+			MockResponse()
+				.setResponseCode(HttpStatus.OK.value())
+				.setBody(schemaString),
 		)
 	}
 }

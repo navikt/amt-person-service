@@ -48,7 +48,7 @@ class NavEnhetService(
 
 	fun oppdaterNavEnheter(enheter: List<NavEnhetDbo>) {
 		val oppdaterteEnheter =
-			norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetId }
+			norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetNr }
 
 		enheter.forEach { opprinneligEnhet ->
 			val oppdatertEnhet = oppdaterteEnheter[opprinneligEnhet.enhetId]

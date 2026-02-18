@@ -53,28 +53,3 @@ class KodeverkClient(
 		}
 	}
 }
-
-data class GetKodeverkKoderBetydningerResponse(
-	val betydninger: Map<String, List<Betydning>>,
-) {
-	fun toPostnummerListe(): List<Postnummer> =
-		betydninger.map {
-			Postnummer(
-				postnummer = it.key,
-				poststed =
-					it.value
-						.first()
-						.beskrivelser["nb"]
-						?.term
-						?: throw RuntimeException("Kode ${it.key} mangler term"),
-			)
-		}
-}
-
-data class Betydning(
-	val beskrivelser: Map<String, Beskrivelse>,
-)
-
-data class Beskrivelse(
-	val term: String,
-)

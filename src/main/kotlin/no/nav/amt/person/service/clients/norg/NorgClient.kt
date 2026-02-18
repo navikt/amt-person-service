@@ -11,7 +11,7 @@ class NorgClient(
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
-	fun hentNavEnhet(enhetId: String): NorgNavEnhet? {
+	fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
 		val request =
 			Request
 				.Builder()
@@ -30,13 +30,11 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return objectMapper
-				.readValue<NavEnhetDto>(body)
-				.let { NorgNavEnhet(it.enhetNr, it.navn) }
+			return objectMapper.readValue<NorgNavEnhetDto>(body)
 		}
 	}
 
-	fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhet> {
+	fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
 		val request =
 			Request
 				.Builder()
@@ -51,12 +49,7 @@ class NorgClient(
 
 			val body = response.body.string()
 
-			return objectMapper.readValue<List<NavEnhetDto>>(body).map { NorgNavEnhet(it.enhetNr, it.navn) }
+			return objectMapper.readValue<List<NorgNavEnhetDto>>(body)
 		}
 	}
-
-	private data class NavEnhetDto(
-		val navn: String,
-		val enhetNr: String,
-	)
 }

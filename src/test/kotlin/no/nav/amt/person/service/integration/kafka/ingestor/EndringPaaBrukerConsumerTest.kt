@@ -28,7 +28,7 @@ class EndringPaaBrukerConsumerTest(
 
 		testDataRepository.insertNavBruker(navBruker)
 
-		mockNorgHttpServer.addNavEnhet(navEnhet.enhetId, navEnhet.navn)
+		mockNorgHttpServer.addNavEnhet(navEnhet)
 		kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload.toJson())
 
 		await().untilAsserted {

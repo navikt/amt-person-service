@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpHeaders
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.util.UUID
 
@@ -109,7 +110,7 @@ class PdlClientTest(
 
 		request.path shouldBe "/graphql"
 		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
+		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
 		request.getHeader("Tema") shouldBe "GEN"
 
 		val expectedJson =
@@ -205,7 +206,7 @@ class PdlClientTest(
 
 		request.path shouldBe "/graphql"
 		request.method shouldBe "POST"
-		request.getHeader("Authorization") shouldBe "Bearer TOKEN"
+		request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
 		request.getHeader("Tema") shouldBe "GEN"
 
 		val expectedJson =

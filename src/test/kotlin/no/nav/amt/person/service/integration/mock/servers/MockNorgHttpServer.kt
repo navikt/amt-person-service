@@ -1,34 +1,30 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import no.nav.amt.person.service.integration.mock.responses.MockNavEnhetResponse
+import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.data.TestData.navGrunerlokka
+import no.nav.amt.person.service.navenhet.NavEnhetDbo
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
+import org.springframework.http.HttpStatus
 
 class MockNorgHttpServer : MockHttpServer(name = "MockNorgHttpServer") {
-	private val baseUrl = "/norg2/api/v1/enhet"
-
-	fun mockHentNavEnhet(navEnhet: MockNavEnhetResponse) {
-		addNavEnhet(navEnhet.enhetId, navEnhet.navn)
+	companion object {
+		private const val BASE_URL = "/norg2/api/v1/enhet"
 	}
 
-	fun addNavAnsattEnhet() {
-		addNavEnhet("0315", "Nav Grünerløkka")
+	fun addNavEnhetGrunerLokka() {
+		addNavEnhet(navGrunerlokka)
 	}
 
-	fun addNavEnhet(
-		enhetNr: String,
-		navn: String,
-	) {
-		val body =
-			"""
-			{
-				"navn": "$navn",
-				"enhetNr": "$enhetNr"
-			}
-			""".trimIndent()
+	fun addNavEnhet(navEnhet: NavEnhetDbo) {
+		val response =
+			MockResponse()
+				.setResponseCode(HttpStatus.OK.value())
+				.setBody(
+					staticObjectMapper.writeValueAsString(NorgNavEnhetDto.fromDbo(navEnhet)),
+				)
 
-		val response = MockResponse().setResponseCode(200).setBody(body)
-
-		addResponseHandler("$baseUrl/$enhetNr", response)
+		addResponseHandler("$BASE_URL/${navEnhet.enhetId}", response)
 	}
 }

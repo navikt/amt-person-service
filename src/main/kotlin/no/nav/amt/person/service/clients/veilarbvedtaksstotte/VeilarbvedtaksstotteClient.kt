@@ -11,11 +11,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.util.function.Supplier
 
 class VeilarbvedtaksstotteClient(
 	private val apiUrl: String,
-	private val veilarbvedtaksstotteTokenProvider: Supplier<String>,
+	private val veilarbvedtaksstotteTokenProvider: () -> String,
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 ) {
@@ -26,7 +25,7 @@ class VeilarbvedtaksstotteClient(
 				.Builder()
 				.url("$apiUrl/api/hent-gjeldende-14a-vedtak")
 				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider.get()}")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider()}")
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()
 

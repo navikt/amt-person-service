@@ -4,6 +4,7 @@ import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpStatus
 
 class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServer") {
 	fun addErSkjermetResponse(data: Map<String, Boolean>) {
@@ -19,7 +20,7 @@ class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServ
 
 		val response =
 			MockResponse()
-				.setResponseCode(200)
+				.setResponseCode(HttpStatus.OK.value())
 				.setBody(staticObjectMapper.writeValueAsString(data))
 
 		addResponseHandler(predicate, response)

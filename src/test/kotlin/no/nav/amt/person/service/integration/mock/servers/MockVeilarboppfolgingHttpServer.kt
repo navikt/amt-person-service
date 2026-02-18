@@ -7,6 +7,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpStatus
 import java.time.ZoneId
 
 class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfolgingHttpServer") {
@@ -25,10 +26,10 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 
 		val response =
 			if (veilederIdent == null) {
-				MockResponse().setResponseCode(204)
+				MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value())
 			} else {
 				MockResponse()
-					.setResponseCode(200)
+					.setResponseCode(HttpStatus.OK.value())
 					.setBody("""{"veilederIdent": "$veilederIdent"}""")
 			}
 		addResponseHandler(predicate, response)
@@ -58,7 +59,7 @@ class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfol
 
 		val response =
 			MockResponse()
-				.setResponseCode(200)
+				.setResponseCode(HttpStatus.OK.value())
 				.setBody(staticObjectMapper.writeValueAsString(oppfolgingsperioderRespons))
 		addResponseHandler(predicate, response)
 	}

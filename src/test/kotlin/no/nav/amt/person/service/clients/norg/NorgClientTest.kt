@@ -55,11 +55,10 @@ class NorgClientTest {
 
 		val enhet = client.hentNavEnhet("1234")
 
-		enhet?.enhetId shouldBe "1234"
+		enhet?.enhetNr shouldBe "1234"
 		enhet?.navn shouldBe "NAV Testheim"
 
 		val request = server.takeRequest()
-
 		request.path shouldBe "/norg2/api/v1/enhet/1234"
 	}
 }

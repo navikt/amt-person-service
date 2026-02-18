@@ -13,6 +13,7 @@ import no.nav.amt.person.service.utils.MockHttpServer
 import no.nav.amt.person.service.utils.getBodyAsString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpStatus
 
 class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 	fun mockHentPerson(person: PersonDbo) = mockHentPerson(person.personident, TestData.lagPdlPerson(person))
@@ -124,7 +125,9 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				),
 			)
 
-		return MockResponse().setResponseCode(200).setBody(body)
+		return MockResponse()
+			.setResponseCode(HttpStatus.OK.value())
+			.setBody(body)
 	}
 
 	private fun createHentTelefonResponse(telefon: String?): MockResponse {
@@ -144,7 +147,9 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				),
 			)
 
-		return MockResponse().setResponseCode(200).setBody(body)
+		return MockResponse()
+			.setResponseCode(HttpStatus.OK.value())
+			.setBody(body)
 	}
 
 	private fun createHentIdenterResponse(ident: Personident): MockResponse {
@@ -169,7 +174,9 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 				),
 			)
 
-		return MockResponse().setResponseCode(200).setBody(body)
+		return MockResponse()
+			.setResponseCode(HttpStatus.OK.value())
+			.setBody(body)
 	}
 
 	private fun createPdlBrukerResponse(
@@ -242,7 +249,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
 			)
 
 		return MockResponse()
-			.setResponseCode(200)
+			.setResponseCode(HttpStatus.OK.value())
 			.setBody(body)
 	}
 }

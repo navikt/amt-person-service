@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.consume
-import no.nav.amt.person.service.integration.mock.responses.MockNavAnsattRespomse
 import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
@@ -64,8 +63,8 @@ class NavAnsattProducerTest(
 		val uendretAnsatt = TestData.lagNavAnsatt()
 		testDataRepository.insertNavAnsatt(uendretAnsatt)
 
-		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(endretAnsatt.copy(navn = "nytt navn")))
-		mockNomHttpServer.mockHentNavAnsatt(MockNavAnsattRespomse.fromDbo(uendretAnsatt))
+		mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.copy(navn = "nytt navn"))
+		mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt)
 
 		navAnsattUpdater.oppdaterAlle()
 

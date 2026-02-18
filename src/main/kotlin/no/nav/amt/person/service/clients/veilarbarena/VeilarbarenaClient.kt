@@ -7,13 +7,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.util.function.Supplier
 
 class VeilarbarenaClient(
 	private val baseUrl: String,
-	private val tokenProvider: Supplier<String>,
+	private val tokenProvider: () -> String,
 	private val objectMapper: ObjectMapper,
 	private val httpClient: OkHttpClient = baseClient(),
 	private val consumerId: String = "amt-person-service",
@@ -26,7 +26,7 @@ class VeilarbarenaClient(
 			Request
 				.Builder()
 				.url("$baseUrl/veilarbarena/api/v2/arena/hent-status")
-				.addHeader("Authorization", "Bearer ${tokenProvider.get()}")
+				.addHeader(HttpHeaders.AUTHORIZATION, "Bearer ${tokenProvider()}")
 				.addHeader("Nav-Consumer-Id", consumerId)
 				.post(personRequestJson.toRequestBody(mediaTypeJson))
 				.build()

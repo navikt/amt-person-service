@@ -15,11 +15,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.util.function.Supplier
 
 class PdlClient(
 	private val baseUrl: String,
-	private val tokenProvider: Supplier<String>,
+	private val tokenProvider: () -> String,
 	private val httpClient: OkHttpClient = baseClient(),
 	private val poststedRepository: PoststedRepository,
 	private val objectMapper: ObjectMapper,
@@ -59,7 +58,8 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			val pdlPerson = gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer.toSet()) }
+			val pdlPerson =
+				gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer.toSet()) }
 
 			if (pdlPerson.erUkjent()) {
 				log.warn("PDL-person har ukjent etternavn")
@@ -205,7 +205,7 @@ class PdlClient(
 		Request
 			.Builder()
 			.url("$baseUrl/graphql")
-			.addHeader(HttpHeaders.AUTHORIZATION, "Bearer ${tokenProvider.get()}")
+			.addHeader(HttpHeaders.AUTHORIZATION, "Bearer ${tokenProvider()}")
 			.addHeader("Tema", "GEN")
 			.addHeader("behandlingsnummer", BEHANDLINGSNUMMER)
 			.post(jsonPayload.toRequestBody(mediaTypeJson))

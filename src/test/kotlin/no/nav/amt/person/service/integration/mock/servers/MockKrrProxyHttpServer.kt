@@ -1,28 +1,33 @@
 package no.nav.amt.person.service.integration.mock.servers
 
+import no.nav.amt.person.service.clients.krr.PostPersonerResponse
+import no.nav.amt.person.service.navbruker.dbo.NavBrukerDbo
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
 import okhttp3.mockwebserver.MockResponse
+import org.springframework.http.HttpStatus
 
 class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
-	fun mockHentKontaktinformasjon(kontaktinformasjon: MockKontaktinformasjon) {
+	fun mockHentKontaktinformasjon(navBruker: NavBrukerDbo) {
 		val response =
 			MockResponse()
-				.setResponseCode(200)
+				.setResponseCode(HttpStatus.OK.value()) //
 				.setBody(
-					staticObjectMapper.writeValueAsString(MockKResponse(mapOf(kontaktinformasjon.personident to kontaktinformasjon))),
+					staticObjectMapper.writeValueAsString(
+						PostPersonerResponse(
+							mapOf(
+								navBruker.person.personident to
+									PostPersonerResponse.KontaktinformasjonDto(
+										personident = navBruker.person.personident,
+										epostadresse = navBruker.epost,
+										mobiltelefonnummer = navBruker.telefon,
+									),
+							),
+							feil = emptyMap(),
+						),
+					),
 				)
+
 		addResponseHandler("/rest/v1/personer?inkluderSikkerDigitalPost=false", response)
 	}
 }
-
-data class MockKResponse(
-	val personer: Map<String, MockKontaktinformasjon>,
-	val feil: Map<String, String> = emptyMap(),
-)
-
-data class MockKontaktinformasjon(
-	val personident: String,
-	val epostadresse: String?,
-	val mobiltelefonnummer: String?,
-)

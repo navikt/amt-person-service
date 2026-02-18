@@ -9,6 +9,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
 
 class VeilarbvedtaksstotteClientTest {
 	private lateinit var server: MockWebServer
@@ -52,7 +53,7 @@ class VeilarbvedtaksstotteClientTest {
 
 	@Test
 	fun `hentInnsatsgruppe - manglende tilgang - kaster exception`() {
-		server.enqueue(MockResponse().setResponseCode(401))
+		server.enqueue(MockResponse().setResponseCode(HttpStatus.FORBIDDEN.value()))
 		assertThrows<RuntimeException> { client.hentInnsatsgruppe("123") }
 	}
 }
