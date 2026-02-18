@@ -35,7 +35,7 @@ class NavAnsattUpdater(
 						ansatte[nomAnsatt.navIdent]?.let { finnOppdatering(it, nomAnsatt) }
 					}.toSet()
 
-			log.info("Oppdaterer informasjon om ${oppdaterteAnsatte.size} nav-ansatte, sjekket ${nomResultat.size} ansatte")
+			log.info("Oppdaterer informasjon om ${oppdaterteAnsatte.size} Nav-ansatte, sjekket ${nomResultat.size} ansatte")
 
 			navAnsattService.upsertMany(oppdaterteAnsatte)
 
@@ -57,12 +57,12 @@ class NavAnsattUpdater(
 		return if (ansatt.lagretAnsatt.skalOppdateres(nomAnsatt, navEnhet)) {
 			val telefon =
 				nomAnsatt.telefonnummer ?: ansatt.lagretAnsatt.telefon?.also {
-					log.warn("Telefonnummer for nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
+					log.warn("Telefonnummer for Nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
 				}
 
 			val epost =
 				nomAnsatt.epost ?: ansatt.lagretAnsatt.epost?.also {
-					log.warn("Epost for nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
+					log.warn("E-post for Nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
 				}
 
 			NavAnsattDbo(
