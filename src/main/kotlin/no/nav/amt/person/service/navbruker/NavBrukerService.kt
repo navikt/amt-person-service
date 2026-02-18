@@ -60,7 +60,6 @@ class NavBrukerService(
 
 	private fun opprettNavBruker(personident: String): NavBrukerDbo {
 		val pdlPerson = pdlClient.hentPerson(personident)
-		check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke Nav-bruker" }
 
 		val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
 		val veileder = navAnsattService.hentBrukersVeileder(personident)
@@ -90,7 +89,12 @@ class NavBrukerService(
 			)
 
 		upsert(navBruker)
-		log.info("Opprettet ny nav bruker med id: ${navBruker.id}")
+
+		if (pdlPerson.erUkjent()) {
+			log.warn("Opprettet ny Nav-bruker med id: ${navBruker.id} og ukjent navn")
+		} else {
+			log.info("Opprettet ny Nav-bruker med id: ${navBruker.id}")
+		}
 
 		return navBrukerRepository.getByPersonId(person.id)
 			?: throw IllegalStateException(
