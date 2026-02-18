@@ -64,10 +64,6 @@ class PdlClient(
 			val pdlPerson =
 				gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
 
-			if (pdlPerson.erUkjent()) {
-				log.warn("PDL-person har ukjent etternavn")
-			}
-
 			return pdlPerson
 		}
 	}

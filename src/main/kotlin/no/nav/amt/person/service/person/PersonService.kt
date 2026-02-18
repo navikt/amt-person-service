@@ -27,7 +27,6 @@ class PersonService(
 	fun hentEllerOpprettPerson(personident: String): PersonDbo =
 		personRepository.get(personident) ?: run {
 			val pdlPerson = pdlClient.hentPerson(personident)
-			check(!pdlPerson.erUkjent()) { "Person har ukjent etternavn, oppretter ikke person" }
 			opprettPerson(pdlPerson)
 		}
 
@@ -109,7 +108,11 @@ class PersonService(
 		upsert(person)
 		personidentRepository.upsert(pdlPerson.identer.map { it.toDbo(person.id) }.toSet())
 
-		log.info("Opprettet ny person med id ${person.id}")
+		if (person.erUkjent()) {
+			log.warn("Opprettet ny person med id ${person.id} og ukjent navn")
+		} else {
+			log.info("Opprettet ny person med id ${person.id}")
+		}
 
 		return person
 	}

@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.person.dbo
 
-import no.nav.amt.person.service.clients.pdl.PdlPerson.Companion.UNKNOWN_NAME
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -13,5 +12,9 @@ data class PersonDbo(
 	val createdAt: LocalDateTime = LocalDateTime.now(),
 	val modifiedAt: LocalDateTime = LocalDateTime.now(),
 ) {
-	fun erUkjent() = etternavn == UNKNOWN_NAME
+	fun erUkjent() = etternavn.equals(UNKNOWN_NAME, ignoreCase = true)
+
+	companion object {
+		const val UNKNOWN_NAME = "Ukjent"
+	}
 }

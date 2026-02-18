@@ -93,9 +93,9 @@ class InternalController(
 	) {
 		if (isInternal(servlet)) {
 			val person = personRepository.get(id)
-			check(!person.erUkjent()) {
-				"Person ${person.id} har ukjent etternavn, kan ikke oppdatere navn"
-			}
+
+			if (person.erUkjent()) log.warn("Person $id har ukjent navn")
+
 			personService.oppdaterNavn(person)
 		}
 	}

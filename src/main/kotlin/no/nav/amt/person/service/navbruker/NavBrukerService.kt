@@ -88,7 +88,7 @@ class NavBrukerService(
 
 		upsert(navBruker)
 
-		if (pdlPerson.erUkjent()) {
+		if (navBruker.person.erUkjent()) {
 			log.warn("Opprettet ny Nav-bruker med id: ${navBruker.id} og ukjent navn")
 		} else {
 			log.info("Opprettet ny Nav-bruker med id: ${navBruker.id}")
@@ -96,7 +96,7 @@ class NavBrukerService(
 
 		return navBrukerRepository.getByPersonId(person.id)
 			?: throw IllegalStateException(
-				"Fant ikke nav-bruker for person ${person.id}, skulle ha opprettet bruker ${navBruker.id}",
+				"Fant ikke Nav-bruker for person ${person.id}, skulle ha opprettet bruker ${navBruker.id}",
 			)
 	}
 

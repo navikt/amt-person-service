@@ -24,8 +24,6 @@ data class PdlPerson(
 			null
 		}
 
-	fun erUkjent() = etternavn == UNKNOWN_NAME
-
 	fun toPersonDbo(): PersonDbo {
 		val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
 
@@ -36,9 +34,5 @@ data class PdlPerson(
 			mellomnavn = mellomnavn,
 			etternavn = etternavn,
 		)
-	}
-
-	companion object {
-		const val UNKNOWN_NAME = "Ukjent"
 	}
 }

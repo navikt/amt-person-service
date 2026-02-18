@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.clients.pdl
 
-import no.nav.amt.person.service.clients.pdl.PdlPerson.Companion.UNKNOWN_NAME
+import no.nav.amt.person.service.person.dbo.PersonDbo.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.Bostedsadresse
