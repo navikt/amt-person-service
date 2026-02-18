@@ -350,12 +350,11 @@ class NavBrukerService(
 			log.info("Fjerner epostadresse for personId ${bruker.person.id}")
 		}
 		upsert(
-			bruker
-				.copy(
-					telefon = kontaktinformasjon.telefonnummer,
-					epost = kontaktinformasjon.epost,
-					sisteKrrSync = LocalDateTime.now(),
-				),
+			bruker.copy(
+				telefon = kontaktinformasjon.telefonnummer,
+				epost = kontaktinformasjon.epost,
+				sisteKrrSync = LocalDateTime.now(),
+			),
 		)
 	}
 }
