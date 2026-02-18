@@ -81,7 +81,7 @@ private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc
 	return adresse
 }
 
-private fun List<PdlQueries.Attribute.Navn>.toNavnMedFallback(): PdlQueries.Attribute.Navn =
+internal fun List<PdlQueries.Attribute.Navn>.toNavnMedFallback(): PdlQueries.Attribute.Navn =
 	this.firstOrNull() ?: PdlQueries.Attribute.Navn(
 		fornavn = UNKNOWN_NAME,
 		mellomnavn = null,
