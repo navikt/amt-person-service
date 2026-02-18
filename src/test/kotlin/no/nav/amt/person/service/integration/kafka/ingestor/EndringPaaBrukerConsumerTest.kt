@@ -29,7 +29,7 @@ class EndringPaaBrukerConsumerTest(
 		testDataRepository.insertNavBruker(navBruker)
 
 		mockNorgHttpServer.addNavEnhet(navEnhet)
-		kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload.toJson())
+		kafkaMessageSender.sendTilEndringPaaBrukerTopic(objectMapper.writeValueAsString(kafkaPayload))
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerRepository.get(navBruker.id)

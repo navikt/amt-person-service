@@ -125,7 +125,7 @@ class NavBrukerService(
 		val bruker = navBrukerRepository.get(navBrukerId)
 		val oppfolgingsperioder =
 			bruker.oppfolgingsperioder
-				.filter { it.id != oppfolgingsperiode.id }
+				.filterNot { it.id == oppfolgingsperiode.id }
 				.plus(oppfolgingsperiode)
 
 		if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
@@ -161,11 +161,10 @@ class NavBrukerService(
 
 		if (navBruker.innsatsgruppe != innsatsgruppe || navBruker.oppfolgingsperioder != oppfolgingsperioder) {
 			upsert(
-				navBruker
-					.copy(
-						oppfolgingsperioder = oppfolgingsperioder,
-						innsatsgruppe = innsatsgruppe,
-					),
+				navBruker.copy(
+					oppfolgingsperioder = oppfolgingsperioder,
+					innsatsgruppe = innsatsgruppe,
+				),
 			)
 			log.info("Oppdatert innsatsgruppe og oppfølgingsperidoe for Nav-bruker med id ${navBruker.id}")
 		}
@@ -176,6 +175,7 @@ class NavBrukerService(
 			krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
 				val feilmelding =
 					"Klarte ikke hente kontaktinformasjon fra KRR-Proxy for bruker ${bruker.id}: ${it.message}"
+
 				if (EnvUtils.isDev()) {
 					log.info(feilmelding)
 				} else {
@@ -183,6 +183,7 @@ class NavBrukerService(
 				}
 				return
 			}
+
 		val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(bruker.person.personident)
 		oppdaterKontaktinfo(bruker, kontaktinformasjon.copy(telefonnummer = telefon))
 	}
@@ -214,10 +215,13 @@ class NavBrukerService(
 					return
 				}
 
-			krrKontaktinfo.forEach kontaktinfoPersoner@{
-				val telefon = it.value.telefonnummer ?: pdlClient.hentTelefon(it.key)
-				val bruker = navBrukerRepository.get(it.key) ?: return@kontaktinfoPersoner
-				oppdaterKontaktinfo(bruker, it.value.copy(telefonnummer = telefon))
+			for ((navBrukerId, kontaktinfo) in krrKontaktinfo) {
+				val telefon = kontaktinfo.telefonnummer ?: pdlClient.hentTelefon(navBrukerId)
+				val bruker = navBrukerRepository.get(navBrukerId) ?: continue
+				oppdaterKontaktinfo(
+					bruker = bruker,
+					kontaktinformasjon = kontaktinfo.copy(telefonnummer = telefon),
+				)
 			}
 		}
 		log.info("Syncet kontaktinfo for ${personerChunks.size} personer")
@@ -271,11 +275,10 @@ class NavBrukerService(
 		if (navBruker.adressebeskyttelse == oppdatertAdressebeskyttelse) return
 
 		upsert(
-			navBruker
-				.copy(
-					adressebeskyttelse = oppdatertAdressebeskyttelse,
-					adresse = getAdresse(personOpplysninger),
-				),
+			navBruker.copy(
+				adressebeskyttelse = oppdatertAdressebeskyttelse,
+				adresse = getAdresse(personOpplysninger),
+			),
 		)
 	}
 

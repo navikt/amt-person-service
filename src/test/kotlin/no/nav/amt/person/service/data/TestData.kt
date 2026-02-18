@@ -18,6 +18,7 @@ import no.nav.amt.person.service.person.model.Kontaktadresse
 import no.nav.amt.person.service.person.model.Matrikkeladresse
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.Vegadresse
+import no.nav.amt.person.service.poststed.Postnummer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -186,5 +187,14 @@ object TestData {
 						),
 					postboksadresse = null,
 				),
+		)
+
+	val postnumreInTest =
+		setOf(
+			Postnummer("0484", "OSLO"),
+			Postnummer("5341", "STRAUME"),
+			Postnummer("5365", "TURØY"),
+			Postnummer("5449", "BØMLO"),
+			Postnummer("9609", "NORDRE SEILAND"),
 		)
 }

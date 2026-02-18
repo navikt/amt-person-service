@@ -8,6 +8,7 @@ import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
+import no.nav.security.mock.oauth2.http.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -29,7 +30,7 @@ class EndringPaaBrukerConsumerTest {
 	@Test
 	fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
 		endringPaaBrukerConsumer.ingest(
-			KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null).toJson(),
+			objectMapper.writeValueAsString(KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null)),
 		)
 
 		verify(exactly = 0) { navBrukerRepository.get(any<String>()) }

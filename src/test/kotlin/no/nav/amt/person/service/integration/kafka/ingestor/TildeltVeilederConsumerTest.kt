@@ -24,14 +24,14 @@ class TildeltVeilederConsumerTest(
 		val navBruker = TestData.lagNavBruker()
 		testDataRepository.insertNavBruker(navBruker)
 
-		val msg = KafkaMessageCreator.lagTildeltVeilederMsg()
-		val navAnsatt = TestData.lagNavAnsatt(navIdent = msg.veilederId)
+		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+		val navAnsatt = TestData.lagNavAnsatt(navIdent = payload.veilederId)
 
-		mockPdlHttpServer.mockHentIdenter(msg.aktorId, navBruker.person.personident)
+		mockPdlHttpServer.mockHentIdenter(payload.aktorId, navBruker.person.personident)
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
 		mockNorgHttpServer.addNavEnhetGrunerLokka()
 
-		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
+		kafkaMessageSender.sendTilTildeltVeilederTopic(this.objectMapper.writeValueAsString(payload))
 
 		await().untilAsserted {
 			val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
@@ -52,13 +52,13 @@ class TildeltVeilederConsumerTest(
 
 	@Test
 	fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
-		val msg = KafkaMessageCreator.lagTildeltVeilederMsg()
-		mockPdlHttpServer.mockHentIdenter(msg.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilTildeltVeilederTopic(msg.toJson())
+		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+		mockPdlHttpServer.mockHentIdenter(payload.aktorId, "ukjent ident")
+		kafkaMessageSender.sendTilTildeltVeilederTopic(this.objectMapper.writeValueAsString(payload))
 
 		withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				navAnsattRepository.get(msg.veilederId) shouldBe null
+				navAnsattRepository.get(payload.veilederId) shouldBe null
 
 				loggingEvents.any {
 					it.message == "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"

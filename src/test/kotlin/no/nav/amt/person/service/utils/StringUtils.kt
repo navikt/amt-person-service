@@ -5,14 +5,5 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object StringUtils {
-	fun nullableStringJsonValue(str: String?): String =
-		if (str == null) {
-			"null"
-		} else {
-			"\"$str\""
-		}
-
-	fun String.toJsonRequestBody(): RequestBody = this.toRequestBody(mediaTypeJson)
-
 	fun emptyRequest(): RequestBody = "".toRequestBody(mediaTypeJson)
 }

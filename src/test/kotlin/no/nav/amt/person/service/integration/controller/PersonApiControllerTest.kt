@@ -19,9 +19,10 @@ import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
+import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.amt.person.service.utils.StringUtils.emptyRequest
-import no.nav.amt.person.service.utils.StringUtils.toJsonRequestBody
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -47,7 +48,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/arrangor-ansatt",
-				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
+				body = """{"personident": "${person.personident}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
 			)
 
@@ -77,7 +78,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/arrangor-ansatt",
-				body = """{"personident": "${person.personident}"}""".toJsonRequestBody(),
+				body = """{"personident": "${person.personident}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer $token"),
 			)
 
@@ -122,7 +123,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
-				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				body = """{"personident": "${navBruker.person.personident}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -154,7 +155,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
-				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				body = """{"personident": "${navBruker.person.personident}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -199,7 +200,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/nav-bruker",
-				body = """{"personident": "${navBruker.person.personident}"}""".toJsonRequestBody(),
+				body = """{"personident": "${navBruker.person.personident}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -222,7 +223,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/nav-ansatt",
-				body = """{"navIdent": "${navAnsatt.navIdent}"}""".toJsonRequestBody(),
+				body = """{"navIdent": "${navAnsatt.navIdent}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -250,7 +251,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/nav-enhet",
-				body = """{"enhetId": "${navEnhet.enhetId}"}""".toJsonRequestBody(),
+				body = """{"enhetId": "${navEnhet.enhetId}"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -277,7 +278,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/person/adressebeskyttelse",
-				body = """{"personident": "$personident"}""".toJsonRequestBody(),
+				body = """{"personident": "$personident"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 
@@ -297,7 +298,7 @@ class PersonApiControllerTest(
 			sendRequest(
 				method = HttpMethod.POST.name(),
 				path = "/api/person/adressebeskyttelse",
-				body = """{"personident": "$personident"}""".toJsonRequestBody(),
+				body = """{"personident": "$personident"}""".toRequestBody(mediaTypeJson),
 				headers = mapOf(HttpHeaders.AUTHORIZATION to "Bearer ${mockOAuthServer.issueAzureAdM2MToken()}"),
 			)
 

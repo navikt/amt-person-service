@@ -4,7 +4,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.RepositoryTestBase
-import no.nav.amt.person.service.utils.DbTestDataUtils.postnumreInTest
+import no.nav.amt.person.service.data.TestData.postnumreInTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

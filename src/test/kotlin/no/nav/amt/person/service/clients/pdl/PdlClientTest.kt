@@ -13,11 +13,11 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.data.TestData.postnumreInTest
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.PoststedRepository
-import no.nav.amt.person.service.utils.DbTestDataUtils.postnumreInTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -40,8 +40,8 @@ class PdlClientTest(
 		serverUrl = server.url("").toString().removeSuffix("/")
 
 		poststedRepository.oppdaterPoststed(
-			postnumreInTest,
-			UUID.randomUUID(),
+			oppdatertePostnummer = postnumreInTest,
+			sporingsId = UUID.randomUUID(),
 		)
 	}
 
