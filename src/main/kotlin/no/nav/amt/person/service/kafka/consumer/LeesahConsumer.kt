@@ -24,13 +24,25 @@ class LeesahConsumer(
 
 	fun ingest(personhendelse: Personhendelse) {
 		when (personhendelse.opplysningstype) {
-			OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter)
-			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
-				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+			OpplysningsType.NAVN_V1.toString() -> {
+				handterNavn(personhendelse.personidenter)
+			}
 
-			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
-			OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
-			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter)
+			OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() -> {
+				handterAdressebeskyttelse(personhendelse.personidenter, personhendelse.adressebeskyttelse)
+			}
+
+			OpplysningsType.BOSTEDSADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
+
+			OpplysningsType.KONTAKTADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
+
+			OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> {
+				handterAdresse(personhendelse.personidenter)
+			}
 		}
 	}
 
@@ -79,6 +91,7 @@ class LeesahConsumer(
 				"5d4e6416-5c82-48ec-a80e-04304f6d300d",
 				"aeba3431-5a7c-42ff-b7e4-a464746e519e",
 				"de7785d4-6c41-41fe-9743-1bd034590ee4",
+				"69d71750-dd78-4254-baf1-21949b398ed8",
 			)
 	}
 }
