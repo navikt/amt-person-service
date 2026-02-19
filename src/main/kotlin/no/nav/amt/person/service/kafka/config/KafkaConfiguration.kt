@@ -119,7 +119,12 @@ class KafkaConfiguration(
 						kafkaTopicProperties.skjermedePersonerTopic,
 						Deserializers.stringDeserializer(),
 						Deserializers.stringDeserializer(),
-						Consumer { skjermetPersonConsumer.ingest(it.key(), it.value()) },
+						Consumer {
+							it
+								.value()
+								?.let { payload -> skjermetPersonConsumer.ingest(it.key(), payload) }
+								?: skjermetPersonConsumer.ingestTombstone(it.key())
+						},
 					),
 			)
 

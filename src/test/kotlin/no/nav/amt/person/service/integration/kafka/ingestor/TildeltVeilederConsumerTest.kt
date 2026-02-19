@@ -31,7 +31,7 @@ class TildeltVeilederConsumerTest(
 		mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
 		mockNorgHttpServer.addNavEnhetGrunerLokka()
 
-		kafkaMessageSender.sendTilTildeltVeilederTopic(objectMapper.writeValueAsString(payload))
+		kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
 
 		await().untilAsserted {
 			val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
@@ -54,7 +54,7 @@ class TildeltVeilederConsumerTest(
 	fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
 		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
 		mockPdlHttpServer.mockHentIdenter(payload.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilTildeltVeilederTopic(objectMapper.writeValueAsString(payload))
+		kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
 
 		withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {

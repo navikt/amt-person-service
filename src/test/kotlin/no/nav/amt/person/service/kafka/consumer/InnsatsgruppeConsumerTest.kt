@@ -26,7 +26,7 @@ class InnsatsgruppeConsumerTest(
 			)
 
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
+		kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerRepository.get(navBruker.id)
@@ -43,7 +43,7 @@ class InnsatsgruppeConsumerTest(
 				innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
 			)
 		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(objectMapper.writeValueAsString(siste14aVedtak))
+		kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
 
 		withLogCapture(InnsatsgruppeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
