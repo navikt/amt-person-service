@@ -41,7 +41,7 @@ class OppfolgingsperiodeConsumerTest(
 			InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
 		)
 
-		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
+		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(sisteOppfolgingsperiodeV1)
 
 		await().untilAsserted {
 			val faktiskBruker = navBrukerRepository.get(navBruker.id)
@@ -70,7 +70,7 @@ class OppfolgingsperiodeConsumerTest(
 				sluttDato = null,
 			)
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
+		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(sisteOppfolgingsperiodeV1)
 
 		withLogCapture(OppfolgingsperiodeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {

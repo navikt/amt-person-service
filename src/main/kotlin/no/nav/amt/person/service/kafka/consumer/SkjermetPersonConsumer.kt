@@ -2,7 +2,6 @@ package no.nav.amt.person.service.kafka.consumer
 
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.utils.EnvUtils.isDev
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -17,22 +16,22 @@ class SkjermetPersonConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(
-		key: String,
-		value: String?,
+		personident: String,
+		erSkjermetAsJson: String,
 	) {
-		if (value == null) {
-			if (isDev()) {
-				log.warn("Mottok uventet tombstone for Kafka-record.")
-				return
-			} else {
-				throw IllegalArgumentException("Kan ikke ingeste tombstone for Kafka-record.")
+		val brukerId = navBrukerRepository.finnBrukerId(personident) ?: return
+		navBrukerService.settSkjermet(
+			brukerId,
+			objectMapper.readValue<Boolean>(erSkjermetAsJson),
+		)
+	}
+
+	fun ingestTombstone(personident: String) {
+		navBrukerRepository
+			.finnBrukerId(personident)
+			?.let { brukerId ->
+				val logMessage = "Kan ikke ingeste tombstone for eksisterende Nav-bruker $brukerId"
+				throw IllegalArgumentException(logMessage).also { log.error(logMessage) }
 			}
-		}
-
-		val erSkjermet = objectMapper.readValue<Boolean>(value)
-
-		val brukerId = navBrukerRepository.finnBrukerId(key) ?: return
-
-		navBrukerService.settSkjermet(brukerId, erSkjermet)
 	}
 }

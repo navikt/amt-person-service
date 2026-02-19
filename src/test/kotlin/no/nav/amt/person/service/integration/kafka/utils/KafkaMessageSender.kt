@@ -3,8 +3,13 @@ package no.nav.amt.person.service.integration.kafka.utils
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
+import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
+import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.integration.IntegrationTestBase.Companion.kafkaContainer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
+import no.nav.amt.person.service.kafka.consumer.InnsatsgruppeConsumer
+import no.nav.amt.person.service.kafka.consumer.dto.SisteOppfolgingsperiodeKafkaPayload
+import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.leesah.Personhendelse
@@ -39,58 +44,18 @@ class KafkaMessageSender(
 ) {
 	private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
-	fun sendTilEndringPaaBrukerTopic(jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				endringPaaBrukerTopic,
-				UUID.randomUUID().toString(),
-				jsonString,
-			),
-		)
-	}
+	fun sendTilEndringPaaBrukerTopic(payload: EndringPaaBrukerMsg) = sendTilTopic(endringPaaBrukerTopic, payload)
 
-	fun sendTilTildeltVeilederTopic(jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				sisteTilordnetVeilederTopic,
-				UUID.randomUUID().toString(),
-				jsonString,
-			),
-		)
-	}
+	fun sendTilTildeltVeilederTopic(payload: TildeltVeilederMsg) = sendTilTopic(sisteTilordnetVeilederTopic, payload)
 
-	fun sendTilOppfolgingsperiodeTopic(jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				oppfolgingsperiodeTopic,
-				UUID.randomUUID().toString(),
-				jsonString,
-			),
-		)
-	}
+	fun sendTilOppfolgingsperiodeTopic(payload: SisteOppfolgingsperiodeKafkaPayload) = sendTilTopic(oppfolgingsperiodeTopic, payload)
 
-	fun sendTilInnsatsgruppeTopic(jsonString: String) {
-		kafkaProducer.send(
-			ProducerRecord(
-				innsatsgruppeTopic,
-				UUID.randomUUID().toString(),
-				jsonString,
-			),
-		)
-	}
+	fun sendTilInnsatsgruppeTopic(payload: InnsatsgruppeConsumer.Siste14aVedtak) = sendTilTopic(innsatsgruppeTopic, payload)
 
 	fun sendTilSkjermetPersonTopic(
 		personident: String,
-		erSkjermet: Boolean,
-	) {
-		kafkaProducer.send(
-			ProducerRecord(
-				skjermedePersonerTopic,
-				personident,
-				erSkjermet.toString(),
-			),
-		)
-	}
+		erSkjermet: Boolean?,
+	) = sendTilTopic(skjermedePersonerTopic, erSkjermet, personident)
 
 	fun sendTilAktorV2Topic(
 		key: String,
@@ -116,6 +81,16 @@ class KafkaMessageSender(
 					schemaId.toString().toByteArray(),
 				)
 			},
+		)
+	}
+
+	private fun sendTilTopic(
+		topic: String,
+		payload: Any?,
+		key: String = UUID.randomUUID().toString(),
+	) {
+		kafkaProducer.send(
+			ProducerRecord(topic, key, payload?.let { staticObjectMapper.writeValueAsString(it) }),
 		)
 	}
 
