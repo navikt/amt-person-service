@@ -1,5 +1,7 @@
 package no.nav.amt.person.service.kafka.config
 
+import no.nav.amt.person.service.kafka.config.KafkaTopicProperties.Companion.CONSUMER_GROUP_ID
+import no.nav.amt.person.service.kafka.config.KafkaTopicProperties.Companion.PRODUCER_ID
 import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.common.kafka.util.KafkaPropertiesPreset
@@ -14,9 +16,9 @@ class KafkaBeans {
 	@Profile("default")
 	fun kafkaConsumerProperties(): KafkaProperties =
 		object : KafkaProperties {
-			override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties("amt-person-service-consumer.v1")
+			override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties(CONSUMER_GROUP_ID)
 
-			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties("amt-person-service-producer")
+			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties(PRODUCER_ID)
 		}
 
 	@Bean

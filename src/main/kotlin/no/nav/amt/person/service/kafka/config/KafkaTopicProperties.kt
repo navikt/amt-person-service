@@ -17,4 +17,9 @@ data class KafkaTopicProperties(
 	val amtArrangorAnsattPersonaliaTopic: String,
 	val amtNavAnsattPersonaliaTopic: String,
 	val amtNavEnhetTopic: String,
-)
+) {
+	companion object {
+		const val CONSUMER_GROUP_ID = "amt-person-service-consumer.v1"
+		const val PRODUCER_ID = "amt-person-service-producer"
+	}
+}
