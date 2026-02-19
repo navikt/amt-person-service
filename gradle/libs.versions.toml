@@ -1,5 +1,5 @@
 [versions]
-kotlin-version = "2.3.10"
+kotlin-version = "2.2.21"
 apache-avro-version = "1.12.1"
 
 [libraries]

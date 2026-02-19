@@ -1,7 +1,7 @@
 plugins {
-    val kotlinVersion = "2.3.10"
+    val kotlinVersion = libs.versions.kotlin.version
 
-    kotlin("jvm") // versjon settes i buildSrc
+    kotlin("jvm")
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
