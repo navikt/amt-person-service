@@ -5,6 +5,7 @@ import no.nav.amt.person.service.kafka.config.KafkaTopicProperties.Companion.PRO
 import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.common.kafka.util.KafkaPropertiesPreset
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -12,7 +13,7 @@ import java.util.Properties
 
 @Configuration(proxyBeanMethods = false)
 class KafkaBeans {
-	@Bean
+	@Bean("kafkaProperties")
 	@Profile("default")
 	fun kafkaConsumerProperties(): KafkaProperties =
 		object : KafkaProperties {
@@ -21,7 +22,17 @@ class KafkaBeans {
 			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties(PRODUCER_ID)
 		}
 
+	@Bean("tempKafkaProperties")
+	@Profile("default")
+	fun tempKafkaConsumerProperties(): KafkaProperties =
+		object : KafkaProperties {
+			override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties("$CONSUMER_GROUP_ID-temp")
+
+			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties(PRODUCER_ID)
+		}
+
 	@Bean
-	fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
-		KafkaProducerClientImpl(kafkaProperties.producer())
+	fun kafkaProducer(
+		@Qualifier("kafkaProperties") kafkaProperties: KafkaProperties,
+	): KafkaProducerClient<String, String> = KafkaProducerClientImpl(kafkaProperties.producer())
 }

@@ -17,6 +17,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.Properties
@@ -24,7 +25,7 @@ import java.util.UUID
 
 @Component
 class KafkaMessageSender(
-	properties: KafkaProperties,
+	@Qualifier("kafkaProperties") properties: KafkaProperties,
 	@Value($$"${kafka.schema.registry.url}")
 	private val schemaRegistryUrl: String,
 	@Value($$"${app.env.endringPaaBrukerTopic}")

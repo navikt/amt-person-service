@@ -11,7 +11,7 @@ import java.util.Properties
 
 @TestConfiguration
 class KafkaTestConfiguration {
-	@Bean
+	@Bean("kafkaProperties")
 	fun kafkaProperties() =
 		object : KafkaProperties {
 			override fun consumer(): Properties =
@@ -31,6 +31,21 @@ class KafkaTestConfiguration {
 					.withProducerId(PRODUCER_ID)
 					.withSerializers(StringSerializer::class.java, StringSerializer::class.java)
 					.build()
+		}
+
+	@Bean("tempKafkaProperties")
+	fun tempKafkaProperties() =
+		object : KafkaProperties {
+			override fun consumer(): Properties =
+				KafkaPropertiesBuilder
+					.consumerBuilder()
+					.withBrokerUrl(kafkaContainer.bootstrapServers)
+					.withBaseProperties()
+					.withConsumerGroupId("$CONSUMER_ID-temp")
+					.withDeserializers(ByteArrayDeserializer::class.java, ByteArrayDeserializer::class.java)
+					.build()
+
+			override fun producer(): Properties = Properties()
 		}
 
 	companion object {

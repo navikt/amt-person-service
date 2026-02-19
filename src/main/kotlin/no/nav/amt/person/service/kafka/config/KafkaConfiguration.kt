@@ -17,6 +17,7 @@ import no.nav.common.kafka.spring.PostgresJdbcTemplateConsumerRepository
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
@@ -32,7 +33,8 @@ class KafkaConfiguration(
 	@Value($$"${kafka.schema.registry.username}") schemaRegistryUsername: String,
 	@Value($$"${kafka.schema.registry.password}") schemaRegistryPassword: String,
 	kafkaTopicProperties: KafkaTopicProperties,
-	kafkaProperties: KafkaProperties,
+	@Qualifier("kafkaProperties") kafkaProperties: KafkaProperties,
+	@Qualifier("tempKafkaProperties") tempKafkaProperties: KafkaProperties,
 	jdbcTemplate: JdbcTemplate,
 	endringPaaBrukerConsumer: EndringPaaBrukerConsumer,
 	tildeltVeilederConsumer: TildeltVeilederConsumer,
@@ -46,6 +48,7 @@ class KafkaConfiguration(
 	private val consumerRepository = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
 
 	private val client: KafkaConsumerClient
+	private val tempClient: KafkaConsumerClient
 	private val consumerRecordProcessor: KafkaConsumerRecordProcessor
 
 	init {
@@ -111,6 +114,10 @@ class KafkaConfiguration(
 						SpecificAvroDeserializer(schemaRegistryUrl, schemaRegistryUsername, schemaRegistryPassword),
 						Consumer { leesahConsumer.ingest(it.value()) },
 					),
+			)
+
+		val tempTopicConfigs =
+			listOf(
 				KafkaConsumerClientBuilder
 					.TopicConfig<String, String>()
 					.withLogging()
@@ -133,14 +140,23 @@ class KafkaConfiguration(
 				.builder()
 				.withLockProvider(JdbcTemplateLockProvider(jdbcTemplate))
 				.withKafkaConsumerRepository(consumerRepository)
-				.withConsumerConfigs(topicConfigs.map { it.consumerConfig })
-				.build()
+				.withConsumerConfigs(
+					topicConfigs.map { it.consumerConfig } +
+						tempTopicConfigs.map { it.consumerConfig },
+				).build()
 
 		client =
 			KafkaConsumerClientBuilder
 				.builder()
 				.withProperties(kafkaProperties.consumer())
 				.withTopicConfigs(topicConfigs)
+				.build()
+
+		tempClient =
+			KafkaConsumerClientBuilder
+				.builder()
+				.withProperties(tempKafkaProperties.consumer())
+				.withTopicConfigs(tempTopicConfigs)
 				.build()
 	}
 
@@ -149,6 +165,7 @@ class KafkaConfiguration(
 	fun onApplicationEvent(event: ContextRefreshedEvent?) {
 		log.info("Starting Kafka consumer and stored record processor...")
 		client.start()
+		tempClient.start()
 		consumerRecordProcessor.start()
 	}
 }
