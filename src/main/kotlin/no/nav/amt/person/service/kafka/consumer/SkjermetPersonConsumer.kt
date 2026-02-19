@@ -16,20 +16,22 @@ class SkjermetPersonConsumer(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun ingest(
-		key: String,
-		value: String,
+		personident: String,
+		erSkjermetAsJson: String,
 	) {
-		val brukerId = navBrukerRepository.finnBrukerId(key) ?: return
-		val erSkjermet = objectMapper.readValue<Boolean>(value)
-		navBrukerService.settSkjermet(brukerId, erSkjermet)
+		val brukerId = navBrukerRepository.finnBrukerId(personident) ?: return
+		navBrukerService.settSkjermet(
+			brukerId,
+			objectMapper.readValue<Boolean>(erSkjermetAsJson),
+		)
 	}
 
-	fun ingestTombstone(key: String) {
-		val brukerId = navBrukerRepository.finnBrukerId(key)
-
-		if (brukerId != null) {
-			val logMessage = "Kan ikke ingeste tombstone for eksisterende Nav-bruker $brukerId"
-			throw IllegalArgumentException(logMessage).also { log.error(logMessage) }
-		}
+	fun ingestTombstone(personident: String) {
+		navBrukerRepository
+			.finnBrukerId(personident)
+			?.let { brukerId ->
+				val logMessage = "Kan ikke ingeste tombstone for eksisterende Nav-bruker $brukerId"
+				throw IllegalArgumentException(logMessage).also { log.error(logMessage) }
+			}
 	}
 }
