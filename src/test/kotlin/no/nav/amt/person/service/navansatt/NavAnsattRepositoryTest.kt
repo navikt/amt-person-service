@@ -159,7 +159,12 @@ class NavAnsattRepositoryTest(
 
 		ansattRepository.upsertMany(setOf(oppdatertAnsatt1, oppdatertAnsatt2))
 
-		ansattRepository.get(oppdatertAnsatt1.navIdent)!!.navn shouldBe oppdatertAnsatt1.navn
-		ansattRepository.get(oppdatertAnsatt2.navIdent)!!.navn shouldBe oppdatertAnsatt2.navn
+		assertSoftly(ansattRepository.get(oppdatertAnsatt1.navIdent).shouldNotBeNull()) {
+			navn shouldBe oppdatertAnsatt1.navn
+		}
+
+		assertSoftly(ansattRepository.get(oppdatertAnsatt2.navIdent).shouldNotBeNull()) {
+			navn shouldBe oppdatertAnsatt2.navn
+		}
 	}
 }

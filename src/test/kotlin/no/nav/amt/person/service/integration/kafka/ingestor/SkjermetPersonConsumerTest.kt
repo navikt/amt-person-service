@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
@@ -36,9 +37,8 @@ class SkjermetPersonConsumerTest(
 
 		withLogCapture(SkjermetPersonConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				loggingEvents.any {
-					it.message.contains("Kan ikke ingeste tombstone for eksisterende Nav-bruker ${navBruker.id}")
-				} shouldBe true
+				loggingEvents.map { it.message } shouldContain
+					"Kan ikke ingeste tombstone for eksisterende Nav-bruker ${navBruker.id}"
 			}
 		}
 	}

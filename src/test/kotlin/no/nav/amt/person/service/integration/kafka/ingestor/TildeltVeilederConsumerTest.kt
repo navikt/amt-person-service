@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.amt.deltaker.bff.utils.withLogCapture
@@ -60,9 +61,8 @@ class TildeltVeilederConsumerTest(
 			await().untilAsserted {
 				navAnsattRepository.get(payload.veilederId) shouldBe null
 
-				loggingEvents.any {
-					it.message == "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
-				} shouldBe true
+				loggingEvents.map { it.message } shouldContain
+					"Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 			}
 		}
 	}

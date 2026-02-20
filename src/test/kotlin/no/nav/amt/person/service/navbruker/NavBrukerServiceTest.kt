@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.navbruker
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -170,7 +171,7 @@ class NavBrukerServiceTest {
 							expectedNavBruker.epost == it.epost &&
 							expectedNavBruker.erSkjermet == it.erSkjermet &&
 							expectedNavBruker.adresse == it.adresse &&
-							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync.shouldNotBeNull().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -222,7 +223,7 @@ class NavBrukerServiceTest {
 							expectedNavBruker.epost == it.epost &&
 							expectedNavBruker.erSkjermet == it.erSkjermet &&
 							expectedNavBruker.adresse == it.adresse &&
-							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync.shouldNotBeNull().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -290,7 +291,7 @@ class NavBrukerServiceTest {
 							expectedNavBruker.epost == it.epost &&
 							expectedNavBruker.erSkjermet == it.erSkjermet &&
 							expectedNavBruker.adresse == it.adresse &&
-							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync.shouldNotBeNull().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -340,7 +341,7 @@ class NavBrukerServiceTest {
 							expectedNavBruker.epost == it.epost &&
 							expectedNavBruker.erSkjermet == it.erSkjermet &&
 							expectedNavBruker.adresse == it.adresse &&
-							expectedNavBruker.sisteKrrSync == it.sisteKrrSync!!.truncatedTo(java.time.temporal.ChronoUnit.DAYS)
+							expectedNavBruker.sisteKrrSync == it.sisteKrrSync.shouldNotBeNull().truncatedTo(java.time.temporal.ChronoUnit.DAYS)
 					},
 				)
 			}
@@ -564,8 +565,8 @@ class NavBrukerServiceTest {
 		pdlPerson: PdlPerson,
 	) {
 		val person = navBruker.person
-		val veileder = navBruker.navVeileder!!
-		val navEnhet = navBruker.navEnhet!!
+		val veileder = navBruker.navVeileder.shouldNotBeNull()
+		val navEnhet = navBruker.navEnhet.shouldNotBeNull()
 		val kontaktinformasjon = Kontaktinformasjon(navBruker.epost, navBruker.telefon)
 
 		every { navBrukerRepository.get(person.personident) } returns null

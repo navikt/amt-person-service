@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.kafka.consumer
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
@@ -47,9 +48,8 @@ class InnsatsgruppeConsumerTest(
 
 		withLogCapture(InnsatsgruppeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				loggingEvents.any {
-					it.message == "Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
-				} shouldBe true
+				loggingEvents.map { it.message } shouldContain
+					"Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
 			}
 		}
 	}

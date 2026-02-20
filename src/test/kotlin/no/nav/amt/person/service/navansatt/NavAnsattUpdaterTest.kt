@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.navansatt
 
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContain
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -46,13 +47,10 @@ class NavAnsattUpdaterTest {
 		withLogCapture(NavAnsattUpdater::class.java.name) { loggingEvents ->
 			updater.oppdaterAlle()
 
-			loggingEvents.any {
-				it.message == "Fant ikke Nav-ansatt med id ${ansatt1.id} i NOM"
-			} shouldBe false
+			val logMessages = loggingEvents.map { it.message }
 
-			loggingEvents.any {
-				it.message == "Fant ikke Nav-ansatt med id ${ansatt2.id} i NOM"
-			} shouldBe true
+			logMessages shouldContain "Fant ikke Nav-ansatt med id ${ansatt2.id} i NOM"
+			logMessages shouldNotContain "Fant ikke Nav-ansatt med id ${ansatt1.id} i NOM"
 		}
 	}
 

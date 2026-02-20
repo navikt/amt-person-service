@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.utils
 
 import io.kotest.matchers.date.shouldBeWithin
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldNotBe
 import java.time.Duration
 import java.time.LocalDateTime
@@ -10,10 +11,10 @@ import java.time.LocalDateTime
  */
 infix fun LocalDateTime.shouldBeEqualTo(expected: LocalDateTime?) {
 	expected shouldNotBe null
-	expected!!.shouldBeWithin(Duration.ofSeconds(1), this)
+	expected.shouldNotBeNull().shouldBeWithin(Duration.ofSeconds(1), this)
 }
 
 infix fun LocalDateTime.shouldBeCloseTo(expected: LocalDateTime?) {
 	expected shouldNotBe null
-	expected!!.shouldBeWithin(Duration.ofSeconds(10), this)
+	expected.shouldNotBeNull().shouldBeWithin(Duration.ofSeconds(10), this)
 }

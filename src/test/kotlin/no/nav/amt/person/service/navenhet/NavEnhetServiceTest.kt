@@ -41,11 +41,12 @@ class NavEnhetServiceTest {
 		every { navEnhetRepository.get(navEnhet.enhetId) } returns null
 		every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 
-		val faktiskEnhet = service.hentNavEnhetForBruker(personident)!!
+		val faktiskEnhet = service.hentNavEnhetForBruker(personident)
 		assertSoftly(faktiskEnhet.shouldNotBeNull()) {
 			enhetId shouldBe navEnhet.enhetId
 			navn shouldBe navEnhet.navn
 		}
+
 		verify { kafkaProducerService.publiserNavEnhet(faktiskEnhet) }
 	}
 

@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.person
 
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldContainAll
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.lagPersonident
@@ -18,17 +18,16 @@ class PersonidentRepositoryTest(
 		testDataRepository.insertPerson(person)
 
 		val identer =
-			listOf(
+			setOf(
 				lagPersonident(personId = person.id, historisk = true, type = IdentType.AKTORID),
 				lagPersonident(personId = person.id, historisk = true, type = IdentType.NPID),
 			)
 
-		personidentRepository.upsert(identer.toSet())
+		personidentRepository.upsert(identer)
 
 		val faktiskeIdenter = personidentRepository.getAllForPerson(person.id)
 
-		faktiskeIdenter.any { it.ident == identer[0].ident } shouldBe true
-		faktiskeIdenter.any { it.ident == identer[1].ident } shouldBe true
+		faktiskeIdenter.map { it.ident } shouldContainAll identer.map { it.ident }
 	}
 
 	@Test
@@ -37,16 +36,15 @@ class PersonidentRepositoryTest(
 		testDataRepository.insertPerson(person)
 
 		val identer =
-			listOf(
+			setOf(
 				lagPersonident(personId = person.id, historisk = true),
 				lagPersonident(personId = person.id, historisk = false),
 			)
 
-		personidentRepository.upsert(identer.toSet())
+		personidentRepository.upsert(identer)
 
 		val faktiskeIdenter = personidentRepository.getAllForPerson(person.id)
 
-		faktiskeIdenter.any { it.ident == identer[0].ident && it.historisk } shouldBe true
-		faktiskeIdenter.any { it.ident == identer[1].ident && !it.historisk } shouldBe true
+		faktiskeIdenter.map { it.ident } shouldContainAll identer.map { it.ident }
 	}
 }

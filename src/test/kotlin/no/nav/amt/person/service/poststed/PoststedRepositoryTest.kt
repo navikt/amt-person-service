@@ -50,7 +50,10 @@ class PoststedRepositoryTest(
 		fun `oppdaterPoststed - postnummer finnes i db men ikke i oppdatert liste - sletter poststed`() {
 			val postnrUtenStraume = postnumreInTest.filterNot { it.postnummer == "5341" }.toSet()
 
-			sut.oppdaterPoststed(postnrUtenStraume, UUID.randomUUID())
+			sut.oppdaterPoststed(
+				oppdatertePostnummer = postnrUtenStraume,
+				sporingsId = UUID.randomUUID(),
+			)
 
 			val allePoststeder = sut.getAllePoststeder()
 

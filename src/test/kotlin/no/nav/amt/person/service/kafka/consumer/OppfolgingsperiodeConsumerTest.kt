@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import no.nav.amt.deltaker.bff.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData.lagNavBruker
@@ -69,14 +70,14 @@ class OppfolgingsperiodeConsumerTest(
 				startDato = ZonedDateTime.now().minusWeeks(1),
 				sluttDato = null,
 			)
+
 		mockPdlHttpServer.mockHentIdenter(sisteOppfolgingsperiodeV1.aktorId, "ukjent ident")
 		kafkaMessageSender.sendTilOppfolgingsperiodeTopic(sisteOppfolgingsperiodeV1)
 
 		withLogCapture(OppfolgingsperiodeConsumer::class.java.name) { loggingEvents ->
 			await().untilAsserted {
-				loggingEvents.any {
-					it.message == "Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering"
-				} shouldBe true
+				loggingEvents.map { it.message } shouldContain
+					"Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering"
 			}
 		}
 	}

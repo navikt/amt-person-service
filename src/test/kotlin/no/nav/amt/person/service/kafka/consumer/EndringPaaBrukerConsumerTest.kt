@@ -33,8 +33,10 @@ class EndringPaaBrukerConsumerTest {
 			objectMapper.writeValueAsString(KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null)),
 		)
 
-		verify(exactly = 0) { navBrukerRepository.get(any<String>()) }
-		verify(exactly = 0) { navEnhetService.hentEllerOpprettNavEnhet(any()) }
-		verify(exactly = 0) { navBrukerService.upsert(any()) }
+		verify(exactly = 0) {
+			navBrukerRepository.get(any<String>())
+			navEnhetService.hentEllerOpprettNavEnhet(any())
+			navBrukerService.upsert(any())
+		}
 	}
 }

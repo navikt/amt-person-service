@@ -185,8 +185,8 @@ class NavBrukerRepositoryTest(
 			val navBruker = TestData.lagNavBruker()
 
 			testDataRepository.insertPerson(navBruker.person)
-			testDataRepository.insertNavAnsatt(navBruker.navVeileder!!)
-			testDataRepository.insertNavEnhet(navBruker.navEnhet!!)
+			testDataRepository.insertNavAnsatt(navBruker.navVeileder.shouldNotBeNull())
+			testDataRepository.insertNavEnhet(navBruker.navEnhet.shouldNotBeNull())
 
 			brukerRepository.upsert(navBruker)
 
@@ -200,8 +200,8 @@ class NavBrukerRepositoryTest(
 			val navBruker = TestData.lagNavBruker(adressebeskyttelse = Adressebeskyttelse.FORTROLIG, adresse = null)
 
 			testDataRepository.insertPerson(navBruker.person)
-			testDataRepository.insertNavAnsatt(navBruker.navVeileder!!)
-			testDataRepository.insertNavEnhet(navBruker.navEnhet!!)
+			testDataRepository.insertNavAnsatt(navBruker.navVeileder.shouldNotBeNull())
+			testDataRepository.insertNavEnhet(navBruker.navEnhet.shouldNotBeNull())
 
 			brukerRepository.upsert(navBruker)
 

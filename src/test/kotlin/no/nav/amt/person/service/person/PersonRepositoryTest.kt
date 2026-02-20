@@ -2,6 +2,7 @@ package no.nav.amt.person.service.person
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -67,9 +68,7 @@ class PersonRepositoryTest(
 				),
 			)
 
-		personer shouldHaveSize 2
-		personer.any { it.id == person1.id } shouldBe true
-		personer.any { it.id == person2.id } shouldBe true
+		personer.map { it.id } shouldContainAll listOf(person1.id, person2.id)
 	}
 
 	@Test

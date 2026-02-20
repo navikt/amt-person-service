@@ -71,8 +71,7 @@ class NavAnsattProducerTest(
 		val records = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
 
 		records.shouldNotBeNull()
-		records.any { it.key() == endretAnsatt.id.toString() } shouldBe true
-		records.any { it.key() == uendretAnsatt.id.toString() } shouldBe false
+		records.map { it.key() } shouldBe listOf(endretAnsatt.id.toString())
 	}
 
 	private fun ansattTilV1Json(ansatt: NavAnsattDbo): String =

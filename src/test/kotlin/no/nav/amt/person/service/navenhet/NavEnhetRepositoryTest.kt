@@ -2,7 +2,7 @@ package no.nav.amt.person.service.navenhet
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -25,11 +25,13 @@ class NavEnhetRepositoryTest(
 
 		val faktiskEnhet = enhetRepository.get(enhet.id)
 
-		faktiskEnhet.id shouldBe enhet.id
-		faktiskEnhet.enhetId shouldBe enhet.enhetId
-		faktiskEnhet.navn shouldBe enhet.navn
-		faktiskEnhet.createdAt shouldBeEqualTo enhet.createdAt
-		faktiskEnhet.modifiedAt shouldBeEqualTo enhet.modifiedAt
+		assertSoftly(faktiskEnhet) {
+			id shouldBe enhet.id
+			enhetId shouldBe enhet.enhetId
+			navn shouldBe enhet.navn
+			createdAt shouldBeEqualTo enhet.createdAt
+			modifiedAt shouldBeEqualTo enhet.modifiedAt
+		}
 	}
 
 	@Test
@@ -72,9 +74,11 @@ class NavEnhetRepositoryTest(
 
 		val faktiskEnhet = enhetRepository.get(enhet.id)
 
-		faktiskEnhet.id shouldBe enhet.id
-		faktiskEnhet.enhetId shouldBe enhet.enhetId
-		faktiskEnhet.navn shouldBe enhet.navn
+		assertSoftly(faktiskEnhet) {
+			id shouldBe enhet.id
+			enhetId shouldBe enhet.enhetId
+			navn shouldBe enhet.navn
+		}
 	}
 
 	@Test
@@ -87,14 +91,13 @@ class NavEnhetRepositoryTest(
 	fun `getAll - flere enheter - returnerer flere enheter`() {
 		val enhet1 = TestData.lagNavEnhet()
 		val enhet2 = TestData.lagNavEnhet()
+
 		testDataRepository.insertNavEnhet(enhet1)
 		testDataRepository.insertNavEnhet(enhet2)
 
 		val enheter = enhetRepository.getAll()
 
-		enheter shouldHaveSize 2
-		enheter.find { it.id == enhet1.id } shouldNotBe null
-		enheter.find { it.id == enhet2.id } shouldNotBe null
+		enheter.shouldContainAll(listOf(enhet1, enhet2))
 	}
 
 	@Test
