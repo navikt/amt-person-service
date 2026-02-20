@@ -9,7 +9,7 @@ class KodeverkResponseMappingTest {
 	fun `toPostnummerListe - reell respons fra kodeverk - kodeverkresponse mappes riktig`() {
 		val kodeverkrespons =
 			staticObjectMapper.readValue(
-				KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
+				javaClass.getResourceAsStream("/kodeverkrespons.json"),
 				GetKodeverkKoderBetydningerResponse::class.java,
 			)
 
