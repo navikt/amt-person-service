@@ -51,17 +51,11 @@ object KafkaMessageCreator {
 		personidenter = personidenter,
 		navn =
 			Navn(
-				// fornavn =
 				fornavn,
-				// mellomnavn =
 				mellomnavn,
-				// etternavn =
 				etternavn,
-				// forkortetNavn =
 				"forkortetNavn",
-				// originaltNavn =
 				null,
-				// gyldigFraOgMed =
 				LocalDate.now(),
 			),
 		adressebeskyttelse = null,
@@ -74,23 +68,14 @@ object KafkaMessageCreator {
 		adressebeskyttelse: Adressebeskyttelse?,
 		opplysningsType: OpplysningsType,
 	) = Personhendelse(
-		// hendelseId =
 		UUID.randomUUID().toString(),
-		// personidenter =
 		personidenter,
-		// master =
 		"FREG",
-		// opprettet =
 		ZonedDateTime.now().toInstant(),
-		// opplysningstype =
 		opplysningsType.toString(),
-		// endringstype =
 		Endringstype.OPPRETTET,
-		// tidligereHendelseId =
 		null,
-		// adressebeskyttelse =
 		adressebeskyttelse,
-		// navn =
 		navn,
 	)
 }
