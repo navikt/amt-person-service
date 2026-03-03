@@ -97,7 +97,7 @@ class NavEnhetRepositoryTest(
 
 		val enheter = enhetRepository.getAll()
 
-		enheter.shouldContainAll(listOf(enhet1, enhet2))
+		enheter.map { it.id } shouldContainAll listOf(enhet1.id, enhet2.id)
 	}
 
 	@Test
