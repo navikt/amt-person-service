@@ -31,7 +31,7 @@ val confluentVersion = "8.1.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.8.0"
-val jacksonModuleKotlinVersion = "3.0.4"
+val jacksonModuleKotlinVersion = "3.1.0"
 val amtLibVersion = "1.2026.02.17_13.55-de9b1752e174"
 
 // fjernes ved neste release av org.apache.kafka:kafka-clients
