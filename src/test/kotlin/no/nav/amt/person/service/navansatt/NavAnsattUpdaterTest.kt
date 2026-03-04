@@ -6,7 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.amt.deltaker.bff.utils.withLogCapture
+import no.nav.amt.lib.testing.utils.withLogCapture
 import no.nav.amt.person.service.clients.nom.NomClientImpl
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData

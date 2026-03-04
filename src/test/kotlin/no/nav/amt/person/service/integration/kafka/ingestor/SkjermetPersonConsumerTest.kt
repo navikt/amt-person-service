@@ -2,7 +2,7 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
-import no.nav.amt.deltaker.bff.utils.withLogCapture
+import no.nav.amt.lib.testing.utils.withLogCapture
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
