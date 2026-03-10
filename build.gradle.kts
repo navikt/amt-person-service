@@ -21,7 +21,7 @@ repositories {
 
 val commonVersion = "3.2026.03.03_07.58-86d37775258a"
 val okhttp3Version = "5.3.2"
-val kotestVersion = "6.1.3"
+val kotestVersion = "6.1.4"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
 val tokenSupportVersion = "6.0.3"
 val mockkVersion = "1.14.9"
@@ -46,7 +46,7 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation("at.yawk.lz4:lz4-java:1.10.3") // fjernes ved neste release av org.apache.kafka:kafka-clients
+    implementation("at.yawk.lz4:lz4-java:1.10.4") // fjernes ved neste release av org.apache.kafka:kafka-clients
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
