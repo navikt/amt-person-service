@@ -19,7 +19,7 @@ repositories {
     maven { url = uri("https://packages.confluent.io/maven/") }
 }
 
-val commonVersion = "3.2026.03.03_07.58-86d37775258a"
+val commonVersion = "3.2026.03.04_12.35-b34c347c6239"
 val okhttp3Version = "5.3.2"
 val kotestVersion = "6.1.6"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
