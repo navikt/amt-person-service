@@ -34,20 +34,7 @@ val ktLintVersion = "1.8.0"
 val jacksonModuleKotlinVersion = "3.1.0"
 val amtLibVersion = "1.2026.03.01_23.16-831b1856e93b"
 
-// fjernes ved neste release av org.apache.kafka:kafka-clients
-configurations.configureEach {
-    resolutionStrategy {
-        capabilitiesResolution {
-            withCapability("org.lz4:lz4-java") {
-                select(candidates.first { (it.id as ModuleComponentIdentifier).group == "at.yawk.lz4" })
-            }
-        }
-    }
-}
-
 dependencies {
-    implementation("at.yawk.lz4:lz4-java:1.10.4") // fjernes ved neste release av org.apache.kafka:kafka-clients
-
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
