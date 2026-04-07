@@ -2,7 +2,7 @@ plugins {
     val kotlinVersion = libs.versions.kotlin.version
 
     kotlin("jvm")
-    id("org.springframework.boot") version "4.0.4"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -21,7 +21,7 @@ repositories {
 
 val commonVersion = "3.2026.03.04_12.35-b34c347c6239"
 val okhttp3Version = "5.3.2"
-val kotestVersion = "6.1.7"
+val kotestVersion = "6.1.10"
 val poaoTilgangVersion = "2025.11.03_13.40-18456d0598be"
 val tokenSupportVersion = "6.0.4"
 val mockkVersion = "1.14.9"
@@ -31,7 +31,7 @@ val confluentVersion = "8.1.1"
 val mockOauth2ServerVersion = "3.0.1"
 val logstashEncoderVersion = "9.0"
 val ktLintVersion = "1.8.0"
-val jacksonModuleKotlinVersion = "3.1.0"
+val jacksonModuleKotlinVersion = "3.1.1"
 val amtLibVersion = "1.2026.03.01_23.16-831b1856e93b"
 
 dependencies {
