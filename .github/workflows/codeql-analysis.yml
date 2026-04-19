@@ -32,14 +32,14 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '24'
+          java-version: 25
           cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build artifacts
-        run: ./gradlew clean build -x test --no-build-cache --console=plain --no-daemon
+        run: ./gradlew assemble -x test --no-build-cache --console=plain --no-daemon
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
