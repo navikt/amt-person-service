@@ -9,11 +9,12 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
 class NorgClient(
-    private val url: String,
+    url: String,
     private val objectMapper: ObjectMapper,
     private val httpClient: OkHttpClient = baseClient(),
 ) {
     private val enhetIdPattern = Regex("^\\d{4}$")
+
     private val baseUrl =
         url.toHttpUrl().also {
             require(it.scheme == "https" || it.scheme == "http") { "Ugyldig url-skjema for norg-klient" }
@@ -30,18 +31,17 @@ class NorgClient(
 
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
         val validatedEnhetId = validateEnhetId(enhetId)
-        val endpointUrl =
-            baseUrl
-                .newBuilder()
-                .addPathSegments("norg2/api/v1/enhet")
-                .addPathSegment(validatedEnhetId)
-                .build()
-        val request =
-            Request
-                .Builder()
-                .url(endpointUrl)
-                .get()
-                .build()
+        val endpointUrl = baseUrl
+            .newBuilder()
+            .addPathSegments("norg2/api/v1/enhet")
+            .addPathSegment(validatedEnhetId)
+            .build()
+
+        val request = Request
+            .Builder()
+            .url(endpointUrl)
+            .get()
+            .build()
 
         httpClient.newCall(request).execute().use { response ->
             if (response.code == HttpStatus.NOT_FOUND.value()) {
@@ -60,12 +60,12 @@ class NorgClient(
 
     fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
         val validatedEnheter = validateEnhetIds(enheter)
-        val endpointUrl =
-            baseUrl
-                .newBuilder()
-                .addPathSegments("norg2/api/v1/enhet")
-                .addQueryParameter("enhetsnummerListe", validatedEnheter.joinToString(","))
-                .build()
+        val endpointUrl = baseUrl
+            .newBuilder()
+            .addPathSegments("norg2/api/v1/enhet")
+            .addQueryParameter("enhetsnummerListe", validatedEnheter.joinToString(","))
+            .build()
+
         val request =
             Request
                 .Builder()
