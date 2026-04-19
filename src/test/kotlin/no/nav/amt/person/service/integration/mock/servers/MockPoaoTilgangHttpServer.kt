@@ -16,7 +16,7 @@ class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServ
 
             req.path == url &&
                 req.method == HttpMethod.POST.name() &&
-                data.keys.map { body.contains(it) }.all { true }
+                data.keys.all { body.contains(it) }
         }
 
         val response =
