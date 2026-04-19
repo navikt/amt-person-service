@@ -13,33 +13,33 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class TildeltVeilederConsumer(
-	private val pdlClient: PdlClient,
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navBrukerService: NavBrukerService,
-	private val navAnsattService: NavAnsattService,
-	private val objectMapper: ObjectMapper,
+    private val pdlClient: PdlClient,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navBrukerService: NavBrukerService,
+    private val navAnsattService: NavAnsattService,
+    private val objectMapper: ObjectMapper,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(value: String) {
-		val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederPayload>(value)
+    fun ingest(value: String) {
+        val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederPayload>(value)
 
-		val gjeldendeIdent =
-			pdlClient
-				.hentIdenter(sisteTildeltVeileder.aktorId)
-				.finnGjeldendeIdent()
-				.getOrThrow()
+        val gjeldendeIdent =
+            pdlClient
+                .hentIdenter(sisteTildeltVeileder.aktorId)
+                .finnGjeldendeIdent()
+                .getOrThrow()
 
-		val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
+        val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
-		if (brukerId == null) {
-			log.info("Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
-			return
-		}
+        if (brukerId == null) {
+            log.info("Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
+            return
+        }
 
-		val veileder = navAnsattService.hentEllerOpprettAnsatt(sisteTildeltVeileder.veilederId)
+        val veileder = navAnsattService.hentEllerOpprettAnsatt(sisteTildeltVeileder.veilederId)
 
-		navBrukerService.oppdaterNavVeileder(brukerId, veileder)
-		log.info("Tildelt veileder endret. Veileder ${veileder.id} tildelt til Nav-bruker $brukerId")
-	}
+        navBrukerService.oppdaterNavVeileder(brukerId, veileder)
+        log.info("Tildelt veileder endret. Veileder ${veileder.id} tildelt til Nav-bruker $brukerId")
+    }
 }

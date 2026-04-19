@@ -5,14 +5,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Oppfolgingsperiode(
-	val id: UUID,
-	val startdato: LocalDateTime,
-	val sluttdato: LocalDateTime?,
+    val id: UUID,
+    val startdato: LocalDateTime,
+    val sluttdato: LocalDateTime?,
 ) {
-	fun erAktiv(): Boolean {
-		val now = LocalDate.now()
-		return !(now.isBefore(startdato.toLocalDate()) || (sluttdato != null && !now.isBefore(sluttdato.toLocalDate())))
-	}
+    fun erAktiv(): Boolean {
+        val now = LocalDate.now()
+        return !(now.isBefore(startdato.toLocalDate()) || (sluttdato != null && !now.isBefore(sluttdato.toLocalDate())))
+    }
 }
 
 fun harAktivOppfolgingsperiode(oppfolgingsperioder: List<Oppfolgingsperiode>): Boolean = oppfolgingsperioder.find { it.erAktiv() } != null

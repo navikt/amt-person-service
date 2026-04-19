@@ -12,32 +12,32 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class EndringPaaBrukerConsumerTest(
-	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerRepository: NavBrukerRepository,
+    private val kafkaMessageSender: KafkaMessageSender,
+    private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
-	@Test
-	fun `ingest - bruker finnes, har ikke Nav-kontor - oppretter og oppdaterer Nav-kontor`() {
-		val navEnhet = TestData.lagNavEnhet()
-		val navBruker = TestData.lagNavBruker(navEnhet = null)
+    @Test
+    fun `ingest - bruker finnes, har ikke Nav-kontor - oppretter og oppdaterer Nav-kontor`() {
+        val navEnhet = TestData.lagNavEnhet()
+        val navBruker = TestData.lagNavBruker(navEnhet = null)
 
-		val kafkaPayload =
-			KafkaMessageCreator.lagEndringPaaBrukerMsg(
-				fodselsnummer = navBruker.person.personident,
-				oppfolgingsenhet = navEnhet.enhetId,
-			)
+        val kafkaPayload =
+            KafkaMessageCreator.lagEndringPaaBrukerMsg(
+                fodselsnummer = navBruker.person.personident,
+                oppfolgingsenhet = navEnhet.enhetId,
+            )
 
-		testDataRepository.insertNavBruker(navBruker)
+        testDataRepository.insertNavBruker(navBruker)
 
-		mockNorgHttpServer.addNavEnhet(navEnhet)
-		kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload)
+        mockNorgHttpServer.addNavEnhet(navEnhet)
+        kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload)
 
-		await().untilAsserted {
-			val faktiskBruker = navBrukerRepository.get(navBruker.id)
+        await().untilAsserted {
+            val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
-			assertSoftly(faktiskBruker.navEnhet.shouldNotBeNull()) {
-				enhetId shouldBe navEnhet.enhetId
-				navn shouldBe navEnhet.navn
-			}
-		}
-	}
+            assertSoftly(faktiskBruker.navEnhet.shouldNotBeNull()) {
+                enhetId shouldBe navEnhet.enhetId
+                navn shouldBe navEnhet.navn
+            }
+        }
+    }
 }

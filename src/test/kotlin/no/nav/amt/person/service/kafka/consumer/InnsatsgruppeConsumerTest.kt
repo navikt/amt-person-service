@@ -12,45 +12,45 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class InnsatsgruppeConsumerTest(
-	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerRepository: NavBrukerRepository,
+    private val kafkaMessageSender: KafkaMessageSender,
+    private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
-	@Test
-	fun `ingest - bruker finnes, ny innsatsgruppe - oppdaterer`() {
-		val navBruker = TestData.lagNavBruker(innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS)
-		testDataRepository.insertNavBruker(navBruker)
+    @Test
+    fun `ingest - bruker finnes, ny innsatsgruppe - oppdaterer`() {
+        val navBruker = TestData.lagNavBruker(innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS)
+        testDataRepository.insertNavBruker(navBruker)
 
-		val siste14aVedtak =
-			InnsatsgruppeConsumer.Siste14aVedtak(
-				aktorId = navBruker.person.personident,
-				innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
-			)
+        val siste14aVedtak =
+            InnsatsgruppeConsumer.Siste14aVedtak(
+                aktorId = navBruker.person.personident,
+                innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
+            )
 
-		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
+        mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, navBruker.person.personident)
+        kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
 
-		await().untilAsserted {
-			val faktiskBruker = navBrukerRepository.get(navBruker.id)
+        await().untilAsserted {
+            val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
-			faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
-		}
-	}
+            faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
+        }
+    }
 
-	@Test
-	fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
-		val siste14aVedtak =
-			InnsatsgruppeConsumer.Siste14aVedtak(
-				aktorId = "1234",
-				innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
-			)
-		mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
+    @Test
+    fun `ingest - bruker finnes ikke - oppdaterer ikke`() {
+        val siste14aVedtak =
+            InnsatsgruppeConsumer.Siste14aVedtak(
+                aktorId = "1234",
+                innsatsgruppe = InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS,
+            )
+        mockPdlHttpServer.mockHentIdenter(siste14aVedtak.aktorId, "ukjent ident")
+        kafkaMessageSender.sendTilInnsatsgruppeTopic(siste14aVedtak)
 
-		withLogCapture(InnsatsgruppeConsumer::class.java.name) { loggingEvents ->
-			await().untilAsserted {
-				loggingEvents.map { it.message } shouldContain
-					"Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
-			}
-		}
-	}
+        withLogCapture(InnsatsgruppeConsumer::class.java.name) { loggingEvents ->
+            await().untilAsserted {
+                loggingEvents.map { it.message } shouldContain
+                    "Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
+            }
+        }
+    }
 }

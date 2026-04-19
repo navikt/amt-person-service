@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class NavEnhetUpdateJob(
-	private val navEnhetRepository: NavEnhetRepository,
-	private val navEnhetService: NavEnhetService,
+    private val navEnhetRepository: NavEnhetRepository,
+    private val navEnhetService: NavEnhetService,
 ) {
-	@Scheduled(cron = "@daily")
-	@SchedulerLock(name = "NavEnhetUpdateJob", lockAtMostFor = "60m")
-	fun update() {
-		JobRunner.runAsync("oppdater_nav_enheter") { oppdaterEnheter() }
-	}
+    @Scheduled(cron = "@daily")
+    @SchedulerLock(name = "NavEnhetUpdateJob", lockAtMostFor = "60m")
+    fun update() {
+        JobRunner.runAsync("oppdater_nav_enheter") { oppdaterEnheter() }
+    }
 
-	private fun oppdaterEnheter() {
-		val enheter = navEnhetRepository.getAll()
-		navEnhetService.oppdaterNavEnheter(enheter)
-	}
+    private fun oppdaterEnheter() {
+        val enheter = navEnhetRepository.getAll()
+        navEnhetService.oppdaterNavEnheter(enheter)
+    }
 }

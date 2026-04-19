@@ -8,26 +8,26 @@ import okhttp3.mockwebserver.MockResponse
 import org.springframework.http.HttpStatus
 
 class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
-	fun mockHentKontaktinformasjon(navBruker: NavBrukerDbo) {
-		val response =
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value()) //
-				.setBody(
-					staticObjectMapper.writeValueAsString(
-						PostPersonerResponse(
-							mapOf(
-								navBruker.person.personident to
-									PostPersonerResponse.KontaktinformasjonDto(
-										personident = navBruker.person.personident,
-										epostadresse = navBruker.epost,
-										mobiltelefonnummer = navBruker.telefon,
-									),
-							),
-							feil = emptyMap(),
-						),
-					),
-				)
+    fun mockHentKontaktinformasjon(navBruker: NavBrukerDbo) {
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value()) //
+                .setBody(
+                    staticObjectMapper.writeValueAsString(
+                        PostPersonerResponse(
+                            mapOf(
+                                navBruker.person.personident to
+                                    PostPersonerResponse.KontaktinformasjonDto(
+                                        personident = navBruker.person.personident,
+                                        epostadresse = navBruker.epost,
+                                        mobiltelefonnummer = navBruker.telefon,
+                                    ),
+                            ),
+                            feil = emptyMap(),
+                        ),
+                    ),
+                )
 
-		addResponseHandler("/rest/v1/personer?inkluderSikkerDigitalPost=false", response)
-	}
+        addResponseHandler("/rest/v1/personer?inkluderSikkerDigitalPost=false", response)
+    }
 }

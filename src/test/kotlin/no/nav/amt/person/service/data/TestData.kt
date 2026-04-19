@@ -24,177 +24,176 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object TestData {
-	fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
+    fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
 
-	val navGrunerlokka =
-		NavEnhetDbo(
-			id = UUID(0L, 0L),
-			navn = "Nav Grünerløkka",
-			enhetId = "0315",
-		)
+    val navGrunerlokka =
+        NavEnhetDbo(
+            id = UUID(0L, 0L),
+            navn = "Nav Grünerløkka",
+            enhetId = "0315",
+        )
 
-	val orgTilknytning =
-		listOf(
-			NomQueries.HentRessurser.OrgTilknytning(
-				gyldigFom = LocalDate.of(2020, 1, 1),
-				gyldigTom = null,
-				orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
-				erDagligOppfolging = true,
-			),
-		)
+    val orgTilknytning =
+        listOf(
+            NomQueries.HentRessurser.OrgTilknytning(
+                gyldigFom = LocalDate.of(2020, 1, 1),
+                gyldigTom = null,
+                orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
+                erDagligOppfolging = true,
+            ),
+        )
 
-	fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
+    fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
 
-	fun randomEnhetId() = (1000..9999).random().toString()
+    fun randomEnhetId() = (1000..9999).random().toString()
 
-	fun lagPerson(
-		id: UUID = UUID.randomUUID(),
-		personident: String = randomIdent(),
-		fornavn: String = "Fornavn",
-		mellomnavn: String? = null,
-		etternavn: String = "Etternavn",
-		createdAt: LocalDateTime = LocalDateTime.now(),
-		modifiedAt: LocalDateTime = LocalDateTime.now(),
-	) = PersonDbo(
-		id,
-		personident,
-		fornavn,
-		mellomnavn,
-		etternavn,
-		createdAt,
-		modifiedAt,
-	)
+    fun lagPerson(
+        id: UUID = UUID.randomUUID(),
+        personident: String = randomIdent(),
+        fornavn: String = "Fornavn",
+        mellomnavn: String? = null,
+        etternavn: String = "Etternavn",
+        createdAt: LocalDateTime = LocalDateTime.now(),
+        modifiedAt: LocalDateTime = LocalDateTime.now(),
+    ) = PersonDbo(
+        id,
+        personident,
+        fornavn,
+        mellomnavn,
+        etternavn,
+        createdAt,
+        modifiedAt,
+    )
 
-	fun lagNavEnhet(
-		id: UUID = UUID.randomUUID(),
-		enhetId: String = randomEnhetId(),
-		navn: String = "Nav Enhet 1",
-		createdAt: LocalDateTime = LocalDateTime.now(),
-		modifiedAt: LocalDateTime = LocalDateTime.now(),
-	) = NavEnhetDbo(id, enhetId, navn, createdAt, modifiedAt)
+    fun lagNavEnhet(
+        id: UUID = UUID.randomUUID(),
+        enhetId: String = randomEnhetId(),
+        navn: String = "Nav Enhet 1",
+        createdAt: LocalDateTime = LocalDateTime.now(),
+        modifiedAt: LocalDateTime = LocalDateTime.now(),
+    ) = NavEnhetDbo(id, enhetId, navn, createdAt, modifiedAt)
 
-	fun lagNavAnsatt(
-		id: UUID = UUID.randomUUID(),
-		navIdent: String = randomNavIdent(),
-		navn: String = "Nav Ansatt",
-		telefon: String = "99988777",
-		epost: String = "ansatt@nav.no",
-		createdAt: LocalDateTime = LocalDateTime.now(),
-		modifiedAt: LocalDateTime = LocalDateTime.now(),
-	) = NavAnsattDbo(
-		id = id,
-		navIdent = navIdent,
-		navn = navn,
-		telefon = telefon,
-		epost = epost,
-		navEnhetId = navGrunerlokka.id,
-		createdAt = createdAt,
-		modifiedAt = modifiedAt,
-	)
+    fun lagNavAnsatt(
+        id: UUID = UUID.randomUUID(),
+        navIdent: String = randomNavIdent(),
+        navn: String = "Nav Ansatt",
+        telefon: String = "99988777",
+        epost: String = "ansatt@nav.no",
+        createdAt: LocalDateTime = LocalDateTime.now(),
+        modifiedAt: LocalDateTime = LocalDateTime.now(),
+    ) = NavAnsattDbo(
+        id = id,
+        navIdent = navIdent,
+        navn = navn,
+        telefon = telefon,
+        epost = epost,
+        navEnhetId = navGrunerlokka.id,
+        createdAt = createdAt,
+        modifiedAt = modifiedAt,
+    )
 
-	fun lagNavBruker(
-		id: UUID = UUID.randomUUID(),
-		person: PersonDbo = lagPerson(),
-		navVeileder: NavAnsattDbo? = lagNavAnsatt(),
-		navEnhet: NavEnhetDbo? = lagNavEnhet(),
-		telefon: String? = "77788999",
-		epost: String? = "nav_bruker@gmail.com",
-		erSkjermet: Boolean = false,
-		adresse: Adresse? = null,
-		sisteKrrSync: LocalDateTime? = null,
-		createdAt: LocalDateTime = LocalDateTime.now(),
-		modifiedAt: LocalDateTime = LocalDateTime.now(),
-		adressebeskyttelse: Adressebeskyttelse? = null,
-		oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
-		innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS,
-	) = NavBrukerDbo(
-		id = id,
-		person = person,
-		navVeileder = navVeileder,
-		navEnhet = navEnhet,
-		telefon = telefon,
-		epost = epost,
-		erSkjermet = erSkjermet,
-		adresse = adresse,
-		sisteKrrSync = sisteKrrSync,
-		adressebeskyttelse = adressebeskyttelse,
-		oppfolgingsperioder = oppfolgingsperioder,
-		innsatsgruppe = innsatsgruppe,
-		createdAt = createdAt,
-		modifiedAt = modifiedAt,
-	)
+    fun lagNavBruker(
+        id: UUID = UUID.randomUUID(),
+        person: PersonDbo = lagPerson(),
+        navVeileder: NavAnsattDbo? = lagNavAnsatt(),
+        navEnhet: NavEnhetDbo? = lagNavEnhet(),
+        telefon: String? = "77788999",
+        epost: String? = "nav_bruker@gmail.com",
+        erSkjermet: Boolean = false,
+        adresse: Adresse? = null,
+        sisteKrrSync: LocalDateTime? = null,
+        createdAt: LocalDateTime = LocalDateTime.now(),
+        modifiedAt: LocalDateTime = LocalDateTime.now(),
+        adressebeskyttelse: Adressebeskyttelse? = null,
+        oppfolgingsperioder: List<Oppfolgingsperiode> = listOf(lagOppfolgingsperiode()),
+        innsatsgruppe: InnsatsgruppeV1? = InnsatsgruppeV1.STANDARD_INNSATS,
+    ) = NavBrukerDbo(
+        id = id,
+        person = person,
+        navVeileder = navVeileder,
+        navEnhet = navEnhet,
+        telefon = telefon,
+        epost = epost,
+        erSkjermet = erSkjermet,
+        adresse = adresse,
+        sisteKrrSync = sisteKrrSync,
+        adressebeskyttelse = adressebeskyttelse,
+        oppfolgingsperioder = oppfolgingsperioder,
+        innsatsgruppe = innsatsgruppe,
+        createdAt = createdAt,
+        modifiedAt = modifiedAt,
+    )
 
-	fun lagOppfolgingsperiode(
-		id: UUID = UUID.randomUUID(),
-		startdato: LocalDateTime = LocalDateTime.now().minusMonths(1),
-		sluttdato: LocalDateTime? = null,
-	) = Oppfolgingsperiode(
-		id,
-		startdato,
-		sluttdato,
-	)
+    fun lagOppfolgingsperiode(
+        id: UUID = UUID.randomUUID(),
+        startdato: LocalDateTime = LocalDateTime.now().minusMonths(1),
+        sluttdato: LocalDateTime? = null,
+    ) = Oppfolgingsperiode(
+        id,
+        startdato,
+        sluttdato,
+    )
 
-	fun lagPdlPerson(
-		person: PersonDbo,
-		telefon: String? = null,
-		adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
-		identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
-		adresse: Adresse? = lagAdresse(),
-	) = PdlPerson(
-		fornavn = person.fornavn,
-		mellomnavn = person.mellomnavn,
-		etternavn = person.etternavn,
-		telefonnummer = telefon,
-		adressebeskyttelseGradering = adressebeskyttelseGradering,
-		identer = identer,
-		adresse = adresse,
-	)
+    fun lagPdlPerson(
+        person: PersonDbo,
+        telefon: String? = null,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering? = null,
+        identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
+        adresse: Adresse? = lagAdresse(),
+    ) = PdlPerson(
+        fornavn = person.fornavn,
+        mellomnavn = person.mellomnavn,
+        etternavn = person.etternavn,
+        telefonnummer = telefon,
+        adressebeskyttelseGradering = adressebeskyttelseGradering,
+        identer = identer,
+        adresse = adresse,
+    )
 
-	fun lagPersonident(
-		ident: String = randomIdent(),
-		personId: UUID = UUID.randomUUID(),
-		historisk: Boolean = false,
-		type: IdentType = IdentType.FOLKEREGISTERIDENT,
-		modifiedAt: LocalDateTime = LocalDateTime.now(),
-		createdAt: LocalDateTime = LocalDateTime.now(),
-	) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
+    fun lagPersonident(
+        ident: String = randomIdent(),
+        personId: UUID = UUID.randomUUID(),
+        historisk: Boolean = false,
+        type: IdentType = IdentType.FOLKEREGISTERIDENT,
+        modifiedAt: LocalDateTime = LocalDateTime.now(),
+        createdAt: LocalDateTime = LocalDateTime.now(),
+    ) = PersonidentDbo(ident, personId, historisk, type, modifiedAt, createdAt)
 
-	fun lagAdresse(): Adresse =
-		Adresse(
-			bostedsadresse =
-				Bostedsadresse(
-					coAdressenavn = "C/O Gutterommet",
-					vegadresse = null,
-					matrikkeladresse =
-						Matrikkeladresse(
-							tilleggsnavn = "Gården",
-							postnummer = "0484",
-							poststed = "OSLO",
-						),
-				),
-			oppholdsadresse = null,
-			kontaktadresse =
-				Kontaktadresse(
-					coAdressenavn = null,
-					vegadresse =
-						Vegadresse(
-							husnummer = "1",
-							husbokstav = null,
-							adressenavn = "Gate",
-							tilleggsnavn = null,
-							postnummer = "1234",
-							poststed = "MOSS",
-						),
-					postboksadresse = null,
-				),
-		)
+    fun lagAdresse(): Adresse = Adresse(
+        bostedsadresse =
+            Bostedsadresse(
+                coAdressenavn = "C/O Gutterommet",
+                vegadresse = null,
+                matrikkeladresse =
+                    Matrikkeladresse(
+                        tilleggsnavn = "Gården",
+                        postnummer = "0484",
+                        poststed = "OSLO",
+                    ),
+            ),
+        oppholdsadresse = null,
+        kontaktadresse =
+            Kontaktadresse(
+                coAdressenavn = null,
+                vegadresse =
+                    Vegadresse(
+                        husnummer = "1",
+                        husbokstav = null,
+                        adressenavn = "Gate",
+                        tilleggsnavn = null,
+                        postnummer = "1234",
+                        poststed = "MOSS",
+                    ),
+                postboksadresse = null,
+            ),
+    )
 
-	val postnumreInTest =
-		setOf(
-			Postnummer("0484", "OSLO"),
-			Postnummer("5341", "STRAUME"),
-			Postnummer("5365", "TURØY"),
-			Postnummer("5449", "BØMLO"),
-			Postnummer("9609", "NORDRE SEILAND"),
-		)
+    val postnumreInTest =
+        setOf(
+            Postnummer("0484", "OSLO"),
+            Postnummer("5341", "STRAUME"),
+            Postnummer("5365", "TURØY"),
+            Postnummer("5449", "BØMLO"),
+            Postnummer("9609", "NORDRE SEILAND"),
+        )
 }

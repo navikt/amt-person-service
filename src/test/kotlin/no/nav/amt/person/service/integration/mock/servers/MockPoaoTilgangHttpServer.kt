@@ -8,22 +8,22 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 class MockPoaoTilgangHttpServer : MockHttpServer(name = "MockPoaoTilgangHttpServer") {
-	fun addErSkjermetResponse(data: Map<String, Boolean>) {
-		val url = "/api/v1/skjermet-person"
+    fun addErSkjermetResponse(data: Map<String, Boolean>) {
+        val url = "/api/v1/skjermet-person"
 
-		val predicate = { req: RecordedRequest ->
-			val body = req.body.readUtf8()
+        val predicate = { req: RecordedRequest ->
+            val body = req.body.readUtf8()
 
-			req.path == url &&
-				req.method == HttpMethod.POST.name() &&
-				data.keys.map { body.contains(it) }.all { true }
-		}
+            req.path == url &&
+                req.method == HttpMethod.POST.name() &&
+                data.keys.all { body.contains(it) }
+        }
 
-		val response =
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody(staticObjectMapper.writeValueAsString(data))
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody(staticObjectMapper.writeValueAsString(data))
 
-		addResponseHandler(predicate, response)
-	}
+        addResponseHandler(predicate, response)
+    }
 }

@@ -12,37 +12,36 @@ import org.springframework.stereotype.Component
 
 @Component
 class AktorV2Consumer(
-	private val personService: PersonService,
+    private val personService: PersonService,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(
-		key: String,
-		value: Aktor?,
-	) {
-		if (value == null) {
-			TeamLogs.warn("Fikk tombstone for record med key=$key.")
-			log.warn("Fikk tombstone for Kafka-record. Se team logs for key. Behandler ikke meldingen.")
-			return
-		}
+    fun ingest(
+        key: String,
+        value: Aktor?,
+    ) {
+        if (value == null) {
+            TeamLogs.warn("Fikk tombstone for record med key=$key.")
+            log.warn("Fikk tombstone for Kafka-record. Se team logs for key. Behandler ikke meldingen.")
+            return
+        }
 
-		val identer =
-			value.identifikatorer
-				.map { Personident(it.idnummer, !it.gjeldende, it.type.toIdentType()) }
+        val identer =
+            value.identifikatorer
+                .map { Personident(it.idnummer, !it.gjeldende, it.type.toIdentType()) }
 
-		if (identer.finnGjeldendeIdent().isFailure) {
-			TeamLogs.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")
-			log.error("AktorV2 ingestor mottok bruker med 0 gjeldende ident(er). Se team logs for detaljer")
-			throw IllegalStateException("Kan ikke ingeste bruker med 0 gjeldende ident(er)")
-		}
+        if (identer.finnGjeldendeIdent().isFailure) {
+            TeamLogs.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")
+            log.error("AktorV2 ingestor mottok bruker med 0 gjeldende ident(er). Se team logs for detaljer")
+            throw IllegalStateException("Kan ikke ingeste bruker med 0 gjeldende ident(er)")
+        }
 
-		personService.oppdaterPersonIdent(identer)
-	}
+        personService.oppdaterPersonIdent(identer)
+    }
 }
 
-private fun Type.toIdentType(): IdentType =
-	when (this) {
-		Type.FOLKEREGISTERIDENT -> IdentType.FOLKEREGISTERIDENT
-		Type.NPID -> IdentType.NPID
-		Type.AKTORID -> IdentType.AKTORID
-	}
+private fun Type.toIdentType(): IdentType = when (this) {
+    Type.FOLKEREGISTERIDENT -> IdentType.FOLKEREGISTERIDENT
+    Type.NPID -> IdentType.NPID
+    Type.AKTORID -> IdentType.AKTORID
+}

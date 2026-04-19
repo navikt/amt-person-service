@@ -11,22 +11,22 @@ import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
 import org.junit.jupiter.api.Test
 
 class NavEnhetProducerTest(
-	private val kafkaProducerService: KafkaProducerService,
-	private val kafkaTopicProperties: KafkaTopicProperties,
+    private val kafkaProducerService: KafkaProducerService,
+    private val kafkaTopicProperties: KafkaTopicProperties,
 ) : IntegrationTestBase() {
-	@Test
-	fun `publiserNavEnhet - skal publisere enhet med riktig key og value`() {
-		val navEnhet = TestData.lagNavEnhet()
+    @Test
+    fun `publiserNavEnhet - skal publisere enhet med riktig key og value`() {
+        val navEnhet = TestData.lagNavEnhet()
 
-		kafkaProducerService.publiserNavEnhet(navEnhet)
+        kafkaProducerService.publiserNavEnhet(navEnhet)
 
-		val records = consume(kafkaTopicProperties.amtNavEnhetTopic)
-		records.shouldNotBeNull()
-		val record = records.first { it.key() == navEnhet.id.toString() }
+        val records = consume(kafkaTopicProperties.amtNavEnhetTopic)
+        records.shouldNotBeNull()
+        val record = records.first { it.key() == navEnhet.id.toString() }
 
-		val forventetValue = objectMapper.writeValueAsString(NavEnhetDtoV1.fromDbo(navEnhet))
+        val forventetValue = objectMapper.writeValueAsString(NavEnhetDtoV1.fromDbo(navEnhet))
 
-		record.key() shouldBe navEnhet.id.toString()
-		record.value() shouldBe forventetValue
-	}
+        record.key() shouldBe navEnhet.id.toString()
+        record.value() shouldBe forventetValue
+    }
 }

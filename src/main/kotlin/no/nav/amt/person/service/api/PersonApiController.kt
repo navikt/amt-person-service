@@ -33,100 +33,100 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api")
 class PersonApiController(
-	private val navAnsattRepository: NavAnsattRepository,
-	private val navAnsattService: NavAnsattService,
-	private val navBrukerService: NavBrukerService,
-	private val navEnhetsRepository: NavEnhetRepository,
-	private val navEnhetService: NavEnhetService,
-	private val arrangorAnsattService: ArrangorAnsattService,
-	private val pdlClient: PdlClient,
-	private val authService: AuthService,
+    private val navAnsattRepository: NavAnsattRepository,
+    private val navAnsattService: NavAnsattService,
+    private val navBrukerService: NavBrukerService,
+    private val navEnhetsRepository: NavEnhetRepository,
+    private val navEnhetService: NavEnhetService,
+    private val arrangorAnsattService: ArrangorAnsattService,
+    private val pdlClient: PdlClient,
+    private val authService: AuthService,
 ) {
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/nav-bruker")
-	fun hentEllerOpprettNavBruker(
-		@RequestBody request: NavBrukerRequest,
-	): NavBrukerDto {
-		authService.verifyRequestIsMachineToMachine()
-		return NavBrukerDto.fromDbo(
-			navBrukerService.hentEllerOpprettNavBruker(request.personident),
-		)
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/nav-bruker")
+    fun hentEllerOpprettNavBruker(
+        @RequestBody request: NavBrukerRequest,
+    ): NavBrukerDto {
+        authService.verifyRequestIsMachineToMachine()
+        return NavBrukerDto.fromDbo(
+            navBrukerService.hentEllerOpprettNavBruker(request.personident),
+        )
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/nav-bruker-fodselsar")
-	fun hentNavBrukerFodselsar(
-		@RequestBody request: NavBrukerRequest,
-	): NavBrukerFodselsdatoDto {
-		authService.verifyRequestIsMachineToMachine()
-		return NavBrukerFodselsdatoDto(pdlClient.hentPersonFodselsar(request.personident))
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/nav-bruker-fodselsar")
+    fun hentNavBrukerFodselsar(
+        @RequestBody request: NavBrukerRequest,
+    ): NavBrukerFodselsdatoDto {
+        authService.verifyRequestIsMachineToMachine()
+        return NavBrukerFodselsdatoDto(pdlClient.hentPersonFodselsar(request.personident))
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/nav-bruker/kontaktinformasjon")
-	fun hentNavBrukerKontaktinformasjon(
-		@RequestBody personidenter: Set<String>,
-	): Map<String, Kontaktinformasjon> {
-		authService.verifyRequestIsMachineToMachine()
-		return navBrukerService.fetchOppdatertKontaktinfo(personidenter)
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/nav-bruker/kontaktinformasjon")
+    fun hentNavBrukerKontaktinformasjon(
+        @RequestBody personidenter: Set<String>,
+    ): Map<String, Kontaktinformasjon> {
+        authService.verifyRequestIsMachineToMachine()
+        return navBrukerService.fetchOppdatertKontaktinfo(personidenter)
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/nav-ansatt")
-	fun hentEllerOpprettNavAnsatt(
-		@RequestBody request: NavAnsattRequest,
-	): NavAnsattDto {
-		authService.verifyRequestIsMachineToMachine()
-		return NavAnsattDto.fromDbo(navAnsattService.hentEllerOpprettAnsatt(request.navIdent))
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/nav-ansatt")
+    fun hentEllerOpprettNavAnsatt(
+        @RequestBody request: NavAnsattRequest,
+    ): NavAnsattDto {
+        authService.verifyRequestIsMachineToMachine()
+        return NavAnsattDto.fromDbo(navAnsattService.hentEllerOpprettAnsatt(request.navIdent))
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@GetMapping("/nav-ansatt/{id}")
-	fun hentNavAnsatt(
-		@PathVariable id: UUID,
-	): NavAnsattDto {
-		authService.verifyRequestIsMachineToMachine()
-		return NavAnsattDto.fromDbo(navAnsattRepository.get(id))
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @GetMapping("/nav-ansatt/{id}")
+    fun hentNavAnsatt(
+        @PathVariable id: UUID,
+    ): NavAnsattDto {
+        authService.verifyRequestIsMachineToMachine()
+        return NavAnsattDto.fromDbo(navAnsattRepository.get(id))
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/arrangor-ansatt")
-	fun hentEllerOpprettArrangorAnsatt(
-		@RequestBody request: ArrangorAnsattRequest,
-	): ArrangorAnsattDto {
-		authService.verifyRequestIsMachineToMachine()
-		val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personident)
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/arrangor-ansatt")
+    fun hentEllerOpprettArrangorAnsatt(
+        @RequestBody request: ArrangorAnsattRequest,
+    ): ArrangorAnsattDto {
+        authService.verifyRequestIsMachineToMachine()
+        val person = arrangorAnsattService.hentEllerOpprettAnsatt(request.personident)
 
-		return ArrangorAnsattDto.fromDbo(person)
-	}
+        return ArrangorAnsattDto.fromDbo(person)
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/nav-enhet")
-	fun hentEllerOpprettNavEnhet(
-		@RequestBody request: NavEnhetRequest,
-	): NavEnhetDto {
-		authService.verifyRequestIsMachineToMachine()
-		return navEnhetService
-			.hentEllerOpprettNavEnhet(request.enhetId)
-			?.let { NavEnhetDto.fromDbo(it) }
-			?: throw NoSuchElementException("Klarte ikke å hente Nav-enhet med enhet-id: ${request.enhetId}")
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/nav-enhet")
+    fun hentEllerOpprettNavEnhet(
+        @RequestBody request: NavEnhetRequest,
+    ): NavEnhetDto {
+        authService.verifyRequestIsMachineToMachine()
+        return navEnhetService
+            .hentEllerOpprettNavEnhet(request.enhetId)
+            ?.let { NavEnhetDto.fromDbo(it) }
+            ?: throw NoSuchElementException("Klarte ikke å hente Nav-enhet med enhet-id: ${request.enhetId}")
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@GetMapping("/nav-enhet/{id}")
-	fun hentNavEnhet(
-		@PathVariable id: UUID,
-	): NavEnhetDto {
-		authService.verifyRequestIsMachineToMachine()
-		return NavEnhetDto.fromDbo(navEnhetsRepository.get(id))
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @GetMapping("/nav-enhet/{id}")
+    fun hentNavEnhet(
+        @PathVariable id: UUID,
+    ): NavEnhetDto {
+        authService.verifyRequestIsMachineToMachine()
+        return NavEnhetDto.fromDbo(navEnhetsRepository.get(id))
+    }
 
-	@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
-	@PostMapping("/person/adressebeskyttelse")
-	fun hentAdressebeskyttelse(
-		@RequestBody request: AdressebeskyttelseRequest,
-	): AdressebeskyttelseDto {
-		authService.verifyRequestIsMachineToMachine()
-		return AdressebeskyttelseDto(pdlClient.hentAdressebeskyttelse(request.personident))
-	}
+    @ProtectedWithClaims(issuer = Issuer.AZURE_AD)
+    @PostMapping("/person/adressebeskyttelse")
+    fun hentAdressebeskyttelse(
+        @RequestBody request: AdressebeskyttelseRequest,
+    ): AdressebeskyttelseDto {
+        authService.verifyRequestIsMachineToMachine()
+        return AdressebeskyttelseDto(pdlClient.hentAdressebeskyttelse(request.personident))
+    }
 }

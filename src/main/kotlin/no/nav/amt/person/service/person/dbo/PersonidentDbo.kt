@@ -5,10 +5,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class PersonidentDbo(
-	val ident: String,
-	val personId: UUID,
-	val historisk: Boolean,
-	val type: IdentType,
-	val modifiedAt: LocalDateTime = LocalDateTime.now(),
-	val createdAt: LocalDateTime = LocalDateTime.now(),
+    val ident: String,
+    val personId: UUID,
+    val historisk: Boolean,
+    val type: IdentType,
+    val modifiedAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 )

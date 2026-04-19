@@ -9,22 +9,22 @@ import okhttp3.mockwebserver.MockResponse
 import org.springframework.http.HttpStatus
 
 class MockNorgHttpServer : MockHttpServer(name = "MockNorgHttpServer") {
-	companion object {
-		private const val BASE_URL = "/norg2/api/v1/enhet"
-	}
+    companion object {
+        private const val BASE_URL = "/norg2/api/v1/enhet"
+    }
 
-	fun addNavEnhetGrunerLokka() {
-		addNavEnhet(navGrunerlokka)
-	}
+    fun addNavEnhetGrunerLokka() {
+        addNavEnhet(navGrunerlokka)
+    }
 
-	fun addNavEnhet(navEnhet: NavEnhetDbo) {
-		val response =
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody(
-					staticObjectMapper.writeValueAsString(NorgNavEnhetDto.fromDbo(navEnhet)),
-				)
+    fun addNavEnhet(navEnhet: NavEnhetDbo) {
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody(
+                    staticObjectMapper.writeValueAsString(NorgNavEnhetDto.fromDbo(navEnhet)),
+                )
 
-		addResponseHandler("$BASE_URL/${navEnhet.enhetId}", response)
-	}
+        addResponseHandler("$BASE_URL/${navEnhet.enhetId}", response)
+    }
 }

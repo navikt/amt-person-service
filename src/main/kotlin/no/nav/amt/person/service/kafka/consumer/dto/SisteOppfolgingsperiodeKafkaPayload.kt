@@ -6,15 +6,14 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 data class SisteOppfolgingsperiodeKafkaPayload(
-	val uuid: UUID,
-	val aktorId: String,
-	val startDato: ZonedDateTime,
-	val sluttDato: ZonedDateTime?,
+    val uuid: UUID,
+    val aktorId: String,
+    val startDato: ZonedDateTime,
+    val sluttDato: ZonedDateTime?,
 ) {
-	fun toOppfolgingsperiode() =
-		Oppfolgingsperiode(
-			id = uuid,
-			startdato = startDato.toSystemZoneLocalDateTime(),
-			sluttdato = sluttDato?.toSystemZoneLocalDateTime(),
-		)
+    fun toOppfolgingsperiode() = Oppfolgingsperiode(
+        id = uuid,
+        startdato = startDato.toSystemZoneLocalDateTime(),
+        sluttdato = sluttDato?.toSystemZoneLocalDateTime(),
+    )
 }

@@ -18,62 +18,62 @@ import java.util.UUID
 
 @Service
 class KafkaProducerService(
-	private val kafkaTopicProperties: KafkaTopicProperties,
-	private val kafkaProducerClient: KafkaProducerClient<String, String>,
-	private val objectMapper: ObjectMapper,
+    private val kafkaTopicProperties: KafkaTopicProperties,
+    private val kafkaProducerClient: KafkaProducerClient<String, String>,
+    private val objectMapper: ObjectMapper,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun publiserNavBruker(navBruker: NavBrukerDbo) {
-		kafkaProducerClient.sendSync(
-			ProducerRecord(
-				kafkaTopicProperties.amtNavBrukerTopic,
-				navBruker.person.id.toString(),
-				objectMapper.writeValueAsString(NavBrukerDtoV1.fromDbo(navBruker)),
-			),
-		)
-		log.info("Publiserte Nav-bruker med personId ${navBruker.person.id} til topic")
-	}
+    fun publiserNavBruker(navBruker: NavBrukerDbo) {
+        kafkaProducerClient.sendSync(
+            ProducerRecord(
+                kafkaTopicProperties.amtNavBrukerTopic,
+                navBruker.person.id.toString(),
+                objectMapper.writeValueAsString(NavBrukerDtoV1.fromDbo(navBruker)),
+            ),
+        )
+        log.info("Publiserte Nav-bruker med personId ${navBruker.person.id} til topic")
+    }
 
-	fun publiserArrangorAnsatt(ansatt: PersonDbo) {
-		kafkaProducerClient.sendSync(
-			ProducerRecord(
-				kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic,
-				ansatt.id.toString(),
-				objectMapper.writeValueAsString(ArrangorAnsattDtoV1.fromDbo(ansatt)),
-			),
-		)
-	}
+    fun publiserArrangorAnsatt(ansatt: PersonDbo) {
+        kafkaProducerClient.sendSync(
+            ProducerRecord(
+                kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic,
+                ansatt.id.toString(),
+                objectMapper.writeValueAsString(ArrangorAnsattDtoV1.fromDbo(ansatt)),
+            ),
+        )
+    }
 
-	fun publiserNavAnsatt(ansatt: NavAnsattDbo) {
-		kafkaProducerClient.sendSync(
-			ProducerRecord(
-				kafkaTopicProperties.amtNavAnsattPersonaliaTopic,
-				ansatt.id.toString(),
-				objectMapper.writeValueAsString(NavAnsattDtoV1.fromDbo(ansatt)),
-			),
-		)
-	}
+    fun publiserNavAnsatt(ansatt: NavAnsattDbo) {
+        kafkaProducerClient.sendSync(
+            ProducerRecord(
+                kafkaTopicProperties.amtNavAnsattPersonaliaTopic,
+                ansatt.id.toString(),
+                objectMapper.writeValueAsString(NavAnsattDtoV1.fromDbo(ansatt)),
+            ),
+        )
+    }
 
-	fun publiserNavEnhet(navEnhet: NavEnhetDbo) {
-		kafkaProducerClient.sendSync(
-			ProducerRecord(
-				kafkaTopicProperties.amtNavEnhetTopic,
-				navEnhet.id.toString(),
-				objectMapper.writeValueAsString(NavEnhetDtoV1.fromDbo(navEnhet)),
-			),
-		)
-		log.info("Publiserte nav enhet med id ${navEnhet.id} til topic")
-	}
+    fun publiserNavEnhet(navEnhet: NavEnhetDbo) {
+        kafkaProducerClient.sendSync(
+            ProducerRecord(
+                kafkaTopicProperties.amtNavEnhetTopic,
+                navEnhet.id.toString(),
+                objectMapper.writeValueAsString(NavEnhetDtoV1.fromDbo(navEnhet)),
+            ),
+        )
+        log.info("Publiserte nav enhet med id ${navEnhet.id} til topic")
+    }
 
-	// brukes kun av tester
-	internal fun publiserSlettNavBruker(personId: UUID) {
-		kafkaProducerClient.sendSync(
-			ProducerRecord(
-				kafkaTopicProperties.amtNavBrukerTopic,
-				personId.toString(),
-				null,
-			),
-		)
-	}
+    // brukes kun av tester
+    internal fun publiserSlettNavBruker(personId: UUID) {
+        kafkaProducerClient.sendSync(
+            ProducerRecord(
+                kafkaTopicProperties.amtNavBrukerTopic,
+                personId.toString(),
+                null,
+            ),
+        )
+    }
 }

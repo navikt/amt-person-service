@@ -9,18 +9,18 @@ import java.util.UUID
 
 @Component
 class PoststedJob(
-	val kodeverkClient: KodeverkClient,
-	val poststedRepository: PoststedRepository,
+    val kodeverkClient: KodeverkClient,
+    val poststedRepository: PoststedRepository,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	@Scheduled(cron = "0 0 6 * * *")
-	@SchedulerLock(name = "PoststedJob", lockAtMostFor = "30m")
-	fun run() {
-		val sporingsId = UUID.randomUUID()
-		log.info("Oppdaterer database med postnummer og poststed, $sporingsId")
-		val postnummerListe = kodeverkClient.hentKodeverk(sporingsId)
-		poststedRepository.oppdaterPoststed(postnummerListe.toSet(), sporingsId)
-		log.info("Ferdig med å oppdatere poststed i database, $sporingsId")
-	}
+    @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "PoststedJob", lockAtMostFor = "30m")
+    fun run() {
+        val sporingsId = UUID.randomUUID()
+        log.info("Oppdaterer database med postnummer og poststed, $sporingsId")
+        val postnummerListe = kodeverkClient.hentKodeverk(sporingsId)
+        poststedRepository.oppdaterPoststed(postnummerListe.toSet(), sporingsId)
+        log.info("Ferdig med å oppdatere poststed i database, $sporingsId")
+    }
 }

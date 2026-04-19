@@ -7,25 +7,25 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 class MockVeilarbarenaHttpServer : MockHttpServer(name = "MockVeilarbarenaHttpServer") {
-	fun mockHentBrukerOppfolgingsenhetId(
-		fnr: String,
-		oppfolgingsenhet: String?,
-	) {
-		val url = "/veilarbarena/api/v2/arena/hent-status"
-		val predicate = { req: RecordedRequest ->
-			val body = req.body.readUtf8()
+    fun mockHentBrukerOppfolgingsenhetId(
+        fnr: String,
+        oppfolgingsenhet: String?,
+    ) {
+        val url = "/veilarbarena/api/v2/arena/hent-status"
+        val predicate = { req: RecordedRequest ->
+            val body = req.body.readUtf8()
 
-			req.path == url &&
-				req.method == HttpMethod.POST.name() &&
-				body.contains(fnr)
-		}
+            req.path == url &&
+                req.method == HttpMethod.POST.name() &&
+                body.contains(fnr)
+        }
 
-		val enhet = if (oppfolgingsenhet == null) "null" else "\"$oppfolgingsenhet\""
-		val response =
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody("""{"oppfolgingsenhet": $enhet}""")
+        val enhet = if (oppfolgingsenhet == null) "null" else "\"$oppfolgingsenhet\""
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody("""{"oppfolgingsenhet": $enhet}""")
 
-		addResponseHandler(predicate, response)
-	}
+        addResponseHandler(predicate, response)
+    }
 }

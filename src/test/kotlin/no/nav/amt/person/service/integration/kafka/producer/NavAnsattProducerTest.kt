@@ -14,75 +14,74 @@ import no.nav.amt.person.service.navansatt.NavAnsattUpdater
 import org.junit.jupiter.api.Test
 
 class NavAnsattProducerTest(
-	private val kafkaProducerService: KafkaProducerService,
-	private val kafkaTopicProperties: KafkaTopicProperties,
-	private val navAnsattService: NavAnsattService,
-	private val navAnsattUpdater: NavAnsattUpdater,
+    private val kafkaProducerService: KafkaProducerService,
+    private val kafkaTopicProperties: KafkaTopicProperties,
+    private val navAnsattService: NavAnsattService,
+    private val navAnsattUpdater: NavAnsattUpdater,
 ) : IntegrationTestBase() {
-	@Test
-	fun `publiserNavAnsatt - skal publisere ansatt med riktig key og value`() {
-		val ansatt = TestData.lagNavAnsatt()
+    @Test
+    fun `publiserNavAnsatt - skal publisere ansatt med riktig key og value`() {
+        val ansatt = TestData.lagNavAnsatt()
 
-		kafkaProducerService.publiserNavAnsatt(ansatt)
+        kafkaProducerService.publiserNavAnsatt(ansatt)
 
-		val record =
-			consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-				?.first { it.key() == ansatt.id.toString() }
+        val record =
+            consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+                ?.first { it.key() == ansatt.id.toString() }
 
-		val forventetValue = ansattTilV1Json(ansatt)
+        val forventetValue = ansattTilV1Json(ansatt)
 
-		record.shouldNotBeNull()
-		record.key() shouldBe ansatt.id.toString()
-		record.value() shouldBe forventetValue
-	}
+        record.shouldNotBeNull()
+        record.key() shouldBe ansatt.id.toString()
+        record.value() shouldBe forventetValue
+    }
 
-	@Test
-	fun `publiserNavAnsatt - ansatt er oppdatert - skal publisere ny melding`() {
-		val ansatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(ansatt)
+    @Test
+    fun `publiserNavAnsatt - ansatt er oppdatert - skal publisere ny melding`() {
+        val ansatt = TestData.lagNavAnsatt()
+        testDataRepository.insertNavAnsatt(ansatt)
 
-		val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no")
-		navAnsattService.upsert(oppdatertAnsatt)
+        val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no")
+        navAnsattService.upsert(oppdatertAnsatt)
 
-		val record =
-			consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-				?.first { it.key() == ansatt.id.toString() }
+        val record =
+            consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+                ?.first { it.key() == ansatt.id.toString() }
 
-		val forventetValue = ansattTilV1Json(oppdatertAnsatt)
+        val forventetValue = ansattTilV1Json(oppdatertAnsatt)
 
-		record.shouldNotBeNull()
-		record.key() shouldBe ansatt.id.toString()
-		record.value() shouldBe forventetValue
-	}
+        record.shouldNotBeNull()
+        record.key() shouldBe ansatt.id.toString()
+        record.value() shouldBe forventetValue
+    }
 
-	@Test
-	fun `publiserNavAnsatt - flere ansatte sjekkes for oppdatering - skal publisere melding kun for de med endring`() {
-		val endretAnsatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(endretAnsatt)
+    @Test
+    fun `publiserNavAnsatt - flere ansatte sjekkes for oppdatering - skal publisere melding kun for de med endring`() {
+        val endretAnsatt = TestData.lagNavAnsatt()
+        testDataRepository.insertNavAnsatt(endretAnsatt)
 
-		val uendretAnsatt = TestData.lagNavAnsatt()
-		testDataRepository.insertNavAnsatt(uendretAnsatt)
+        val uendretAnsatt = TestData.lagNavAnsatt()
+        testDataRepository.insertNavAnsatt(uendretAnsatt)
 
-		mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.copy(navn = "nytt navn"))
-		mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt)
+        mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.copy(navn = "nytt navn"))
+        mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt)
 
-		navAnsattUpdater.oppdaterAlle()
+        navAnsattUpdater.oppdaterAlle()
 
-		val records = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+        val records = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
 
-		records.shouldNotBeNull()
-		records.map { it.key() } shouldBe listOf(endretAnsatt.id.toString())
-	}
+        records.shouldNotBeNull()
+        records.map { it.key() } shouldBe listOf(endretAnsatt.id.toString())
+    }
 
-	private fun ansattTilV1Json(ansatt: NavAnsattDbo): String =
-		objectMapper.writeValueAsString(
-			NavAnsattDtoV1(
-				id = ansatt.id,
-				navident = ansatt.navIdent,
-				navn = ansatt.navn,
-				telefon = ansatt.telefon,
-				epost = ansatt.epost,
-				navEnhetId = ansatt.navEnhetId,
-			),
-		)
+    private fun ansattTilV1Json(ansatt: NavAnsattDbo): String = objectMapper.writeValueAsString(
+        NavAnsattDtoV1(
+            id = ansatt.id,
+            navident = ansatt.navIdent,
+            navn = ansatt.navn,
+            telefon = ansatt.telefon,
+            epost = ansatt.epost,
+            navEnhetId = ansatt.navEnhetId,
+        ),
+    )
 }

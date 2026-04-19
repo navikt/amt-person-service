@@ -14,91 +14,90 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 class AuthServiceTest {
-	companion object {
-		private val server = MockOAuth2Server()
+    companion object {
+        private val server = MockOAuth2Server()
 
-		init {
-			server.start()
-		}
+        init {
+            server.start()
+        }
 
-		@AfterAll
-		@JvmStatic
-		fun cleanup() {
-			server.shutdown()
-		}
-	}
+        @AfterAll
+        @JvmStatic
+        fun cleanup() {
+            server.shutdown()
+        }
+    }
 
-	@Test
-	fun `verifyRequestIsMachineToMachine - oid og sub er lik - er M2M token`() {
-		val sub = UUID.randomUUID().toString()
-		val claims = mutableMapOf<String, Any>()
-		claims["roles"] = arrayOf("access_as_application")
-		claims["oid"] = sub
+    @Test
+    fun `verifyRequestIsMachineToMachine - oid og sub er lik - er M2M token`() {
+        val sub = UUID.randomUUID().toString()
+        val claims = mutableMapOf<String, Any>()
+        claims["roles"] = arrayOf("access_as_application")
+        claims["oid"] = sub
 
-		val token =
-			server
-				.issueToken(
-					issuerId = Issuer.AZURE_AD,
-					subject = sub,
-					audience = "test-aud",
-					claims = claims,
-				).serialize()
+        val token =
+            server
+                .issueToken(
+                    issuerId = Issuer.AZURE_AD,
+                    subject = sub,
+                    audience = "test-aud",
+                    claims = claims,
+                ).serialize()
 
-		val authService = AuthService(mockContextHolder(token))
+        val authService = AuthService(mockContextHolder(token))
 
-		assertDoesNotThrow {
-			authService.verifyRequestIsMachineToMachine()
-		}
-	}
+        assertDoesNotThrow {
+            authService.verifyRequestIsMachineToMachine()
+        }
+    }
 
-	@Test
-	fun `verifyRequestIsMachineToMachine - oid og sub er ikke lik - er ikke M2M token`() {
-		val sub = UUID.randomUUID().toString()
-		val claims = mutableMapOf<String, Any>()
-		claims["roles"] = arrayOf("access_as_application")
-		claims["oid"] = UUID.randomUUID()
+    @Test
+    fun `verifyRequestIsMachineToMachine - oid og sub er ikke lik - er ikke M2M token`() {
+        val sub = UUID.randomUUID().toString()
+        val claims = mutableMapOf<String, Any>()
+        claims["roles"] = arrayOf("access_as_application")
+        claims["oid"] = UUID.randomUUID()
 
-		val token =
-			server
-				.issueToken(
-					issuerId = Issuer.AZURE_AD,
-					subject = sub,
-					audience = "test-aud",
-					claims = claims,
-				).serialize()
+        val token =
+            server
+                .issueToken(
+                    issuerId = Issuer.AZURE_AD,
+                    subject = sub,
+                    audience = "test-aud",
+                    claims = claims,
+                ).serialize()
 
-		val authService = AuthService(mockContextHolder(token))
+        val authService = AuthService(mockContextHolder(token))
 
-		assertThrows<JwtTokenUnauthorizedException> {
-			authService.verifyRequestIsMachineToMachine()
-		}
-	}
+        assertThrows<JwtTokenUnauthorizedException> {
+            authService.verifyRequestIsMachineToMachine()
+        }
+    }
 
-	@Test
-	fun `verifyRequestIsMachineToMachine - oid mangler - er ikke M2M token`() {
-		val sub = UUID.randomUUID().toString()
-		val claims = mutableMapOf<String, Any>()
+    @Test
+    fun `verifyRequestIsMachineToMachine - oid mangler - er ikke M2M token`() {
+        val sub = UUID.randomUUID().toString()
+        val claims = mutableMapOf<String, Any>()
 
-		val token =
-			server
-				.issueToken(
-					issuerId = Issuer.AZURE_AD,
-					subject = sub,
-					audience = "test-aud",
-					claims = claims,
-				).serialize()
+        val token =
+            server
+                .issueToken(
+                    issuerId = Issuer.AZURE_AD,
+                    subject = sub,
+                    audience = "test-aud",
+                    claims = claims,
+                ).serialize()
 
-		val authService = AuthService(mockContextHolder(token))
+        val authService = AuthService(mockContextHolder(token))
 
-		assertThrows<JwtTokenUnauthorizedException> {
-			authService.verifyRequestIsMachineToMachine()
-		}
-	}
+        assertThrows<JwtTokenUnauthorizedException> {
+            authService.verifyRequestIsMachineToMachine()
+        }
+    }
 
-	private fun mockContextHolder(token: String): TokenValidationContextHolder =
-		object : TokenValidationContextHolder {
-			override fun getTokenValidationContext(): TokenValidationContext = TokenValidationContext(mapOf(Issuer.AZURE_AD to JwtToken(token)))
+    private fun mockContextHolder(token: String): TokenValidationContextHolder = object : TokenValidationContextHolder {
+        override fun getTokenValidationContext(): TokenValidationContext = TokenValidationContext(mapOf(Issuer.AZURE_AD to JwtToken(token)))
 
-			override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit = throw NotImplementedError()
-		}
+        override fun setTokenValidationContext(tokenValidationContext: TokenValidationContext?): Unit = throw NotImplementedError()
+    }
 }

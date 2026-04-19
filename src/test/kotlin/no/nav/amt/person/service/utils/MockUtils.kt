@@ -7,7 +7,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import java.util.function.Consumer
 
 fun mockExecuteWithoutResult(transactionTemplate: TransactionTemplate) {
-	every { transactionTemplate.executeWithoutResult(any<Consumer<TransactionStatus>>()) } answers {
-		(firstArg() as Consumer<TransactionStatus>).accept(SimpleTransactionStatus())
-	}
+    every { transactionTemplate.executeWithoutResult(any<Consumer<TransactionStatus>>()) } answers {
+        (firstArg() as Consumer<TransactionStatus>).accept(SimpleTransactionStatus())
+    }
 }

@@ -8,15 +8,15 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class KrrProxyClientConfig {
-	@Bean
-	fun krrProxyClient(
-		@Value($$"${digdir-krr-proxy.url}") url: String,
-		@Value($$"${digdir-krr-proxy.scope}") scope: String,
-		machineToMachineTokenClient: MachineToMachineTokenClient,
-		objectMapper: ObjectMapper,
-	) = KrrProxyClient(
-		baseUrl = url,
-		tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		objectMapper = objectMapper,
-	)
+    @Bean
+    fun krrProxyClient(
+        @Value($$"${digdir-krr-proxy.url}") url: String,
+        @Value($$"${digdir-krr-proxy.scope}") scope: String,
+        machineToMachineTokenClient: MachineToMachineTokenClient,
+        objectMapper: ObjectMapper,
+    ) = KrrProxyClient(
+        baseUrl = url,
+        tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+        objectMapper = objectMapper,
+    )
 }

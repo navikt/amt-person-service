@@ -8,21 +8,20 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class NomConfig {
-	@Bean
-	fun nomClient(
-		@Value($$"${nom.url}") url: String,
-		@Value($$"${nom.scope}") scope: String,
-		@Value($$"${nom.mock:false}") mock: Boolean,
-		machineToMachineTokenClient: MachineToMachineTokenClient,
-		objectMapper: ObjectMapper,
-	): NomClient =
-		if (mock) {
-			NomClientMock()
-		} else {
-			NomClientImpl(
-				url = url,
-				tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-				objectMapper = objectMapper,
-			)
-		}
+    @Bean
+    fun nomClient(
+        @Value($$"${nom.url}") url: String,
+        @Value($$"${nom.scope}") scope: String,
+        @Value($$"${nom.mock:false}") mock: Boolean,
+        machineToMachineTokenClient: MachineToMachineTokenClient,
+        objectMapper: ObjectMapper,
+    ): NomClient = if (mock) {
+        NomClientMock()
+    } else {
+        NomClientImpl(
+            url = url,
+            tokenSupplier = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+            objectMapper = objectMapper,
+        )
+    }
 }

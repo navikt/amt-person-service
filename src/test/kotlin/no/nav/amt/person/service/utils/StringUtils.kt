@@ -5,5 +5,5 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object StringUtils {
-	fun emptyRequest(): RequestBody = "".toRequestBody(mediaTypeJson)
+    fun emptyRequest(): RequestBody = "".toRequestBody(mediaTypeJson)
 }

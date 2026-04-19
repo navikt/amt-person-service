@@ -13,41 +13,41 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
 class VeilarbvedtaksstotteClient(
-	private val apiUrl: String,
-	private val veilarbvedtaksstotteTokenProvider: () -> String,
-	private val objectMapper: ObjectMapper,
-	private val httpClient: OkHttpClient = baseClient(),
+    private val apiUrl: String,
+    private val veilarbvedtaksstotteTokenProvider: () -> String,
+    private val objectMapper: ObjectMapper,
+    private val httpClient: OkHttpClient = baseClient(),
 ) {
-	fun hentInnsatsgruppe(fnr: String): InnsatsgruppeV1? {
-		val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
-		val request =
-			Request
-				.Builder()
-				.url("$apiUrl/api/hent-gjeldende-14a-vedtak")
-				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider()}")
-				.post(personRequestJson.toRequestBody(mediaTypeJson))
-				.build()
+    fun hentInnsatsgruppe(fnr: String): InnsatsgruppeV1? {
+        val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
+        val request =
+            Request
+                .Builder()
+                .url("$apiUrl/api/hent-gjeldende-14a-vedtak")
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarbvedtaksstotteTokenProvider()}")
+                .post(personRequestJson.toRequestBody(mediaTypeJson))
+                .build()
 
-		httpClient.newCall(request).execute().use { response ->
-			if (!response.isSuccessful) {
-				throw RuntimeException("Uventet status fra veilarbvedtaksstotte ${response.code}")
-			}
-			val body = response.body.string()
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Uventet status fra veilarbvedtaksstotte ${response.code}")
+            }
+            val body = response.body.string()
 
-			if (body.isEmpty()) return null
+            if (body.isEmpty()) return null
 
-			val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakResponse>(body)
+            val gjeldende14aVedtakRespons = objectMapper.readValue<Gjeldende14aVedtakResponse>(body)
 
-			return gjeldende14aVedtakRespons.innsatsgruppe.toV1()
-		}
-	}
+            return gjeldende14aVedtakRespons.innsatsgruppe.toV1()
+        }
+    }
 
-	private data class PersonRequest(
-		val fnr: String,
-	)
+    private data class PersonRequest(
+        val fnr: String,
+    )
 
-	data class Gjeldende14aVedtakResponse(
-		val innsatsgruppe: InnsatsgruppeV2,
-	)
+    data class Gjeldende14aVedtakResponse(
+        val innsatsgruppe: InnsatsgruppeV2,
+    )
 }

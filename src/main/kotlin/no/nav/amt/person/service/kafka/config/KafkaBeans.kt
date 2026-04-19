@@ -12,16 +12,15 @@ import java.util.Properties
 
 @Configuration(proxyBeanMethods = false)
 class KafkaBeans {
-	@Bean
-	@Profile("default")
-	fun kafkaConsumerProperties(): KafkaProperties =
-		object : KafkaProperties {
-			override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties(CONSUMER_GROUP_ID)
+    @Bean
+    @Profile("default")
+    fun kafkaConsumerProperties(): KafkaProperties = object : KafkaProperties {
+        override fun consumer(): Properties = KafkaPropertiesPreset.aivenDefaultConsumerProperties(CONSUMER_GROUP_ID)
 
-			override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties(PRODUCER_ID)
-		}
+        override fun producer(): Properties = KafkaPropertiesPreset.aivenDefaultProducerProperties(PRODUCER_ID)
+    }
 
-	@Bean
-	fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
-		KafkaProducerClientImpl(kafkaProperties.producer())
+    @Bean
+    fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
+        KafkaProducerClientImpl(kafkaProperties.producer())
 }
