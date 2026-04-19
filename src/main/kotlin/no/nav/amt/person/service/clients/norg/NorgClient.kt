@@ -12,11 +12,23 @@ class NorgClient(
     private val objectMapper: ObjectMapper,
     private val httpClient: OkHttpClient = baseClient(),
 ) {
+    private val enhetIdPattern = Regex("^\\d{4}$")
+
+    private fun validateEnhetId(enhetId: String): String {
+        require(enhetIdPattern.matches(enhetId)) {
+            "Ugyldig enhetId-format"
+        }
+        return enhetId
+    }
+
+    private fun validateEnhetIds(enheter: List<String>): List<String> = enheter.map { validateEnhetId(it) }
+
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
+        val validatedEnhetId = validateEnhetId(enhetId)
         val request =
             Request
                 .Builder()
-                .url("$url/norg2/api/v1/enhet/$enhetId")
+                .url("$url/norg2/api/v1/enhet/$validatedEnhetId")
                 .get()
                 .build()
 
@@ -36,10 +48,11 @@ class NorgClient(
     }
 
     fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
+        val validatedEnheter = validateEnhetIds(enheter)
         val request =
             Request
                 .Builder()
-                .url("$url/norg2/api/v1/enhet?enhetsnummerListe=${enheter.joinToString(",")}")
+                .url("$url/norg2/api/v1/enhet?enhetsnummerListe=${validatedEnheter.joinToString(",")}")
                 .get()
                 .build()
 
