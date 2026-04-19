@@ -12,34 +12,34 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class SkjermetPersonConsumerTest(
-	private val navBrukerRepository: NavBrukerRepository,
-	private val kafkaMessageSender: KafkaMessageSender,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val kafkaMessageSender: KafkaMessageSender,
 ) : IntegrationTestBase() {
-	@Test
-	fun `ingest - bruker finnes - skal oppdatere med skjermingsdata`() {
-		val navBruker = TestData.lagNavBruker(erSkjermet = false)
-		testDataRepository.insertNavBruker(navBruker)
+    @Test
+    fun `ingest - bruker finnes - skal oppdatere med skjermingsdata`() {
+        val navBruker = TestData.lagNavBruker(erSkjermet = false)
+        testDataRepository.insertNavBruker(navBruker)
 
-		kafkaMessageSender.sendTilSkjermetPersonTopic(navBruker.person.personident, true)
+        kafkaMessageSender.sendTilSkjermetPersonTopic(navBruker.person.personident, true)
 
-		await().untilAsserted {
-			val faktiskBruker = navBrukerRepository.get(navBruker.id)
-			faktiskBruker.erSkjermet shouldBe true
-		}
-	}
+        await().untilAsserted {
+            val faktiskBruker = navBrukerRepository.get(navBruker.id)
+            faktiskBruker.erSkjermet shouldBe true
+        }
+    }
 
-	@Test
-	fun `ingest tombstone - bruker finnes - skal kaste exception og logge feilmelding`() {
-		val navBruker = TestData.lagNavBruker(erSkjermet = false)
-		testDataRepository.insertNavBruker(navBruker)
+    @Test
+    fun `ingest tombstone - bruker finnes - skal kaste exception og logge feilmelding`() {
+        val navBruker = TestData.lagNavBruker(erSkjermet = false)
+        testDataRepository.insertNavBruker(navBruker)
 
-		kafkaMessageSender.sendTilSkjermetPersonTopic(navBruker.person.personident, null)
+        kafkaMessageSender.sendTilSkjermetPersonTopic(navBruker.person.personident, null)
 
-		withLogCapture(SkjermetPersonConsumer::class.java.name) { loggingEvents ->
-			await().untilAsserted {
-				loggingEvents.map { it.message } shouldContain
-					"Kan ikke ingeste tombstone for eksisterende Nav-bruker ${navBruker.id}"
-			}
-		}
-	}
+        withLogCapture(SkjermetPersonConsumer::class.java.name) { loggingEvents ->
+            await().untilAsserted {
+                loggingEvents.map { it.message } shouldContain
+                    "Kan ikke ingeste tombstone for eksisterende Nav-bruker ${navBruker.id}"
+            }
+        }
+    }
 }

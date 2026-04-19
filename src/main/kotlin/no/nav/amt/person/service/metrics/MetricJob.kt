@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class MetricJob(
-	private val metricService: MetricService,
+    private val metricService: MetricService,
 ) {
-	@Scheduled(fixedDelay = 15 * 60 * 1000L)
-	@SchedulerLock(name = "MetricJob", lockAtMostFor = "30m")
-	fun oppdaterMetrikker() {
-		JobRunner.run("oppdater_metrikker", metricService::oppdaterMetrikker)
-	}
+    @Scheduled(fixedDelay = 15 * 60 * 1000L)
+    @SchedulerLock(name = "MetricJob", lockAtMostFor = "30m")
+    fun oppdaterMetrikker() {
+        JobRunner.run("oppdater_metrikker", metricService::oppdaterMetrikker)
+    }
 }

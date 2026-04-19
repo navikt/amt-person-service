@@ -12,42 +12,42 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class OppfolgingsperiodeConsumer(
-	private val pdlClient: PdlClient,
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navBrukerService: NavBrukerService,
-	private val objectMapper: ObjectMapper,
+    private val pdlClient: PdlClient,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navBrukerService: NavBrukerService,
+    private val objectMapper: ObjectMapper,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(value: String) {
-		val sisteOppfolgingsperiode = objectMapper.readValue<SisteOppfolgingsperiodeKafkaPayload>(value)
+    fun ingest(value: String) {
+        val sisteOppfolgingsperiode = objectMapper.readValue<SisteOppfolgingsperiodeKafkaPayload>(value)
 
-		val gjeldendeIdent =
-			try {
-				pdlClient
-					.hentIdenter(sisteOppfolgingsperiode.aktorId)
-					.finnGjeldendeIdent()
-					.getOrThrow()
-			} catch (e: Exception) {
-				if (e.message?.contains("Fant ikke person") == true) {
-					log.warn(e.message, e)
-					return
-				}
-				throw e
-			}
+        val gjeldendeIdent =
+            try {
+                pdlClient
+                    .hentIdenter(sisteOppfolgingsperiode.aktorId)
+                    .finnGjeldendeIdent()
+                    .getOrThrow()
+            } catch (e: Exception) {
+                if (e.message?.contains("Fant ikke person") == true) {
+                    log.warn(e.message, e)
+                    return
+                }
+                throw e
+            }
 
-		val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
+        val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
-		if (brukerId == null) {
-			log.info("Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering")
-			return
-		}
+        if (brukerId == null) {
+            log.info("Nav-bruker finnes ikke i tabellen nav_bruker, dropper videre prosessering")
+            return
+        }
 
-		navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(
-			brukerId,
-			sisteOppfolgingsperiode.toOppfolgingsperiode(),
-		)
+        navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(
+            brukerId,
+            sisteOppfolgingsperiode.toOppfolgingsperiode(),
+        )
 
-		log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
-	}
+        log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
+    }
 }

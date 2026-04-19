@@ -9,30 +9,30 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 class MockSchemaRegistryHttpServer : MockHttpServer(name = "MockSchemaRegistryHttpServer") {
-	fun registerSchema(
-		id: Int,
-		topic: String,
-		schema: Schema,
-	) {
-		val schemaString = SchemaString(schema.toString()).toJson()
+    fun registerSchema(
+        id: Int,
+        topic: String,
+        schema: Schema,
+    ) {
+        val schemaString = SchemaString(schema.toString()).toJson()
 
-		val requestPredicate = { req: RecordedRequest ->
-			req.path == "/subjects/$topic-value/versions?normalize=false" &&
-				req.method == HttpMethod.POST.name()
-		}
+        val requestPredicate = { req: RecordedRequest ->
+            req.path == "/subjects/$topic-value/versions?normalize=false" &&
+                req.method == HttpMethod.POST.name()
+        }
 
-		addResponseHandler(
-			requestPredicate,
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody("""{"id":"$id"}"""),
-		)
+        addResponseHandler(
+            requestPredicate,
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody("""{"id":"$id"}"""),
+        )
 
-		addResponseHandler(
-			"/schemas/ids/$id?fetchMaxId=false&subject=$topic-value",
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody(schemaString),
-		)
-	}
+        addResponseHandler(
+            "/schemas/ids/$id?fetchMaxId=false&subject=$topic-value",
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody(schemaString),
+        )
+    }
 }

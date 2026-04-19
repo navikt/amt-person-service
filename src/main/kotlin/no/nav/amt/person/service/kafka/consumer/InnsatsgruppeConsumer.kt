@@ -12,38 +12,38 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class InnsatsgruppeConsumer(
-	private val pdlClient: PdlClient,
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navBrukerService: NavBrukerService,
-	private val objectMapper: ObjectMapper,
+    private val pdlClient: PdlClient,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navBrukerService: NavBrukerService,
+    private val objectMapper: ObjectMapper,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(value: String) {
-		val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
+    fun ingest(value: String) {
+        val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
-		val gjeldendeIdent =
-			pdlClient
-				.hentIdenter(siste14aVedtak.aktorId)
-				.finnGjeldendeIdent()
-				.getOrThrow()
+        val gjeldendeIdent =
+            pdlClient
+                .hentIdenter(siste14aVedtak.aktorId)
+                .finnGjeldendeIdent()
+                .getOrThrow()
 
-		val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
+        val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
-		if (brukerId == null) {
-			log.info("Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
-			return
-		}
+        if (brukerId == null) {
+            log.info("Innsatsgruppe endret. Nav-bruker finnes ikke, hopper over Kafka-melding")
+            return
+        }
 
-		navBrukerService.oppdaterInnsatsgruppe(
-			brukerId,
-			siste14aVedtak.innsatsgruppe,
-		)
-		log.info("Oppdatert innsatsgruppe for bruker $brukerId")
-	}
+        navBrukerService.oppdaterInnsatsgruppe(
+            brukerId,
+            siste14aVedtak.innsatsgruppe,
+        )
+        log.info("Oppdatert innsatsgruppe for bruker $brukerId")
+    }
 
-	data class Siste14aVedtak(
-		val aktorId: String,
-		val innsatsgruppe: InnsatsgruppeV1,
-	)
+    data class Siste14aVedtak(
+        val aktorId: String,
+        val innsatsgruppe: InnsatsgruppeV1,
+    )
 }

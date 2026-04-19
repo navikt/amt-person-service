@@ -9,17 +9,17 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class PdlClientConfig {
-	@Bean
-	fun pdlClient(
-		@Value($$"${pdl.url}") url: String,
-		@Value($$"${pdl.scope}") scope: String,
-		machineToMachineTokenClient: MachineToMachineTokenClient,
-		poststedRepository: PoststedRepository,
-		objectMapper: ObjectMapper,
-	) = PdlClient(
-		baseUrl = url,
-		tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		poststedRepository = poststedRepository,
-		objectMapper = objectMapper,
-	)
+    @Bean
+    fun pdlClient(
+        @Value($$"${pdl.url}") url: String,
+        @Value($$"${pdl.scope}") scope: String,
+        machineToMachineTokenClient: MachineToMachineTokenClient,
+        poststedRepository: PoststedRepository,
+        objectMapper: ObjectMapper,
+    ) = PdlClient(
+        baseUrl = url,
+        tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+        poststedRepository = poststedRepository,
+        objectMapper = objectMapper,
+    )
 }

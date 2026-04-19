@@ -14,68 +14,68 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 object KafkaMessageCreator {
-	fun lagEndringPaaBrukerMsg(
-		fodselsnummer: String = TestData.randomIdent(),
-		oppfolgingsenhet: String? = TestData.randomEnhetId(),
-	) = EndringPaaBrukerMsg(
-		fodselsnummer = fodselsnummer,
-		oppfolgingsenhet = oppfolgingsenhet,
-	)
+    fun lagEndringPaaBrukerMsg(
+        fodselsnummer: String = TestData.randomIdent(),
+        oppfolgingsenhet: String? = TestData.randomEnhetId(),
+    ) = EndringPaaBrukerMsg(
+        fodselsnummer = fodselsnummer,
+        oppfolgingsenhet = oppfolgingsenhet,
+    )
 
-	fun lagTildeltVeilederMsg(
-		aktorId: String = TestData.randomIdent(),
-		veilederId: String = TestData.randomNavIdent(),
-		tilordnet: ZonedDateTime = ZonedDateTime.now(),
-	) = TildeltVeilederMsg(
-		aktorId = aktorId,
-		veilederId = veilederId,
-		tilordnet = tilordnet,
-	)
+    fun lagTildeltVeilederMsg(
+        aktorId: String = TestData.randomIdent(),
+        veilederId: String = TestData.randomNavIdent(),
+        tilordnet: ZonedDateTime = ZonedDateTime.now(),
+    ) = TildeltVeilederMsg(
+        aktorId = aktorId,
+        veilederId = veilederId,
+        tilordnet = tilordnet,
+    )
 
-	fun lagPersonhendelseAdressebeskyttelse(
-		personidenter: List<String>,
-		gradering: Gradering,
-	) = lagPersonhendelse(
-		personidenter = personidenter,
-		navn = null,
-		adressebeskyttelse = Adressebeskyttelse(gradering),
-		opplysningsType = OpplysningsType.ADRESSEBESKYTTELSE_V1,
-	)
+    fun lagPersonhendelseAdressebeskyttelse(
+        personidenter: List<String>,
+        gradering: Gradering,
+    ) = lagPersonhendelse(
+        personidenter = personidenter,
+        navn = null,
+        adressebeskyttelse = Adressebeskyttelse(gradering),
+        opplysningsType = OpplysningsType.ADRESSEBESKYTTELSE_V1,
+    )
 
-	fun lagPersonhendelseNavn(
-		personidenter: List<String>,
-		fornavn: String,
-		mellomnavn: String?,
-		etternavn: String,
-	) = lagPersonhendelse(
-		personidenter = personidenter,
-		navn =
-			Navn(
-				fornavn,
-				mellomnavn,
-				etternavn,
-				"forkortetNavn",
-				null,
-				LocalDate.now(),
-			),
-		adressebeskyttelse = null,
-		opplysningsType = OpplysningsType.NAVN_V1,
-	)
+    fun lagPersonhendelseNavn(
+        personidenter: List<String>,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+    ) = lagPersonhendelse(
+        personidenter = personidenter,
+        navn =
+            Navn(
+                fornavn,
+                mellomnavn,
+                etternavn,
+                "forkortetNavn",
+                null,
+                LocalDate.now(),
+            ),
+        adressebeskyttelse = null,
+        opplysningsType = OpplysningsType.NAVN_V1,
+    )
 
-	private fun lagPersonhendelse(
-		personidenter: List<String>,
-		navn: Navn?,
-		adressebeskyttelse: Adressebeskyttelse?,
-		opplysningsType: OpplysningsType,
-	) = Personhendelse(
-		UUID.randomUUID().toString(),
-		personidenter,
-		"FREG",
-		ZonedDateTime.now().toInstant(),
-		opplysningsType.toString(),
-		Endringstype.OPPRETTET,
-		null,
-		adressebeskyttelse,
-		navn,
-	)
+    private fun lagPersonhendelse(
+        personidenter: List<String>,
+        navn: Navn?,
+        adressebeskyttelse: Adressebeskyttelse?,
+        opplysningsType: OpplysningsType,
+    ) = Personhendelse(
+        UUID.randomUUID().toString(),
+        personidenter,
+        "FREG",
+        ZonedDateTime.now().toInstant(),
+        opplysningsType.toString(),
+        Endringstype.OPPRETTET,
+        null,
+        adressebeskyttelse,
+        navn,
+    )
 }

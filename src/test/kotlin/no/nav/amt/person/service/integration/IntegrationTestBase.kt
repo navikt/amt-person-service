@@ -36,122 +36,122 @@ import java.time.Duration
 @TestConfiguration("application-integration.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationTestBase : RepositoryTestBase() {
-	@LocalServerPort
-	private var port: Int = 0
+    @LocalServerPort
+    private var port: Int = 0
 
-	@Autowired
-	protected lateinit var objectMapper: ObjectMapper
+    @Autowired
+    protected lateinit var objectMapper: ObjectMapper
 
-	val client =
-		OkHttpClient
-			.Builder()
-			.callTimeout(Duration.ofMinutes(5))
-			.readTimeout(Duration.ofMinutes(5))
-			.build()
+    val client =
+        OkHttpClient
+            .Builder()
+            .callTimeout(Duration.ofMinutes(5))
+            .readTimeout(Duration.ofMinutes(5))
+            .build()
 
-	@AfterEach
-	fun cleanUp() {
-		mockKrrProxyHttpServer.resetHttpServer()
-		mockNomHttpServer.resetHttpServer()
-		mockNorgHttpServer.resetHttpServer()
-		mockPdlHttpServer.resetHttpServer()
-		mockPoaoTilgangHttpServer.resetHttpServer()
-		mockVeilarbarenaHttpServer.resetHttpServer()
-		mockVeilarboppfolgingHttpServer.resetHttpServer()
-		mockVeilarboppfolgingHttpServer.resetHttpServer()
-	}
+    @AfterEach
+    fun cleanUp() {
+        mockKrrProxyHttpServer.resetHttpServer()
+        mockNomHttpServer.resetHttpServer()
+        mockNorgHttpServer.resetHttpServer()
+        mockPdlHttpServer.resetHttpServer()
+        mockPoaoTilgangHttpServer.resetHttpServer()
+        mockVeilarbarenaHttpServer.resetHttpServer()
+        mockVeilarboppfolgingHttpServer.resetHttpServer()
+        mockVeilarboppfolgingHttpServer.resetHttpServer()
+    }
 
-	companion object {
-		val mockPdlHttpServer = MockPdlHttpServer()
-		val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
-		val mockKrrProxyHttpServer = MockKrrProxyHttpServer()
-		val mockVeilarboppfolgingHttpServer = MockVeilarboppfolgingHttpServer()
-		val mockVeilarbvedtaksstotteHttpServer = MockVeilarbvedtaksstotteHttpServer()
-		val mockNorgHttpServer = MockNorgHttpServer()
-		val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
-		val mockNomHttpServer = MockNomHttpServer()
-		val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
-		val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
-		val mockOAuthServer = MockOAuthServer()
+    companion object {
+        val mockPdlHttpServer = MockPdlHttpServer()
+        val mockMachineToMachineHttpServer = MockMachineToMachineHttpServer()
+        val mockKrrProxyHttpServer = MockKrrProxyHttpServer()
+        val mockVeilarboppfolgingHttpServer = MockVeilarboppfolgingHttpServer()
+        val mockVeilarbvedtaksstotteHttpServer = MockVeilarbvedtaksstotteHttpServer()
+        val mockNorgHttpServer = MockNorgHttpServer()
+        val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
+        val mockNomHttpServer = MockNomHttpServer()
+        val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
+        val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
+        val mockOAuthServer = MockOAuthServer()
 
-		val kafkaContainer =
-			KafkaContainer(DockerImageName.parse("apache/kafka")).apply {
-				// workaround for https://github.com/testcontainers/testcontainers-java/issues/9506
-				withEnv("KAFKA_LISTENERS", "PLAINTEXT://:9092,BROKER://:9093,CONTROLLER://:9094")
-				start()
-				System.setProperty("KAFKA_BROKERS", bootstrapServers)
-			}
+        val kafkaContainer =
+            KafkaContainer(DockerImageName.parse("apache/kafka")).apply {
+                // workaround for https://github.com/testcontainers/testcontainers-java/issues/9506
+                withEnv("KAFKA_LISTENERS", "PLAINTEXT://:9092,BROKER://:9093,CONTROLLER://:9094")
+                start()
+                System.setProperty("KAFKA_BROKERS", bootstrapServers)
+            }
 
-		@JvmStatic
-		@DynamicPropertySource
-		@Suppress("unused")
-		fun startEnvironment(registry: DynamicPropertyRegistry) {
-			mockSchemaRegistryHttpServer.start()
-			registry.add("kafka.schema.registry.url") { mockSchemaRegistryHttpServer.serverUrl() }
+        @JvmStatic
+        @DynamicPropertySource
+        @Suppress("unused")
+        fun startEnvironment(registry: DynamicPropertyRegistry) {
+            mockSchemaRegistryHttpServer.start()
+            registry.add("kafka.schema.registry.url") { mockSchemaRegistryHttpServer.serverUrl() }
 
-			mockPdlHttpServer.start()
-			registry.add("pdl.url") { mockPdlHttpServer.serverUrl() }
-			registry.add("pdl.scope") { "test.pdl" }
+            mockPdlHttpServer.start()
+            registry.add("pdl.url") { mockPdlHttpServer.serverUrl() }
+            registry.add("pdl.scope") { "test.pdl" }
 
-			mockMachineToMachineHttpServer.start()
-			registry.add("nais.env.azureOpenIdConfigTokenEndpoint") {
-				mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.TOKEN_PATH
-			}
+            mockMachineToMachineHttpServer.start()
+            registry.add("nais.env.azureOpenIdConfigTokenEndpoint") {
+                mockMachineToMachineHttpServer.serverUrl() + MockMachineToMachineHttpServer.TOKEN_PATH
+            }
 
-			mockKrrProxyHttpServer.start()
-			registry.add("digdir-krr-proxy.url") { mockKrrProxyHttpServer.serverUrl() }
-			registry.add("digdir-krr-proxy.scope") { "test.digdir-krr-proxy" }
+            mockKrrProxyHttpServer.start()
+            registry.add("digdir-krr-proxy.url") { mockKrrProxyHttpServer.serverUrl() }
+            registry.add("digdir-krr-proxy.scope") { "test.digdir-krr-proxy" }
 
-			mockVeilarboppfolgingHttpServer.start()
-			registry.add("veilarboppfolging.url") { mockVeilarboppfolgingHttpServer.serverUrl() }
-			registry.add("veilarboppfolging.scope") { "test.veilarboppfolging" }
+            mockVeilarboppfolgingHttpServer.start()
+            registry.add("veilarboppfolging.url") { mockVeilarboppfolgingHttpServer.serverUrl() }
+            registry.add("veilarboppfolging.scope") { "test.veilarboppfolging" }
 
-			mockVeilarbvedtaksstotteHttpServer.start()
-			registry.add("veilarbvedtaksstotte.url") { mockVeilarbvedtaksstotteHttpServer.serverUrl() }
-			registry.add("veilarbvedtaksstotte.scope") { "test.veilarbvedtaksstotte" }
+            mockVeilarbvedtaksstotteHttpServer.start()
+            registry.add("veilarbvedtaksstotte.url") { mockVeilarbvedtaksstotteHttpServer.serverUrl() }
+            registry.add("veilarbvedtaksstotte.scope") { "test.veilarbvedtaksstotte" }
 
-			mockNorgHttpServer.start()
-			registry.add("norg.url") { mockNorgHttpServer.serverUrl() }
+            mockNorgHttpServer.start()
+            registry.add("norg.url") { mockNorgHttpServer.serverUrl() }
 
-			mockPoaoTilgangHttpServer.start()
-			registry.add("poao-tilgang.url") { mockPoaoTilgangHttpServer.serverUrl() }
-			registry.add("poao-tilgang.scope") { "test.poao-tilgang" }
+            mockPoaoTilgangHttpServer.start()
+            registry.add("poao-tilgang.url") { mockPoaoTilgangHttpServer.serverUrl() }
+            registry.add("poao-tilgang.scope") { "test.poao-tilgang" }
 
-			mockNomHttpServer.start()
-			registry.add("nom.url") { mockNomHttpServer.serverUrl() }
-			registry.add("nom.scope") { "test.nom" }
+            mockNomHttpServer.start()
+            registry.add("nom.url") { mockNomHttpServer.serverUrl() }
+            registry.add("nom.scope") { "test.nom" }
 
-			mockVeilarbarenaHttpServer.start()
-			registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
-			registry.add("veilarbarena.scope") { "test.veilarbarena" }
+            mockVeilarbarenaHttpServer.start()
+            registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
+            registry.add("veilarbarena.scope") { "test.veilarbarena" }
 
-			mockOAuthServer.start()
-			registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }
-			registry.add("no.nav.security.jwt.issuer.azuread.accepted-audience") { "test-aud" }
+            mockOAuthServer.start()
+            registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }
+            registry.add("no.nav.security.jwt.issuer.azuread.accepted-audience") { "test-aud" }
 
-			registry.add("kodeverk.url") { "http://kodeverk" }
-			registry.add("kodeverk.scope") { "test.kodeverk" }
-		}
-	}
+            registry.add("kodeverk.url") { "http://kodeverk" }
+            registry.add("kodeverk.scope") { "test.kodeverk" }
+        }
+    }
 
-	fun serverUrl() = "http://localhost:$port"
+    fun serverUrl() = "http://localhost:$port"
 
-	fun sendRequest(
-		method: String,
-		path: String,
-		body: RequestBody? = null,
-		headers: Map<String, String> = emptyMap(),
-	): Response {
-		val reqBuilder =
-			Request
-				.Builder()
-				.url("${serverUrl()}$path")
-				.method(method, body)
+    fun sendRequest(
+        method: String,
+        path: String,
+        body: RequestBody? = null,
+        headers: Map<String, String> = emptyMap(),
+    ): Response {
+        val reqBuilder =
+            Request
+                .Builder()
+                .url("${serverUrl()}$path")
+                .method(method, body)
 
-		headers.forEach {
-			reqBuilder.addHeader(it.key, it.value)
-		}
+        headers.forEach {
+            reqBuilder.addHeader(it.key, it.value)
+        }
 
-		return client.newCall(reqBuilder.build()).execute()
-	}
+        return client.newCall(reqBuilder.build()).execute()
+    }
 }

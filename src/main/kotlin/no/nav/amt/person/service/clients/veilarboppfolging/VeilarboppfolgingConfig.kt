@@ -8,19 +8,19 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class VeilarboppfolgingConfig {
-	@Bean
-	fun veilarboppfolgingClient(
-		@Value($$"${veilarboppfolging.url}") url: String,
-		@Value($$"${veilarboppfolging.scope}") veilarboppfolgingScope: String,
-		machineToMachineTokenClient: MachineToMachineTokenClient,
-		objectMapper: ObjectMapper,
-	) = VeilarboppfolgingClient(
-		apiUrl = "$url/veilarboppfolging",
-		veilarboppfolgingTokenProvider = {
-			machineToMachineTokenClient.createMachineToMachineToken(
-				veilarboppfolgingScope,
-			)
-		},
-		objectMapper = objectMapper,
-	)
+    @Bean
+    fun veilarboppfolgingClient(
+        @Value($$"${veilarboppfolging.url}") url: String,
+        @Value($$"${veilarboppfolging.scope}") veilarboppfolgingScope: String,
+        machineToMachineTokenClient: MachineToMachineTokenClient,
+        objectMapper: ObjectMapper,
+    ) = VeilarboppfolgingClient(
+        apiUrl = "$url/veilarboppfolging",
+        veilarboppfolgingTokenProvider = {
+            machineToMachineTokenClient.createMachineToMachineToken(
+                veilarboppfolgingScope,
+            )
+        },
+        objectMapper = objectMapper,
+    )
 }

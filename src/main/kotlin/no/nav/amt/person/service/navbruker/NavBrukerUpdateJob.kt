@@ -8,24 +8,24 @@ import java.time.LocalDateTime
 
 @Component
 class NavBrukerUpdateJob(
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navBrukerService: NavBrukerService,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navBrukerService: NavBrukerService,
 ) {
-	@Scheduled(cron = "@hourly")
-	@SchedulerLock(name = "navBrukerUpdater", lockAtMostFor = "60m")
-	fun update() {
-		JobRunner.run("oppdater_nav_brukere") { oppdaterBrukere() }
-	}
+    @Scheduled(cron = "@hourly")
+    @SchedulerLock(name = "navBrukerUpdater", lockAtMostFor = "60m")
+    fun update() {
+        JobRunner.run("oppdater_nav_brukere") { oppdaterBrukere() }
+    }
 
-	private fun oppdaterBrukere() {
-		val personidenter =
-			navBrukerRepository
-				.getPersonidenter(
-					offset = 0,
-					limit = 10000,
-					notSyncedSince = LocalDateTime.now().minusDays(14),
-				).toSet()
+    private fun oppdaterBrukere() {
+        val personidenter =
+            navBrukerRepository
+                .getPersonidenter(
+                    offset = 0,
+                    limit = 10000,
+                    notSyncedSince = LocalDateTime.now().minusDays(14),
+                ).toSet()
 
-		navBrukerService.syncKontaktinfoBulk(personidenter)
-	}
+        navBrukerService.syncKontaktinfoBulk(personidenter)
+    }
 }

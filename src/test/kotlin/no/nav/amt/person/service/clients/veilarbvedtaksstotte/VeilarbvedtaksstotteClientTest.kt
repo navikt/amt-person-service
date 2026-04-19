@@ -12,48 +12,48 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 
 class VeilarbvedtaksstotteClientTest {
-	private lateinit var server: MockWebServer
-	private lateinit var client: VeilarbvedtaksstotteClient
+    private lateinit var server: MockWebServer
+    private lateinit var client: VeilarbvedtaksstotteClient
 
-	private val fnr = "123"
+    private val fnr = "123"
 
-	@BeforeEach
-	fun setup() {
-		server = MockWebServer()
-		val serverUrl = server.url("/api").toString()
-		client =
-			VeilarbvedtaksstotteClient(
-				apiUrl = serverUrl,
-				veilarbvedtaksstotteTokenProvider = { "VEILARBVEDTAKSSTOTTE_TOKEN" },
-				objectMapper = staticObjectMapper,
-			)
-	}
+    @BeforeEach
+    fun setup() {
+        server = MockWebServer()
+        val serverUrl = server.url("/api").toString()
+        client =
+            VeilarbvedtaksstotteClient(
+                apiUrl = serverUrl,
+                veilarbvedtaksstotteTokenProvider = { "VEILARBVEDTAKSSTOTTE_TOKEN" },
+                objectMapper = staticObjectMapper,
+            )
+    }
 
-	@Test
-	fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
-		val siste14aVedtakDTORespons =
-			VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
-				innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
-			)
-		server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(siste14aVedtakDTORespons)))
+    @Test
+    fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
+        val siste14aVedtakDTORespons =
+            VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
+                innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
+            )
+        server.enqueue(MockResponse().setBody(staticObjectMapper.writeValueAsString(siste14aVedtakDTORespons)))
 
-		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
+        val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
-		innsatsgruppe shouldBe InnsatsgruppeV1.GRADERT_VARIG_TILPASSET_INNSATS
-	}
+        innsatsgruppe shouldBe InnsatsgruppeV1.GRADERT_VARIG_TILPASSET_INNSATS
+    }
 
-	@Test
-	fun `hentInnsatsgruppe - bruker har ikke innsatsgruppe - returnerer null`() {
-		server.enqueue(MockResponse())
+    @Test
+    fun `hentInnsatsgruppe - bruker har ikke innsatsgruppe - returnerer null`() {
+        server.enqueue(MockResponse())
 
-		val innsatsgruppe = client.hentInnsatsgruppe(fnr)
+        val innsatsgruppe = client.hentInnsatsgruppe(fnr)
 
-		innsatsgruppe shouldBe null
-	}
+        innsatsgruppe shouldBe null
+    }
 
-	@Test
-	fun `hentInnsatsgruppe - manglende tilgang - kaster exception`() {
-		server.enqueue(MockResponse().setResponseCode(HttpStatus.FORBIDDEN.value()))
-		assertThrows<RuntimeException> { client.hentInnsatsgruppe("123") }
-	}
+    @Test
+    fun `hentInnsatsgruppe - manglende tilgang - kaster exception`() {
+        server.enqueue(MockResponse().setResponseCode(HttpStatus.FORBIDDEN.value()))
+        assertThrows<RuntimeException> { client.hentInnsatsgruppe("123") }
+    }
 }

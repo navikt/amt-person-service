@@ -8,15 +8,15 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class VeilarbarenaConfig {
-	@Bean
-	fun veilarbarenaClient(
-		@Value($$"${veilarbarena.url}") url: String,
-		@Value($$"${veilarbarena.scope}") scope: String,
-		machineToMachineTokenClient: MachineToMachineTokenClient,
-		objectMapper: ObjectMapper,
-	) = VeilarbarenaClient(
-		baseUrl = url,
-		tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
-		objectMapper = objectMapper,
-	)
+    @Bean
+    fun veilarbarenaClient(
+        @Value($$"${veilarbarena.url}") url: String,
+        @Value($$"${veilarbarena.scope}") scope: String,
+        machineToMachineTokenClient: MachineToMachineTokenClient,
+        objectMapper: ObjectMapper,
+    ) = VeilarbarenaClient(
+        baseUrl = url,
+        tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
+        objectMapper = objectMapper,
+    )
 }

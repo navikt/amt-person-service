@@ -16,73 +16,72 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 class VeilarboppfolgingClient(
-	private val apiUrl: String,
-	private val veilarboppfolgingTokenProvider: () -> String,
-	private val objectMapper: ObjectMapper,
-	private val httpClient: OkHttpClient = baseClient(),
+    private val apiUrl: String,
+    private val veilarboppfolgingTokenProvider: () -> String,
+    private val objectMapper: ObjectMapper,
+    private val httpClient: OkHttpClient = baseClient(),
 ) {
-	fun hentVeilederIdent(fnr: String): String? {
-		val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
-		val request =
-			Request
-				.Builder()
-				.url("$apiUrl/api/v3/hent-veileder")
-				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
-				.post(personRequestJson.toRequestBody(mediaTypeJson))
-				.build()
+    fun hentVeilederIdent(fnr: String): String? {
+        val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
+        val request =
+            Request
+                .Builder()
+                .url("$apiUrl/api/v3/hent-veileder")
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
+                .post(personRequestJson.toRequestBody(mediaTypeJson))
+                .build()
 
-		httpClient.newCall(request).execute().use { response ->
-			if (!response.isSuccessful) {
-				throw RuntimeException("Uventet status ved kall mot veilarboppfolging ${response.code}")
-			}
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Uventet status ved kall mot veilarboppfolging ${response.code}")
+            }
 
-			if (response.code == HttpStatus.NO_CONTENT.value()) return null
+            if (response.code == HttpStatus.NO_CONTENT.value()) return null
 
-			val veilederRespons = objectMapper.readValue<HentBrukersVeilederResponse>(response.body.string())
-			return veilederRespons.veilederIdent
-		}
-	}
+            val veilederRespons = objectMapper.readValue<HentBrukersVeilederResponse>(response.body.string())
+            return veilederRespons.veilederIdent
+        }
+    }
 
-	fun hentOppfolgingperioder(fnr: String): List<Oppfolgingsperiode> {
-		val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
-		val request =
-			Request
-				.Builder()
-				.url("$apiUrl/api/v3/oppfolging/hent-perioder")
-				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
-				.post(personRequestJson.toRequestBody(mediaTypeJson))
-				.build()
+    fun hentOppfolgingperioder(fnr: String): List<Oppfolgingsperiode> {
+        val personRequestJson = objectMapper.writeValueAsString(PersonRequest(fnr))
+        val request =
+            Request
+                .Builder()
+                .url("$apiUrl/api/v3/oppfolging/hent-perioder")
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${veilarboppfolgingTokenProvider()}")
+                .post(personRequestJson.toRequestBody(mediaTypeJson))
+                .build()
 
-		httpClient.newCall(request).execute().use { response ->
-			if (!response.isSuccessful) {
-				throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
-			}
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Uventet status ved hent status-kall mot veilarboppfolging ${response.code}")
+            }
 
-			val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDto>>(response.body.string())
-			return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
-		}
-	}
+            val oppfolgingsperioderRespons = objectMapper.readValue<List<OppfolgingPeriodeDto>>(response.body.string())
+            return oppfolgingsperioderRespons.map { it.toOppfolgingsperiode() }
+        }
+    }
 
-	private data class HentBrukersVeilederResponse(
-		val veilederIdent: String,
-	)
+    private data class HentBrukersVeilederResponse(
+        val veilederIdent: String,
+    )
 
-	private data class PersonRequest(
-		val fnr: String,
-	)
+    private data class PersonRequest(
+        val fnr: String,
+    )
 
-	data class OppfolgingPeriodeDto(
-		val uuid: UUID,
-		val startDato: ZonedDateTime,
-		val sluttDato: ZonedDateTime?,
-	) {
-		fun toOppfolgingsperiode() =
-			Oppfolgingsperiode(
-				id = uuid,
-				startdato = startDato.toSystemZoneLocalDateTime(),
-				sluttdato = sluttDato?.toSystemZoneLocalDateTime(),
-			)
-	}
+    data class OppfolgingPeriodeDto(
+        val uuid: UUID,
+        val startDato: ZonedDateTime,
+        val sluttDato: ZonedDateTime?,
+    ) {
+        fun toOppfolgingsperiode() = Oppfolgingsperiode(
+            id = uuid,
+            startdato = startDato.toSystemZoneLocalDateTime(),
+            sluttdato = sluttDato?.toSystemZoneLocalDateTime(),
+        )
+    }
 }

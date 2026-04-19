@@ -13,30 +13,30 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndringPaaBrukerConsumerTest {
-	private val navBrukerRepository: NavBrukerRepository = mockk(relaxUnitFun = true)
-	private val navBrukerService: NavBrukerService = mockk()
-	private val navEnhetService: NavEnhetService = mockk()
-	private val endringPaaBrukerConsumer =
-		EndringPaaBrukerConsumer(
-			navBrukerRepository = navBrukerRepository,
-			navBrukerService = navBrukerService,
-			navEnhetService = navEnhetService,
-			objectMapper = staticObjectMapper,
-		)
+    private val navBrukerRepository: NavBrukerRepository = mockk(relaxUnitFun = true)
+    private val navBrukerService: NavBrukerService = mockk()
+    private val navEnhetService: NavEnhetService = mockk()
+    private val endringPaaBrukerConsumer =
+        EndringPaaBrukerConsumer(
+            navBrukerRepository = navBrukerRepository,
+            navBrukerService = navBrukerService,
+            navEnhetService = navEnhetService,
+            objectMapper = staticObjectMapper,
+        )
 
-	@BeforeEach
-	fun setup() = clearAllMocks()
+    @BeforeEach
+    fun setup() = clearAllMocks()
 
-	@Test
-	fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
-		endringPaaBrukerConsumer.ingest(
-			objectMapper.writeValueAsString(KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null)),
-		)
+    @Test
+    fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
+        endringPaaBrukerConsumer.ingest(
+            objectMapper.writeValueAsString(KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null)),
+        )
 
-		verify(exactly = 0) {
-			navBrukerRepository.get(any<String>())
-			navEnhetService.hentEllerOpprettNavEnhet(any())
-			navBrukerService.upsert(any())
-		}
-	}
+        verify(exactly = 0) {
+            navBrukerRepository.get(any<String>())
+            navEnhetService.hentEllerOpprettNavEnhet(any())
+            navBrukerService.upsert(any())
+        }
+    }
 }

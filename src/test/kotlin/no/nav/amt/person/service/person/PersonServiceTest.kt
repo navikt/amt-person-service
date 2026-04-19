@@ -16,67 +16,67 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.context.ApplicationEventPublisher
 
 class PersonServiceTest {
-	private val pdlClient: PdlClient = mockk(relaxUnitFun = true)
-	private val personRepository: PersonRepository = mockk(relaxUnitFun = true)
-	private val personidentRepository: PersonidentRepository = mockk(relaxUnitFun = true)
-	private val applicationEventPublisher: ApplicationEventPublisher = mockk(relaxUnitFun = true)
+    private val pdlClient: PdlClient = mockk(relaxUnitFun = true)
+    private val personRepository: PersonRepository = mockk(relaxUnitFun = true)
+    private val personidentRepository: PersonidentRepository = mockk(relaxUnitFun = true)
+    private val applicationEventPublisher: ApplicationEventPublisher = mockk(relaxUnitFun = true)
 
-	private val service =
-		PersonService(
-			pdlClient = pdlClient,
-			personRepository = personRepository,
-			personidentRepository = personidentRepository,
-			applicationEventPublisher = applicationEventPublisher,
-		)
+    private val service =
+        PersonService(
+            pdlClient = pdlClient,
+            personRepository = personRepository,
+            personidentRepository = personidentRepository,
+            applicationEventPublisher = applicationEventPublisher,
+        )
 
-	@BeforeEach
-	fun setup() = clearAllMocks()
+    @BeforeEach
+    fun setup() = clearAllMocks()
 
-	@Test
-	fun `hentEllerOpprettPerson - personen finnes ikke - opprettes og returnere person`() {
-		val personident = TestData.randomIdent()
-		val identType = IdentType.FOLKEREGISTERIDENT
-		val pdlPerson =
-			PdlPerson(
-				fornavn = "Fornavn",
-				mellomnavn = "Mellomnavn",
-				etternavn = "Etternavn",
-				telefonnummer = "81549300",
-				adressebeskyttelseGradering = null,
-				identer =
-					listOf(
-						Personident(ident = personident, historisk = false, type = identType),
-						Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
-					),
-				adresse = null,
-			)
+    @Test
+    fun `hentEllerOpprettPerson - personen finnes ikke - opprettes og returnere person`() {
+        val personident = TestData.randomIdent()
+        val identType = IdentType.FOLKEREGISTERIDENT
+        val pdlPerson =
+            PdlPerson(
+                fornavn = "Fornavn",
+                mellomnavn = "Mellomnavn",
+                etternavn = "Etternavn",
+                telefonnummer = "81549300",
+                adressebeskyttelseGradering = null,
+                identer =
+                    listOf(
+                        Personident(ident = personident, historisk = false, type = identType),
+                        Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
+                    ),
+                adresse = null,
+            )
 
-		every { pdlClient.hentPerson(personident) } returns pdlPerson
-		every { personRepository.get(personident) } returns null
+        every { pdlClient.hentPerson(personident) } returns pdlPerson
+        every { personRepository.get(personident) } returns null
 
-		val person = service.hentEllerOpprettPerson(personident)
-		assertSoftly(person) {
-			personident shouldBe personident
-			fornavn shouldBe pdlPerson.fornavn
-			mellomnavn shouldBe pdlPerson.mellomnavn
-			etternavn shouldBe pdlPerson.etternavn
-		}
-	}
+        val person = service.hentEllerOpprettPerson(personident)
+        assertSoftly(person) {
+            personident shouldBe personident
+            fornavn shouldBe pdlPerson.fornavn
+            mellomnavn shouldBe pdlPerson.mellomnavn
+            etternavn shouldBe pdlPerson.etternavn
+        }
+    }
 
-	@Test
-	fun `oppdaterPersonIdent - flere personer knyttet til samme ident - kaster exception`() {
-		val identer =
-			listOf(
-				Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT),
-				Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
-				Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
-			)
+    @Test
+    fun `oppdaterPersonIdent - flere personer knyttet til samme ident - kaster exception`() {
+        val identer =
+            listOf(
+                Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT),
+                Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+                Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+            )
 
-		every { personRepository.getPersoner(identer.map { it.ident }.toSet()) } returns
-			identer.map { TestData.lagPerson(personident = it.ident) }
+        every { personRepository.getPersoner(identer.map { it.ident }.toSet()) } returns
+            identer.map { TestData.lagPerson(personident = it.ident) }
 
-		assertThrows<IllegalStateException> {
-			service.oppdaterPersonIdent(identer)
-		}
-	}
+        assertThrows<IllegalStateException> {
+            service.oppdaterPersonIdent(identer)
+        }
+    }
 }

@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration(proxyBeanMethods = false)
 class KodeverkClientConfig {
-	@Bean
-	fun kodeverkHttpClient(): OkHttpClient = RestClient.baseClient()
+    @Bean
+    fun kodeverkHttpClient(): OkHttpClient = RestClient.baseClient()
 }

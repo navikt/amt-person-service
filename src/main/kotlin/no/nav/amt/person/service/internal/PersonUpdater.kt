@@ -10,34 +10,34 @@ import org.springframework.stereotype.Service
 
 @Service
 class PersonUpdater(
-	private val personRepository: PersonRepository,
-	private val personService: PersonService,
-	private val pdlClient: PdlClient,
+    private val personRepository: PersonRepository,
+    private val personService: PersonService,
+    private val pdlClient: PdlClient,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun oppdaterPersonidenter(startOffset: Int = 0) {
-		var offset = startOffset
-		var personer: List<PersonDbo>
+    fun oppdaterPersonidenter(startOffset: Int = 0) {
+        var offset = startOffset
+        var personer: List<PersonDbo>
 
-		do {
-			personer = personRepository.getAll(offset)
+        do {
+            personer = personRepository.getAll(offset)
 
-			for (person in personer) {
-				val identer = pdlClient.hentIdenter(person.personident)
-				if (identer.isEmpty()) continue
+            for (person in personer) {
+                val identer = pdlClient.hentIdenter(person.personident)
+                if (identer.isEmpty()) continue
 
-				personService.oppdaterPersonIdent(identer)
+                personService.oppdaterPersonIdent(identer)
 
-				identer.finnGjeldendeIdent().onSuccess { ident ->
-					if (ident.ident != person.personident) {
-						log.info("Ny gjeldende ident for person ${person.id}")
-					}
-				}
-			}
+                identer.finnGjeldendeIdent().onSuccess { ident ->
+                    if (ident.ident != person.personident) {
+                        log.info("Ny gjeldende ident for person ${person.id}")
+                    }
+                }
+            }
 
-			log.info("Oppdaterte personidenter for personer fra offset $offset til ${offset + personer.size}")
-			offset += personer.size
-		} while (personer.isNotEmpty())
-	}
+            log.info("Oppdaterte personidenter for personer fra offset $offset til ${offset + personer.size}")
+            offset += personer.size
+        } while (personer.isNotEmpty())
+    }
 }

@@ -7,12 +7,12 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
 class NorgClientConfig {
-	@Bean
-	fun norgClient(
-		@Value($$"${norg.url}") url: String,
-		objectMapper: ObjectMapper,
-	) = NorgClient(
-		url = url,
-		objectMapper = objectMapper,
-	)
+    @Bean
+    fun norgClient(
+        @Value($$"${norg.url}") url: String,
+        objectMapper: ObjectMapper,
+    ) = NorgClient(
+        url = url,
+        objectMapper = objectMapper,
+    )
 }

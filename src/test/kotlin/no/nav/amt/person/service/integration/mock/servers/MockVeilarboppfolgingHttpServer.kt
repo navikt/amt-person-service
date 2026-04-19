@@ -12,56 +12,56 @@ import org.springframework.http.HttpStatus
 import java.time.ZoneId
 
 class MockVeilarboppfolgingHttpServer : MockHttpServer(name = "MockVeilarboppfolgingHttpServer") {
-	fun mockHentVeilederIdent(
-		fnr: String,
-		veilederIdent: String?,
-	) {
-		val url = "/veilarboppfolging/api/v3/hent-veileder"
-		val predicate = { req: RecordedRequest ->
-			val body = req.getBodyAsString()
+    fun mockHentVeilederIdent(
+        fnr: String,
+        veilederIdent: String?,
+    ) {
+        val url = "/veilarboppfolging/api/v3/hent-veileder"
+        val predicate = { req: RecordedRequest ->
+            val body = req.getBodyAsString()
 
-			req.path == url &&
-				req.method == HttpMethod.POST.name() &&
-				body.contains(fnr)
-		}
+            req.path == url &&
+                req.method == HttpMethod.POST.name() &&
+                body.contains(fnr)
+        }
 
-		val response =
-			if (veilederIdent == null) {
-				MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value())
-			} else {
-				MockResponse()
-					.setResponseCode(HttpStatus.OK.value())
-					.setBody("""{"veilederIdent": "$veilederIdent"}""")
-			}
-		addResponseHandler(predicate, response)
-	}
+        val response =
+            if (veilederIdent == null) {
+                MockResponse().setResponseCode(HttpStatus.NO_CONTENT.value())
+            } else {
+                MockResponse()
+                    .setResponseCode(HttpStatus.OK.value())
+                    .setBody("""{"veilederIdent": "$veilederIdent"}""")
+            }
+        addResponseHandler(predicate, response)
+    }
 
-	fun mockHentOppfolgingperioder(
-		fnr: String,
-		oppfolgingsperioder: List<Oppfolgingsperiode>,
-	) {
-		val url = "/veilarboppfolging/api/v3/oppfolging/hent-perioder"
-		val predicate = { req: RecordedRequest ->
-			val body = req.getBodyAsString()
+    fun mockHentOppfolgingperioder(
+        fnr: String,
+        oppfolgingsperioder: List<Oppfolgingsperiode>,
+    ) {
+        val url = "/veilarboppfolging/api/v3/oppfolging/hent-perioder"
+        val predicate = { req: RecordedRequest ->
+            val body = req.getBodyAsString()
 
-			req.path == url &&
-				req.method == HttpMethod.POST.name() &&
-				body.contains(fnr)
-		}
+            req.path == url &&
+                req.method == HttpMethod.POST.name() &&
+                body.contains(fnr)
+        }
 
-		val oppfolgingsperioderRespons =
-			oppfolgingsperioder.map {
-				VeilarboppfolgingClient.OppfolgingPeriodeDto(
-					uuid = it.id,
-					startDato = it.startdato.atZone(ZoneId.systemDefault()),
-					sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault()),
-				)
-			}
+        val oppfolgingsperioderRespons =
+            oppfolgingsperioder.map {
+                VeilarboppfolgingClient.OppfolgingPeriodeDto(
+                    uuid = it.id,
+                    startDato = it.startdato.atZone(ZoneId.systemDefault()),
+                    sluttDato = it.sluttdato?.atZone(ZoneId.systemDefault()),
+                )
+            }
 
-		val response =
-			MockResponse()
-				.setResponseCode(HttpStatus.OK.value())
-				.setBody(staticObjectMapper.writeValueAsString(oppfolgingsperioderRespons))
-		addResponseHandler(predicate, response)
-	}
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody(staticObjectMapper.writeValueAsString(oppfolgingsperioderRespons))
+        addResponseHandler(predicate, response)
+    }
 }

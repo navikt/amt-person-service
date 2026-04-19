@@ -10,15 +10,14 @@ fun <V> sqlParameters(vararg pairs: Pair<String, V>): MapSqlParameterSource = Ma
 
 fun ResultSet.getUUID(columnLabel: String): UUID = UUID.fromString(this.getString(columnLabel))
 
-fun ResultSet.getNullableUUID(columnLabel: String): UUID? =
-	this
-		.getString(columnLabel)
-		?.let { UUID.fromString(it) }
+fun ResultSet.getNullableUUID(columnLabel: String): UUID? = this
+    .getString(columnLabel)
+    ?.let { UUID.fromString(it) }
 
 fun toPGObject(
-	value: Any?,
-	objectMapper: ObjectMapper,
+    value: Any?,
+    objectMapper: ObjectMapper,
 ) = PGobject().also {
-	it.type = "json"
-	it.value = value?.let { v -> objectMapper.writeValueAsString(v) }
+    it.type = "json"
+    it.value = value?.let { v -> objectMapper.writeValueAsString(v) }
 }

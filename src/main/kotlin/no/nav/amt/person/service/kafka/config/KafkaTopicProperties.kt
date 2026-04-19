@@ -4,22 +4,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "app.env")
 data class KafkaTopicProperties(
-	val endringPaaBrukerTopic: String,
-	val sisteTilordnetVeilederTopic: String,
-	val aktorV2Topic: String,
-	val skjermedePersonerTopic: String,
-	val leesahTopic: String,
-	val deltakerV2Topic: String,
-	val oppfolgingsperiodeTopic: String,
-	val innsatsgruppeTopic: String,
-	// Producer topics:
-	val amtNavBrukerTopic: String,
-	val amtArrangorAnsattPersonaliaTopic: String,
-	val amtNavAnsattPersonaliaTopic: String,
-	val amtNavEnhetTopic: String,
+    val endringPaaBrukerTopic: String,
+    val sisteTilordnetVeilederTopic: String,
+    val aktorV2Topic: String,
+    val skjermedePersonerTopic: String,
+    val leesahTopic: String,
+    val deltakerV2Topic: String,
+    val oppfolgingsperiodeTopic: String,
+    val innsatsgruppeTopic: String,
+    // Producer topics:
+    val amtNavBrukerTopic: String,
+    val amtArrangorAnsattPersonaliaTopic: String,
+    val amtNavAnsattPersonaliaTopic: String,
+    val amtNavEnhetTopic: String,
 ) {
-	companion object {
-		const val CONSUMER_GROUP_ID = "amt-person-service-consumer.v1"
-		const val PRODUCER_ID = "amt-person-service-producer"
-	}
+    companion object {
+        const val CONSUMER_GROUP_ID = "amt-person-service-consumer.v1"
+        const val PRODUCER_ID = "amt-person-service-producer"
+    }
 }

@@ -7,27 +7,27 @@ import java.util.UUID
 
 @Service
 class AuthService(
-	private val tokenValidationContextHolder: TokenValidationContextHolder,
+    private val tokenValidationContextHolder: TokenValidationContextHolder,
 ) {
-	fun verifyRequestIsMachineToMachine() {
-		if (!isRequestFromMachine()) {
-			throw JwtTokenUnauthorizedException("Request is not machine-to-machine")
-		}
-	}
+    fun verifyRequestIsMachineToMachine() {
+        if (!isRequestFromMachine()) {
+            throw JwtTokenUnauthorizedException("Request is not machine-to-machine")
+        }
+    }
 
-	private fun isRequestFromMachine(): Boolean {
-		val claims =
-			tokenValidationContextHolder
-				.getTokenValidationContext()
-				.getClaims(Issuer.AZURE_AD)
+    private fun isRequestFromMachine(): Boolean {
+        val claims =
+            tokenValidationContextHolder
+                .getTokenValidationContext()
+                .getClaims(Issuer.AZURE_AD)
 
-		val sub =
-			claims.getStringClaim("sub")?.let { UUID.fromString(it) }
-				?: throw JwtTokenUnauthorizedException("Sub is missing")
-		val oid =
-			claims.getStringClaim("oid")?.let { UUID.fromString(it) }
-				?: throw JwtTokenUnauthorizedException("Oid is missing")
+        val sub =
+            claims.getStringClaim("sub")?.let { UUID.fromString(it) }
+                ?: throw JwtTokenUnauthorizedException("Sub is missing")
+        val oid =
+            claims.getStringClaim("oid")?.let { UUID.fromString(it) }
+                ?: throw JwtTokenUnauthorizedException("Oid is missing")
 
-		return sub == oid
-	}
+        return sub == oid
+    }
 }

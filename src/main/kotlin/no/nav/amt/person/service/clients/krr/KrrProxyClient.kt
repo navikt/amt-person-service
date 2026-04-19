@@ -13,61 +13,60 @@ import tools.jackson.module.kotlin.readValue
 import java.util.concurrent.TimeUnit
 
 class KrrProxyClient(
-	private val baseUrl: String,
-	private val tokenProvider: () -> String,
-	private val objectMapper: ObjectMapper,
+    private val baseUrl: String,
+    private val tokenProvider: () -> String,
+    private val objectMapper: ObjectMapper,
 ) {
-	private data class PostPersonerRequest(
-		val personidenter: Set<String>,
-	)
+    private data class PostPersonerRequest(
+        val personidenter: Set<String>,
+    )
 
-	private val httpClient =
-		baseClientBuilder()
-			.connectTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-			.readTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-			.writeTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-			.build()
+    private val httpClient =
+        baseClientBuilder()
+            .connectTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(INCREASED_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build()
 
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	companion object {
-		private const val INCREASED_TIMEOUT_SECONDS = 20L
-	}
+    companion object {
+        private const val INCREASED_TIMEOUT_SECONDS = 20L
+    }
 
-	fun hentKontaktinformasjon(personident: String) =
-		hentKontaktinformasjon(setOf(personident)).mapCatching {
-			it[personident] ?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
-		}
+    fun hentKontaktinformasjon(personident: String) = hentKontaktinformasjon(setOf(personident)).mapCatching {
+        it[personident] ?: throw NoSuchElementException("Klarte ikke hente kontaktinformasjon for person")
+    }
 
-	fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
-		val requestBody = objectMapper.writeValueAsString(PostPersonerRequest(personidenter))
+    fun hentKontaktinformasjon(personidenter: Set<String>): Result<KontaktinformasjonForPersoner> {
+        val requestBody = objectMapper.writeValueAsString(PostPersonerRequest(personidenter))
 
-		val request: Request =
-			Request
-				.Builder()
-				.url("$baseUrl/rest/v1/personer?inkluderSikkerDigitalPost=false")
-				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-				.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider())
-				.post(requestBody.toRequestBody(mediaTypeJson))
-				.build()
+        val request: Request =
+            Request
+                .Builder()
+                .url("$baseUrl/rest/v1/personer?inkluderSikkerDigitalPost=false")
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenProvider())
+                .post(requestBody.toRequestBody(mediaTypeJson))
+                .build()
 
-		httpClient.newCall(request).execute().use { response ->
-			if (!response.isSuccessful) {
-				return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
-			}
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                return Result.failure(RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${response.code}"))
+            }
 
-			val responseDto = objectMapper.readValue<PostPersonerResponse>(response.body.string())
+            val responseDto = objectMapper.readValue<PostPersonerResponse>(response.body.string())
 
-			if (responseDto.feil.isNotEmpty()) {
-				TeamLogs.error(responseDto.feil.toString())
-				log.warn("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer")
-			}
+            if (responseDto.feil.isNotEmpty()) {
+                TeamLogs.error(responseDto.feil.toString())
+                log.warn("Respons fra KRR inneholdt feil på ${responseDto.feil.size} av ${personidenter.size} personer")
+            }
 
-			log.info("Hentet kontaktinformasjon for ${responseDto.personer.size} av ${personidenter.size} personer fra KRR-proxy")
+            log.info("Hentet kontaktinformasjon for ${responseDto.personer.size} av ${personidenter.size} personer fra KRR-proxy")
 
-			return Result.success(
-				responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.epostadresse, v.mobiltelefonnummer) },
-			)
-		}
-	}
+            return Result.success(
+                responseDto.personer.mapValues { (_, v) -> Kontaktinformasjon(v.epostadresse, v.mobiltelefonnummer) },
+            )
+        }
+    }
 }

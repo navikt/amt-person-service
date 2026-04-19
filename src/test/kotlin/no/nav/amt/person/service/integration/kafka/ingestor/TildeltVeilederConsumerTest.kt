@@ -16,54 +16,54 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class TildeltVeilederConsumerTest(
-	private val kafkaMessageSender: KafkaMessageSender,
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navAnsattRepository: NavAnsattRepository,
+    private val kafkaMessageSender: KafkaMessageSender,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navAnsattRepository: NavAnsattRepository,
 ) : IntegrationTestBase() {
-	@Test
-	fun `ingest - bruker finnes, ny veileder - oppretter og oppdaterer nav veileder`() {
-		val navBruker = TestData.lagNavBruker()
-		testDataRepository.insertNavBruker(navBruker)
+    @Test
+    fun `ingest - bruker finnes, ny veileder - oppretter og oppdaterer nav veileder`() {
+        val navBruker = TestData.lagNavBruker()
+        testDataRepository.insertNavBruker(navBruker)
 
-		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
-		val navAnsatt = TestData.lagNavAnsatt(navIdent = payload.veilederId)
+        val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+        val navAnsatt = TestData.lagNavAnsatt(navIdent = payload.veilederId)
 
-		mockPdlHttpServer.mockHentIdenter(payload.aktorId, navBruker.person.personident)
-		mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
-		mockNorgHttpServer.addNavEnhetGrunerLokka()
+        mockPdlHttpServer.mockHentIdenter(payload.aktorId, navBruker.person.personident)
+        mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
+        mockNorgHttpServer.addNavEnhetGrunerLokka()
 
-		kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
+        kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
 
-		await().untilAsserted {
-			val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
+        await().untilAsserted {
+            val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
 
-			assertSoftly(faktiskNavAnsatt.shouldNotBeNull()) {
-				navIdent shouldBe navAnsatt.navIdent
-				navn shouldBe navAnsatt.navn
-				epost shouldBe navAnsatt.epost
-				telefon shouldBe navAnsatt.telefon
-			}
+            assertSoftly(faktiskNavAnsatt.shouldNotBeNull()) {
+                navIdent shouldBe navAnsatt.navIdent
+                navn shouldBe navAnsatt.navn
+                epost shouldBe navAnsatt.epost
+                telefon shouldBe navAnsatt.telefon
+            }
 
-			val faktiskBruker = navBrukerRepository.get(navBruker.id)
+            val faktiskBruker = navBrukerRepository.get(navBruker.id)
 
-			faktiskBruker.navVeileder.shouldNotBeNull()
-			faktiskBruker.navVeileder.navIdent shouldBe navAnsatt.navIdent
-		}
-	}
+            faktiskBruker.navVeileder.shouldNotBeNull()
+            faktiskBruker.navVeileder.navIdent shouldBe navAnsatt.navIdent
+        }
+    }
 
-	@Test
-	fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
-		val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
-		mockPdlHttpServer.mockHentIdenter(payload.aktorId, "ukjent ident")
-		kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
+    @Test
+    fun `ingest - bruker finnes ikke - oppdaterer ikke veileder`() {
+        val payload = KafkaMessageCreator.lagTildeltVeilederMsg()
+        mockPdlHttpServer.mockHentIdenter(payload.aktorId, "ukjent ident")
+        kafkaMessageSender.sendTilTildeltVeilederTopic(payload)
 
-		withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
-			await().untilAsserted {
-				navAnsattRepository.get(payload.veilederId) shouldBe null
+        withLogCapture(TildeltVeilederConsumer::class.java.name) { loggingEvents ->
+            await().untilAsserted {
+                navAnsattRepository.get(payload.veilederId) shouldBe null
 
-				loggingEvents.map { it.message } shouldContain
-					"Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
-			}
-		}
-	}
+                loggingEvents.map { it.message } shouldContain
+                    "Tildelt veileder endret. Nav-bruker finnes ikke, hopper over Kafka-melding"
+            }
+        }
+    }
 }

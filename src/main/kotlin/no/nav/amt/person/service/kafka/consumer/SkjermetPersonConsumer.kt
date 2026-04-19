@@ -9,29 +9,29 @@ import tools.jackson.module.kotlin.readValue
 
 @Component
 class SkjermetPersonConsumer(
-	private val navBrukerRepository: NavBrukerRepository,
-	private val navBrukerService: NavBrukerService,
-	private val objectMapper: ObjectMapper,
+    private val navBrukerRepository: NavBrukerRepository,
+    private val navBrukerService: NavBrukerService,
+    private val objectMapper: ObjectMapper,
 ) {
-	private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-	fun ingest(
-		personident: String,
-		erSkjermetAsJson: String,
-	) {
-		val brukerId = navBrukerRepository.finnBrukerId(personident) ?: return
-		navBrukerService.settSkjermet(
-			brukerId,
-			objectMapper.readValue<Boolean>(erSkjermetAsJson),
-		)
-	}
+    fun ingest(
+        personident: String,
+        erSkjermetAsJson: String,
+    ) {
+        val brukerId = navBrukerRepository.finnBrukerId(personident) ?: return
+        navBrukerService.settSkjermet(
+            brukerId,
+            objectMapper.readValue<Boolean>(erSkjermetAsJson),
+        )
+    }
 
-	fun ingestTombstone(personident: String) {
-		navBrukerRepository
-			.finnBrukerId(personident)
-			?.let { brukerId ->
-				val logMessage = "Kan ikke ingeste tombstone for eksisterende Nav-bruker $brukerId"
-				throw IllegalArgumentException(logMessage).also { log.error(logMessage) }
-			}
-	}
+    fun ingestTombstone(personident: String) {
+        navBrukerRepository
+            .finnBrukerId(personident)
+            ?.let { brukerId ->
+                val logMessage = "Kan ikke ingeste tombstone for eksisterende Nav-bruker $brukerId"
+                throw IllegalArgumentException(logMessage).also { log.error(logMessage) }
+            }
+    }
 }

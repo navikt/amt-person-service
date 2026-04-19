@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class NavAnsattUpdateJob(
-	private val navAnsattUpdater: NavAnsattUpdater,
+    private val navAnsattUpdater: NavAnsattUpdater,
 ) {
-	@Scheduled(cron = "@midnight")
-	@SchedulerLock(name = "navAnsattUpdater", lockAtMostFor = "30m", lockAtLeastFor = "15m")
-	fun update() {
-		JobRunner.run("oppdater_alle_nav_ansatte", navAnsattUpdater::oppdaterAlle)
-	}
+    @Scheduled(cron = "@midnight")
+    @SchedulerLock(name = "navAnsattUpdater", lockAtMostFor = "30m", lockAtLeastFor = "15m")
+    fun update() {
+        JobRunner.run("oppdater_alle_nav_ansatte", navAnsattUpdater::oppdaterAlle)
+    }
 }

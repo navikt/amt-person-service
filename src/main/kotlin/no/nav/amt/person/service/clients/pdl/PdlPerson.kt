@@ -9,30 +9,29 @@ import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldend
 import java.util.UUID
 
 data class PdlPerson(
-	val fornavn: String,
-	val mellomnavn: String?,
-	val etternavn: String,
-	val telefonnummer: String?,
-	val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
-	val identer: List<Personident>,
-	val adresse: Adresse?,
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+    val telefonnummer: String?,
+    val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
+    val identer: List<Personident>,
+    val adresse: Adresse?,
 ) {
-	fun getAdressebeskyttelse(): Adressebeskyttelse? =
-		if (adressebeskyttelseGradering?.erBeskyttet() == true) {
-			Adressebeskyttelse.valueOf(adressebeskyttelseGradering.name)
-		} else {
-			null
-		}
+    fun getAdressebeskyttelse(): Adressebeskyttelse? = if (adressebeskyttelseGradering?.erBeskyttet() == true) {
+        Adressebeskyttelse.valueOf(adressebeskyttelseGradering.name)
+    } else {
+        null
+    }
 
-	fun toPersonDbo(): PersonDbo {
-		val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
+    fun toPersonDbo(): PersonDbo {
+        val gjeldendeIdent = identer.finnGjeldendeIdent().getOrThrow()
 
-		return PersonDbo(
-			id = UUID.randomUUID(),
-			personident = gjeldendeIdent.ident,
-			fornavn = fornavn,
-			mellomnavn = mellomnavn,
-			etternavn = etternavn,
-		)
-	}
+        return PersonDbo(
+            id = UUID.randomUUID(),
+            personident = gjeldendeIdent.ident,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
+        )
+    }
 }
