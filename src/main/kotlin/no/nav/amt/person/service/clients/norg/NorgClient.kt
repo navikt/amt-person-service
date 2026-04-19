@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.clients.norg
 
 import no.nav.common.rest.client.RestClient.baseClient
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.springframework.http.HttpStatus
@@ -13,6 +14,10 @@ class NorgClient(
     private val httpClient: OkHttpClient = baseClient(),
 ) {
     private val enhetIdPattern = Regex("^\\d{4}$")
+    private val baseUrl =
+        url.toHttpUrl().also {
+            require(it.scheme == "https" || it.scheme == "http") { "Ugyldig url-skjema for norg-klient" }
+        }
 
     private fun validateEnhetId(enhetId: String): String {
         require(enhetIdPattern.matches(enhetId)) {
@@ -25,10 +30,16 @@ class NorgClient(
 
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
         val validatedEnhetId = validateEnhetId(enhetId)
+        val endpointUrl =
+            baseUrl
+                .newBuilder()
+                .addPathSegments("norg2/api/v1/enhet")
+                .addPathSegment(validatedEnhetId)
+                .build()
         val request =
             Request
                 .Builder()
-                .url("$url/norg2/api/v1/enhet/$validatedEnhetId")
+                .url(endpointUrl)
                 .get()
                 .build()
 
@@ -49,10 +60,16 @@ class NorgClient(
 
     fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
         val validatedEnheter = validateEnhetIds(enheter)
+        val endpointUrl =
+            baseUrl
+                .newBuilder()
+                .addPathSegments("norg2/api/v1/enhet")
+                .addQueryParameter("enhetsnummerListe", validatedEnheter.joinToString(","))
+                .build()
         val request =
             Request
                 .Builder()
-                .url("$url/norg2/api/v1/enhet?enhetsnummerListe=${validatedEnheter.joinToString(",")}")
+                .url(endpointUrl)
                 .get()
                 .build()
 
