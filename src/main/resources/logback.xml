@@ -49,6 +49,13 @@
     <logger name="org.apache.tomcat.util.http.parser.Cookie" level="OFF" />
 
     <logger name="org.apache" level="INFO"/>
+    <!--
+      LogRequestFilter logger med forskjellig level basert på HTTP-status:
+        2xx     -> DEBUG  (derfor må denne loggeren stå på DEBUG for å se normale requests)
+        3xx     -> INFO
+        4xx/5xx -> WARN
+    -->
+    <logger name="no.nav.common.rest.filter.LogRequestFilter" level="DEBUG"/>
     <logger name="org.apache.cxf" level="ERROR"/>
     <logger name="no.nav.common.cxf" level="ERROR"/>
     <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
