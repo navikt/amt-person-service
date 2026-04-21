@@ -55,6 +55,6 @@
     <logger name="org.apache.wss4j.common.crypto.CryptoBase" level="ERROR"/>
 
     <logger name="team-logs-logger" level="INFO" additivity="false">
-        <appenfer-ref ref="team-logs" />
+        <appender-ref ref="team-logs" />
     </logger>
 </configuration>
