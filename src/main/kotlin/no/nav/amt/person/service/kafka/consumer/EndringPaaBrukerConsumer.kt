@@ -21,17 +21,13 @@ class EndringPaaBrukerConsumer(
     fun ingest(value: String) {
         val endringPaaBrukerPayload = objectMapper.readValue<EndringPaaBrukerPayload>(value)
 
-        // Det er ikke mulig å fjerne nav kontor i arena men det kan legges meldinger på topicen som endrer andre ting
-        // og derfor ikke er relevante
-        if (endringPaaBrukerPayload.oppfolgingsenhet == null) return
+        val navBruker = navBrukerRepository.get(endringPaaBrukerPayload.ident) ?: return
 
-        val navBruker = navBrukerRepository.get(endringPaaBrukerPayload.fodselsnummer) ?: return
+        if (navBruker.navEnhet?.enhetId == endringPaaBrukerPayload.kontor.kontorId) return
 
-        if (navBruker.navEnhet?.enhetId == endringPaaBrukerPayload.oppfolgingsenhet) return
+        log.info("Endrer oppfolgingsenhet på NavBruker med id=${navBruker.id}")
 
-        log.info("Endrer oppfølgingsenhet på NavBruker med id=${navBruker.id}")
-
-        val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(endringPaaBrukerPayload.oppfolgingsenhet)
+        val navEnhet = navEnhetService.hentEllerOpprettNavEnhet(endringPaaBrukerPayload.kontor.kontorId)
 
         navBrukerService.upsert(navBruker.copy(navEnhet = navEnhet))
     }

@@ -2,6 +2,7 @@ package no.nav.amt.person.service.data.kafka
 
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
+import no.nav.amt.person.service.data.kafka.message.KontorMsg
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.kafka.consumer.OpplysningsType
 import no.nav.person.pdl.leesah.Endringstype
@@ -15,11 +16,14 @@ import java.util.UUID
 
 object KafkaMessageCreator {
     fun lagEndringPaaBrukerMsg(
-        fodselsnummer: String = TestData.randomIdent(),
-        oppfolgingsenhet: String? = TestData.randomEnhetId(),
+        ident: String = TestData.randomIdent(),
+        kontorId: String = TestData.randomEnhetId(),
+        kontorNavn: String = "NAV ${TestData.randomEnhetId()}",
+        sisteEndringsType: String = "ENDRET_KONTOR",
     ) = EndringPaaBrukerMsg(
-        fodselsnummer = fodselsnummer,
-        oppfolgingsenhet = oppfolgingsenhet,
+        ident = ident,
+        kontor = KontorMsg(kontorId = kontorId, kontorNavn = kontorNavn),
+        sisteEndringsType = sisteEndringsType,
     )
 
     fun lagTildeltVeilederMsg(

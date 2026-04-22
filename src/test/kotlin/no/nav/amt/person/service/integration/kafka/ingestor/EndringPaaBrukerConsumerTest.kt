@@ -22,8 +22,9 @@ class EndringPaaBrukerConsumerTest(
 
         val kafkaPayload =
             KafkaMessageCreator.lagEndringPaaBrukerMsg(
-                fodselsnummer = navBruker.person.personident,
-                oppfolgingsenhet = navEnhet.enhetId,
+                ident = navBruker.person.personident,
+                kontorId = navEnhet.enhetId,
+                kontorNavn = navEnhet.navn,
             )
 
         testDataRepository.insertNavBruker(navBruker)
