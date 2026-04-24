@@ -20,7 +20,6 @@ import okhttp3.Response
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
@@ -33,7 +32,6 @@ import java.time.Duration
 
 @ActiveProfiles("integration")
 @Import(KafkaTestConfiguration::class)
-@TestConfiguration("application-integration.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationTestBase : RepositoryTestBase() {
     @LocalServerPort

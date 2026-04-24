@@ -5,7 +5,7 @@ ktlint-plugin = "14.2.0"
 ktlint-cli-version = "1.8.0"
 
 # Spring
-spring-boot = "4.0.5"
+spring-boot = "4.0.6"
 spring-dependency-management = "1.1.7"
 
 # Serialization / Avro
@@ -31,11 +31,6 @@ kotest = "6.1.11"
 mockk = "1.14.9"
 mock-oauth2-server = "3.0.1"
 
-# CVE-fixes
-tools-jackson-version = "3.1.2"
-tomcat-version = "11.0.21"
-
-
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
@@ -53,7 +48,6 @@ avro-tools = { module = "org.apache.avro:avro-tools", version.ref = "apache-avro
 kafka-avro-serializer = { module = "io.confluent:kafka-avro-serializer", version.ref = "confluent" }
 
 # Jackson
-tools-jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "tools-jackson-version" } # CVE-fix
 tools-jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
 
 # HTTP
