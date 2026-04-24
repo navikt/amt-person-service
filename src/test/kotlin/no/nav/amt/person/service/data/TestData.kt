@@ -50,19 +50,21 @@ object TestData {
 	fun lagPerson(
 		id: UUID = UUID.randomUUID(),
 		personident: String = randomIdent(),
+		erFalskIdentitet: Boolean = false,
 		fornavn: String = "Fornavn",
 		mellomnavn: String? = null,
 		etternavn: String = "Etternavn",
 		createdAt: LocalDateTime = LocalDateTime.now(),
 		modifiedAt: LocalDateTime = LocalDateTime.now(),
 	) = PersonDbo(
-		id,
-		personident,
-		fornavn,
-		mellomnavn,
-		etternavn,
-		createdAt,
-		modifiedAt,
+		id = id,
+		personident = personident,
+		erFalskIdentitet = erFalskIdentitet,
+		fornavn = fornavn,
+		mellomnavn = mellomnavn,
+		etternavn = etternavn,
+		createdAt = createdAt,
+		modifiedAt = modifiedAt,
 	)
 
 	fun lagNavEnhet(
@@ -141,6 +143,7 @@ object TestData {
 		identer: List<Personident> = listOf(Personident(person.personident, false, IdentType.FOLKEREGISTERIDENT)),
 		adresse: Adresse? = lagAdresse(),
 	) = PdlPerson(
+		erFalskIdentitet = person.erFalskIdentitet,
 		fornavn = person.fornavn,
 		mellomnavn = person.mellomnavn,
 		etternavn = person.etternavn,

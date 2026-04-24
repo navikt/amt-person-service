@@ -61,8 +61,7 @@ class PdlClient(
 				throw RuntimeException("PDL respons inneholder ikke data")
 			}
 
-			val pdlPerson =
-				gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
+			val pdlPerson = gqlResponse.data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
 
 			return pdlPerson
 		}

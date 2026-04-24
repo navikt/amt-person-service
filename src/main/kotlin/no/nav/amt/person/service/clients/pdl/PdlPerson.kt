@@ -9,6 +9,7 @@ import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldend
 import java.util.UUID
 
 data class PdlPerson(
+	val erFalskIdentitet: Boolean,
 	val fornavn: String,
 	val mellomnavn: String?,
 	val etternavn: String,
@@ -30,6 +31,7 @@ data class PdlPerson(
 		return PersonDbo(
 			id = UUID.randomUUID(),
 			personident = gjeldendeIdent.ident,
+			erFalskIdentitet = erFalskIdentitet,
 			fornavn = fornavn,
 			mellomnavn = mellomnavn,
 			etternavn = etternavn,

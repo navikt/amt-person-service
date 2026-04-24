@@ -56,11 +56,6 @@ class PersonService(
 
 	@Transactional
 	fun oppdaterNavn(person: PersonDbo) {
-		if (person.erUkjent()) {
-			log.info("Skipper oppdaterNavn for ${person.id} med ukjent etternavn")
-			return
-		}
-
 		val pdlPerson =
 			try {
 				pdlClient.hentPerson(person.personident)
@@ -106,13 +101,12 @@ class PersonService(
 	private fun opprettPerson(pdlPerson: PdlPerson): PersonDbo {
 		val person = pdlPerson.toPersonDbo()
 		upsert(person)
-		personidentRepository.upsert(pdlPerson.identer.map { it.toDbo(person.id) }.toSet())
 
-		if (person.erUkjent()) {
-			log.warn("Opprettet ny person med id ${person.id} og ukjent navn")
-		} else {
-			log.info("Opprettet ny person med id ${person.id}")
-		}
+		personidentRepository.upsert(
+			identer = pdlPerson.identer.map { it.toDbo(person.id) }.toSet(),
+		)
+
+		log.info("Opprettet ny person med id ${person.id}")
 
 		return person
 	}

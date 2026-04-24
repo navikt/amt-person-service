@@ -257,6 +257,7 @@ class NavBrukerRepository(
 					PersonDbo(
 						id = rs.getUUID("nav_bruker.person_id"),
 						personident = rs.getString("person.personident"),
+						erFalskIdentitet = rs.getBoolean("person.er_falsk_identitet"),
 						fornavn = rs.getString("person.fornavn"),
 						mellomnavn = rs.getString("person.mellomnavn"),
 						etternavn = rs.getString("person.etternavn"),
@@ -327,6 +328,7 @@ class NavBrukerRepository(
 				nav_bruker.created_at AS "nav_bruker.created_at",
 				nav_bruker.modified_at AS "nav_bruker.modified_at",
 				person.personident AS "person.personident",
+				person.er_falsk_identitet AS "person.er_falsk_identitet",
 				person.fornavn AS "person.fornavn",
 				person.mellomnavn AS "person.mellomnavn",
 				person.etternavn AS "person.etternavn",

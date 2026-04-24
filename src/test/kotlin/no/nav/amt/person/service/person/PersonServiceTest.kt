@@ -38,6 +38,7 @@ class PersonServiceTest {
 		val identType = IdentType.FOLKEREGISTERIDENT
 		val pdlPerson =
 			PdlPerson(
+				erFalskIdentitet = false,
 				fornavn = "Fornavn",
 				mellomnavn = "Mellomnavn",
 				etternavn = "Etternavn",

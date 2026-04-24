@@ -94,7 +94,7 @@ class InternalController(
 		if (isInternal(servlet)) {
 			val person = personRepository.get(id)
 
-			if (person.erUkjent()) log.warn("Person $id har ukjent navn")
+			if (person.erFalskIdentitet) log.warn("Person $id har erFalskIdentitet = true")
 
 			personService.oppdaterNavn(person)
 		}

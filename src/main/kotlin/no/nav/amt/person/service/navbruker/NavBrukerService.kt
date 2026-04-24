@@ -88,8 +88,8 @@ class NavBrukerService(
 
 		upsert(navBruker)
 
-		if (navBruker.person.erUkjent()) {
-			log.warn("Opprettet ny Nav-bruker med id: ${navBruker.id} og ukjent navn")
+		if (navBruker.person.erFalskIdentitet) {
+			log.warn("Opprettet ny Nav-bruker med id: ${navBruker.id} og erFalskIdentitet = true")
 		} else {
 			log.info("Opprettet ny Nav-bruker med id: ${navBruker.id}")
 		}
@@ -250,9 +250,8 @@ class NavBrukerService(
 	fun oppdaterAdressebeskyttelse(personident: String) {
 		val navBruker = navBrukerRepository.get(personident) ?: return
 
-		if (navBruker.person.erUkjent()) {
-			log.info("Skipper oppdaterAdressebeskyttelse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med ukjent etternavn")
-			return
+		if (navBruker.person.erFalskIdentitet) {
+			log.warn("oppdaterAdressebeskyttelse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med erFalskIdentitet = true")
 		}
 
 		val personOpplysninger =
@@ -289,9 +288,8 @@ class NavBrukerService(
 	private fun oppdaterAdresse(personident: String) {
 		val navBruker = navBrukerRepository.get(personident) ?: return
 
-		if (navBruker.person.erUkjent()) {
-			log.info("Skipper oppdaterAdresse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med ukjent etternavn")
-			return
+		if (navBruker.person.erFalskIdentitet) {
+			log.warn("oppdaterAdresse for Nav-bruker ${navBruker.id} person-id ${navBruker.person.id} med erFalskIdentitet = true")
 		}
 
 		val personOpplysninger =

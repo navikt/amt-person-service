@@ -69,6 +69,9 @@ object PdlClientTestData {
 			"errors": null,
 			"data": {
 				"hentPerson": {
+					"falskIdentitet": {
+						"erFalsk": true
+					},
 					"navn": [
 						{
 							"fornavn": "Tester",
