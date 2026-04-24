@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.kafka.consumer
 
 import io.mockk.clearAllMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
@@ -28,13 +29,14 @@ class EndringPaaBrukerConsumerTest {
     fun setup() = clearAllMocks()
 
     @Test
-    fun `ingest - nav enhet mangler i melding - endrer ikke nav enhet`() {
-        endringPaaBrukerConsumer.ingest(
-            objectMapper.writeValueAsString(KafkaMessageCreator.lagEndringPaaBrukerMsg(oppfolgingsenhet = null)),
-        )
+    fun `ingest - bruker finnes ikke - endrer ikke nav enhet`() {
+        val msg = KafkaMessageCreator.lagEndringPaaBrukerMsg()
+
+        every { navBrukerRepository.get(msg.ident) } returns null
+
+        endringPaaBrukerConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 0) {
-            navBrukerRepository.get(any<String>())
             navEnhetService.hentEllerOpprettNavEnhet(any())
             navBrukerService.upsert(any())
         }
