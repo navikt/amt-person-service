@@ -17,20 +17,20 @@ fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (S
     val navn = hentPerson.navn.toNavnMedFallback()
 
     return PdlPerson(
+        erFalskIdentitet = hentPerson.falskIdentitet?.erFalsk ?: false,
         fornavn = navn.fornavn,
         mellomnavn = navn.mellomnavn,
         etternavn = navn.etternavn,
         telefonnummer = hentPerson.telefonnummer.toTelefonnummer(),
         adressebeskyttelseGradering = hentPerson.adressebeskyttelse.toDiskresjonskode(),
-        identer =
-            hentIdenter.identer.map
-                {
-                    Personident(
-                        it.ident,
-                        it.historisk,
-                        IdentType.valueOf(it.gruppe),
-                    )
-                },
+        identer = hentIdenter.identer.map
+            {
+                Personident(
+                    it.ident,
+                    it.historisk,
+                    IdentType.valueOf(it.gruppe),
+                )
+            },
         adresse = hentPerson.toAdresse(postnummerTilPoststedFunc),
     )
 }
@@ -67,12 +67,11 @@ private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc
 
     if (poststeder.isEmpty()) return null
 
-    val adresse =
-        Adresse(
-            bostedsadresse = bostedsadresseFraPdl?.toBostedsadresse(poststeder),
-            oppholdsadresse = oppholdsadresseFraPdl?.toOppholdsadresse(poststeder),
-            kontaktadresse = kontaktadresseFraPdl?.toKontaktadresse(poststeder),
-        )
+    val adresse = Adresse(
+        bostedsadresse = bostedsadresseFraPdl?.toBostedsadresse(poststeder),
+        oppholdsadresse = oppholdsadresseFraPdl?.toOppholdsadresse(poststeder),
+        kontaktadresse = kontaktadresseFraPdl?.toKontaktadresse(poststeder),
+    )
 
     if (adresse.bostedsadresse == null && adresse.oppholdsadresse == null && adresse.kontaktadresse == null) {
         return null
@@ -123,12 +122,11 @@ private fun PdlQueries.Attribute.Kontaktadresse.toKontaktadresse(poststeder: Lis
     if (vegadresse == null && postboksadresse == null) {
         return null
     }
-    val kontaktadresse =
-        Kontaktadresse(
-            coAdressenavn = coAdressenavn,
-            vegadresse = vegadresse?.toVegadresse(poststeder),
-            postboksadresse = postboksadresse?.toPostboksadresse(poststeder),
-        )
+    val kontaktadresse = Kontaktadresse(
+        coAdressenavn = coAdressenavn,
+        vegadresse = vegadresse?.toVegadresse(poststeder),
+        postboksadresse = postboksadresse?.toPostboksadresse(poststeder),
+    )
     if (kontaktadresse.vegadresse == null && kontaktadresse.postboksadresse == null) {
         return null
     }

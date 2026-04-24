@@ -103,6 +103,7 @@ class PersonRepositoryTest(
             PersonDbo(
                 id = UUID.randomUUID(),
                 personident = TestData.randomIdent(),
+                erFalskIdentitet = false,
                 fornavn = "Fornavn",
                 mellomnavn = "Mellomnavn",
                 etternavn = "Etternavn",
@@ -135,6 +136,7 @@ class PersonRepositoryTest(
             PersonDbo(
                 id = originalPerson.id,
                 personident = originalPerson.personident,
+                erFalskIdentitet = false,
                 fornavn = "Nytt",
                 mellomnavn = "Navn",
                 etternavn = "Med Mer",
@@ -169,6 +171,7 @@ class PersonRepositoryTest(
             PersonDbo(
                 id = originalPerson.id,
                 personident = "ny ident",
+                erFalskIdentitet = false,
                 fornavn = "Nytt",
                 mellomnavn = "Navn",
                 etternavn = "Med Mer",

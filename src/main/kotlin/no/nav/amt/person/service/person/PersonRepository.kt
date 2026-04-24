@@ -48,6 +48,7 @@ class PersonRepository(
             INSERT INTO person (
             	id,
             	personident,
+            	er_falsk_identitet,
             	fornavn,
             	mellomnavn,
             	etternavn
@@ -55,11 +56,13 @@ class PersonRepository(
             VALUES (
             	:id,
             	:personident,
+            	:er_falsk_identitet,
             	:fornavn,
             	:mellomnavn,
             	:etternavn
             )
             ON CONFLICT (id) DO UPDATE SET
+            	er_falsk_identitet = :er_falsk_identitet,
             	fornavn = :fornavn,
             	mellomnavn = :mellomnavn,
             	etternavn = :etternavn,
@@ -71,6 +74,7 @@ class PersonRepository(
             sqlParameters(
                 "id" to person.id,
                 "personident" to person.personident,
+                "er_falsk_identitet" to person.erFalskIdentitet,
                 "fornavn" to person.fornavn,
                 "mellomnavn" to person.mellomnavn,
                 "etternavn" to person.etternavn,
@@ -167,6 +171,7 @@ class PersonRepository(
                 PersonDbo(
                     id = rs.getUUID("id"),
                     personident = rs.getString("personident"),
+                    erFalskIdentitet = rs.getBoolean("er_falsk_identitet"),
                     fornavn = rs.getString("fornavn"),
                     mellomnavn = rs.getString("mellomnavn"),
                     etternavn = rs.getString("etternavn"),
