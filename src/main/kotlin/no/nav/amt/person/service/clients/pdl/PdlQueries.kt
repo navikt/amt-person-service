@@ -38,6 +38,9 @@ object PdlQueries {
             $$"""
 			query($ident: ID!) {
 			    hentPerson(ident: $ident) {
+			        falskIdentitet {
+			            erFalsk
+			        }
 			        navn(historikk: false) {
 			            fornavn
 			            mellomnavn
@@ -122,6 +125,7 @@ object PdlQueries {
         data class HentPerson(
             val navn: List<Attribute.Navn>,
             val telefonnummer: List<Attribute.Telefonnummer>,
+            val falskIdentitet: Attribute.FalskIdentitet?,
             val adressebeskyttelse: List<Attribute.Adressebeskyttelse>,
             val bostedsadresse: List<Attribute.Bostedsadresse>,
             val oppholdsadresse: List<Attribute.Oppholdsadresse>,
@@ -262,6 +266,10 @@ object PdlQueries {
 
         data class Foedselsdato(
             val foedselsaar: Int,
+        )
+
+        data class FalskIdentitet(
+            val erFalsk: Boolean,
         )
 
         data class Ident(

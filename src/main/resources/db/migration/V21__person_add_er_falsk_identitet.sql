@@ -1,0 +1,1 @@
+ALTER TABLE person ADD COLUMN IF NOT EXISTS er_falsk_identitet BOOLEAN;

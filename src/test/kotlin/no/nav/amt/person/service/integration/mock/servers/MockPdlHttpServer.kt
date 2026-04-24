@@ -226,6 +226,7 @@ class MockPdlHttpServer : MockHttpServer(name = "PdlHttpServer") {
                                         ),
                                     ),
                                 oppholdsadresse = emptyList(),
+                                falskIdentitet = null,
                                 kontaktadresse =
                                     listOf(
                                         PdlQueries.Attribute.Kontaktadresse(

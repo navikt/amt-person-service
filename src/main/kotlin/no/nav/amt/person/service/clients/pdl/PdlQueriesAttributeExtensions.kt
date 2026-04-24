@@ -17,6 +17,7 @@ fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (S
     val navn = hentPerson.navn.toNavnMedFallback()
 
     return PdlPerson(
+        erFalskIdentitet = hentPerson.falskIdentitet?.erFalsk ?: false,
         fornavn = navn.fornavn,
         mellomnavn = navn.mellomnavn,
         etternavn = navn.etternavn,
