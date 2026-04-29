@@ -63,6 +63,9 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
+        - application: ao-oppfolgingskontor
+          namespace: dab
+          cluster: dev-gcp
       external:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.nav.no
