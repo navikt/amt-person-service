@@ -7,10 +7,10 @@ import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHt
 import no.nav.amt.person.service.integration.mock.servers.MockNomHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockNorgHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockOAuthServer
+import no.nav.amt.person.service.integration.mock.servers.MockOppfolgningskontorHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPoaoTilgangHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockSchemaRegistryHttpServer
-import no.nav.amt.person.service.integration.mock.servers.MockVeilarbarenaHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockVeilarboppfolgingHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockVeilarbvedtaksstotteHttpServer
 import okhttp3.OkHttpClient
@@ -54,8 +54,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
         mockNorgHttpServer.resetHttpServer()
         mockPdlHttpServer.resetHttpServer()
         mockPoaoTilgangHttpServer.resetHttpServer()
-        mockVeilarbarenaHttpServer.resetHttpServer()
-        mockVeilarboppfolgingHttpServer.resetHttpServer()
+        mockOppfolgningskontorHttpServer.resetHttpServer()
         mockVeilarboppfolgingHttpServer.resetHttpServer()
     }
 
@@ -68,7 +67,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
         val mockNorgHttpServer = MockNorgHttpServer()
         val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
         val mockNomHttpServer = MockNomHttpServer()
-        val mockVeilarbarenaHttpServer = MockVeilarbarenaHttpServer()
+        val mockOppfolgningskontorHttpServer = MockOppfolgningskontorHttpServer()
         val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
         val mockOAuthServer = MockOAuthServer()
 
@@ -119,9 +118,9 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
             registry.add("nom.url") { mockNomHttpServer.serverUrl() }
             registry.add("nom.scope") { "test.nom" }
 
-            mockVeilarbarenaHttpServer.start()
-            registry.add("veilarbarena.url") { mockVeilarbarenaHttpServer.serverUrl() }
-            registry.add("veilarbarena.scope") { "test.veilarbarena" }
+            mockOppfolgningskontorHttpServer.start()
+            registry.add("ao-oppfolgingskontor.url") { mockOppfolgningskontorHttpServer.serverUrl() }
+            registry.add("ao-oppfolgingskontor.scope") { "test.ao-oppfolgingskontor" }
 
             mockOAuthServer.start()
             registry.add("no.nav.security.jwt.issuer.azuread.discovery-url") { mockOAuthServer.getDiscoveryUrl("azuread") }

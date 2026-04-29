@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients.veilarbarena
+package no.nav.amt.person.service.clients.oppfolgningskontor
 
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
@@ -7,14 +7,14 @@ import org.springframework.context.annotation.Configuration
 import tools.jackson.databind.ObjectMapper
 
 @Configuration(proxyBeanMethods = false)
-class VeilarbarenaConfig {
+class OppfolgningskontorConfig {
     @Bean
-    fun veilarbarenaClient(
-        @Value($$"${veilarbarena.url}") url: String,
-        @Value($$"${veilarbarena.scope}") scope: String,
+    fun oppfolgningskontorClient(
+        @Value($$"${ao-oppfolgingskontor.url}") url: String,
+        @Value($$"${ao-oppfolgingskontor.scope}") scope: String,
         machineToMachineTokenClient: MachineToMachineTokenClient,
         objectMapper: ObjectMapper,
-    ) = VeilarbarenaClient(
+    ) = OppfolgningskontorClient(
         baseUrl = url,
         tokenProvider = { machineToMachineTokenClient.createMachineToMachineToken(scope) },
         objectMapper = objectMapper,

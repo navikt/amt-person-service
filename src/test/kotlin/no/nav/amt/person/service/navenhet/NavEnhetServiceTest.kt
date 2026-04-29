@@ -9,7 +9,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
-import no.nav.amt.person.service.clients.veilarbarena.VeilarbarenaClient
+import no.nav.amt.person.service.clients.oppfolgningskontor.KontorForBrukerDto
+import no.nav.amt.person.service.clients.oppfolgningskontor.OppfolgningskontorClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.junit.jupiter.api.BeforeEach
@@ -18,14 +19,14 @@ import org.junit.jupiter.api.Test
 class NavEnhetServiceTest {
     private val norgClient: NorgClient = mockk()
     private val navEnhetRepository: NavEnhetRepository = mockk(relaxUnitFun = true)
-    private val veilarbarenaClient: VeilarbarenaClient = mockk()
+    private val oppfolgningskontorClient: OppfolgningskontorClient = mockk()
     private val kafkaProducerService = mockk<KafkaProducerService>(relaxUnitFun = true)
 
     private val service =
         NavEnhetService(
             navEnhetRepository = navEnhetRepository,
             norgClient = norgClient,
-            veilarbarenaClient = veilarbarenaClient,
+            oppfolgningskontorClient = oppfolgningskontorClient,
             kafkaProducerService,
         )
 
@@ -37,7 +38,7 @@ class NavEnhetServiceTest {
         val navEnhet = TestData.lagNavEnhet()
         val personident = "FNR"
 
-        every { veilarbarenaClient.hentBrukerOppfolgingsenhetId(personident) } returns navEnhet.enhetId
+        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns KontorForBrukerDto(navEnhet.enhetId, navEnhet.navn)
         every { navEnhetRepository.get(navEnhet.enhetId) } returns null
         every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 

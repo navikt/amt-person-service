@@ -1,0 +1,31 @@
+package no.nav.amt.person.service.integration.mock.servers
+import no.nav.amt.person.service.utils.MockHttpServer
+import no.nav.amt.person.service.utils.getBodyAsString
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+
+class MockOppfolgningskontorHttpServer : MockHttpServer(name = "MockOppfolgningskontorHttpServer") {
+    fun mockHentKontorForBruker(
+        ident: String,
+        enhetId: String?,
+    ) {
+        val predicate = { req: RecordedRequest ->
+            req.path == "/graphql" &&
+                req.method == HttpMethod.POST.name() &&
+                req.getBodyAsString().contains(ident)
+        }
+        val kontorJson =
+            if (enhetId == null) {
+                "null"
+            } else {
+                """{"enhetId": "$enhetId", "navn": "NAV Testkontor"}"""
+            }
+        val response =
+            MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setBody("""{"data": {"kontorForBruker": $kontorJson}}""")
+        addResponseHandler(predicate, response)
+    }
+}

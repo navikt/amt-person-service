@@ -130,6 +130,10 @@ spec:
       value: http://veilarbvedtaksstotte.obo
     - name: INNSATSGRUPPE_TOPIC
       value: pto.siste-14a-vedtak-v1
+    - name: AO_OPPFOLGNINGSKONTOR_SCOPE
+      value: api://dev-gcp.dab.ao-oppfolgingskontor/.default
+    - name: AO_OPPFOLGNINGSKONTOR_URL
+      value: http://ao-oppfolgingskontor.dab
 
   gcp:
     sqlInstances:
