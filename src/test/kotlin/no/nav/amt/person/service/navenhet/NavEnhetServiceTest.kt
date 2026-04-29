@@ -9,7 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
-import no.nav.amt.person.service.clients.oppfolgningskontor.KontorForBrukerDto
+import no.nav.amt.person.service.clients.oppfolgningskontor.Arbeidsoppfolging
 import no.nav.amt.person.service.clients.oppfolgningskontor.OppfolgningskontorClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
@@ -38,7 +38,7 @@ class NavEnhetServiceTest {
         val navEnhet = TestData.lagNavEnhet()
         val personident = "FNR"
 
-        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns KontorForBrukerDto(navEnhet.enhetId, navEnhet.navn)
+        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
         every { navEnhetRepository.get(navEnhet.enhetId) } returns null
         every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 
@@ -49,6 +49,17 @@ class NavEnhetServiceTest {
         }
 
         verify { kafkaProducerService.publiserNavEnhet(faktiskEnhet) }
+    }
+
+    @Test
+    fun `hentNavEnhetForBruker - bruker har ingen arbeidsoppfolgingsenhet - skal returnere null`() {
+        val personident = "FNR"
+
+        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns null
+
+        val faktiskEnhet = service.hentNavEnhetForBruker(personident)
+
+        faktiskEnhet shouldBe null
     }
 
     @Test

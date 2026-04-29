@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
 class MockOppfolgningskontorHttpServer : MockHttpServer(name = "MockOppfolgningskontorHttpServer") {
     fun mockHentKontorForBruker(
         ident: String,
-        enhetId: String?,
+        kontorId: String?,
     ) {
         val predicate = { req: RecordedRequest ->
             req.path == "/graphql" &&
@@ -17,15 +17,15 @@ class MockOppfolgningskontorHttpServer : MockHttpServer(name = "MockOppfolgnings
                 req.getBodyAsString().contains(ident)
         }
         val kontorJson =
-            if (enhetId == null) {
-                "null"
+            if (kontorId == null) {
+                """{"arbeidsoppfolging": null}"""
             } else {
-                """{"enhetId": "$enhetId", "navn": "NAV Testkontor"}"""
+                """{"arbeidsoppfolging": {"kontorId": "$kontorId", "kontorNavn": "NAV Testkontor"}}"""
             }
         val response =
             MockResponse()
                 .setResponseCode(HttpStatus.OK.value())
-                .setBody("""{"data": {"kontorForBruker": $kontorJson}}""")
+                .setBody("""{"data": {"kontorTilhorigheter": $kontorJson}}""")
         addResponseHandler(predicate, response)
     }
 }

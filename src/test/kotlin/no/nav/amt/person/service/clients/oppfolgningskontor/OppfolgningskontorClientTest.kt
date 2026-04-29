@@ -33,9 +33,11 @@ class OppfolgningskontorClientTest {
                 """
                 {
                     "data": {
-                        "kontorForBruker": {
-                            "enhetId": "1234",
-                            "navn": "NAV Testkontor"
+                        "kontorTilhorigheter": {
+                            "arbeidsoppfolging": {
+                                "kontorId": "1234",
+                                "kontorNavn": "NAV Testkontor"
+                            }
                         }
                     }
                 }
@@ -45,8 +47,8 @@ class OppfolgningskontorClientTest {
 
         val kontor = client.hentKontorForBruker("12345678901")
 
-        kontor?.enhetId shouldBe "1234"
-        kontor?.navn shouldBe "NAV Testkontor"
+        kontor?.kontorId shouldBe "1234"
+        kontor?.kontorNavn shouldBe "NAV Testkontor"
 
         val request = server.takeRequest()
         val requestBody = request.body.readUtf8()
@@ -54,18 +56,20 @@ class OppfolgningskontorClientTest {
         request.path shouldBe "/graphql"
         request.method shouldBe HttpMethod.POST.name()
         request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer OPPFOLGNINGSKONTOR_TOKEN"
-        requestBody.contains("kontorForBruker") shouldBe true
+        requestBody.contains("kontorTilhorigheter") shouldBe true
         requestBody.contains("12345678901") shouldBe true
     }
 
     @Test
-    fun `hentKontorForBruker skal returnere null hvis kontorForBruker er null i respons`() {
+    fun `hentKontorForBruker skal returnere null hvis arbeidsoppfolging er null i respons`() {
         server.enqueue(
             MockResponse().setBody(
                 """
                 {
                     "data": {
-                        "kontorForBruker": null
+                        "kontorTilhorigheter": {
+                            "arbeidsoppfolging": null
+                        }
                     }
                 }
                 """.trimIndent(),

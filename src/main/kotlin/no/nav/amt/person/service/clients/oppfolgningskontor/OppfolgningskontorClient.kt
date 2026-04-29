@@ -17,15 +17,17 @@ class OppfolgningskontorClient(
 ) {
     private val kontorForBrukerQuery =
         $$"""
-        query KontorForBruker($ident: String!) {
-          kontorForBruker(ident: $ident) {
-            enhetId
-            navn
+        query HentKontorer($ident: String!) {
+          kontorTilhorigheter(ident: $ident) {
+            arbeidsoppfolging {
+                kontorId   
+                kontorNavn 
+            }
           }
         }
         """.trimIndent()
 
-    fun hentKontorForBruker(ident: String): KontorForBrukerDto? {
+    fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
         val requestBody = objectMapper.writeValueAsString(
             GraphQLRequest(
                 query = kontorForBrukerQuery,
@@ -45,7 +47,7 @@ class OppfolgningskontorClient(
                 throw RuntimeException("Klarte ikke å hente kontor fra ao-oppfolgingskontor. Status: ${response.code}")
             }
 
-            val gqlResponse = objectMapper.readValue<GraphQLResponse<KontorForBrukerResponse>>(response.body.string())
+            val gqlResponse = objectMapper.readValue<GraphQLResponse<HentKontorerResponse>>(response.body.string())
 
             gqlResponse.errors?.takeIf { it.isNotEmpty() }?.let { errors ->
                 val melding = errors.joinToString(separator = "\n") { "- ${it.message}" }
@@ -56,7 +58,7 @@ class OppfolgningskontorClient(
                 throw RuntimeException("ao-oppfolgingskontor respons inneholder ikke data")
             }
 
-            return gqlResponse.data.kontorForBruker
+            return gqlResponse.data.kontorTilhorigheter.arbeidsoppfolging
         }
     }
 }
@@ -75,11 +77,15 @@ data class GraphQLError(
     val message: String,
 )
 
-data class KontorForBrukerResponse(
-    val kontorForBruker: KontorForBrukerDto? = null,
+data class HentKontorerResponse(
+    val kontorTilhorigheter: KontorTilhorigheter,
 )
 
-data class KontorForBrukerDto(
-    val enhetId: String,
-    val navn: String,
+data class KontorTilhorigheter(
+    val arbeidsoppfolging: Arbeidsoppfolging? = null,
+)
+
+data class Arbeidsoppfolging(
+    val kontorId: String,
+    val kontorNavn: String,
 )

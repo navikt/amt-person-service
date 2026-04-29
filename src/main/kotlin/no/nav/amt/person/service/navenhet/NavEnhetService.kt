@@ -18,7 +18,7 @@ class NavEnhetService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun hentNavEnhetForBruker(personident: String): NavEnhetDbo? {
-        val oppfolgingsenhetId = oppfolgningskontorClient.hentKontorForBruker(personident)?.enhetId ?: return null
+        val oppfolgingsenhetId = oppfolgningskontorClient.hentKontorForBruker(personident)?.kontorId ?: return null
 
         return hentEllerOpprettNavEnhet(oppfolgingsenhetId)
             .also {
