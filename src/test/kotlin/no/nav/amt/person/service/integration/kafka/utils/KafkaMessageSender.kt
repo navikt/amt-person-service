@@ -3,7 +3,7 @@ package no.nav.amt.person.service.integration.kafka.utils
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
-import no.nav.amt.person.service.data.kafka.message.SisteOppfolginsperiodeMsg
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolgingsperiodePayload
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.integration.IntegrationTestBase.Companion.kafkaContainer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
@@ -44,7 +44,7 @@ class KafkaMessageSender(
 ) {
     private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
-    fun sendTilSisteOppfolgingsperiodeTopic(payload: SisteOppfolginsperiodeMsg) = sendTilTopic(sisteOppfolgingsperiodeTopic, payload)
+    fun sendTilSisteOppfolgingsperiodeTopic(payload: SisteOppfolgingsperiodePayload) = sendTilTopic(sisteOppfolgingsperiodeTopic, payload)
 
     fun sendTilTildeltVeilederTopic(payload: TildeltVeilederMsg) = sendTilTopic(sisteTilordnetVeilederTopic, payload)
 

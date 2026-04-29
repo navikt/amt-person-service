@@ -1,8 +1,8 @@
 package no.nav.amt.person.service.data.kafka
 
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.data.kafka.message.SisteOppfolginsperiodeMsg
-import no.nav.amt.person.service.data.kafka.message.KontorMsg
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolgingsperiodePayload
+import no.nav.amt.person.service.data.kafka.message.KontorPayload
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.kafka.consumer.OpplysningsType
 import no.nav.person.pdl.leesah.Endringstype
@@ -20,9 +20,9 @@ object KafkaMessageCreator {
         kontorId: String = TestData.randomEnhetId(),
         kontorNavn: String = "NAV ${TestData.randomEnhetId()}",
         sisteEndringsType: String = "ENDRET_KONTOR",
-    ) = SisteOppfolginsperiodeMsg(
+    ) = SisteOppfolgingsperiodePayload(
         ident = ident,
-        kontor = KontorMsg(kontorId = kontorId, kontorNavn = kontorNavn),
+        kontor = KontorPayload(kontorId = kontorId, kontorNavn = kontorNavn),
         sisteEndringsType = sisteEndringsType,
     )
 
