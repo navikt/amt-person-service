@@ -17,12 +17,14 @@ import java.util.UUID
 object KafkaMessageCreator {
     fun lagSisteOppfolgingsperiodeMsg(
         ident: String = TestData.randomIdent(),
-        kontorId: String = TestData.randomEnhetId(),
-        kontorNavn: String = "NAV ${TestData.randomEnhetId()}",
+        kontor: KontorPayload? = KontorPayload(
+            kontorId = TestData.randomEnhetId(),
+            kontorNavn = "NAV ${TestData.randomEnhetId()}",
+        ),
         sisteEndringsType: String = "ENDRET_KONTOR",
     ) = SisteOppfolgingsperiodePayload(
         ident = ident,
-        kontor = KontorPayload(kontorId = kontorId, kontorNavn = kontorNavn),
+        kontor = kontor,
         sisteEndringsType = sisteEndringsType,
     )
 

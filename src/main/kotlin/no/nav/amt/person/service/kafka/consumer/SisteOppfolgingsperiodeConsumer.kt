@@ -23,6 +23,9 @@ class SisteOppfolgingsperiodeConsumer(
 
         val navBruker = navBrukerRepository.get(sisteOppfolgingsperiodePayload.ident) ?: return
 
+        // TODO: Avklar om vi må fjerne nav-enhet fra bruker om kontorId kommer som null (dvs. oppfølgingsperioden blir avsluttet)
+        if (sisteOppfolgingsperiodePayload.kontor == null) return
+
         if (navBruker.navEnhet?.enhetId == sisteOppfolgingsperiodePayload.kontor.kontorId) return
 
         log.info("Endrer oppfolgingsenhet på NavBruker med id=${navBruker.id}")

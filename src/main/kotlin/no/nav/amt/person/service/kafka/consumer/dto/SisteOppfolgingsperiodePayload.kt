@@ -4,7 +4,7 @@ import java.time.Instant
 
 data class SisteOppfolgingsperiodePayload(
     val ident: String,
-    val kontor: KontorPayload,
+    val kontor: KontorPayload?,
     val sisteEndringsType: String,
     val sluttTidspunkt: Instant?,
 )
