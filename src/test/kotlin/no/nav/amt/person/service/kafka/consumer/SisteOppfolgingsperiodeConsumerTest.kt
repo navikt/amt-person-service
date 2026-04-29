@@ -13,12 +13,12 @@ import no.nav.security.mock.oauth2.http.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class EndringPaaBrukerConsumerTest {
+class SisteOppfolgingsperiodeConsumerTest {
     private val navBrukerRepository: NavBrukerRepository = mockk(relaxUnitFun = true)
     private val navBrukerService: NavBrukerService = mockk()
     private val navEnhetService: NavEnhetService = mockk()
-    private val endringPaaBrukerConsumer =
-        EndringPaaBrukerConsumer(
+    private val sisteOppfolgingsperiodeConsumer =
+        SisteOppfolgingsperiodeConsumer(
             navBrukerRepository = navBrukerRepository,
             navBrukerService = navBrukerService,
             navEnhetService = navEnhetService,
@@ -30,11 +30,11 @@ class EndringPaaBrukerConsumerTest {
 
     @Test
     fun `ingest - bruker finnes ikke - endrer ikke nav enhet`() {
-        val msg = KafkaMessageCreator.lagEndringPaaBrukerMsg()
+        val msg = KafkaMessageCreator.lagSisteOppfolgingsperiodeMsg()
 
         every { navBrukerRepository.get(msg.ident) } returns null
 
-        endringPaaBrukerConsumer.ingest(objectMapper.writeValueAsString(msg))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 0) {
             navEnhetService.hentEllerOpprettNavEnhet(any())

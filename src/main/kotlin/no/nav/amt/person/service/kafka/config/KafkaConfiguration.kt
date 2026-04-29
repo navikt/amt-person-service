@@ -2,7 +2,7 @@ package no.nav.amt.person.service.kafka.config
 
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
 import no.nav.amt.person.service.kafka.consumer.AktorV2Consumer
-import no.nav.amt.person.service.kafka.consumer.EndringPaaBrukerConsumer
+import no.nav.amt.person.service.kafka.consumer.SisteOppfolgingsperiodeConsumer
 import no.nav.amt.person.service.kafka.consumer.InnsatsgruppeConsumer
 import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
 import no.nav.amt.person.service.kafka.consumer.OppfolgingsperiodeConsumer
@@ -34,7 +34,7 @@ class KafkaConfiguration(
     kafkaTopicProperties: KafkaTopicProperties,
     kafkaProperties: KafkaProperties,
     jdbcTemplate: JdbcTemplate,
-    endringPaaBrukerConsumer: EndringPaaBrukerConsumer,
+    sisteOppfolgingsperiodeConsumer: SisteOppfolgingsperiodeConsumer,
     tildeltVeilederConsumer: TildeltVeilederConsumer,
     aktorV2Consumer: AktorV2Consumer,
     skjermetPersonConsumer: SkjermetPersonConsumer,
@@ -56,10 +56,10 @@ class KafkaConfiguration(
                     .withLogging()
                     .withStoreOnFailure(consumerRepository)
                     .withConsumerConfig(
-                        kafkaTopicProperties.endringPaaBrukerTopic,
+                        kafkaTopicProperties.sisteOppfolgingsperiodeTopic,
                         Deserializers.stringDeserializer(),
                         Deserializers.stringDeserializer(),
-                        Consumer { endringPaaBrukerConsumer.ingest(it.value()) },
+                        Consumer { sisteOppfolgingsperiodeConsumer.ingest(it.value()) },
                     ),
                 KafkaConsumerClientBuilder
                     .TopicConfig<String, String>()

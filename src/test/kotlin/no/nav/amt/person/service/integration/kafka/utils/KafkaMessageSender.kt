@@ -3,7 +3,7 @@ package no.nav.amt.person.service.integration.kafka.utils
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
-import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolginsperiodeMsg
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.integration.IntegrationTestBase.Companion.kafkaContainer
 import no.nav.amt.person.service.kafka.config.KafkaProperties
@@ -27,8 +27,8 @@ class KafkaMessageSender(
     properties: KafkaProperties,
     @Value($$"${kafka.schema.registry.url}")
     private val schemaRegistryUrl: String,
-    @Value($$"${app.env.endringPaaBrukerTopic}")
-    private val endringPaaBrukerTopic: String,
+    @Value($$"${app.env.sisteOppfolgingsperiodeTopic}")
+    private val sisteOppfolgingsperiodeTopic: String,
     @Value($$"${app.env.sisteTilordnetVeilederTopic}")
     private val sisteTilordnetVeilederTopic: String,
     @Value($$"${app.env.aktorV2Topic}")
@@ -44,7 +44,7 @@ class KafkaMessageSender(
 ) {
     private val kafkaProducer = KafkaProducerClientImpl<String, String>(properties.producer())
 
-    fun sendTilEndringPaaBrukerTopic(payload: EndringPaaBrukerMsg) = sendTilTopic(endringPaaBrukerTopic, payload)
+    fun sendTilSisteOppfolgingsperiodeTopic(payload: SisteOppfolginsperiodeMsg) = sendTilTopic(sisteOppfolgingsperiodeTopic, payload)
 
     fun sendTilTildeltVeilederTopic(payload: TildeltVeilederMsg) = sendTilTopic(sisteTilordnetVeilederTopic, payload)
 

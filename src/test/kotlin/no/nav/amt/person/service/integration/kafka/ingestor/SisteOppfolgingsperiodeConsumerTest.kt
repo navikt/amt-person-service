@@ -11,7 +11,7 @@ import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
-class EndringPaaBrukerConsumerTest(
+class SisteOppfolgingsperiodeConsumerTest(
     private val kafkaMessageSender: KafkaMessageSender,
     private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
@@ -21,7 +21,7 @@ class EndringPaaBrukerConsumerTest(
         val navBruker = TestData.lagNavBruker(navEnhet = null)
 
         val kafkaPayload =
-            KafkaMessageCreator.lagEndringPaaBrukerMsg(
+            KafkaMessageCreator.lagSisteOppfolgingsperiodeMsg(
                 ident = navBruker.person.personident,
                 kontorId = navEnhet.enhetId,
                 kontorNavn = navEnhet.navn,
@@ -30,7 +30,7 @@ class EndringPaaBrukerConsumerTest(
         testDataRepository.insertNavBruker(navBruker)
 
         mockNorgHttpServer.addNavEnhet(navEnhet)
-        kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload)
+        kafkaMessageSender.sendTilSisteOppfolgingsperiodeTopic(kafkaPayload)
 
         await().untilAsserted {
             val faktiskBruker = navBrukerRepository.get(navBruker.id)

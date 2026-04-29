@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.data.kafka
 
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolginsperiodeMsg
 import no.nav.amt.person.service.data.kafka.message.KontorMsg
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.kafka.consumer.OpplysningsType
@@ -15,12 +15,12 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 object KafkaMessageCreator {
-    fun lagEndringPaaBrukerMsg(
+    fun lagSisteOppfolgingsperiodeMsg(
         ident: String = TestData.randomIdent(),
         kontorId: String = TestData.randomEnhetId(),
         kontorNavn: String = "NAV ${TestData.randomEnhetId()}",
         sisteEndringsType: String = "ENDRET_KONTOR",
-    ) = EndringPaaBrukerMsg(
+    ) = SisteOppfolginsperiodeMsg(
         ident = ident,
         kontor = KontorMsg(kontorId = kontorId, kontorNavn = kontorNavn),
         sisteEndringsType = sisteEndringsType,

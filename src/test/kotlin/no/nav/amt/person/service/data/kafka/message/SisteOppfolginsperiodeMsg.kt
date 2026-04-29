@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.data.kafka.message
 
-data class EndringPaaBrukerMsg(
+data class SisteOppfolginsperiodeMsg(
     val ident: String,
     val kontor: KontorMsg,
     val sisteEndringsType: String,

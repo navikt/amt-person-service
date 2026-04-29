@@ -102,7 +102,7 @@ spec:
       value: https://nom-api.intern.dev.nav.no
     - name: NOM_MOCK
       value: "true"
-    - name: ENDRING_PAA_BRUKER_TOPIC
+    - name: SISTE_OPPFOLGINGSPERIODE_TOPIC
       value: pto.siste-oppfolgingsperiode-v3
     - name: SISTE_TILORDNET_VEILEDER_TOPIC
       value: pto.siste-tilordnet-veileder-v1
