@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients.oppfolgningskontor
+package no.nav.amt.person.service.clients.oppfolgingskontor
 
 import no.nav.amt.person.service.utils.OkHttpClientUtils.mediaTypeJson
 import no.nav.common.rest.client.RestClient.baseClient
@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
-class OppfolgningskontorClient(
+class OppfolgingskontorClient(
     private val baseUrl: String,
     private val tokenProvider: () -> String,
     private val objectMapper: ObjectMapper,

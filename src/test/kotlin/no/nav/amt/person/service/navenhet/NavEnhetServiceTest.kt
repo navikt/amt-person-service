@@ -9,8 +9,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
-import no.nav.amt.person.service.clients.oppfolgningskontor.Arbeidsoppfolging
-import no.nav.amt.person.service.clients.oppfolgningskontor.OppfolgningskontorClient
+import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
+import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.junit.jupiter.api.BeforeEach
@@ -19,14 +19,14 @@ import org.junit.jupiter.api.Test
 class NavEnhetServiceTest {
     private val norgClient: NorgClient = mockk()
     private val navEnhetRepository: NavEnhetRepository = mockk(relaxUnitFun = true)
-    private val oppfolgningskontorClient: OppfolgningskontorClient = mockk()
+    private val oppfolgingskontorClient: OppfolgingskontorClient = mockk()
     private val kafkaProducerService = mockk<KafkaProducerService>(relaxUnitFun = true)
 
     private val service =
         NavEnhetService(
             navEnhetRepository = navEnhetRepository,
             norgClient = norgClient,
-            oppfolgningskontorClient = oppfolgningskontorClient,
+            oppfolgingskontorClient = oppfolgingskontorClient,
             kafkaProducerService,
         )
 
@@ -38,7 +38,7 @@ class NavEnhetServiceTest {
         val navEnhet = TestData.lagNavEnhet()
         val personident = "FNR"
 
-        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
+        every { oppfolgingskontorClient.hentKontorForBruker(personident) } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
         every { navEnhetRepository.get(navEnhet.enhetId) } returns null
         every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 
@@ -55,7 +55,7 @@ class NavEnhetServiceTest {
     fun `hentNavEnhetForBruker - bruker har ingen arbeidsoppfolgingsenhet - skal returnere null`() {
         val personident = "FNR"
 
-        every { oppfolgningskontorClient.hentKontorForBruker(personident) } returns null
+        every { oppfolgingskontorClient.hentKontorForBruker(personident) } returns null
 
         val faktiskEnhet = service.hentNavEnhetForBruker(personident)
 

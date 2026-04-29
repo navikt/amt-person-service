@@ -6,7 +6,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
-class MockOppfolgningskontorHttpServer : MockHttpServer(name = "MockOppfolgningskontorHttpServer") {
+class MockOppfolgingskontorHttpServer : MockHttpServer(name = "MockOppfolgingskontorHttpServer") {
     fun mockHentKontorForBruker(
         ident: String,
         kontorId: String?,

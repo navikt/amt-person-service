@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.navenhet
 
 import no.nav.amt.person.service.clients.norg.NorgClient
-import no.nav.amt.person.service.clients.oppfolgningskontor.OppfolgningskontorClient
+import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.slf4j.LoggerFactory
@@ -12,13 +12,13 @@ import java.util.UUID
 class NavEnhetService(
     private val navEnhetRepository: NavEnhetRepository,
     private val norgClient: NorgClient,
-    private val oppfolgningskontorClient: OppfolgningskontorClient,
+    private val oppfolgingskontorClient: OppfolgingskontorClient,
     private val kafkaProducerService: KafkaProducerService,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun hentNavEnhetForBruker(personident: String): NavEnhetDbo? {
-        val oppfolgingsenhetId = oppfolgningskontorClient.hentKontorForBruker(personident)?.kontorId ?: return null
+        val oppfolgingsenhetId = oppfolgingskontorClient.hentKontorForBruker(personident)?.kontorId ?: return null
 
         return hentEllerOpprettNavEnhet(oppfolgingsenhetId)
             .also {

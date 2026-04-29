@@ -7,7 +7,7 @@ import no.nav.amt.person.service.integration.mock.servers.MockMachineToMachineHt
 import no.nav.amt.person.service.integration.mock.servers.MockNomHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockNorgHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockOAuthServer
-import no.nav.amt.person.service.integration.mock.servers.MockOppfolgningskontorHttpServer
+import no.nav.amt.person.service.integration.mock.servers.MockOppfolgingskontorHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPdlHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockPoaoTilgangHttpServer
 import no.nav.amt.person.service.integration.mock.servers.MockSchemaRegistryHttpServer
@@ -54,7 +54,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
         mockNorgHttpServer.resetHttpServer()
         mockPdlHttpServer.resetHttpServer()
         mockPoaoTilgangHttpServer.resetHttpServer()
-        mockOppfolgningskontorHttpServer.resetHttpServer()
+        mockOppfolgingskontorHttpServer.resetHttpServer()
         mockVeilarboppfolgingHttpServer.resetHttpServer()
     }
 
@@ -67,7 +67,7 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
         val mockNorgHttpServer = MockNorgHttpServer()
         val mockPoaoTilgangHttpServer = MockPoaoTilgangHttpServer()
         val mockNomHttpServer = MockNomHttpServer()
-        val mockOppfolgningskontorHttpServer = MockOppfolgningskontorHttpServer()
+        val mockOppfolgingskontorHttpServer = MockOppfolgingskontorHttpServer()
         val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
         val mockOAuthServer = MockOAuthServer()
 
@@ -118,8 +118,8 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
             registry.add("nom.url") { mockNomHttpServer.serverUrl() }
             registry.add("nom.scope") { "test.nom" }
 
-            mockOppfolgningskontorHttpServer.start()
-            registry.add("ao-oppfolgingskontor.url") { mockOppfolgningskontorHttpServer.serverUrl() }
+            mockOppfolgingskontorHttpServer.start()
+            registry.add("ao-oppfolgingskontor.url") { mockOppfolgingskontorHttpServer.serverUrl() }
             registry.add("ao-oppfolgingskontor.scope") { "test.ao-oppfolgingskontor" }
 
             mockOAuthServer.start()

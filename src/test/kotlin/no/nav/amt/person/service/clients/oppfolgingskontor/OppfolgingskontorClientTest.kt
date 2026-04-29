@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients.oppfolgningskontor
+package no.nav.amt.person.service.clients.oppfolgingskontor
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -11,17 +11,17 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
-class OppfolgningskontorClientTest {
+class OppfolgingskontorClientTest {
     lateinit var server: MockWebServer
-    lateinit var client: OppfolgningskontorClient
+    lateinit var client: OppfolgingskontorClient
 
     @BeforeEach
     fun setup() {
         server = MockWebServer()
         client =
-            OppfolgningskontorClient(
+            OppfolgingskontorClient(
                 baseUrl = server.url("").toString().removeSuffix("/"),
-                tokenProvider = { "OPPFOLGNINGSKONTOR_TOKEN" },
+                tokenProvider = { "OPPFOLGINGSKONTOR_TOKEN" },
                 objectMapper = staticObjectMapper,
             )
     }
@@ -55,7 +55,7 @@ class OppfolgningskontorClientTest {
 
         request.path shouldBe "/graphql"
         request.method shouldBe HttpMethod.POST.name()
-        request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer OPPFOLGNINGSKONTOR_TOKEN"
+        request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer OPPFOLGINGSKONTOR_TOKEN"
         requestBody.contains("kontorTilhorigheter") shouldBe true
         requestBody.contains("12345678901") shouldBe true
     }
