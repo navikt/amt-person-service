@@ -28,7 +28,7 @@ class SisteOppfolgingsperiodeConsumer(
          * Tidligere når vi hentet oppfølgingsenhet fra Arena var det ikke mulig å slette enhet i Arena.
          * Ny vurdering når det nå er mulig å slette er at vi likevel beholder den.
          * Oppfølgingsenhet deles på deltaker-v1, deltaker-ekstern-v1 og finnes i arrangør-flaten.
-        */
+         */
         if (sisteOppfolgingsperiodePayload.kontor == null) return
 
         if (navBruker.navEnhet?.enhetId == sisteOppfolgingsperiodePayload.kontor.kontorId) return
