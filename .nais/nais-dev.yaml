@@ -70,7 +70,6 @@ spec:
         - host: digdir-krr-proxy.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io
         - host: nom-api.intern.dev.nav.no
-        - host: veilarbarena.dev-fss-pub.nais.io
         - host: kodeverk-api.nav.no
   env:
     - name: JDK_JAVA_OPTIONS
@@ -103,10 +102,6 @@ spec:
       value: https://nom-api.intern.dev.nav.no
     - name: NOM_MOCK
       value: "true"
-    - name: VEILARBARENA_SCOPE
-      value: api://dev-fss.pto.veilarbarena/.default
-    - name: VEILARBARENA_URL
-      value: https://veilarbarena.dev-fss-pub.nais.io
     - name: ENDRING_PAA_BRUKER_TOPIC
       value: pto.siste-oppfolgingsperiode-v3
     - name: SISTE_TILORDNET_VEILEDER_TOPIC
@@ -133,9 +128,9 @@ spec:
       value: http://veilarbvedtaksstotte.obo
     - name: INNSATSGRUPPE_TOPIC
       value: pto.siste-14a-vedtak-v1
-    - name: AO_OPPFOLGNINGSKONTOR_SCOPE
+    - name: AO_OPPFOLGINGSKONTOR_SCOPE
       value: api://dev-gcp.dab.ao-oppfolgingskontor/.default
-    - name: AO_OPPFOLGNINGSKONTOR_URL
+    - name: AO_OPPFOLGINGSKONTOR_URL
       value: http://ao-oppfolgingskontor.dab
 
   gcp:
