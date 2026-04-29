@@ -1,8 +1,8 @@
 package no.nav.amt.person.service.data.kafka
 
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.data.kafka.message.SisteOppfolgingsperiodePayload
 import no.nav.amt.person.service.data.kafka.message.KontorPayload
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolgingsperiodePayload
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.kafka.consumer.OpplysningsType
 import no.nav.person.pdl.leesah.Endringstype
