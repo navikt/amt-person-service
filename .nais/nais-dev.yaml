@@ -103,7 +103,7 @@ spec:
     - name: NOM_MOCK
       value: "true"
     - name: SISTE_OPPFOLGINGSPERIODE_TOPIC
-      value: pto.siste-oppfolgingsperiode-v3
+      value: poao.siste-oppfolgingsperiode-v3
     - name: SISTE_TILORDNET_VEILEDER_TOPIC
       value: pto.siste-tilordnet-veileder-v1
     - name: AKTOR_V2_TOPIC
