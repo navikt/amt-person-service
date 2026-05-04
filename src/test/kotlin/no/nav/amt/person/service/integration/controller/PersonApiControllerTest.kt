@@ -112,7 +112,7 @@ class PersonApiControllerTest(
             navBruker.person.personident,
             InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
         )
-        mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
+        mockOppfolgingskontorHttpServer.mockHentKontorForBruker(navBruker.person.personident, navEnhet.enhetId)
         mockKrrProxyHttpServer.mockHentKontaktinformasjon(navBruker)
         mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
         mockNomHttpServer.mockHentNavAnsatt(navAnsatt)
@@ -189,7 +189,7 @@ class PersonApiControllerTest(
             navBruker.person.personident,
             InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE,
         )
-        mockVeilarbarenaHttpServer.mockHentBrukerOppfolgingsenhetId(navBruker.person.personident, navEnhet.enhetId)
+        mockOppfolgingskontorHttpServer.mockHentKontorForBruker(navBruker.person.personident, navEnhet.enhetId)
         mockKrrProxyHttpServer.mockHentKontaktinformasjon(navBruker)
         mockPoaoTilgangHttpServer.addErSkjermetResponse(mapOf(navBruker.person.personident to false))
         mockNomHttpServer.mockHentNavAnsatt(navAnsatt)

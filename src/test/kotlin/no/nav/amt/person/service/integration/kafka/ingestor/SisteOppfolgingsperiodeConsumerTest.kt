@@ -5,13 +5,14 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
+import no.nav.amt.person.service.data.kafka.message.KontorPayload
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
-class EndringPaaBrukerConsumerTest(
+class SisteOppfolgingsperiodeConsumerTest(
     private val kafkaMessageSender: KafkaMessageSender,
     private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
@@ -21,15 +22,15 @@ class EndringPaaBrukerConsumerTest(
         val navBruker = TestData.lagNavBruker(navEnhet = null)
 
         val kafkaPayload =
-            KafkaMessageCreator.lagEndringPaaBrukerMsg(
-                fodselsnummer = navBruker.person.personident,
-                oppfolgingsenhet = navEnhet.enhetId,
+            KafkaMessageCreator.lagSisteOppfolgingsperiodeMsg(
+                ident = navBruker.person.personident,
+                kontor = KontorPayload(kontorId = navEnhet.enhetId, kontorNavn = navEnhet.navn),
             )
 
         testDataRepository.insertNavBruker(navBruker)
 
         mockNorgHttpServer.addNavEnhet(navEnhet)
-        kafkaMessageSender.sendTilEndringPaaBrukerTopic(kafkaPayload)
+        kafkaMessageSender.sendTilSisteOppfolgingsperiodeTopic(kafkaPayload)
 
         await().untilAsserted {
             val faktiskBruker = navBrukerRepository.get(navBruker.id)

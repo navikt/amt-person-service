@@ -1,7 +1,8 @@
 package no.nav.amt.person.service.data.kafka
 
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.data.kafka.message.EndringPaaBrukerMsg
+import no.nav.amt.person.service.data.kafka.message.KontorPayload
+import no.nav.amt.person.service.data.kafka.message.SisteOppfolgingsperiodePayload
 import no.nav.amt.person.service.data.kafka.message.TildeltVeilederMsg
 import no.nav.amt.person.service.kafka.consumer.OpplysningsType
 import no.nav.person.pdl.leesah.Endringstype
@@ -14,12 +15,17 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 object KafkaMessageCreator {
-    fun lagEndringPaaBrukerMsg(
-        fodselsnummer: String = TestData.randomIdent(),
-        oppfolgingsenhet: String? = TestData.randomEnhetId(),
-    ) = EndringPaaBrukerMsg(
-        fodselsnummer = fodselsnummer,
-        oppfolgingsenhet = oppfolgingsenhet,
+    fun lagSisteOppfolgingsperiodeMsg(
+        ident: String = TestData.randomIdent(),
+        kontor: KontorPayload? = KontorPayload(
+            kontorId = TestData.randomEnhetId(),
+            kontorNavn = "NAV ${TestData.randomEnhetId()}",
+        ),
+        sisteEndringsType: String = "ENDRET_KONTOR",
+    ) = SisteOppfolgingsperiodePayload(
+        ident = ident,
+        kontor = kontor,
+        sisteEndringsType = sisteEndringsType,
     )
 
     fun lagTildeltVeilederMsg(
