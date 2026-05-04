@@ -2,8 +2,6 @@ package no.nav.amt.person.service.internal
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.amt.person.service.api.request.NavBrukerRequest
-import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
-import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
@@ -49,21 +47,8 @@ class InternalController(
     private val navAnsattUpdater: NavAnsattUpdater,
     private val navEnhetUpdateJob: NavEnhetUpdateJob,
     private val personidentRepository: PersonidentRepository,
-    private val oppfolgingskontorClient: OppfolgingskontorClient,
 ) {
     private val log = LoggerFactory.getLogger(InternalController::class.java)
-
-    @Unprotected
-    @GetMapping("/oppfolgingskontor/{ident}")
-    fun hentOppfolgingskontor(
-        servlet: HttpServletRequest,
-        @PathVariable ident: String,
-    ): Arbeidsoppfolging? {
-        if (isDev() && isInternal(servlet)) {
-            return oppfolgingskontorClient.hentKontorForBruker(ident)
-        }
-        throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    }
 
     @Unprotected
     @PostMapping("/person/{dollyIdent}")
