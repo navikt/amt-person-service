@@ -1,6 +1,6 @@
 [versions]
 # Kotlin & build
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 ktlint-plugin = "14.2.0"
 ktlint-cli-version = "1.8.0"
 
@@ -19,7 +19,7 @@ logstash-encoder = "9.0"
 
 # NAV
 nav-common = "3.2026.04.08_08.37-229807cc181a"
-token-support = "6.0.5"
+token-support = "6.0.6"
 poao-tilgang = "2025.11.03_13.40-18456d0598be"
 amt-lib = "1.2026.04.19_10.49-44013e7d5585"
 
