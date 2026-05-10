@@ -1,111 +1,147 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import io.kotest.matchers.string.shouldStartWith
+import io.mockk.every
+import no.nav.amt.person.service.clients.RestClientTestBase
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
+import org.springframework.test.web.client.match.MockRestRequestMatchers.content
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-class OppfolgingskontorClientTest {
-    lateinit var server: MockWebServer
-    lateinit var client: OppfolgingskontorClient
-
+@RestClientTest(OppfolgingskontorClient::class)
+@TestPropertySource(
+    properties = [
+        "ao-oppfolgingskontor.url=http://oppfolgingskontor",
+        "ao-oppfolgingskontor.scope=test.oppfolgingskontor",
+    ],
+)
+class OppfolgingskontorClientTest(
+    @Autowired private val sut: OppfolgingskontorClient,
+) : RestClientTestBase() {
     @BeforeEach
-    fun setup() {
-        server = MockWebServer()
-        client =
-            OppfolgingskontorClient(
-                baseUrl = server.url("").toString().removeSuffix("/"),
-                tokenProvider = { "OPPFOLGINGSKONTOR_TOKEN" },
-                objectMapper = staticObjectMapper,
-            )
+    fun setUp() {
+        every { tokenClient.createMachineToMachineToken(any()) } returns "OPPFOLGINGSKONTOR_TOKEN"
     }
 
     @Test
     fun `hentKontorForBruker skal lage riktig request og parse respons`() {
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                    "data": {
-                        "kontorTilhorigheter": {
-                            "arbeidsoppfolging": {
-                                "kontorId": "1234",
-                                "kontorNavn": "NAV Testkontor"
+        server
+            .expect(requestTo("http://oppfolgingskontor/graphql"))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer OPPFOLGINGSKONTOR_TOKEN"))
+            .andExpect(content().string(containsString("kontorTilhorigheter")))
+            .andExpect(content().string(containsString("12345678901")))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                        "data": {
+                            "kontorTilhorigheter": {
+                                "arbeidsoppfolging": {
+                                    "kontorId": "1234",
+                                    "kontorNavn": "NAV Testkontor"
+                                }
                             }
                         }
                     }
-                }
-                """.trimIndent(),
-            ),
-        )
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        val kontor = client.hentKontorForBruker("12345678901")
+        val kontor = sut.hentKontorForBruker("12345678901").shouldNotBeNull()
 
-        kontor?.kontorId shouldBe "1234"
-        kontor?.kontorNavn shouldBe "NAV Testkontor"
-
-        val request = server.takeRequest()
-        val requestBody = request.body.readUtf8()
-
-        request.path shouldBe "/graphql"
-        request.method shouldBe HttpMethod.POST.name()
-        request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer OPPFOLGINGSKONTOR_TOKEN"
-        requestBody.contains("kontorTilhorigheter") shouldBe true
-        requestBody.contains("12345678901") shouldBe true
+        kontor.kontorId shouldBe "1234"
+        kontor.kontorNavn shouldBe "NAV Testkontor"
     }
 
     @Test
     fun `hentKontorForBruker skal returnere null hvis arbeidsoppfolging er null i respons`() {
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                    "data": {
-                        "kontorTilhorigheter": {
-                            "arbeidsoppfolging": null
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                        "data": {
+                            "kontorTilhorigheter": {
+                                "arbeidsoppfolging": null
+                            }
                         }
                     }
-                }
-                """.trimIndent(),
-            ),
-        )
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        val kontor = client.hentKontorForBruker("12345678901")
-
-        kontor shouldBe null
+        sut.hentKontorForBruker("12345678901") shouldBe null
     }
 
     @Test
     fun `hentKontorForBruker skal kaste exception ved GraphQL feil`() {
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                    "errors": [
-                        {"message": "Bruker ikke funnet"}
-                    ]
-                }
-                """.trimIndent(),
-            ),
-        )
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                        "errors": [
+                            {"message": "Bruker ikke funnet"}
+                        ]
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        shouldThrow<RuntimeException> {
-            client.hentKontorForBruker("12345678901")
-        }.message?.contains("Feilmeldinger i respons fra ao-oppfolgingskontor") shouldBe true
+        val thrown = shouldThrow<RuntimeException> {
+            sut.hentKontorForBruker("12345678901")
+        }
+
+        thrown.message.shouldStartWith("Feilmeldinger i respons fra ao-oppfolgingskontor")
     }
 
     @Test
     fun `hentKontorForBruker skal kaste exception ved ikke-vellykket HTTP-status`() {
-        server.enqueue(MockResponse().setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
 
         shouldThrow<RuntimeException> {
-            client.hentKontorForBruker("12345678901")
-        }.message?.contains("Status: 500") shouldBe true
+            sut.hentKontorForBruker("12345678901")
+        }
+    }
+
+    @Test
+    fun `hentKontorForBruker skal kaste exception når data er null uten errors`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """{ "data": null }""",
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+
+        val thrown = shouldThrow<RuntimeException> {
+            sut.hentKontorForBruker("12345678901")
+        }
+
+        thrown.message shouldBe "ao-oppfolgingskontor respons inneholder ikke data"
     }
 }

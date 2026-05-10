@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.navansatt
 
+import no.nav.amt.person.service.clients.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.nom.NomClient
-import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory

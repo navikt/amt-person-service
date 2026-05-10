@@ -7,7 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.lib.testing.utils.withLogCapture
-import no.nav.amt.person.service.clients.nom.NomClientImpl
+import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.navGrunerlokka
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 class NavAnsattUpdaterTest {
     private val navAnsattRepository: NavAnsattRepository = mockk(relaxUnitFun = true)
     private val navAnsattService: NavAnsattService = mockk(relaxUnitFun = true)
-    private val nomClient: NomClientImpl = mockk()
+    private val nomClient: NomClient = mockk()
     private val navEnhetService: NavEnhetService = mockk()
     private val updater = NavAnsattUpdater(navAnsattRepository, navAnsattService, nomClient, navEnhetService)
 

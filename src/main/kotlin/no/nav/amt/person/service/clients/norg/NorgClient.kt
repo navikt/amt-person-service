@@ -1,86 +1,58 @@
 package no.nav.amt.person.service.clients.norg
 
-import no.nav.common.rest.client.RestClient.baseClient
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.springframework.http.HttpStatus
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.readValue
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.body
 
+@Service
 class NorgClient(
-    url: String,
-    private val objectMapper: ObjectMapper,
-    private val httpClient: OkHttpClient = baseClient(),
+    @Value($$"${norg.url}") url: String,
+    restClientBuilder: RestClient.Builder,
 ) {
     private val enhetIdPattern = Regex("^\\d{4}$")
 
-    private val baseUrl =
-        url.toHttpUrl().also {
-            require(it.scheme == "https" || it.scheme == "http") { "Ugyldig url-skjema for norg-klient" }
-        }
+    private val restClient: RestClient
+
+    init {
+        require(url.startsWith("https://") || url.startsWith("http://")) { "Ugyldig url-skjema for norg-klient" }
+        restClient = restClientBuilder.baseUrl(url).build()
+    }
 
     private fun validateEnhetId(enhetId: String): String {
-        require(enhetIdPattern.matches(enhetId)) {
-            "Ugyldig enhetId-format"
-        }
+        require(enhetIdPattern.matches(enhetId)) { "Ugyldig enhetId-format" }
         return enhetId
     }
 
-    private fun validateEnhetIds(enheter: List<String>): List<String> = enheter.map { validateEnhetId(it) }
-
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
         val validatedEnhetId = validateEnhetId(enhetId)
-        val endpointUrl = baseUrl
-            .newBuilder()
-            .addPathSegments("norg2/api/v1/enhet")
-            .addPathSegment(validatedEnhetId)
-            .build()
-
-        val request = Request
-            .Builder()
-            .url(endpointUrl)
-            .get()
-            .build()
-
-        httpClient.newCall(request).execute().use { response ->
-            if (response.code == HttpStatus.NOT_FOUND.value()) {
-                return null
-            }
-
-            if (!response.isSuccessful) {
-                throw RuntimeException("Klarte ikke å hente enhet enhetId=$enhetId fra norg status=${response.code}")
-            }
-
-            val body = response.body.string()
-
-            return objectMapper.readValue<NorgNavEnhetDto>(body)
+        try {
+            return restClient
+                .get()
+                .uri("/norg2/api/v1/enhet/{enhetId}", validatedEnhetId)
+                .retrieve()
+                .body<NorgNavEnhetDto>()
+        } catch (e: RestClientResponseException) {
+            if (e.statusCode.value() == 404) return null
+            throw RuntimeException("Klarte ikke å hente enhet enhetId=$enhetId fra norg status=${e.statusCode.value()}", e)
         }
     }
 
     fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
-        val validatedEnheter = validateEnhetIds(enheter)
-        val endpointUrl = baseUrl
-            .newBuilder()
-            .addPathSegments("norg2/api/v1/enhet")
-            .addQueryParameter("enhetsnummerListe", validatedEnheter.joinToString(","))
-            .build()
-
-        val request =
-            Request
-                .Builder()
-                .url(endpointUrl)
+        val validatedEnheter = enheter.map { validateEnhetId(it) }
+        try {
+            return restClient
                 .get()
-                .build()
-
-        httpClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw RuntimeException("Klarte ikke å hente enheter fra norg status=${response.code}")
-            }
-
-            val body = response.body.string()
-
-            return objectMapper.readValue<List<NorgNavEnhetDto>>(body)
+                .uri { uriBuilder ->
+                    uriBuilder
+                        .path("/norg2/api/v1/enhet")
+                        .queryParam("enhetsnummerListe", validatedEnheter.joinToString(","))
+                        .build()
+                }.retrieve()
+                .body<List<NorgNavEnhetDto>>() ?: emptyList()
+        } catch (e: RestClientResponseException) {
+            throw RuntimeException("Klarte ikke å hente enheter fra norg status=${e.statusCode.value()}", e)
         }
     }
 }

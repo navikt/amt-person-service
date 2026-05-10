@@ -43,19 +43,13 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
     val client =
         OkHttpClient
             .Builder()
-            .callTimeout(Duration.ofMinutes(5))
-            .readTimeout(Duration.ofMinutes(5))
+            .callTimeout(Duration.ofSeconds(30))
+            .readTimeout(Duration.ofSeconds(30))
             .build()
 
     @AfterEach
     fun cleanUp() {
-        mockKrrProxyHttpServer.resetHttpServer()
-        mockNomHttpServer.resetHttpServer()
-        mockNorgHttpServer.resetHttpServer()
-        mockPdlHttpServer.resetHttpServer()
-        mockPoaoTilgangHttpServer.resetHttpServer()
-        mockOppfolgingskontorHttpServer.resetHttpServer()
-        mockVeilarboppfolgingHttpServer.resetHttpServer()
+        resettableMockServers.forEach { it.resetHttpServer() }
     }
 
     companion object {
@@ -70,6 +64,27 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
         val mockOppfolgingskontorHttpServer = MockOppfolgingskontorHttpServer()
         val mockSchemaRegistryHttpServer = MockSchemaRegistryHttpServer()
         val mockOAuthServer = MockOAuthServer()
+
+        /**
+         * Mock servers that should have their response handlers cleared between tests
+         * to avoid state leakage between tests.
+         *
+         * Excluded on purpose:
+         *  - mockMachineToMachineHttpServer: registers its token handler once in init { }
+         *    and would stop responding if reset.
+         *  - mockSchemaRegistryHttpServer: schemas are registered once per topic at startup.
+         *  - mockOAuthServer: holds long-lived issuer state used across tests.
+         */
+        private val resettableMockServers = listOf(
+            mockPdlHttpServer,
+            mockKrrProxyHttpServer,
+            mockVeilarboppfolgingHttpServer,
+            mockVeilarbvedtaksstotteHttpServer,
+            mockNorgHttpServer,
+            mockPoaoTilgangHttpServer,
+            mockNomHttpServer,
+            mockOppfolgingskontorHttpServer,
+        )
 
         val kafkaContainer =
             KafkaContainer(DockerImageName.parse("apache/kafka")).apply {

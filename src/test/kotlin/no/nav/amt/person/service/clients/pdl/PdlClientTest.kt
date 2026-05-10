@@ -1,10 +1,14 @@
 package no.nav.amt.person.service.clients.pdl
 
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.assertSoftly
-import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import no.nav.amt.person.service.clients.HeaderConstants.BEHANDLINGSNUMMER_HEADER
 import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
 import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
+import no.nav.amt.person.service.clients.RestClientTestBase
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.ERROR_PREFIX
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.NULL_ERROR
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
@@ -14,316 +18,351 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespon
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.postnumreInTest
-import no.nav.amt.person.service.integration.IntegrationTestBase
+import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.PoststedRepository
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import java.util.UUID
+import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestClientResponseException
 
+@RestClientTest(PdlClient::class)
+@TestPropertySource(
+    properties = [
+        "pdl.url=http://pdl",
+        "pdl.scope=test.pdl",
+    ],
+)
 class PdlClientTest(
-    private val poststedRepository: PoststedRepository,
-) : IntegrationTestBase() {
-    private lateinit var serverUrl: String
-    private lateinit var server: MockWebServer
+    @Autowired private val client: PdlClient,
+) : RestClientTestBase() {
+    @MockkBean
+    private lateinit var poststedRepository: PoststedRepository
 
     @BeforeEach
-    fun setup() {
-        server = MockWebServer()
-        serverUrl = server.url("").toString().removeSuffix("/")
-
-        poststedRepository.oppdaterPoststed(
-            oppdatertePostnummer = postnumreInTest,
-            sporingsId = UUID.randomUUID(),
-        )
+    fun setUp() {
+        every { poststedRepository.getPoststeder(any()) } returns postnumreInTest.toList()
     }
 
-    @AfterEach
-    fun tearDownLocal() = server.shutdown()
+    @Nested
+    inner class HentPersonTests {
+        @Test
+        fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
+            server
+                .expect(requestTo("http://pdl/graphql"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
+                .andExpect(header(BEHANDLINGSNUMMER_HEADER, "B446"))
+                .andRespond(withSuccess(gyldigRespons, MediaType.APPLICATION_JSON))
 
-    @Test
-    fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
-        val connector =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
+            val pdlPerson = client.hentPerson("FNR")
 
-        server.enqueue(MockResponse().setBody(gyldigRespons))
+            pdlPerson.fornavn shouldBe "Tester"
+            pdlPerson.mellomnavn shouldBe "Test"
+            pdlPerson.etternavn shouldBe "Testersen"
+            pdlPerson.telefonnummer shouldBe "+4712345678"
+            pdlPerson.adresse
+                ?.bostedsadresse
+                ?.matrikkeladresse
+                ?.tilleggsnavn shouldBe "Storgården"
+            pdlPerson.adresse
+                ?.bostedsadresse
+                ?.matrikkeladresse
+                ?.postnummer shouldBe "0484"
+            pdlPerson.adresse
+                ?.bostedsadresse
+                ?.matrikkeladresse
+                ?.poststed shouldBe "OSLO"
+            pdlPerson.adresse?.oppholdsadresse shouldBe null
+            pdlPerson.adresse
+                ?.kontaktadresse
+                ?.postboksadresse
+                ?.postboks shouldBe "Postboks 1234"
 
-        val pdlPerson = connector.hentPerson("FNR")
-
-        pdlPerson.fornavn shouldBe "Tester"
-        pdlPerson.mellomnavn shouldBe "Test"
-        pdlPerson.etternavn shouldBe "Testersen"
-        pdlPerson.telefonnummer shouldBe "+4712345678"
-        pdlPerson.adresse
-            ?.bostedsadresse
-            ?.matrikkeladresse
-            ?.tilleggsnavn shouldBe "Storgården"
-        pdlPerson.adresse
-            ?.bostedsadresse
-            ?.matrikkeladresse
-            ?.postnummer shouldBe "0484"
-        pdlPerson.adresse
-            ?.bostedsadresse
-            ?.matrikkeladresse
-            ?.poststed shouldBe "OSLO"
-        pdlPerson.adresse?.oppholdsadresse shouldBe null
-        pdlPerson.adresse
-            ?.kontaktadresse
-            ?.postboksadresse
-            ?.postboks shouldBe "Postboks 1234"
-        pdlPerson.adresse
-            ?.bostedsadresse
-            ?.matrikkeladresse
-            ?.postnummer shouldBe "0484"
-        pdlPerson.adresse
-            ?.bostedsadresse
-            ?.matrikkeladresse
-            ?.poststed shouldBe "OSLO"
-
-        val ident = pdlPerson.identer.first()
-        assertSoftly(ident) {
-            type shouldBe IdentType.FOLKEREGISTERIDENT
-            historisk shouldBe false
-            it.ident shouldBe "29119826819"
+            val ident = pdlPerson.identer.first()
+            assertSoftly(ident) {
+                type shouldBe IdentType.FOLKEREGISTERIDENT
+                historisk shouldBe false
+                it.ident shouldBe "29119826819"
+            }
         }
 
-        val request = server.takeRequest()
-
-        request.path shouldBe "/graphql"
-        request.method shouldBe HttpMethod.POST.name()
-        request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
-        request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
-
-        val expectedJson =
-            """
-            {
-            	"query": "${PdlQueries.HentPerson.query.replace("\n", "\\n").replace("\t", "\\t")}",
-            	"variables": { "ident": "FNR" }
-            }
-            """.trimIndent()
-
-        val body = request.body.readUtf8()
-        body shouldEqualJson expectedJson
-    }
-
-    @Test
-    fun `hentPerson - data mangler - skal kaste exception`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
+        @Test
+        fun `hentPerson - data mangler - skal kaste exception`() {
+            server.expect(method(HttpMethod.POST)).andRespond(
+                withSuccess(
+                    """{"errors": [{"message": "Noe gikk galt"}], "data": null}""",
+                    MediaType.APPLICATION_JSON,
+                ),
             )
 
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                	"errors": [{"message": "Noe gikk galt"}],
-                	"data": null
-                }
-                """.trimIndent(),
-            ),
-        )
-
-        val exception =
-            assertThrows<RuntimeException> {
+            val exception = shouldThrow<RuntimeException> {
                 client.hentPerson("FNR")
             }
 
-        exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+            exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+        }
 
-        val request = server.takeRequest()
+        @Test
+        fun `hentPerson - Detaljert respons - skal kaste exception med noe detaljert informasjon`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withSuccess(minimalFeilRespons, MediaType.APPLICATION_JSON))
 
-        request.path shouldBe "/graphql"
-        request.method shouldBe HttpMethod.POST.name()
+            val exception = shouldThrow<RuntimeException> {
+                client.hentPerson("FNR")
+            }
+
+            exception.message shouldBe
+                ERROR_PREFIX + NULL_ERROR +
+                "- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
+        }
+
+        @Test
+        fun `hentPerson - Flere feil i respons - skal kaste exception med noe detaljert informasjon`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withSuccess(flereFeilRespons, MediaType.APPLICATION_JSON))
+
+            val exception = shouldThrow<RuntimeException> {
+                client.hentPerson("FNR")
+            }
+
+            exception.message shouldBe
+                ERROR_PREFIX + NULL_ERROR + "- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, " +
+                "cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n" +
+                "- Test (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, " +
+                "policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
+        }
     }
 
     @Test
     fun `hentIdenter skal lage riktig request og parse response`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
-
         val personident1 = Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT)
         val personident2 = Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT)
 
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                	"errors": null,
-                	"data": {
-                		"hentIdenter": {
-                		  "identer": [
-                			{
-                			  "ident": "${personident1.ident}",
-                			  "historisk": ${personident1.historisk},
-                			  "gruppe": "${personident1.type.name}"
-                			},
-                			{
-                			  "ident": "${personident2.ident}",
-                			  "historisk": ${personident2.historisk},
-                			  "gruppe": "${personident2.type.name}"
-                			}
-                		  ]
-                		}
-                	  }
-                }
-                """.trimIndent(),
-            ),
-        )
+        server
+            .expect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                        "errors": null,
+                        "data": {
+                            "hentIdenter": {
+                              "identer": [
+                                { "ident": "${personident1.ident}", "historisk": ${personident1.historisk}, "gruppe": "${personident1.type.name}" },
+                                { "ident": "${personident2.ident}", "historisk": ${personident2.historisk}, "gruppe": "${personident2.type.name}" }
+                              ]
+                            }
+                        }
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        val identer = client.hentIdenter(personident2.ident)
+        client.hentIdenter(personident2.ident) shouldBe listOf(personident1, personident2)
+    }
 
-        identer shouldBe listOf(personident1, personident2)
+    @Test
+    fun `hentIdenter - hentIdenter er null - skal kaste exception`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """{"errors": null, "data": {"hentIdenter": null}}""",
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        val request = server.takeRequest()
+        val exception = shouldThrow<RuntimeException> {
+            client.hentIdenter("FNR")
+        }
 
-        request.path shouldBe "/graphql"
-        request.method shouldBe HttpMethod.POST.name()
-        request.getHeader(HttpHeaders.AUTHORIZATION) shouldBe "Bearer TOKEN"
-        request.getHeader(TEMA_HEADER) shouldBe GEN_TEMA_HEADER_VALUE
+        exception.message shouldBe "PDL respons inneholder ikke data"
+    }
 
-        val expectedJson =
-            """
-            {
-            	"query": "${PdlQueries.HentIdenter.query.replace("\n", "\\n").replace("\t", "\\t")}",
-            	"variables": { "ident": "${personident2.ident}" }
+    @Nested
+    inner class HentTelefonTests {
+        @Test
+        fun `hentTelefon - person har telefon - returnerer telefon`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withSuccess(telefonResponse, MediaType.APPLICATION_JSON))
+
+            client.hentTelefon("FNR") shouldBe "+4712345678"
+        }
+
+        @Test
+        fun `hentTelefon - person uten telefon - returnerer null`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": null, "data": {"hentPerson": {"telefonnummer": []}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            client.hentTelefon("FNR") shouldBe null
+        }
+
+        @Test
+        fun `hentTelefon - tom errors-liste - skal ikke kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": [], "data": {"hentPerson": {"telefonnummer": []}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            client.hentTelefon("FNR") shouldBe null
+        }
+
+        @Test
+        fun `hentTelefon - data mangler - skal kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": [{"message": "Noe gikk galt"}], "data": null}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            val exception = shouldThrow<RuntimeException> {
+                client.hentTelefon("FNR")
             }
-            """.trimIndent()
 
-        val body = request.body.readUtf8()
-        body shouldEqualJson expectedJson
+            exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+        }
     }
 
-    @Test
-    fun `hentPerson - Detaljert respons - skal kaste exception med noe detaljert informasjon`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
+    @Nested
+    inner class HentPersonFodselsarTests {
+        @Test
+        fun `hentPersonFodselsar - person har fodselsar - returnerer fodselsar`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withSuccess(fodselsarRespons, MediaType.APPLICATION_JSON))
 
-        server.enqueue(MockResponse().setBody(minimalFeilRespons))
+            client.hentPersonFodselsar("FNR") shouldBe 1976
+        }
 
-        val exception =
-            assertThrows<RuntimeException> {
-                client.hentPerson("FNR")
-            }
+        @Test
+        fun `hentPersonFodselsar - data mangler - skal kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": [{"message": "Noe gikk galt"}], "data": null}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
 
-        exception.message shouldBe ERROR_PREFIX + NULL_ERROR +
-            "- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
-    }
-
-    @Test
-    fun `hentPerson - Flere feil i respons - skal kaste exception med noe detaljert informasjon`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
-
-        server.enqueue(MockResponse().setBody(flereFeilRespons))
-
-        val exception =
-            assertThrows<RuntimeException> {
-                client.hentPerson("FNR")
-            }
-
-        exception.message shouldBe ERROR_PREFIX + NULL_ERROR +
-            "- Ikke tilgang til å se person (code: unauthorized details: PdlErrorDetails(type=abac-deny, " +
-            "cause=cause-0001-manglerrolle, policy=adressebeskyttelse_strengt_fortrolig_adresse))\n" +
-            "- Test (code: unauthorized details: PdlErrorDetails(type=abac-deny, cause=cause-0001-manglerrolle, " +
-            "policy=adressebeskyttelse_strengt_fortrolig_adresse))\n"
-    }
-
-    @Test
-    fun `hentTelefon - person har telefon - returnerer telefon`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
-
-        server.enqueue(MockResponse().setBody(telefonResponse))
-
-        val telefon = client.hentTelefon("FNR")
-
-        telefon shouldBe "+4712345678"
-    }
-
-    @Test
-    fun `hentPersonFodselsar - person har fodselsar - returnerer fodselsar`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
-
-        server.enqueue(MockResponse().setBody(fodselsarRespons))
-
-        val fodselsar = client.hentPersonFodselsar("FNR")
-
-        fodselsar shouldBe 1976
-    }
-
-    @Test
-    fun `hentPersonFodselsar - data mangler - skal kaste exception`() {
-        val client =
-            PdlClient(
-                serverUrl,
-                { "TOKEN" },
-                poststedRepository = poststedRepository,
-                objectMapper = objectMapper,
-            )
-
-        server.enqueue(
-            MockResponse().setBody(
-                """
-                {
-                	"errors": [{"message": "Noe gikk galt"}],
-                	"data": null
-                }
-                """.trimIndent(),
-            ),
-        )
-
-        val exception =
-            assertThrows<RuntimeException> {
+            val exception = shouldThrow<RuntimeException> {
                 client.hentPersonFodselsar("FNR")
             }
 
-        exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+            exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+        }
 
-        val request = server.takeRequest()
+        @Test
+        fun `hentPersonFodselsar - person mangler foedselsdato - skal kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": null, "data": {"hentPerson": {"foedselsdato": []}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
 
-        request.path shouldBe "/graphql"
-        request.method shouldBe HttpMethod.POST.name()
+            val exception = shouldThrow<RuntimeException> {
+                client.hentPersonFodselsar("FNR")
+            }
+
+            exception.message shouldBe "PDL person mangler fodselsdato"
+        }
+    }
+
+    @Nested
+    inner class HentAdressebeskyttelseTests {
+        @Test
+        fun `hentAdressebeskyttelse - person er beskyttet - returnerer gradering`() {
+            server
+                .expect(requestTo("http://pdl/graphql"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": null, "data": {"hentPerson": {"adressebeskyttelse": [{"gradering": "STRENGT_FORTROLIG"}]}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            client.hentAdressebeskyttelse("FNR") shouldBe AdressebeskyttelseGradering.STRENGT_FORTROLIG
+        }
+
+        @Test
+        fun `hentAdressebeskyttelse - person er ikke beskyttet - returnerer null`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": null, "data": {"hentPerson": {"adressebeskyttelse": []}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            client.hentAdressebeskyttelse("FNR") shouldBe null
+        }
+
+        @Test
+        fun `hentAdressebeskyttelse - data mangler - skal kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": [{"message": "Noe gikk galt"}], "data": null}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            val exception = shouldThrow<RuntimeException> {
+                client.hentAdressebeskyttelse("FNR")
+            }
+
+            exception.message shouldBe "$ERROR_PREFIX$NULL_ERROR- Noe gikk galt (code: null details: null)\n"
+        }
+    }
+
+    @Test
+    fun `executeQuery - HTTP 500 fra PDL - skal kaste exception`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withServerError())
+
+        shouldThrow<RestClientResponseException> {
+            client.hentPerson("FNR")
+        }
     }
 }

@@ -1,12 +1,11 @@
 package no.nav.amt.person.service.navbruker
 
+import no.nav.amt.person.service.clients.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
-import no.nav.amt.person.service.clients.krr.KontaktinformasjonForPersoner
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
-import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
@@ -227,7 +226,7 @@ class NavBrukerService(
         log.info("Syncet kontaktinfo for ${personerChunks.size} personer")
     }
 
-    fun fetchOppdatertKontaktinfo(personidenter: Set<String>): KontaktinformasjonForPersoner {
+    fun fetchOppdatertKontaktinfo(personidenter: Set<String>): Map<String, Kontaktinformasjon> {
         if (personidenter.size > 500) {
             throw IllegalArgumentException("Kontaktinformasjon kan henters for maks 500 personidenter i en batch")
         }
