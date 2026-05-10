@@ -29,7 +29,6 @@ dependencies {
 
     implementation(libs.nav.common.log)
     implementation(libs.nav.common.token.client)
-    implementation(libs.nav.common.rest)
     implementation(libs.nav.common.job)
     implementation(libs.nav.common.kafka)
 
