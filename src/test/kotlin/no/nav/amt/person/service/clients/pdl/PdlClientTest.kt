@@ -53,7 +53,6 @@ class PdlClientTest(
 
     @BeforeEach
     fun setUp() {
-        // every { tokenClient.createMachineToMachineToken(any()) } returns TOKEN_IN_TEST
         every { poststedRepository.getPoststeder(any()) } returns postnumreInTest.toList()
     }
 
@@ -217,6 +216,20 @@ class PdlClientTest(
                 .andRespond(
                     withSuccess(
                         """{"errors": null, "data": {"hentPerson": {"telefonnummer": []}}}""",
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            client.hentTelefon("FNR") shouldBe null
+        }
+
+        @Test
+        fun `hentTelefon - tom errors-liste - skal ikke kaste exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(
+                    withSuccess(
+                        """{"errors": [], "data": {"hentPerson": {"telefonnummer": []}}}""",
                         MediaType.APPLICATION_JSON,
                     ),
                 )

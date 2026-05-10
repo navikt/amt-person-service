@@ -30,6 +30,8 @@ class PdlClient(
         private const val BEHANDLINGSNUMMER =
             // https://behandlingskatalog.nais.adeo.no/process/team/5345bce7-e076-4b37-8bf4-49030901a4c3/b3003849-c4bb-4c60-a4cb-e07ce6025623
             "B446"
+
+        private const val EMPTY_DATA_MSG = "PDL respons inneholder ikke data"
     }
 
     private val restClient: RestClient = restClientBuilder
@@ -46,9 +48,7 @@ class PdlClient(
             personident = personident,
         )
 
-        validate(response, response.extensions)
-
-        val data = response.data ?: throw RuntimeException("PDL respons inneholder ikke data")
+        val data = validateAndGetData(response, response.extensions)
         return data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
     }
 
@@ -58,9 +58,7 @@ class PdlClient(
             personident,
         )
 
-        validate(response, response.extensions)
-
-        val data = response.data ?: throw RuntimeException("PDL respons inneholder ikke data")
+        val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.foedselsdato
             .firstOrNull()
             ?.foedselsaar
@@ -73,9 +71,8 @@ class PdlClient(
             personident,
         )
 
-        validate(response, response.extensions)
-
-        val hentIdenter = response.data?.hentIdenter ?: throw RuntimeException("PDL respons inneholder ikke data")
+        val data = validateAndGetData(response, response.extensions)
+        val hentIdenter = data.hentIdenter ?: throw RuntimeException(EMPTY_DATA_MSG)
         return hentIdenter.identer.map {
             Personident(
                 ident = it.ident,
@@ -91,9 +88,7 @@ class PdlClient(
             personident,
         )
 
-        validate(response, response.extensions)
-
-        val data = response.data ?: throw RuntimeException("PDL respons inneholder ikke data")
+        val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.telefonnummer.toTelefonnummer()
     }
 
@@ -103,9 +98,7 @@ class PdlClient(
             personident,
         )
 
-        validate(response, response.extensions)
-
-        val data = response.data ?: throw RuntimeException("PDL respons inneholder ikke data")
+        val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.adressebeskyttelse.toDiskresjonskode()
     }
 
@@ -118,20 +111,23 @@ class PdlClient(
         .retrieve()
         .body(T::class.java) ?: throw RuntimeException("Tomt svar fra PDL")
 
-    private fun validate(
-        response: GraphqlResponse<*, PdlQueries.PdlErrorExtension>,
+    private fun <Data> validateAndGetData(
+        response: GraphqlResponse<Data, PdlQueries.PdlErrorExtension>,
         extensions: PdlQueries.Extensions?,
-    ) {
+    ): Data {
         throwPdlApiErrors(response)
         logPdlWarnings(extensions?.warnings)
+        return response.data ?: throw RuntimeException(EMPTY_DATA_MSG)
     }
 
     private fun throwPdlApiErrors(response: GraphqlResponse<*, PdlQueries.PdlErrorExtension>) {
-        var melding = "Feilmeldinger i respons fra pdl:\n"
-        if (response.data == null) melding = "$melding- data i respons er null \n"
-        response.errors?.let { feilmeldinger ->
-            melding += feilmeldinger.joinToString(separator = "") {
-                "- ${it.message} (code: ${it.extensions?.code} details: ${it.extensions?.details})\n"
+        response.errors?.takeIf { it.isNotEmpty() }?.let { feilmeldinger ->
+            val melding = buildString {
+                append("Feilmeldinger i respons fra pdl:\n")
+                if (response.data == null) append("- data i respons er null \n")
+                feilmeldinger.forEach {
+                    append("- ${it.message} (code: ${it.extensions?.code} details: ${it.extensions?.details})\n")
+                }
             }
             throw RuntimeException(melding)
         }

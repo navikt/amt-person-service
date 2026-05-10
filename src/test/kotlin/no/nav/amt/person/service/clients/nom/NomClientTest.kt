@@ -231,44 +231,42 @@ class NomClientTest(
 
         private fun hentRessurserResponse(
             veiledere: List<NavAnsattDbo>,
-            antallNotFount: Int = 0,
+            antallNotFound: Int = 0,
         ): String {
-            val ressurser =
-                veiledere.map {
-                    """
-                    {
-                    	"ressurs": {
-                    		"navident": "${it.navIdent}",
-                    		"visningsnavn": "${it.navn}",
-                    		"fornavn": "Fornavn",
-                    		"etternavn": "Etternavn",
-                    		"epost": "${it.epost}",
-                    		"telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${it.telefon}" }],
-                    		"orgTilknytning": [
-                    			{
-                    			  "gyldigTom": null,
-                    			  "orgEnhet": {
-                    				"remedyEnhetId": "0315"
-                    			  },
-                    			  "erDagligOppfolging": true,
-                    			  "gyldigFom": "2015-01-01"
-                    			}
-                    		]
-                    	},
-                    	"code": "OK"
-                    }
-                    """.trimIndent()
+            val ressurser = veiledere.map {
+                """
+                {
+                	"ressurs": {
+                		"navident": "${it.navIdent}",
+                		"visningsnavn": "${it.navn}",
+                		"fornavn": "Fornavn",
+                		"etternavn": "Etternavn",
+                		"epost": "${it.epost}",
+                		"telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${it.telefon}" }],
+                		"orgTilknytning": [
+                			{
+                			  "gyldigTom": null,
+                			  "orgEnhet": {
+                				"remedyEnhetId": "0315"
+                			  },
+                			  "erDagligOppfolging": true,
+                			  "gyldigFom": "2015-01-01"
+                			}
+                		]
+                	},
+                	"code": "OK"
                 }
+                """.trimIndent()
+            }
 
-            val notFound =
-                (0..antallNotFount).map {
-                    """
-                    {
-                    	"code": "NOT_FOUND",
-                    	"ressurs": null
-                    }
-                    """.trimIndent()
+            val notFound = List(antallNotFound) {
+                """
+                {
+                	"code": "NOT_FOUND",
+                	"ressurs": null
                 }
+                """.trimIndent()
+            }
 
             return """
                 {
