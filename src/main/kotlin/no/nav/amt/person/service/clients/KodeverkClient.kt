@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients
 
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.poststed.Postnummer
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ class KodeverkClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl(url)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
         .defaultRequest { spec ->
             spec.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

@@ -6,5 +6,6 @@ object HeaderConstants {
     const val TEMA_HEADER = "Tema"
     const val BEHANDLINGSNUMMER_HEADER = "behandlingsnummer"
 
+    const val NAV_CONSUMER_ID_HEADER_VALUE = "amt-person-service"
     const val GEN_TEMA_HEADER_VALUE = "GEN"
 }

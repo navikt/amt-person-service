@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients
 
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
 import no.nav.common.token_client.client.MachineToMachineTokenClient
@@ -25,7 +26,7 @@ class VeilarboppfolgingClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl("$url/veilarboppfolging")
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

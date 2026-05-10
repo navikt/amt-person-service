@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients
 
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.common.token_client.client.MachineToMachineTokenClient
@@ -20,7 +21,7 @@ class VeilarbvedtaksstotteClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl("$url/veilarbvedtaksstotte")
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()
