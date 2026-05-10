@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
+import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -32,6 +33,7 @@ class OppfolgingskontorClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

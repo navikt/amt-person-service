@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.nom
 
+import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ class NomClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl(url)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

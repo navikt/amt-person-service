@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients.pdl
 
 import no.nav.amt.person.service.clients.HeaderConstants.BEHANDLINGSNUMMER_HEADER
 import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
+import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
@@ -38,6 +39,7 @@ class PdlClient(
         .baseUrl("$url/graphql")
         .defaultHeader(TEMA_HEADER, GEN_TEMA_HEADER_VALUE)
         .defaultHeader(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER)
+        .defaultHeader(NAV_CONSUMER_ID_HEADER, "amt-person-service")
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.krr
 
+import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.amt.person.service.config.TeamLogs
 import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
@@ -23,6 +24,7 @@ class KrrProxyClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()

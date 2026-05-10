@@ -20,6 +20,7 @@ class VeilarbvedtaksstotteClient(
     private val restClient: RestClient = restClientBuilder
         .baseUrl("$url/veilarbvedtaksstotte")
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, "amt-person-service")
         .defaultRequest {
             it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
         }.build()
