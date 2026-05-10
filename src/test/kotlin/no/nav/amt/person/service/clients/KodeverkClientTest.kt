@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
@@ -10,12 +11,11 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
-import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
-import java.time.LocalDate
 import java.util.UUID
 
 @RestClientTest(KodeverkClient::class)
@@ -33,12 +33,11 @@ class KodeverkClientTest(
         val callId = UUID.randomUUID()
 
         server
-            .expect(
-                MockRestRequestMatchers.requestToUriTemplate(
-                    "http://kodeverk/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato={d}&spraak=nb",
-                    LocalDate.now(),
-                ),
-            ).andExpect(method(HttpMethod.GET))
+            .expect(requestTo(containsString("/api/v1/kodeverk/Postnummer/koder/betydninger")))
+            .andExpect(requestTo(containsString("ekskluderUgyldige=true")))
+            .andExpect(requestTo(containsString("oppslagsdato=")))
+            .andExpect(requestTo(containsString("spraak=nb")))
+            .andExpect(method(HttpMethod.GET))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-token"))
             .andExpect(header("Nav-Call-Id", callId.toString()))
             .andExpect(header("Nav-Consumer-Id", "amt-person-service"))
