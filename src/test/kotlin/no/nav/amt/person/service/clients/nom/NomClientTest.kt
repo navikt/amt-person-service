@@ -1,53 +1,61 @@
 package no.nav.amt.person.service.clients.nom
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.RestClientTestBase
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-class NomClientTest {
-    private lateinit var client: NomClientImpl
-    private lateinit var server: MockWebServer
-    private val token = "TOKEN"
-
-    @BeforeEach
-    fun setup() {
-        server = MockWebServer()
-        client =
-            NomClientImpl(
-                url = server.url("").toString().removeSuffix("/"),
-                tokenSupplier = { token },
-                objectMapper = staticObjectMapper,
+@RestClientTest(NomClient::class)
+@TestPropertySource(
+    properties = [
+        "nom.url=http://nom",
+        "nom.scope=test.nom",
+    ],
+)
+class NomClientTest(
+    @Autowired private val sut: NomClient,
+) : RestClientTestBase() {
+    @Test
+    fun `hentNavAnsatt - veileder finnes ikke - returnerer null`() {
+        server
+            .expect(requestTo("http://nom/graphql"))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN"))
+            .andRespond(
+                withSuccess(
+                    hentRessurserResponse(emptyList(), 1),
+                    MediaType.APPLICATION_JSON,
+                ),
             )
-    }
 
-    @AfterEach
-    fun tearDown() = server.shutdown()
-
-    @Test
-    fun `hentVeileder - veileder finnes ikke - returnerer null`() {
-        val veilederRespons = hentRessurserResponse(emptyList(), 1)
-        server.enqueue(MockResponse().setBody(veilederRespons))
-
-        val veileder = client.hentNavAnsatt("test")
-        veileder shouldBe null
+        sut.hentNavAnsatt("test") shouldBe null
     }
 
     @Test
-    fun `hentVeiledere - veiledere finnes - returnerer veiledere`() {
+    fun `hentNavAnsatte - veiledere finnes - returnerer veiledere`() {
         val veiledere = listOf(TestData.lagNavAnsatt(), TestData.lagNavAnsatt())
-        val veilederRespons = hentRessurserResponse(veiledere)
 
-        server.enqueue(MockResponse().setBody(veilederRespons))
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withSuccess(hentRessurserResponse(veiledere), MediaType.APPLICATION_JSON))
 
-        val faktiskeVeiledere = client.hentNavAnsatte(veiledere.map { it.navIdent })
+        val faktiskeVeiledere = sut.hentNavAnsatte(veiledere.map { it.navIdent })
         val firstFaktiskVeileder = faktiskeVeiledere.first { it.navIdent == veiledere[0].navIdent }
         val secondFaktiskVeileder = faktiskeVeiledere.first { it.navIdent == veiledere[1].navIdent }
 
@@ -67,16 +75,20 @@ class NomClientTest {
     }
 
     @Test
-    fun `hentVeiledere - en veileder finnes ikke - returnerer veileder som finnes`() {
+    fun `hentNavAnsatte - en veileder finnes ikke - returnerer veileder som finnes`() {
         val veileder = TestData.lagNavAnsatt()
         val feilIdent = "Feil Ident"
 
-        val veilederRespons = hentRessurserResponse(listOf(veileder), 1)
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    hentRessurserResponse(listOf(veileder), 1),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
 
-        server.enqueue(MockResponse().setBody(veilederRespons))
-
-        val faktiskeVeiledere = client.hentNavAnsatte(listOf(veileder.navIdent, feilIdent))
-
+        val faktiskeVeiledere = sut.hentNavAnsatte(listOf(veileder.navIdent, feilIdent))
         val faktiskVeileder = faktiskeVeiledere.first { it.navIdent == veileder.navIdent }
 
         faktiskeVeiledere.find { it.navIdent == feilIdent } shouldBe null
@@ -90,56 +102,181 @@ class NomClientTest {
         }
     }
 
-    private fun hentRessurserResponse(
-        veiledere: List<NavAnsattDbo>,
-        antallNotFount: Int = 0,
-    ): String {
-        val ressurser =
-            veiledere.map {
-                """
+    @Test
+    fun `hentNavAnsatte - visningsnavn er null - bruker fornavn og etternavn`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                      "data": {
+                        "ressurser": [{
+                          "ressurs": {
+                            "navident": "Z123",
+                            "visningsnavn": null,
+                            "fornavn": "Ola",
+                            "etternavn": "Nordmann",
+                            "epost": "ola@nav.no",
+                            "telefon": [],
+                            "orgTilknytning": []
+                          },
+                          "code": "OK"
+                        }]
+                      }
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+
+        val result = sut.hentNavAnsatte(listOf("Z123"))
+
+        result shouldHaveSize 1
+        result.first().navn shouldBe "Ola Nordmann"
+    }
+
+    @Test
+    fun `hentNavAnsatte - NAV_KONTOR_TELEFON prioriteres over NAV_TJENESTE_TELEFON`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                      "data": {
+                        "ressurser": [{
+                          "ressurs": {
+                            "navident": "Z123",
+                            "visningsnavn": "Test",
+                            "fornavn": "Test",
+                            "etternavn": "Test",
+                            "epost": "test@nav.no",
+                            "telefon": [
+                              { "type": "NAV_TJENESTE_TELEFON", "nummer": "11111111" },
+                              { "type": "NAV_KONTOR_TELEFON", "nummer": "22222222" }
+                            ],
+                            "orgTilknytning": []
+                          },
+                          "code": "OK"
+                        }]
+                      }
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+
+        sut.hentNavAnsatte(listOf("Z123")).first().telefonnummer shouldBe "22222222"
+    }
+
+    @Test
+    fun `hentNavAnsatte - ingen telefon - returnerer null`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """
+                    {
+                      "data": {
+                        "ressurser": [{
+                          "ressurs": {
+                            "navident": "Z123",
+                            "visningsnavn": "Test",
+                            "fornavn": "Test",
+                            "etternavn": "Test",
+                            "epost": "test@nav.no",
+                            "telefon": [],
+                            "orgTilknytning": []
+                          },
+                          "code": "OK"
+                        }]
+                      }
+                    }
+                    """.trimIndent(),
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+
+        sut.hentNavAnsatte(listOf("Z123")).first().telefonnummer shouldBe null
+    }
+
+    @Test
+    fun `hentNavAnsatte - data er null - returnerer tom liste`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(
+                withSuccess(
+                    """{ "data": null }""",
+                    MediaType.APPLICATION_JSON,
+                ),
+            )
+
+        sut.hentNavAnsatte(listOf("Z123")).shouldBeEmpty()
+    }
+
+    @Test
+    fun `hentNavAnsatte - HTTP 500 - kaster exception`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withServerError())
+
+        shouldThrow<Exception> {
+            sut.hentNavAnsatte(listOf("Z123"))
+        }
+    }
+
+    companion object {
+        private const val TOKEN = "test-token"
+
+        private fun hentRessurserResponse(
+            veiledere: List<NavAnsattDbo>,
+            antallNotFount: Int = 0,
+        ): String {
+            val ressurser =
+                veiledere.map {
+                    """
+                    {
+                    	"ressurs": {
+                    		"navident": "${it.navIdent}",
+                    		"visningsnavn": "${it.navn}",
+                    		"fornavn": "Fornavn",
+                    		"etternavn": "Etternavn",
+                    		"epost": "${it.epost}",
+                    		"telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${it.telefon}" }],
+                    		"orgTilknytning": [
+                    			{
+                    			  "gyldigTom": null,
+                    			  "orgEnhet": {
+                    				"remedyEnhetId": "0315"
+                    			  },
+                    			  "erDagligOppfolging": true,
+                    			  "gyldigFom": "2015-01-01"
+                    			}
+                    		]
+                    	},
+                    	"code": "OK"
+                    }
+                    """.trimIndent()
+                }
+
+            val notFound =
+                (0..antallNotFount).map {
+                    """
+                    {
+                    	"code": "NOT_FOUND",
+                    	"ressurs": null
+                    }
+                    """.trimIndent()
+                }
+
+            return """
                 {
-                	"ressurs": {
-                		"navident": "${it.navIdent}",
-                		"visningsnavn": "${it.navn}",
-                		"fornavn": "Fornavn",
-                		"etternavn": "Etternavn",
-                		"epost": "${it.epost}",
-                		"telefon": [{ "type": "NAV_TJENESTE_TELEFON", "nummer": "${it.telefon}" }],
-                		"orgTilknytning": [
-                			{
-                			  "gyldigTom": null,
-                			  "orgEnhet": {
-                				"remedyEnhetId": "0315"
-                			  },
-                			  "erDagligOppfolging": true,
-                			  "gyldigFom": "2015-01-01"
-                			}
-                		]
-                	},
-                	"code": "OK"
+                  "data": {
+                	"ressurser": [ ${ressurser.plus(notFound).joinToString { it }} ]
+                  }
                 }
                 """.trimIndent()
-            }
-
-        val notFound =
-            (0..antallNotFount).map {
-                """
-                {
-                	"code": "NOT_FOUND",
-                	"ressurs": null
-                }
-                """.trimIndent()
-            }
-
-        val veilederRespons =
-            """
-            {
-              "data": {
-            	"ressurser": [ ${ressurser.plus(notFound).joinToString { it }} ]
-              }
-            }
-            """.trimIndent()
-
-        return veilederRespons
+        }
     }
 }

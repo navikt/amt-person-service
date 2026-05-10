@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.poststed
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
-import no.nav.amt.person.service.clients.kodeverk.KodeverkClient
+import no.nav.amt.person.service.clients.KodeverkClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component

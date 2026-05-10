@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.amt.person.service.clients.nom.NomClientImpl
+import no.nav.amt.person.service.clients.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
-import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.data.TestData.orgTilknytning
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 
 class NavAnsattServiceTest {
     private val navAnsattRepository: NavAnsattRepository = mockk(relaxUnitFun = true)
-    private val nomClient: NomClientImpl = mockk()
+    private val nomClient: NomClient = mockk()
     private val veilarboppfolgingClient: VeilarboppfolgingClient = mockk()
     private val kafkaProducerService: KafkaProducerService = mockk(relaxUnitFun = true)
     private val navEnhetService: NavEnhetService = mockk()

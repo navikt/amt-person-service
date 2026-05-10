@@ -19,9 +19,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-flyway")
+    implementation("org.springframework.boot:spring-boot-restclient")
 
     implementation(libs.tools.jackson.module.kotlin)
-    implementation(libs.okhttp)
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql")
 
@@ -49,15 +49,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-data-jdbc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
+    testImplementation("org.springframework.boot:spring-boot-restclient-test")
 
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)
-    testImplementation(libs.okhttp.mockwebserver)
 
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.kafka)
 
     testImplementation(libs.mockk)
+    testImplementation(libs.springmockk)
     testImplementation(libs.mock.oauth2.server)
     testImplementation(libs.amt.lib.testing)
 }
@@ -78,6 +79,7 @@ ktlint {
 }
 
 tasks.register<GenerateAvroTask>("generateAvroJava") {
+    description = "Genererer Java-klasser fra Avro-skjemaer"
     avroSchemasDir = layout.projectDirectory.dir("src/main/avro")
     avroCodeGenerationDir = layout.buildDirectory.dir("generated/avro/java")
 }

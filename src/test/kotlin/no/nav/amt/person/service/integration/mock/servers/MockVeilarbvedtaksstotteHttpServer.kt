@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
+import no.nav.amt.person.service.clients.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer

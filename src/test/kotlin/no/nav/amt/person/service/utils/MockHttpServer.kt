@@ -8,9 +8,11 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-private val requestBodyCache = mutableMapOf<RecordedRequest, String>()
-
-fun RecordedRequest.getBodyAsString(): String = requestBodyCache.getOrPut(this) { this.body.readUtf8() }
+/**
+ * Reads the request body non-destructively by cloning the underlying Buffer,
+ * so the body can be read multiple times (e.g. for matching + logging).
+ */
+fun RecordedRequest.getBodyAsString(): String = this.body.clone().readUtf8()
 
 abstract class MockHttpServer(
     private val name: String,
@@ -38,7 +40,7 @@ abstract class MockHttpServer(
                         response.count += 1
 
                         log.info("Responding [${request.method}: ${request.path}]: $response")
-                        return response.response.invoke(request)
+                        return ensureJsonContentType(response.response.invoke(request))
                     }
                 }
         } catch (_: IllegalArgumentException) {
@@ -76,6 +78,17 @@ abstract class MockHttpServer(
     fun serverUrl(): String = server.url("").toString().removeSuffix("/")
 
     private fun printHeaders(headers: Headers): String = headers.joinToString("\n") { "		${it.first} : ${it.second}" }
+
+    /**
+     * Ensures the mock response has a Content-Type header so that Spring's RestClient
+     * can pick a HttpMessageConverter. Defaults to application/json since all mock
+     * servers in this codebase serve JSON. If a Content-Type is already set, it is left untouched.
+     */
+    private fun ensureJsonContentType(response: MockResponse): MockResponse {
+        if (response.headers["Content-Type"] != null) return response
+        if (response.getBody()?.size == 0L) return response
+        return response.addHeader("Content-Type", "application/json")
+    }
 
     private data class ResponseHolder(
         val id: UUID,

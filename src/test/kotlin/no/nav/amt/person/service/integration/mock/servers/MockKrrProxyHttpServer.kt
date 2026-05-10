@@ -1,6 +1,6 @@
 package no.nav.amt.person.service.integration.mock.servers
 
-import no.nav.amt.person.service.clients.krr.PostPersonerResponse
+import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.amt.person.service.utils.MockHttpServer
@@ -14,10 +14,10 @@ class MockKrrProxyHttpServer : MockHttpServer(name = "MockKrrProxyHttpServer") {
                 .setResponseCode(HttpStatus.OK.value()) //
                 .setBody(
                     staticObjectMapper.writeValueAsString(
-                        PostPersonerResponse(
+                        KrrProxyClient.PostPersonerResponse(
                             mapOf(
                                 navBruker.person.personident to
-                                    PostPersonerResponse.KontaktinformasjonDto(
+                                    KrrProxyClient.PostPersonerResponse.KontaktinformasjonDto(
                                         personident = navBruker.person.personident,
                                         epostadresse = navBruker.epost,
                                         mobiltelefonnummer = navBruker.telefon,
