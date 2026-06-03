@@ -50,6 +50,10 @@ class NavEnhetService(
         val oppdaterteEnheter =
             norgClient.hentNavEnheter(enheter.map { it.enhetId }).associateBy { it.enhetNr }
 
+        log.info(
+            "Hentet ${enheter.size} enheter fra Norg for oppdatering av navn. Norg returnerte ${oppdaterteEnheter.size} enheter.",
+        )
+
         enheter.forEach { opprinneligEnhet ->
             val oppdatertEnhet = oppdaterteEnheter[opprinneligEnhet.enhetId]
 
