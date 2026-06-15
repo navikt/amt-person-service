@@ -26,14 +26,16 @@ class KafkaBeans {
     @Bean
     @Profile("local")
     fun kafkaLocalProperties(): KafkaProperties = object : KafkaProperties {
-        override fun consumer(): Properties = KafkaPropertiesBuilder.consumerBuilder()
+        override fun consumer(): Properties = KafkaPropertiesBuilder
+            .consumerBuilder()
             .withBrokerUrl("localhost:9092")
             .withBaseProperties()
             .withConsumerGroupId("amt-person-service-local-consumer")
             .withDeserializers(StringDeserializer::class.java, StringDeserializer::class.java)
             .build()
 
-        override fun producer(): Properties = KafkaPropertiesBuilder.producerBuilder()
+        override fun producer(): Properties = KafkaPropertiesBuilder
+            .producerBuilder()
             .withBrokerUrl("localhost:9092")
             .withBaseProperties()
             .withProducerId("amt-person-service-local-producer")
