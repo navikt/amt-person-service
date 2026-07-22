@@ -10,7 +10,7 @@ spring-dependency-management = "1.1.7"
 
 # Serialization / Avro
 apache-avro = "1.12.1"
-jackson-module-kotlin = "3.2.0"
+jackson-module-kotlin = "3.2.1"
 confluent = "8.1.1"
 
 # HTTP / logging
@@ -27,7 +27,7 @@ amt-lib = "1.2026.04.19_10.49-44013e7d5585"
 shedlock = "7.7.0"
 
 # Testing
-kotest = "6.2.1"
+kotest = "6.2.2"
 mockk = "1.14.11"
 mock-oauth2-server = "5.0.2"
 springmockk-version = "5.0.1"
