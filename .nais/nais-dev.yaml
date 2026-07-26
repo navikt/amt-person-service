@@ -32,7 +32,7 @@ spec:
   resources:
     requests:
       cpu: 10m
-      memory: 256Mi
+      memory: 512Mi
     limits:
       memory: 1024Mi
   azure:
@@ -73,7 +73,7 @@ spec:
         - host: kodeverk-api.nav.no
   env:
     - name: JDK_JAVA_OPTIONS
-      value: "-XX:MaxRAMPercentage=70.0"
+      value: "-XX:MaxRAMPercentage=80.0 -Xshare:off --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"
 
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io
@@ -107,7 +107,6 @@ spec:
       value: http://poao-tilgang.poao.svc.cluster.local
     - name: POAO_TILGANG_SCOPE
       value: api://dev-gcp.poao.poao-tilgang/.default
-
 
     - name: NOM_URL
       value: https://nom-api.intern.dev.nav.no
