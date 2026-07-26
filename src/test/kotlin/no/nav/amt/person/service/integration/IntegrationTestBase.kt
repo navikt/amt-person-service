@@ -11,7 +11,6 @@ import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
-import no.nav.amt.person.service.config.WebMvcConfig
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.poao_tilgang.client.PoaoTilgangClient
@@ -21,17 +20,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import tools.jackson.databind.ObjectMapper
 
 @ActiveProfiles("integration")
 @EnableMockOAuth2Server
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = ["spring.autoconfigure.exclude="],
-)
-@Import(WebMvcConfig::class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationTestBase : RepositoryTestBase() {
     @LocalServerPort
     private var port: Int = 0

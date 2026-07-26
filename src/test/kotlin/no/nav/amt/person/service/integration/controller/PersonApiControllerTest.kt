@@ -14,6 +14,7 @@ import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
 import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
+import no.nav.amt.person.service.config.WebMvcConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.navansatt.NavAnsattRepository
@@ -31,6 +32,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -40,6 +42,7 @@ import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 @AutoConfigureMockMvc
+@Import(WebMvcConfig::class)
 class PersonApiControllerTest(
     private val mockMvc: MockMvc,
     private val personidentRepository: PersonidentRepository,
