@@ -22,14 +22,13 @@ class NavAnsattServiceTest {
     private val veilarboppfolgingClient: VeilarboppfolgingClient = mockk()
     private val kafkaProducerService: KafkaProducerService = mockk(relaxUnitFun = true)
     private val navEnhetService: NavEnhetService = mockk()
-    private val service =
-        NavAnsattService(
-            navAnsattRepository = navAnsattRepository,
-            nomClient = nomClient,
-            veilarboppfolgingClient = veilarboppfolgingClient,
-            kafkaProducerService = kafkaProducerService,
-            navEnhetService = navEnhetService,
-        )
+    private val service = NavAnsattService(
+        navAnsattRepository = navAnsattRepository,
+        nomClient = nomClient,
+        veilarboppfolgingClient = veilarboppfolgingClient,
+        kafkaProducerService = kafkaProducerService,
+        navEnhetService = navEnhetService,
+    )
 
     @BeforeEach
     fun setup() = clearAllMocks()

@@ -2,7 +2,6 @@ package no.nav.amt.person.service.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.ws.rs.NotAuthorizedException
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -31,10 +30,6 @@ class GlobalExceptionHandler(
 
         is IllegalStateException -> {
             buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
-        }
-
-        is NotAuthorizedException -> {
-            buildResponse(HttpStatus.UNAUTHORIZED, ex)
         }
 
         is JwtTokenUnauthorizedException -> {

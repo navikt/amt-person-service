@@ -78,14 +78,13 @@ class PoststedRepositoryTest(
 
         @Test
         fun `oppdaterPoststed - flere endringer - sletter 1 poststed, lagrer 1 poststed, bytter navn for 1 poststed`() {
-            val oppdatertePostnumre =
-                setOf(
-                    Postnummer("0484", "OSLO"),
-                    Postnummer("0502", "OSLO"),
-                    Postnummer("5341", "STRAUME"),
-                    Postnummer("5365", "TURØY"),
-                    Postnummer("9609", "SENJA"),
-                )
+            val oppdatertePostnumre = setOf(
+                Postnummer("0484", "OSLO"),
+                Postnummer("0502", "OSLO"),
+                Postnummer("5341", "STRAUME"),
+                Postnummer("5365", "TURØY"),
+                Postnummer("9609", "SENJA"),
+            )
 
             sut.oppdaterPoststed(
                 oppdatertePostnumre,

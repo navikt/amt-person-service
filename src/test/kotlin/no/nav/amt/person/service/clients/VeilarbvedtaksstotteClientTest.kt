@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -20,15 +19,10 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import tools.jackson.databind.ObjectMapper
 
 @RestClientTest(VeilarbvedtaksstotteClient::class)
-@TestPropertySource(
-    properties = [
-        "veilarbvedtaksstotte.url=http://veilarbvedtaksstotte-host",
-        "veilarbvedtaksstotte.scope=test.veilarbvedtaksstotte",
-    ],
-)
+@TestPropertySource(properties = ["veilarbvedtaksstotte.url=http://veilarbvedtaksstotte"])
 class VeilarbvedtaksstotteClientTest(
-    @Autowired private val sut: VeilarbvedtaksstotteClient,
-    @Autowired private val objectMapper: ObjectMapper,
+    private val sut: VeilarbvedtaksstotteClient,
+    private val objectMapper: ObjectMapper,
 ) : RestClientTestBase() {
     @Test
     fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
@@ -40,7 +34,7 @@ class VeilarbvedtaksstotteClientTest(
 
         server
             .expect(
-                requestTo("http://veilarbvedtaksstotte-host/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
+                requestTo("http://veilarbvedtaksstotte/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
             ).andExpect(method(HttpMethod.POST))
             .andExpect(header("Authorization", "Bearer $TOKEN_IN_TEST"))
             .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))

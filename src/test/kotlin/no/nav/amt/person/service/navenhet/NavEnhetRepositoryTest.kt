@@ -63,12 +63,11 @@ class NavEnhetRepositoryTest(
 
     @Test
     fun `insert - ny enhet - inserter ny enhet`() {
-        val enhet =
-            NavEnhetDbo(
-                id = UUID.randomUUID(),
-                enhetId = "0001",
-                navn = "Ny Nav Enhet",
-            )
+        val enhet = NavEnhetDbo(
+            id = UUID.randomUUID(),
+            enhetId = "0001",
+            navn = "Ny Nav Enhet",
+        )
 
         enhetRepository.insert(enhet)
 

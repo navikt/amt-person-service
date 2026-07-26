@@ -2,21 +2,21 @@ package no.nav.amt.person.service.integration.kafka.ingestor
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
-import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageSender
+import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
 import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.utils.titlecase
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
-import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 
 class LeesahConsumerTest(
-    private val kafkaMessageSender: KafkaMessageSender,
+    private val leesahConsumer: LeesahConsumer,
     private val personRepository: PersonRepository,
     private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
@@ -31,9 +31,8 @@ class LeesahConsumerTest(
         val nyttMellomnavn = "NYTT MELLOMNAVN"
         val nyttEtternavn = "NYTT ETTERNAVN"
 
-        mockPdlHttpServer.mockHentTelefon(person.personident, null)
-
-        mockPdlHttpServer.mockHentPerson(
+        every { pdlClient.hentTelefon(person.personident) } returns null
+        every { pdlClient.hentPerson(person.personident) } returns TestData.lagPdlPerson(
             person.copy(
                 fornavn = nyttFornavn,
                 mellomnavn = nyttMellomnavn,
@@ -41,24 +40,19 @@ class LeesahConsumerTest(
             ),
         )
 
-        val msg =
-            KafkaMessageCreator.lagPersonhendelseNavn(
-                personidenter = listOf(person.personident),
-                fornavn = nyttFornavn,
-                mellomnavn = nyttMellomnavn,
-                etternavn = nyttEtternavn,
-            )
+        val personhendelse = KafkaMessageCreator.lagPersonhendelseNavn(
+            personidenter = listOf(person.personident),
+            fornavn = nyttFornavn,
+            mellomnavn = nyttMellomnavn,
+            etternavn = nyttEtternavn,
+        )
 
-        mockSchemaRegistryHttpServer.registerSchema(1, "leesah-topic", msg.schema)
+        leesahConsumer.ingest(personhendelse)
 
-        kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
-
-        await().untilAsserted {
-            assertSoftly(personRepository.get(person.id)) {
-                fornavn shouldBe nyttFornavn.titlecase()
-                mellomnavn shouldBe nyttMellomnavn.titlecase()
-                etternavn shouldBe nyttEtternavn.titlecase()
-            }
+        assertSoftly(personRepository.get(person.id)) {
+            fornavn shouldBe nyttFornavn.titlecase()
+            mellomnavn shouldBe nyttMellomnavn.titlecase()
+            etternavn shouldBe nyttEtternavn.titlecase()
         }
     }
 
@@ -67,30 +61,22 @@ class LeesahConsumerTest(
         val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
         testDataRepository.insertNavBruker(navBruker)
 
-        mockPdlHttpServer.mockHentPerson(
-            navBruker.person.personident,
-            TestData.lagPdlPerson(
-                navBruker.person,
-                adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                adresse = navBruker.adresse,
-            ),
+        every { pdlClient.hentPerson(navBruker.person.personident) } returns TestData.lagPdlPerson(
+            navBruker.person,
+            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+            adresse = navBruker.adresse,
         )
 
-        val msg =
-            KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
-                personidenter = listOf(navBruker.person.personident),
-                gradering = Gradering.STRENGT_FORTROLIG,
-            )
+        val personhendelse = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
+            personidenter = listOf(navBruker.person.personident),
+            gradering = Gradering.STRENGT_FORTROLIG,
+        )
 
-        mockSchemaRegistryHttpServer.registerSchema(1, "leesah-topic", msg.schema)
+        leesahConsumer.ingest(personhendelse)
 
-        kafkaMessageSender.sendTilLeesahTopic("aktorId", msg, 1)
+        val oppdatertNavBruker = navBrukerRepository.get(navBruker.person.personident)
 
-        await().untilAsserted {
-            val oppdatertNavBruker = navBrukerRepository.get(navBruker.person.personident)
-
-            oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
-            oppdatertNavBruker?.adresse shouldBe null
-        }
+        oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
+        oppdatertNavBruker?.adresse shouldBe null
     }
 }

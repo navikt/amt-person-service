@@ -12,13 +12,10 @@ class NorgClient(
     restClientBuilder: RestClient.Builder,
 ) {
     private val enhetIdPattern = Regex("^\\d{4}$")
-
-    private val restClient: RestClient
-
-    init {
-        require(url.startsWith("https://") || url.startsWith("http://")) { "Ugyldig url-skjema for norg-klient" }
-        restClient = restClientBuilder.baseUrl(url).build()
+    private val validatedUrl = url.also {
+        require(it.startsWith("https://") || it.startsWith("http://")) { "Ugyldig url-skjema for norg-klient" }
     }
+    private val restClient = restClientBuilder.baseUrl(validatedUrl).build()
 
     private fun validateEnhetId(enhetId: String): String {
         require(enhetIdPattern.matches(enhetId)) { "Ugyldig enhetId-format" }

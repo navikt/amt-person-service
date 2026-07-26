@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients
 
 import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.poststed.Postnummer
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -16,10 +15,8 @@ import java.util.UUID
 
 @Service
 class KodeverkClient(
-    @Value($$"${kodeverk.url}") url: String,
-    @Value($$"${kodeverk.scope}") private val scope: String,
+    @Value($$"${kodeverk-api.url}") url: String,
     restClientBuilder: RestClient.Builder,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -27,9 +24,7 @@ class KodeverkClient(
         .baseUrl(url)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest { spec ->
-            spec.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     @Retryable
     fun hentKodeverk(callId: UUID): List<Postnummer> = runCatching {

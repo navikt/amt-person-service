@@ -22,13 +22,12 @@ class NavEnhetServiceTest {
     private val oppfolgingskontorClient: OppfolgingskontorClient = mockk()
     private val kafkaProducerService = mockk<KafkaProducerService>(relaxUnitFun = true)
 
-    private val service =
-        NavEnhetService(
-            navEnhetRepository = navEnhetRepository,
-            norgClient = norgClient,
-            oppfolgingskontorClient = oppfolgingskontorClient,
-            kafkaProducerService,
-        )
+    private val service = NavEnhetService(
+        navEnhetRepository = navEnhetRepository,
+        norgClient = norgClient,
+        oppfolgingskontorClient = oppfolgingskontorClient,
+        kafkaProducerService,
+    )
 
     @BeforeEach
     fun setup() = clearAllMocks()

@@ -28,7 +28,6 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation(libs.nav.common.log)
-    implementation(libs.nav.common.token.client)
     implementation(libs.nav.common.job)
     implementation(libs.nav.common.kafka)
 
@@ -38,6 +37,7 @@ dependencies {
     implementation(libs.poao.tilgang.client)
 
     implementation(libs.token.validation.spring)
+    implementation(libs.token.client.spring)
 
     implementation(libs.shedlock.spring)
     implementation(libs.shedlock.provider.jdbc.template)
@@ -49,16 +49,17 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
     testImplementation("org.springframework.boot:spring-boot-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
 
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)
 
     testImplementation(libs.testcontainers.postgresql)
-    testImplementation(libs.testcontainers.kafka)
 
     testImplementation(libs.mockk)
     testImplementation(libs.springmockk)
     testImplementation(libs.mock.oauth2.server)
+    testImplementation(libs.token.validation.spring.test)
     testImplementation(libs.amt.lib.testing)
 }
 
@@ -67,7 +68,6 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
-            "-Xannotation-default-target=param-property",
             "-Xwarning-level=IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE:disabled",
         )
     }

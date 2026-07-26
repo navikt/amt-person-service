@@ -35,14 +35,13 @@ class AuthServiceTest {
         claims["roles"] = arrayOf("access_as_application")
         claims["oid"] = sub
 
-        val token =
-            server
-                .issueToken(
-                    issuerId = Issuer.AZURE_AD,
-                    subject = sub,
-                    audience = "test-aud",
-                    claims = claims,
-                ).serialize()
+        val token = server
+            .issueToken(
+                issuerId = Issuer.AZURE_AD,
+                subject = sub,
+                audience = "test-aud",
+                claims = claims,
+            ).serialize()
 
         val authService = AuthService(mockContextHolder(token))
 
@@ -58,14 +57,13 @@ class AuthServiceTest {
         claims["roles"] = arrayOf("access_as_application")
         claims["oid"] = UUID.randomUUID()
 
-        val token =
-            server
-                .issueToken(
-                    issuerId = Issuer.AZURE_AD,
-                    subject = sub,
-                    audience = "test-aud",
-                    claims = claims,
-                ).serialize()
+        val token = server
+            .issueToken(
+                issuerId = Issuer.AZURE_AD,
+                subject = sub,
+                audience = "test-aud",
+                claims = claims,
+            ).serialize()
 
         val authService = AuthService(mockContextHolder(token))
 
@@ -79,14 +77,13 @@ class AuthServiceTest {
         val sub = UUID.randomUUID().toString()
         val claims = mutableMapOf<String, Any>()
 
-        val token =
-            server
-                .issueToken(
-                    issuerId = Issuer.AZURE_AD,
-                    subject = sub,
-                    audience = "test-aud",
-                    claims = claims,
-                ).serialize()
+        val token = server
+            .issueToken(
+                issuerId = Issuer.AZURE_AD,
+                subject = sub,
+                audience = "test-aud",
+                claims = claims,
+            ).serialize()
 
         val authService = AuthService(mockContextHolder(token))
 

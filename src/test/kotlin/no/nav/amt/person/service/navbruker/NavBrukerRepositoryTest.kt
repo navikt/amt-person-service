@@ -212,46 +212,44 @@ class NavBrukerRepositoryTest(
 
         @Test
         fun `upsert - bruker finnes - oppdaterer bruker`() {
-            val navBruker =
-                TestData.lagNavBruker(
-                    createdAt = LocalDateTime.now().minusMonths(6),
-                    modifiedAt = LocalDateTime.now().minusMonths(6),
-                    erSkjermet = false,
-                )
+            val navBruker = TestData.lagNavBruker(
+                createdAt = LocalDateTime.now().minusMonths(6),
+                modifiedAt = LocalDateTime.now().minusMonths(6),
+                erSkjermet = false,
+            )
             testDataRepository.insertNavBruker(navBruker)
 
             brukerRepository.get(navBruker.id)
 
-            val upsert =
-                navBruker.copy(
-                    navVeileder = null,
-                    navEnhet = null,
-                    telefon = "ny telefon",
-                    epost = "ny@epost.no",
-                    erSkjermet = true,
-                    adresse =
-                        Adresse(
-                            bostedsadresse = null,
-                            oppholdsadresse = null,
-                            kontaktadresse =
-                                Kontaktadresse(
-                                    coAdressenavn = null,
-                                    vegadresse =
-                                        Vegadresse(
-                                            husnummer = "1",
-                                            husbokstav = null,
-                                            adressenavn = "Gate",
-                                            tilleggsnavn = null,
-                                            postnummer = "1234",
-                                            poststed = "MOSS",
-                                        ),
-                                    postboksadresse = null,
-                                ),
-                        ),
-                    adressebeskyttelse = null,
-                    oppfolgingsperioder = navBruker.oppfolgingsperioder,
-                    innsatsgruppe = InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS,
-                )
+            val upsert = navBruker.copy(
+                navVeileder = null,
+                navEnhet = null,
+                telefon = "ny telefon",
+                epost = "ny@epost.no",
+                erSkjermet = true,
+                adresse =
+                    Adresse(
+                        bostedsadresse = null,
+                        oppholdsadresse = null,
+                        kontaktadresse =
+                            Kontaktadresse(
+                                coAdressenavn = null,
+                                vegadresse =
+                                    Vegadresse(
+                                        husnummer = "1",
+                                        husbokstav = null,
+                                        adressenavn = "Gate",
+                                        tilleggsnavn = null,
+                                        postnummer = "1234",
+                                        poststed = "MOSS",
+                                    ),
+                                postboksadresse = null,
+                            ),
+                    ),
+                adressebeskyttelse = null,
+                oppfolgingsperioder = navBruker.oppfolgingsperioder,
+                innsatsgruppe = InnsatsgruppeV1.SITUASJONSBESTEMT_INNSATS,
+            )
 
             brukerRepository.upsert(upsert)
 

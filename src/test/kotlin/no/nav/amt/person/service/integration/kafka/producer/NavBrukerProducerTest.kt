@@ -1,11 +1,10 @@
 package no.nav.amt.person.service.integration.kafka.producer
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
-import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.consume
-import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.kafka.producer.dto.NavEnhetDtoV1
@@ -13,12 +12,12 @@ import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.person.PersonService
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class NavBrukerProducerTest(
     private val kafkaProducerService: KafkaProducerService,
-    private val kafkaTopicProperties: KafkaTopicProperties,
     private val personService: PersonService,
     private val navBrukerService: NavBrukerService,
 ) : IntegrationTestBase() {
@@ -28,14 +27,13 @@ class NavBrukerProducerTest(
 
         kafkaProducerService.publiserNavBruker(navBruker)
 
-        val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-        records.shouldNotBeNull()
-        val record = records.first { it.key() == navBruker.person.id.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
         val forventetValue = brukerTilV1Json(navBruker)
 
-        record.key() shouldBe navBruker.person.id.toString()
-        record.value() shouldBe forventetValue
+        recordSlot.captured.key() shouldBe navBruker.person.id.toString()
+        recordSlot.captured.value() shouldBe forventetValue
     }
 
     @Test
@@ -44,11 +42,11 @@ class NavBrukerProducerTest(
 
         kafkaProducerService.publiserSlettNavBruker(personId)
 
-        val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-        records.shouldNotBeNull()
-        val record = records.first { it.key() == personId.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
-        record.value() shouldBe null
+        recordSlot.captured.key() shouldBe personId.toString()
+        recordSlot.captured.value() shouldBe null
     }
 
     @Test
@@ -59,11 +57,11 @@ class NavBrukerProducerTest(
         val oppdatertBruker = bruker.copy(person = bruker.person.copy(fornavn = "Nytt Navn"))
         personService.upsert(oppdatertBruker.person)
 
-        val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-        records.shouldNotBeNull()
-        val record = records.first { it.key() == bruker.person.id.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
-        record.value() shouldBe brukerTilV1Json(oppdatertBruker)
+        recordSlot.captured.key() shouldBe bruker.person.id.toString()
+        recordSlot.captured.value() shouldBe brukerTilV1Json(oppdatertBruker)
     }
 
     @Test
@@ -74,11 +72,11 @@ class NavBrukerProducerTest(
         val oppdatertBruker = bruker.copy(navEnhet = null)
         navBrukerService.upsert(oppdatertBruker)
 
-        val records = consume(kafkaTopicProperties.amtNavBrukerTopic)
-        records.shouldNotBeNull()
-        val record = records.first { it.key() == bruker.person.id.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
-        record.value() shouldBe brukerTilV1Json(oppdatertBruker)
+        recordSlot.captured.key() shouldBe bruker.person.id.toString()
+        recordSlot.captured.value() shouldBe brukerTilV1Json(oppdatertBruker)
     }
 
     private fun brukerTilV1Json(navBruker: NavBrukerDbo): String = objectMapper.writeValueAsString(

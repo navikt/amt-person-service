@@ -45,7 +45,11 @@ object TestData {
 
     fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
 
-    fun randomEnhetId() = (1000..9999).random().toString()
+    private val enhetIdCounter = java.util.concurrent.atomic
+        .AtomicInteger(1000)
+
+    fun randomEnhetId(): String =
+        enhetIdCounter.getAndUpdate { current -> if (current >= 9999) 1000 else current + 1 }.toString().padStart(4, '0')
 
     fun lagPerson(
         id: UUID = UUID.randomUUID(),

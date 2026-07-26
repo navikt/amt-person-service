@@ -21,11 +21,10 @@ class ActuatorTest(
     @ParameterizedTest(name = "{0} probe skal returnere OK og status = UP")
     @ValueSource(strings = ["liveness", "readiness"])
     fun probe_skal_returnere_OK_og_status_UP(probeName: String) {
-        val uri =
-            UriComponentsBuilder
-                .fromUriString("http://localhost:{port}/internal/health/{probeName}")
-                .buildAndExpand(managementPort, probeName)
-                .toUri()
+        val uri = UriComponentsBuilder
+            .fromUriString("http://localhost:{port}/internal/health/{probeName}")
+            .buildAndExpand(managementPort, probeName)
+            .toUri()
 
         val response = restTemplate.getForEntity<String>(uri)
 
@@ -37,11 +36,10 @@ class ActuatorTest(
 
     @Test
     fun `Prometheus-endepunktet skal returnere OK`() {
-        val uri =
-            UriComponentsBuilder
-                .fromUriString("http://localhost:{port}/internal/prometheus")
-                .buildAndExpand(managementPort)
-                .toUri()
+        val uri = UriComponentsBuilder
+            .fromUriString("http://localhost:{port}/internal/prometheus")
+            .buildAndExpand(managementPort)
+            .toUri()
 
         val response = restTemplate.getForEntity<String>(uri)
 
@@ -50,11 +48,10 @@ class ActuatorTest(
 
     @Test
     fun `Metrics-endepunktet skal returnere NOT_FOUND`() {
-        val uri =
-            UriComponentsBuilder
-                .fromUriString("http://localhost:{port}/internal/metrics")
-                .buildAndExpand(managementPort)
-                .toUri()
+        val uri = UriComponentsBuilder
+            .fromUriString("http://localhost:{port}/internal/metrics")
+            .buildAndExpand(managementPort)
+            .toUri()
 
         val response = restTemplate.getForEntity<String>(uri)
 

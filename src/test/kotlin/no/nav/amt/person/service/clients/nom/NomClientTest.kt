@@ -9,7 +9,6 @@ import no.nav.amt.person.service.clients.RestClientTestBase
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -22,21 +21,16 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RestClientTest(NomClient::class)
-@TestPropertySource(
-    properties = [
-        "nom.url=http://nom",
-        "nom.scope=test.nom",
-    ],
-)
+@TestPropertySource(properties = ["nom-api.url=http://nom-api"])
 class NomClientTest(
-    @Autowired private val sut: NomClient,
+    private val sut: NomClient,
 ) : RestClientTestBase() {
     @Test
     fun `hentNavAnsatt - veileder finnes ikke - returnerer null`() {
         server
-            .expect(requestTo("http://nom/graphql"))
+            .expect(requestTo("http://nom-api/graphql"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
             .andRespond(
                 withSuccess(
                     hentRessurserResponse(emptyList(), 1),
@@ -227,8 +221,6 @@ class NomClientTest(
     }
 
     companion object {
-        private const val TOKEN = "test-token"
-
         private fun hentRessurserResponse(
             veiledere: List<NavAnsattDbo>,
             antallNotFound: Int = 0,

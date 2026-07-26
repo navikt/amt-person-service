@@ -3,7 +3,6 @@ package no.nav.amt.person.service.clients.nom
 import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.utils.GraphqlUtils
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -14,18 +13,14 @@ import org.springframework.web.client.body
 
 @Service
 class NomClient(
-    @Value($$"${nom.url}") url: String,
-    @Value($$"${nom.scope}") private val scope: String,
+    @Value($$"${nom-api.url}") url: String,
     restClientBuilder: RestClient.Builder,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
 ) {
     private val restClient: RestClient = restClientBuilder
         .baseUrl(url)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest {
-            it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     fun hentNavAnsatt(navIdent: String): NomNavAnsatt? = hentNavAnsatte(listOf(navIdent))
         .firstOrNull()
