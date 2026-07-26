@@ -35,6 +35,7 @@ import java.util.UUID
 
 @Suppress("SpringMvcPathVariableDeclarationInspection")
 @RestController
+@Unprotected
 @RequestMapping("/internal")
 class InternalController(
     private val personService: PersonService,
@@ -50,7 +51,6 @@ class InternalController(
 ) {
     private val log = LoggerFactory.getLogger(InternalController::class.java)
 
-    @Unprotected
     @PostMapping("/person/{dollyIdent}")
     fun opprettPerson(
         servlet: HttpServletRequest,
@@ -61,7 +61,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @PostMapping("/nav-bruker/{dollyIdent}")
     fun opprettNavBruker(
         servlet: HttpServletRequest,
@@ -72,7 +71,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @PostMapping("/person/identer")
     fun oppdaterPersonidenter(
         servlet: HttpServletRequest,
@@ -85,7 +83,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/person/navn/{id}")
     fun oppdaterNavn(
         servlet: HttpServletRequest,
@@ -100,7 +97,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/republiser")
     fun republiserNavBrukere(
         servlet: HttpServletRequest,
@@ -120,7 +116,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/oppdater-adr-republiser")
     fun oppdaterOgRepubliserNavBrukere(
         servlet: HttpServletRequest,
@@ -138,7 +133,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-bruker/oppdater-adr-republiser/{id}")
     fun oppdaterAdresseOgRepubliserNavBruker(
         servlet: HttpServletRequest,
@@ -154,7 +148,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/oppdater-innsats-republiser")
     fun oppdaterOppfolgingInnsatsOgRepubliserNavBrukere(
         servlet: HttpServletRequest,
@@ -180,7 +173,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-bruker/oppdater-innsats-republiser/{id}")
     fun oppdaterOppfolgingInnsatsOgRepubliserNavBruker(
         servlet: HttpServletRequest,
@@ -196,7 +188,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/republiser/{navBrukerId}")
     fun republiserNavBruker(
         servlet: HttpServletRequest,
@@ -209,7 +200,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/arrangor-ansatte/republiser")
     fun republiserArrangorAnsatte(
         servlet: HttpServletRequest,
@@ -225,7 +215,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-ansatte/republiser")
     fun republiserNavAnsatte(servlet: HttpServletRequest) {
         if (isInternal(servlet)) {
@@ -237,7 +226,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-ansatte/oppdater")
     fun oppdaterNavAnsatte(servlet: HttpServletRequest) {
         if (isInternal(servlet)) {
@@ -249,7 +237,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-enhet/oppdater")
     fun oppdaterNavEnheter(servlet: HttpServletRequest) {
         if (isInternal(servlet)) {
@@ -259,7 +246,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/synkroniser-krr")
     fun synkroniserKrr(
         servlet: HttpServletRequest,
@@ -285,7 +271,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/oppdater-manglende-kontaktinfo")
     fun oppdaterManglendeKontakinfo(
         servlet: HttpServletRequest,
@@ -317,7 +302,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @PostMapping("/nav-brukere/synkroniser-krr")
     fun synkroniserKrrForPerson(
         servlet: HttpServletRequest,
@@ -334,7 +318,6 @@ class InternalController(
         }
     }
 
-    @Unprotected
     @GetMapping("/nav-brukere/republiser-ny-ident")
     fun republiserNavBrukereMedNyIdent(servlet: HttpServletRequest) {
         if (isInternal(servlet)) {

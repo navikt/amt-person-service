@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -19,14 +18,9 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import java.util.UUID
 
 @RestClientTest(KodeverkClient::class)
-@TestPropertySource(
-    properties = [
-        "kodeverk.url=http://kodeverk",
-        "kodeverk.scope=test.kodeverk",
-    ],
-)
+@TestPropertySource(properties = ["kodeverk-api.url=http://kodeverk-api"])
 class KodeverkClientTest(
-    @Autowired private val sut: KodeverkClient,
+    private val sut: KodeverkClient,
 ) : RestClientTestBase() {
     @Test
     fun `hentKodeverk - skal sende riktige headere og query-parametre, og parse respons`() {
@@ -38,7 +32,7 @@ class KodeverkClientTest(
             .andExpect(requestTo(containsString("oppslagsdato=")))
             .andExpect(requestTo(containsString("spraak=nb")))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-token"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
             .andExpect(header("Nav-Call-Id", callId.toString()))
             .andExpect(header("Nav-Consumer-Id", "amt-person-service"))
             .andRespond(

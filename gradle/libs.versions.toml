@@ -13,8 +13,7 @@ apache-avro = "1.12.1"
 jackson-module-kotlin = "3.2.1"
 confluent = "8.1.1"
 
-# HTTP / logging
-okhttp = "5.3.2"
+# Logging
 logstash-encoder = "9.0"
 
 # NAV
@@ -57,12 +56,11 @@ logstash-encoder = { module = "net.logstash.logback:logstash-logback-encoder", v
 # NAV common
 nav-common-log = { module = "no.nav.common:log", version.ref = "nav-common" }
 nav-common-job = { module = "no.nav.common:job", version.ref = "nav-common" }
-nav-common-rest = { module = "no.nav.common:rest", version.ref = "nav-common" }
 nav-common-kafka = { module = "no.nav.common:kafka", version.ref = "nav-common" }
-nav-common-token-client = { module = "no.nav.common:token-client", version.ref = "nav-common" }
 
 # NAV security / tilgang
 token-validation-spring = { module = "no.nav.security:token-validation-spring", version.ref = "token-support" }
+token-client-spring = { module = "no.nav.security:token-client-spring", version.ref = "token-support" }
 poao-tilgang-client = { module = "no.nav.poao-tilgang:client", version.ref = "poao-tilgang" }
 
 # AMT lib
@@ -77,8 +75,8 @@ kotest-assertions-core = { module = "io.kotest:kotest-assertions-core-jvm", vers
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json-jvm", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 mock-oauth2-server = { module = "no.nav.security:mock-oauth2-server", version.ref = "mock-oauth2-server" }
+token-validation-spring-test = { module = "no.nav.security:token-validation-spring-test", version.ref = "token-support" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
-testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk-version" }
 
 

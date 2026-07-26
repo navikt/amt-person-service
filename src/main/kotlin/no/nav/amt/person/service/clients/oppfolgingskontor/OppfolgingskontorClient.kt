@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients.oppfolgingskontor
 
 import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -13,8 +12,6 @@ import org.springframework.web.client.body
 @Service
 class OppfolgingskontorClient(
     @Value($$"${ao-oppfolgingskontor.url}") baseUrl: String,
-    @Value($$"${ao-oppfolgingskontor.scope}") private val scope: String,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
     restClientBuilder: RestClient.Builder,
 ) {
     companion object {
@@ -35,9 +32,7 @@ class OppfolgingskontorClient(
         .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest {
-            it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
         val gqlResponse = restClient

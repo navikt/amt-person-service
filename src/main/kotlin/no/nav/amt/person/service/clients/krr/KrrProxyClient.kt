@@ -3,7 +3,6 @@ package no.nav.amt.person.service.clients.krr
 import no.nav.amt.person.service.clients.HeaderConstants
 import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.config.TeamLogs
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -16,8 +15,6 @@ import org.springframework.web.client.body
 @Service
 class KrrProxyClient(
     @Value($$"${digdir-krr-proxy.url}") baseUrl: String,
-    @Value($$"${digdir-krr-proxy.scope}") private val scope: String,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
     restClientBuilder: RestClient.Builder,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -26,9 +23,7 @@ class KrrProxyClient(
         .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest {
-            it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> = hentKontaktinformasjon(
         personidenter = setOf(personident),

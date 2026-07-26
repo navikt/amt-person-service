@@ -8,6 +8,7 @@ import no.nav.common.kafka.util.KafkaPropertiesBuilder
 import no.nav.common.kafka.util.KafkaPropertiesPreset
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -44,6 +45,7 @@ class KafkaBeans {
     }
 
     @Bean
+    @ConditionalOnProperty("kafka.enabled", havingValue = "true", matchIfMissing = true)
     fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
         KafkaProducerClientImpl(kafkaProperties.producer())
 }

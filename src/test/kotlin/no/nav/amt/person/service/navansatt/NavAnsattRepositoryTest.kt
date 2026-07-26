@@ -86,21 +86,19 @@ class NavAnsattRepositoryTest(
 
     @Test
     fun `upsert - ansatt finnes - oppdatterer ansatt`() {
-        val ansatt =
-            TestData.lagNavAnsatt(
-                createdAt = LocalDateTime.now().minusMonths(6),
-                modifiedAt = LocalDateTime.now().minusMonths(6),
-            )
+        val ansatt = TestData.lagNavAnsatt(
+            createdAt = LocalDateTime.now().minusMonths(6),
+            modifiedAt = LocalDateTime.now().minusMonths(6),
+        )
 
-        val oppdatertAnsatt =
-            NavAnsattDbo(
-                id = ansatt.id,
-                navIdent = ansatt.navIdent,
-                navn = "Nytt Navn",
-                epost = "ny_epost@nav.no",
-                telefon = "12345678",
-                navEnhetId = null,
-            )
+        val oppdatertAnsatt = NavAnsattDbo(
+            id = ansatt.id,
+            navIdent = ansatt.navIdent,
+            navn = "Nytt Navn",
+            epost = "ny_epost@nav.no",
+            telefon = "12345678",
+            navEnhetId = null,
+        )
 
         testDataRepository.insertNavAnsatt(ansatt)
 
@@ -137,25 +135,23 @@ class NavAnsattRepositoryTest(
         testDataRepository.insertNavAnsatt(ansatt1)
         testDataRepository.insertNavAnsatt(ansatt2)
 
-        val oppdatertAnsatt1 =
-            NavAnsattDbo(
-                id = ansatt1.id,
-                navIdent = ansatt1.navIdent,
-                navn = "nytt navn 1",
-                telefon = ansatt1.telefon,
-                epost = ansatt1.epost,
-                navEnhetId = null,
-            )
+        val oppdatertAnsatt1 = NavAnsattDbo(
+            id = ansatt1.id,
+            navIdent = ansatt1.navIdent,
+            navn = "nytt navn 1",
+            telefon = ansatt1.telefon,
+            epost = ansatt1.epost,
+            navEnhetId = null,
+        )
 
-        val oppdatertAnsatt2 =
-            NavAnsattDbo(
-                id = ansatt2.id,
-                navIdent = ansatt2.navIdent,
-                navn = "nytt navn 2",
-                telefon = ansatt2.telefon,
-                epost = ansatt2.epost,
-                navEnhetId = null,
-            )
+        val oppdatertAnsatt2 = NavAnsattDbo(
+            id = ansatt2.id,
+            navIdent = ansatt2.navIdent,
+            navn = "nytt navn 2",
+            telefon = ansatt2.telefon,
+            epost = ansatt2.epost,
+            navEnhetId = null,
+        )
 
         ansattRepository.upsertMany(setOf(oppdatertAnsatt1, oppdatertAnsatt2))
 

@@ -1,21 +1,22 @@
 package no.nav.amt.person.service.integration.kafka.producer
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
-import no.nav.amt.person.service.integration.kafka.utils.KafkaMessageConsumer.consume
-import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.Test
 
 class NavAnsattProducerTest(
     private val kafkaProducerService: KafkaProducerService,
-    private val kafkaTopicProperties: KafkaTopicProperties,
     private val navAnsattService: NavAnsattService,
     private val navAnsattUpdater: NavAnsattUpdater,
 ) : IntegrationTestBase() {
@@ -25,15 +26,13 @@ class NavAnsattProducerTest(
 
         kafkaProducerService.publiserNavAnsatt(ansatt)
 
-        val record =
-            consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-                ?.first { it.key() == ansatt.id.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
         val forventetValue = ansattTilV1Json(ansatt)
 
-        record.shouldNotBeNull()
-        record.key() shouldBe ansatt.id.toString()
-        record.value() shouldBe forventetValue
+        recordSlot.captured.key() shouldBe ansatt.id.toString()
+        recordSlot.captured.value() shouldBe forventetValue
     }
 
     @Test
@@ -44,15 +43,13 @@ class NavAnsattProducerTest(
         val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no")
         navAnsattService.upsert(oppdatertAnsatt)
 
-        val record =
-            consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
-                ?.first { it.key() == ansatt.id.toString() }
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
         val forventetValue = ansattTilV1Json(oppdatertAnsatt)
 
-        record.shouldNotBeNull()
-        record.key() shouldBe ansatt.id.toString()
-        record.value() shouldBe forventetValue
+        recordSlot.captured.key() shouldBe ansatt.id.toString()
+        recordSlot.captured.value() shouldBe forventetValue
     }
 
     @Test
@@ -63,15 +60,29 @@ class NavAnsattProducerTest(
         val uendretAnsatt = TestData.lagNavAnsatt()
         testDataRepository.insertNavAnsatt(uendretAnsatt)
 
-        mockNomHttpServer.mockHentNavAnsatt(endretAnsatt.copy(navn = "nytt navn"))
-        mockNomHttpServer.mockHentNavAnsatt(uendretAnsatt)
+        every { nomClient.hentNavAnsatte(any()) } returns listOf(
+            NomNavAnsatt(
+                navIdent = endretAnsatt.navIdent,
+                navn = "nytt navn",
+                telefonnummer = endretAnsatt.telefon,
+                epost = endretAnsatt.epost,
+                orgTilknytning = TestData.orgTilknytning,
+            ),
+            NomNavAnsatt(
+                navIdent = uendretAnsatt.navIdent,
+                navn = uendretAnsatt.navn,
+                telefonnummer = uendretAnsatt.telefon,
+                epost = uendretAnsatt.epost,
+                orgTilknytning = TestData.orgTilknytning,
+            ),
+        )
 
         navAnsattUpdater.oppdaterAlle()
 
-        val records = consume(kafkaTopicProperties.amtNavAnsattPersonaliaTopic)
+        val recordSlot = slot<ProducerRecord<String, String>>()
+        verify(exactly = 1) { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
-        records.shouldNotBeNull()
-        records.map { it.key() } shouldBe listOf(endretAnsatt.id.toString())
+        recordSlot.captured.key() shouldBe endretAnsatt.id.toString()
     }
 
     private fun ansattTilV1Json(ansatt: NavAnsattDbo): String = objectMapper.writeValueAsString(

@@ -17,11 +17,10 @@ class PersonidentRepositoryTest(
         val person = TestData.lagPerson()
         testDataRepository.insertPerson(person)
 
-        val identer =
-            setOf(
-                lagPersonident(personId = person.id, historisk = true, type = IdentType.AKTORID),
-                lagPersonident(personId = person.id, historisk = true, type = IdentType.NPID),
-            )
+        val identer = setOf(
+            lagPersonident(personId = person.id, historisk = true, type = IdentType.AKTORID),
+            lagPersonident(personId = person.id, historisk = true, type = IdentType.NPID),
+        )
 
         personidentRepository.upsert(identer)
 
@@ -35,11 +34,10 @@ class PersonidentRepositoryTest(
         val person = TestData.lagPerson()
         testDataRepository.insertPerson(person)
 
-        val identer =
-            setOf(
-                lagPersonident(personId = person.id, historisk = true),
-                lagPersonident(personId = person.id, historisk = false),
-            )
+        val identer = setOf(
+            lagPersonident(personId = person.id, historisk = true),
+            lagPersonident(personId = person.id, historisk = false),
+        )
 
         personidentRepository.upsert(identer)
 

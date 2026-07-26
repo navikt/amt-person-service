@@ -4,12 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import io.mockk.every
 import no.nav.amt.person.service.clients.RestClientTestBase
 import org.hamcrest.CoreMatchers.containsString
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -24,26 +21,16 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RestClientTest(OppfolgingskontorClient::class)
-@TestPropertySource(
-    properties = [
-        "ao-oppfolgingskontor.url=http://oppfolgingskontor",
-        "ao-oppfolgingskontor.scope=test.oppfolgingskontor",
-    ],
-)
+@TestPropertySource(properties = ["ao-oppfolgingskontor.url=http://ao-oppfolgingskontor"])
 class OppfolgingskontorClientTest(
-    @Autowired private val sut: OppfolgingskontorClient,
+    private val sut: OppfolgingskontorClient,
 ) : RestClientTestBase() {
-    @BeforeEach
-    fun setUp() {
-        every { tokenClient.createMachineToMachineToken(any()) } returns "OPPFOLGINGSKONTOR_TOKEN"
-    }
-
     @Test
     fun `hentKontorForBruker skal lage riktig request og parse respons`() {
         server
-            .expect(requestTo("http://oppfolgingskontor/graphql"))
+            .expect(requestTo("http://ao-oppfolgingskontor/graphql"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer OPPFOLGINGSKONTOR_TOKEN"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
             .andExpect(content().string(containsString("kontorTilhorigheter")))
             .andExpect(content().string(containsString("12345678901")))
             .andRespond(

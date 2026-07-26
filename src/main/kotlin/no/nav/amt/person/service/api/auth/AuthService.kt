@@ -16,17 +16,15 @@ class AuthService(
     }
 
     private fun isRequestFromMachine(): Boolean {
-        val claims =
-            tokenValidationContextHolder
-                .getTokenValidationContext()
-                .getClaims(Issuer.AZURE_AD)
+        val claims = tokenValidationContextHolder
+            .getTokenValidationContext()
+            .getClaims(Issuer.AZURE_AD)
 
-        val sub =
-            claims.getStringClaim("sub")?.let { UUID.fromString(it) }
-                ?: throw JwtTokenUnauthorizedException("Sub is missing")
-        val oid =
-            claims.getStringClaim("oid")?.let { UUID.fromString(it) }
-                ?: throw JwtTokenUnauthorizedException("Oid is missing")
+        val sub = claims.getStringClaim("sub")?.let { UUID.fromString(it) }
+            ?: throw JwtTokenUnauthorizedException("Sub is missing")
+
+        val oid = claims.getStringClaim("oid")?.let { UUID.fromString(it) }
+            ?: throw JwtTokenUnauthorizedException("Oid is missing")
 
         return sub == oid
     }

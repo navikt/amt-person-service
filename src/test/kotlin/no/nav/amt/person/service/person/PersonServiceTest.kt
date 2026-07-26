@@ -21,13 +21,12 @@ class PersonServiceTest {
     private val personidentRepository: PersonidentRepository = mockk(relaxUnitFun = true)
     private val applicationEventPublisher: ApplicationEventPublisher = mockk(relaxUnitFun = true)
 
-    private val service =
-        PersonService(
-            pdlClient = pdlClient,
-            personRepository = personRepository,
-            personidentRepository = personidentRepository,
-            applicationEventPublisher = applicationEventPublisher,
-        )
+    private val service = PersonService(
+        pdlClient = pdlClient,
+        personRepository = personRepository,
+        personidentRepository = personidentRepository,
+        applicationEventPublisher = applicationEventPublisher,
+    )
 
     @BeforeEach
     fun setup() = clearAllMocks()
@@ -36,21 +35,19 @@ class PersonServiceTest {
     fun `hentEllerOpprettPerson - personen finnes ikke - opprettes og returnere person`() {
         val personident = TestData.randomIdent()
         val identType = IdentType.FOLKEREGISTERIDENT
-        val pdlPerson =
-            PdlPerson(
-                erFalskIdentitet = false,
-                fornavn = "Fornavn",
-                mellomnavn = "Mellomnavn",
-                etternavn = "Etternavn",
-                telefonnummer = "81549300",
-                adressebeskyttelseGradering = null,
-                identer =
-                    listOf(
-                        Personident(ident = personident, historisk = false, type = identType),
-                        Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
-                    ),
-                adresse = null,
-            )
+        val pdlPerson = PdlPerson(
+            erFalskIdentitet = false,
+            fornavn = "Fornavn",
+            mellomnavn = "Mellomnavn",
+            etternavn = "Etternavn",
+            telefonnummer = "81549300",
+            adressebeskyttelseGradering = null,
+            identer = listOf(
+                Personident(ident = personident, historisk = false, type = identType),
+                Personident(ident = TestData.randomIdent(), historisk = true, type = identType),
+            ),
+            adresse = null,
+        )
 
         every { pdlClient.hentPerson(personident) } returns pdlPerson
         every { personRepository.get(personident) } returns null
@@ -66,12 +63,11 @@ class PersonServiceTest {
 
     @Test
     fun `oppdaterPersonIdent - flere personer knyttet til samme ident - kaster exception`() {
-        val identer =
-            listOf(
-                Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT),
-                Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
-                Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
-            )
+        val identer = listOf(
+            Personident(TestData.randomIdent(), false, IdentType.FOLKEREGISTERIDENT),
+            Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+            Personident(TestData.randomIdent(), true, IdentType.FOLKEREGISTERIDENT),
+        )
 
         every { personRepository.getPersoner(identer.map { it.ident }.toSet()) } returns
             identer.map { TestData.lagPerson(personident = it.ident) }

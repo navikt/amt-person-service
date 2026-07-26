@@ -42,15 +42,14 @@ class NavBrukerService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun hentEllerOpprettNavBruker(personident: String): NavBrukerDbo {
-        val navBruker =
-            navBrukerRepository.get(personident)?.let { navBrukerDbo ->
-                if (navBrukerDbo.innsatsgruppe == null) {
-                    oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBrukerDbo)
-                    navBrukerRepository.get(navBrukerDbo.id)
-                } else {
-                    navBrukerDbo
-                }
-            } ?: opprettNavBruker(personident)
+        val navBruker = navBrukerRepository.get(personident)?.let { navBrukerDbo ->
+            if (navBrukerDbo.innsatsgruppe == null) {
+                oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBrukerDbo)
+                navBrukerRepository.get(navBrukerDbo.id)
+            } else {
+                navBrukerDbo
+            }
+        } ?: opprettNavBruker(personident)
 
         return navBruker
     }
@@ -61,29 +60,27 @@ class NavBrukerService(
         val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
         val veileder = navAnsattService.hentBrukersVeileder(personident)
         val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
-        val kontaktinformasjon =
-            krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
-                null.also { log.warn("Navbruker ${person.id} mangler kontaktinformasjon fra KRR") }
-            }
+        val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
+            null.also { log.warn("Navbruker ${person.id} mangler kontaktinformasjon fra KRR") }
+        }
         val erSkjermet = poaoTilgangClient.erSkjermetPerson(personident).getOrThrow()
         val oppfolgingsperioder = veilarboppfolgingClient.hentOppfolgingperioder(personident)
         val innsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(personident)
 
-        val navBruker =
-            NavBrukerDbo(
-                id = UUID.randomUUID(),
-                person = person,
-                navVeileder = veileder,
-                navEnhet = navEnhet,
-                telefon = kontaktinformasjon?.telefonnummer ?: pdlPerson.telefonnummer,
-                epost = kontaktinformasjon?.epost,
-                erSkjermet = erSkjermet,
-                adresse = getAdresse(pdlPerson),
-                sisteKrrSync = LocalDateTime.now(),
-                adressebeskyttelse = pdlPerson.getAdressebeskyttelse(),
-                oppfolgingsperioder = oppfolgingsperioder,
-                innsatsgruppe = innsatsgruppe,
-            )
+        val navBruker = NavBrukerDbo(
+            id = UUID.randomUUID(),
+            person = person,
+            navVeileder = veileder,
+            navEnhet = navEnhet,
+            telefon = kontaktinformasjon?.telefonnummer ?: pdlPerson.telefonnummer,
+            epost = kontaktinformasjon?.epost,
+            erSkjermet = erSkjermet,
+            adresse = getAdresse(pdlPerson),
+            sisteKrrSync = LocalDateTime.now(),
+            adressebeskyttelse = pdlPerson.getAdressebeskyttelse(),
+            oppfolgingsperioder = oppfolgingsperioder,
+            innsatsgruppe = innsatsgruppe,
+        )
 
         upsert(navBruker)
 
@@ -122,10 +119,9 @@ class NavBrukerService(
         oppfolgingsperiode: Oppfolgingsperiode,
     ) {
         val bruker = navBrukerRepository.get(navBrukerId)
-        val oppfolgingsperioder =
-            bruker.oppfolgingsperioder
-                .filterNot { it.id == oppfolgingsperiode.id }
-                .plus(oppfolgingsperiode)
+        val oppfolgingsperioder = bruker.oppfolgingsperioder
+            .filterNot { it.id == oppfolgingsperiode.id }
+            .plus(oppfolgingsperiode)
 
         if (oppfolgingsperioder.toSet() != bruker.oppfolgingsperioder.toSet()) {
             val oppdatertInnsatsgruppe = veilarbvedtaksstotteClient.hentInnsatsgruppe(bruker.person.personident)
@@ -170,18 +166,17 @@ class NavBrukerService(
     }
 
     fun oppdaterKontaktinformasjon(bruker: NavBrukerDbo) {
-        val kontaktinformasjon =
-            krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
-                val feilmelding =
-                    "Klarte ikke hente kontaktinformasjon fra KRR-Proxy for bruker ${bruker.id}: ${it.message}"
+        val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(bruker.person.personident).getOrElse {
+            val feilmelding =
+                "Klarte ikke hente kontaktinformasjon fra KRR-Proxy for bruker ${bruker.id}: ${it.message}"
 
-                if (EnvUtils.isDev()) {
-                    log.info(feilmelding)
-                } else {
-                    log.error(feilmelding)
-                }
-                return
+            if (EnvUtils.isDev()) {
+                log.info(feilmelding)
+            } else {
+                log.error(feilmelding)
             }
+            return
+        }
 
         val telefon = kontaktinformasjon.telefonnummer ?: pdlClient.hentTelefon(bruker.person.personident)
         oppdaterKontaktinfo(bruker, kontaktinformasjon.copy(telefonnummer = telefon))
@@ -198,25 +193,24 @@ class NavBrukerService(
     }
 
     fun syncKontaktinfoBulk(personident: Set<String>) {
-        val personerChunks =
-            personident.chunked(250) // maksgrense på 500 hos krr, vi spør på færre for å redusere timeout-problematikk
+        val personerChunks = personident.chunked(250) // maksgrense på 500 hos krr, vi spør på færre for å redusere timeout-problematikk
 
         personerChunks.forEach { personChunk ->
-            val krrKontaktinfo =
-                krrProxyClient.hentKontaktinformasjon(personChunk.toSet()).getOrElse {
-                    val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
+            val krrKontaktinfo = krrProxyClient.hentKontaktinformasjon(personChunk.toSet()).getOrElse {
+                val feilmelding = "Klarte ikke hente kontaktinformasjon fra KRR-Proxy: ${it.message}"
 
-                    if (EnvUtils.isDev()) {
-                        log.info(feilmelding)
-                    } else {
-                        log.error(feilmelding)
-                    }
-                    return
+                if (EnvUtils.isDev()) {
+                    log.info(feilmelding)
+                } else {
+                    log.error(feilmelding)
                 }
+                return
+            }
 
             for ((navBrukerId, kontaktinfo) in krrKontaktinfo) {
                 val telefon = kontaktinfo.telefonnummer ?: pdlClient.hentTelefon(navBrukerId)
                 val bruker = navBrukerRepository.get(navBrukerId) ?: continue
+
                 oppdaterKontaktinfo(
                     bruker = bruker,
                     kontaktinformasjon = kontaktinfo.copy(telefonnummer = telefon),
@@ -234,9 +228,8 @@ class NavBrukerService(
             .hentKontaktinformasjon(personidenter)
             .getOrThrow()
             .mapValues { (ident, info) ->
-                val bruker =
-                    navBrukerRepository.get(ident)
-                        ?: throw NoSuchElementException("Kunne ikke oppdatere kontakinformasjon, bruker finnes ikke")
+                val bruker = navBrukerRepository.get(ident)
+                    ?: throw NoSuchElementException("Kunne ikke oppdatere kontakinformasjon, bruker finnes ikke")
 
                 val tlf = info.telefonnummer ?: pdlClient.hentTelefon(ident)
 

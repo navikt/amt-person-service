@@ -3,7 +3,6 @@ package no.nav.amt.person.service.clients
 import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -19,17 +18,13 @@ import java.util.UUID
 @Service
 class VeilarboppfolgingClient(
     @Value($$"${veilarboppfolging.url}") url: String,
-    @Value($$"${veilarboppfolging.scope}") private val scope: String,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
     restClientBuilder: RestClient.Builder,
 ) {
     private val restClient: RestClient = restClientBuilder
         .baseUrl("$url/veilarboppfolging")
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest {
-            it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     fun hentVeilederIdent(fnr: String): String? {
         try {

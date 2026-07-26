@@ -25,7 +25,6 @@ import no.nav.amt.person.service.poststed.PoststedRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -39,14 +38,9 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.client.RestClientResponseException
 
 @RestClientTest(PdlClient::class)
-@TestPropertySource(
-    properties = [
-        "pdl.url=http://pdl",
-        "pdl.scope=test.pdl",
-    ],
-)
+@TestPropertySource(properties = ["pdl-api.url=http://pdl-api"])
 class PdlClientTest(
-    @Autowired private val client: PdlClient,
+    private val client: PdlClient,
 ) : RestClientTestBase() {
     @MockkBean
     private lateinit var poststedRepository: PoststedRepository
@@ -61,7 +55,7 @@ class PdlClientTest(
         @Test
         fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
             server
-                .expect(requestTo("http://pdl/graphql"))
+                .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
@@ -309,7 +303,7 @@ class PdlClientTest(
         @Test
         fun `hentAdressebeskyttelse - person er beskyttet - returnerer gradering`() {
             server
-                .expect(requestTo("http://pdl/graphql"))
+                .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andRespond(

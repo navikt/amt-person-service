@@ -44,21 +44,20 @@ class NavBrukerServiceTest {
     private val kafkaProducerService: KafkaProducerService = mockk(relaxUnitFun = true)
     private val transactionTemplate: TransactionTemplate = mockk()
 
-    private val sut =
-        NavBrukerService(
-            navBrukerRepository = navBrukerRepository,
-            rolleRepository = rolleRepository,
-            personService = personService,
-            navAnsattService = navAnsattService,
-            navEnhetService = navEnhetService,
-            krrProxyClient = krrProxyClient,
-            poaoTilgangClient = poaoTilgangClient,
-            pdlClient = pdlClient,
-            veilarboppfolgingClient = veilarboppfolgingClient,
-            veilarbvedtaksstotteClient = veilarbvedtaksstotteClient,
-            kafkaProducerService = kafkaProducerService,
-            transactionTemplate = transactionTemplate,
-        )
+    private val sut = NavBrukerService(
+        navBrukerRepository = navBrukerRepository,
+        rolleRepository = rolleRepository,
+        personService = personService,
+        navAnsattService = navAnsattService,
+        navEnhetService = navEnhetService,
+        krrProxyClient = krrProxyClient,
+        poaoTilgangClient = poaoTilgangClient,
+        pdlClient = pdlClient,
+        veilarboppfolgingClient = veilarboppfolgingClient,
+        veilarbvedtaksstotteClient = veilarbvedtaksstotteClient,
+        kafkaProducerService = kafkaProducerService,
+        transactionTemplate = transactionTemplate,
+    )
 
     @BeforeEach
     fun setup() = clearAllMocks()
@@ -104,17 +103,16 @@ class NavBrukerServiceTest {
 
         @Test
         fun `hentEllerOpprettNavBruker - ikke aktiv oppfolgingsperiode - innsatsgruppe er null`() {
-            val navBruker =
-                TestData.lagNavBruker(
-                    innsatsgruppe = null,
-                    oppfolgingsperioder =
-                        listOf(
-                            TestData.lagOppfolgingsperiode(
-                                startdato = LocalDateTime.now().minusYears(1),
-                                sluttdato = LocalDateTime.now().minusDays(29),
-                            ),
+            val navBruker = TestData.lagNavBruker(
+                innsatsgruppe = null,
+                oppfolgingsperioder =
+                    listOf(
+                        TestData.lagOppfolgingsperiode(
+                            startdato = LocalDateTime.now().minusYears(1),
+                            sluttdato = LocalDateTime.now().minusDays(29),
                         ),
-                )
+                    ),
+            )
             val pdlPerson = TestData.lagPdlPerson(person = navBruker.person)
 
             mocksForHentEllerOpprettNavBruker(navBruker, pdlPerson)
@@ -132,31 +130,28 @@ class NavBrukerServiceTest {
         @Test
         fun `syncKontaktinfoBulk - telefon er registrert i krr - oppdaterer bruker med telefon fra krr`() {
             val navBruker = TestData.lagNavBruker()
-            val kontaktinfo =
-                Kontaktinformasjon(
-                    "ny epost",
-                    "krr-telefon",
-                )
+            val kontaktinfo = Kontaktinformasjon(
+                "ny epost",
+                "krr-telefon",
+            )
             val kontakinfoForPersoner = mapOf(navBruker.person.personident to kontaktinfo)
 
             every { navBrukerRepository.finnBrukerId(navBruker.person.personident) } returns navBruker.id
             every { navBrukerRepository.get(navBruker.person.personident) } returns navBruker
             every { navBrukerRepository.get(navBruker.id) } returns navBruker
-            every { krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident)) } returns
-                Result.success(
-                    kontakinfoForPersoner,
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident))
+            } returns Result.success(kontakinfoForPersoner)
 
             mockExecuteWithoutResult(transactionTemplate)
 
             sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
-            val expectedNavBruker =
-                navBruker.copy(
-                    telefon = kontaktinfo.telefonnummer,
-                    epost = kontaktinfo.epost,
-                    sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-                )
+            val expectedNavBruker = navBruker.copy(
+                telefon = kontaktinfo.telefonnummer,
+                epost = kontaktinfo.epost,
+                sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+            )
 
             verify(exactly = 1) {
                 krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident))
@@ -181,11 +176,10 @@ class NavBrukerServiceTest {
         @Test
         fun `syncKontaktinfoBulk - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
             val navBruker = TestData.lagNavBruker()
-            val krrKontaktinfo =
-                Kontaktinformasjon(
-                    "ny epost",
-                    null,
-                )
+            val krrKontaktinfo = Kontaktinformasjon(
+                "ny epost",
+                null,
+            )
             val kontakinfoForPersoner = mapOf(navBruker.person.personident to krrKontaktinfo)
 
             val pdlTelefon = "pdl-telefon"
@@ -194,21 +188,19 @@ class NavBrukerServiceTest {
             every { pdlClient.hentTelefon(navBruker.person.personident) } returns pdlTelefon
             every { navBrukerRepository.get(navBruker.person.personident) } returns navBruker
             every { navBrukerRepository.get(navBruker.id) } returns navBruker
-            every { krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident)) } returns
-                Result.success(
-                    kontakinfoForPersoner,
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident))
+            } returns Result.success(kontakinfoForPersoner)
 
             mockExecuteWithoutResult(transactionTemplate)
 
             sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
-            val expectedNavBruker =
-                navBruker.copy(
-                    telefon = pdlTelefon,
-                    epost = krrKontaktinfo.epost,
-                    sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-                )
+            val expectedNavBruker = navBruker.copy(
+                telefon = pdlTelefon,
+                epost = krrKontaktinfo.epost,
+                sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+            )
 
             verify(exactly = 1) {
                 pdlClient.hentTelefon(navBruker.person.personident)
@@ -238,10 +230,9 @@ class NavBrukerServiceTest {
             every { navBrukerRepository.finnBrukerId(navBruker.person.personident) } returns navBruker.id
             every { navBrukerRepository.get(navBruker.person.personident) } returns navBruker
             every { navBrukerRepository.get(navBruker.id) } returns navBruker
-            every { krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident)) } returns
-                Result.failure(
-                    RuntimeException(),
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(setOf(navBruker.person.personident))
+            } returns Result.failure(RuntimeException())
 
             sut.syncKontaktinfoBulk(setOf(navBruker.person.personident))
 
@@ -255,30 +246,26 @@ class NavBrukerServiceTest {
         @Test
         fun `oppdaterKontaktinformasjon - bruker har ny kontaktinfo - oppdaterer bruker`() {
             val navBruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
-            val kontaktinfo =
-                Kontaktinformasjon(
-                    "ny epost",
-                    "krr-telefon",
-                )
+            val kontaktinfo = Kontaktinformasjon(
+                "ny epost",
+                "krr-telefon",
+            )
 
             every { navBrukerRepository.get(navBruker.person.personident) } returns navBruker
             every { navBrukerRepository.get(navBruker.id) } returns navBruker
-            every { krrProxyClient.hentKontaktinformasjon(navBruker.person.personident) } returns
-                Result.success(
-                    kontaktinfo,
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(navBruker.person.personident)
+            } returns Result.success(kontaktinfo)
 
             mockExecuteWithoutResult(transactionTemplate)
 
             sut.oppdaterKontaktinformasjon(navBruker)
 
-            val expectedNavBruker =
-                navBruker
-                    .copy(
-                        telefon = kontaktinfo.telefonnummer,
-                        epost = kontaktinfo.epost,
-                        sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-                    )
+            val expectedNavBruker = navBruker.copy(
+                telefon = kontaktinfo.telefonnummer,
+                epost = kontaktinfo.epost,
+                sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+            )
 
             verify(exactly = 1) {
                 krrProxyClient.hentKontaktinformasjon(navBruker.person.personident)
@@ -303,32 +290,29 @@ class NavBrukerServiceTest {
         @Test
         fun `oppdaterKontaktinformasjon - telefon er ikke registrert i krr - oppdaterer bruker med telefon fra pdl`() {
             val navBruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
-            val krrKontaktinfo =
-                Kontaktinformasjon(
-                    "ny epost",
-                    null,
-                )
+            val krrKontaktinfo = Kontaktinformasjon(
+                "ny epost",
+                null,
+            )
 
             val pdlTelefon = "pdl-telefon"
 
             every { pdlClient.hentTelefon(navBruker.person.personident) } returns pdlTelefon
             every { navBrukerRepository.get(navBruker.person.personident) } returns navBruker
             every { navBrukerRepository.get(navBruker.id) } returns navBruker
-            every { krrProxyClient.hentKontaktinformasjon(navBruker.person.personident) } returns
-                Result.success(
-                    krrKontaktinfo,
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(navBruker.person.personident)
+            } returns Result.success(krrKontaktinfo)
 
             mockExecuteWithoutResult(transactionTemplate)
 
             sut.oppdaterKontaktinformasjon(navBruker)
 
-            val expectedNavBruker =
-                navBruker.copy(
-                    telefon = pdlTelefon,
-                    epost = krrKontaktinfo.epost,
-                    sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
-                )
+            val expectedNavBruker = navBruker.copy(
+                telefon = pdlTelefon,
+                epost = krrKontaktinfo.epost,
+                sisteKrrSync = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+            )
 
             verify(exactly = 1) {
                 pdlClient.hentTelefon(navBruker.person.personident)
@@ -356,10 +340,9 @@ class NavBrukerServiceTest {
             val bruker = TestData.lagNavBruker().copy(sisteKrrSync = LocalDateTime.now().minusWeeks(4))
 
             every { navBrukerRepository.get(bruker.person.personident) } returns bruker
-            every { krrProxyClient.hentKontaktinformasjon(bruker.person.personident) } returns
-                Result.failure(
-                    RuntimeException(),
-                )
+            every {
+                krrProxyClient.hentKontaktinformasjon(bruker.person.personident)
+            } returns Result.failure(RuntimeException())
 
             sut.oppdaterKontaktinformasjon(bruker)
 
@@ -472,18 +455,16 @@ class NavBrukerServiceTest {
     inner class OppdaterInnsatsgruppeTests {
         @Test
         fun `oppdaterInnsatsgruppe - har aktiv oppfolgingsperiode - lagrer`() {
-            val bruker =
-                TestData.lagNavBruker(
-                    oppfolgingsperioder =
-                        listOf(
-                            Oppfolgingsperiode(
-                                id = UUID.randomUUID(),
-                                startdato = LocalDateTime.now().minusYears(3),
-                                sluttdato = null,
-                            ),
-                        ),
-                    innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
-                )
+            val bruker = TestData.lagNavBruker(
+                oppfolgingsperioder = listOf(
+                    Oppfolgingsperiode(
+                        id = UUID.randomUUID(),
+                        startdato = LocalDateTime.now().minusYears(3),
+                        sluttdato = null,
+                    ),
+                ),
+                innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
+            )
             every { navBrukerRepository.get(bruker.id) } returns bruker
             mockExecuteWithoutResult(transactionTemplate)
 
@@ -500,18 +481,16 @@ class NavBrukerServiceTest {
 
         @Test
         fun `oppdaterInnsatsgruppe - har aktiv oppfolgingsperiode, ingen endring - lagrer ikke`() {
-            val bruker =
-                TestData.lagNavBruker(
-                    oppfolgingsperioder =
-                        listOf(
-                            Oppfolgingsperiode(
-                                id = UUID.randomUUID(),
-                                startdato = LocalDateTime.now().minusYears(3),
-                                sluttdato = null,
-                            ),
-                        ),
-                    innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
-                )
+            val bruker = TestData.lagNavBruker(
+                oppfolgingsperioder = listOf(
+                    Oppfolgingsperiode(
+                        id = UUID.randomUUID(),
+                        startdato = LocalDateTime.now().minusYears(3),
+                        sluttdato = null,
+                    ),
+                ),
+                innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
+            )
             every { navBrukerRepository.get(bruker.id) } returns bruker
             mockExecuteWithoutResult(transactionTemplate)
 
@@ -522,18 +501,16 @@ class NavBrukerServiceTest {
 
         @Test
         fun `oppdaterInnsatsgruppe - har ikke aktiv oppfolgingsperiode - lagrer innsatsgruppe null`() {
-            val bruker =
-                TestData.lagNavBruker(
-                    oppfolgingsperioder =
-                        listOf(
-                            Oppfolgingsperiode(
-                                id = UUID.randomUUID(),
-                                startdato = LocalDateTime.now().minusYears(3),
-                                sluttdato = LocalDateTime.now().minusMonths(2),
-                            ),
-                        ),
-                    innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
-                )
+            val bruker = TestData.lagNavBruker(
+                oppfolgingsperioder = listOf(
+                    Oppfolgingsperiode(
+                        id = UUID.randomUUID(),
+                        startdato = LocalDateTime.now().minusYears(3),
+                        sluttdato = LocalDateTime.now().minusMonths(2),
+                    ),
+                ),
+                innsatsgruppe = InnsatsgruppeV1.STANDARD_INNSATS,
+            )
             every { navBrukerRepository.get(bruker.id) } returns bruker
             mockExecuteWithoutResult(transactionTemplate)
 
@@ -550,18 +527,16 @@ class NavBrukerServiceTest {
 
         @Test
         fun `oppdaterInnsatsgruppe - har ikke aktiv oppfolgingsperiode, ikke innsatsgruppe - oppdaterer ikke`() {
-            val bruker =
-                TestData.lagNavBruker(
-                    oppfolgingsperioder =
-                        listOf(
-                            Oppfolgingsperiode(
-                                id = UUID.randomUUID(),
-                                startdato = LocalDateTime.now().minusYears(3),
-                                sluttdato = LocalDateTime.now().minusMonths(2),
-                            ),
-                        ),
-                    innsatsgruppe = null,
-                )
+            val bruker = TestData.lagNavBruker(
+                oppfolgingsperioder = listOf(
+                    Oppfolgingsperiode(
+                        id = UUID.randomUUID(),
+                        startdato = LocalDateTime.now().minusYears(3),
+                        sluttdato = LocalDateTime.now().minusMonths(2),
+                    ),
+                ),
+                innsatsgruppe = null,
+            )
             every { navBrukerRepository.get(bruker.id) } returns bruker
             mockExecuteWithoutResult(transactionTemplate)
 

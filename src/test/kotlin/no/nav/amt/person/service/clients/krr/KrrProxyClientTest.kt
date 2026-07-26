@@ -4,7 +4,6 @@ import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.clients.RestClientTestBase
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -20,23 +19,18 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RestClientTest(KrrProxyClient::class)
-@TestPropertySource(
-    properties = [
-        "digdir-krr-proxy.url=http://krr-proxy",
-        "digdir-krr-proxy.scope=test.krr-proxy",
-    ],
-)
+@TestPropertySource(properties = ["digdir-krr-proxy.url=http://digdir-krr-proxy"])
 class KrrProxyClientTest(
-    @Autowired private val sut: KrrProxyClient,
+    private val sut: KrrProxyClient,
 ) : RestClientTestBase() {
     @Test
     fun `hentKontaktinformasjon - enkelt personident - returnerer kontaktinformasjon`() {
         val personident = "12345678901"
 
         server
-            .expect(requestTo("http://krr-proxy/rest/v1/personer?inkluderSikkerDigitalPost=false"))
+            .expect(requestTo("http://digdir-krr-proxy/rest/v1/personer?inkluderSikkerDigitalPost=false"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-token"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.personidenter[0]").value(personident))
             .andRespond(

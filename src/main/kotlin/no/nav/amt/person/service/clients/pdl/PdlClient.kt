@@ -11,19 +11,15 @@ import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.PoststedRepository
 import no.nav.amt.person.service.utils.GraphqlUtils
 import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
-import no.nav.common.token_client.client.MachineToMachineTokenClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
 
 @Service
 class PdlClient(
-    @Value($$"${pdl.url}") url: String,
-    @Value($$"${pdl.scope}") private val scope: String,
+    @Value($$"${pdl-api.url}") url: String,
     restClientBuilder: RestClient.Builder,
-    private val machineToMachineTokenClient: MachineToMachineTokenClient,
     private val poststedRepository: PoststedRepository,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -41,9 +37,7 @@ class PdlClient(
         .defaultHeader(TEMA_HEADER, GEN_TEMA_HEADER_VALUE)
         .defaultHeader(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER)
         .defaultHeader(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .defaultRequest {
-            it.header(HttpHeaders.AUTHORIZATION, "Bearer ${machineToMachineTokenClient.createMachineToMachineToken(scope)}")
-        }.build()
+        .build()
 
     fun hentPerson(personident: String): PdlPerson {
         val response = executeQuery<PdlQueries.HentPerson.Response>(
