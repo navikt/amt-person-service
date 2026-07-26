@@ -18,16 +18,15 @@ import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.leesah.Personhendelse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
 import java.util.function.Consumer
 
-@EnableConfigurationProperties(KafkaTopicProperties::class)
 @Configuration(proxyBeanMethods = false)
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty("kafka.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty("kafka.enabled", havingValue = "true", matchIfMissing = true)
 class KafkaConfiguration(
     @Value($$"${kafka.schema.registry.url}") schemaRegistryUrl: String,
     @Value($$"${kafka.schema.registry.username}") schemaRegistryUsername: String,
