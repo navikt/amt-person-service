@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.api
 
-import no.nav.amt.person.service.api.auth.Issuer
 import no.nav.amt.person.service.api.dto.AdressebeskyttelseDto
 import no.nav.amt.person.service.api.dto.ArrangorAnsattDto
 import no.nav.amt.person.service.api.dto.NavAnsattDto
@@ -20,7 +19,6 @@ import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetRepository
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.ArrangorAnsattService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@ProtectedWithClaims(issuer = Issuer.AZURE_AD)
 @RequestMapping("/api")
 class PersonApiController(
     private val navAnsattRepository: NavAnsattRepository,

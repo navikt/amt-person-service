@@ -10,10 +10,8 @@ class WebMvcConfig(
     private val machineToMachineInterceptor: MachineToMachineInterceptor,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
-        // Must run after JwtTokenValidationInterceptor (order 0) so the token context is populated
         registry
             .addInterceptor(machineToMachineInterceptor)
             .addPathPatterns("/api/**")
-            .order(1)
     }
 }

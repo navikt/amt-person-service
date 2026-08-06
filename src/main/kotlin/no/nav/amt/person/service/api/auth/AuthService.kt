@@ -1,30 +1,31 @@
 package no.nav.amt.person.service.api.auth
 
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class AuthService(
-    private val tokenValidationContextHolder: TokenValidationContextHolder,
-) {
+class AuthService {
     fun verifyRequestIsMachineToMachine() {
         if (!isRequestFromMachine()) {
-            throw JwtTokenUnauthorizedException("Request is not machine-to-machine")
+            throw AccessDeniedException("Request is not machine-to-machine")
         }
     }
 
     private fun isRequestFromMachine(): Boolean {
-        val claims = tokenValidationContextHolder
-            .getTokenValidationContext()
-            .getClaims(Issuer.AZURE_AD)
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw AccessDeniedException("No authentication found")
 
-        val sub = claims.getStringClaim("sub")?.let { UUID.fromString(it) }
-            ?: throw JwtTokenUnauthorizedException("Sub is missing")
+        val jwt = (authentication as? JwtAuthenticationToken)?.token
+            ?: throw AccessDeniedException("Not a JWT authentication")
 
-        val oid = claims.getStringClaim("oid")?.let { UUID.fromString(it) }
-            ?: throw JwtTokenUnauthorizedException("Oid is missing")
+        val sub = jwt.getClaimAsString("sub")?.let { UUID.fromString(it) }
+            ?: throw AccessDeniedException("Sub is missing")
+
+        val oid = jwt.getClaimAsString("oid")?.let { UUID.fromString(it) }
+            ?: throw AccessDeniedException("Oid is missing")
 
         return sub == oid
     }

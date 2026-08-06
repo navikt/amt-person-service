@@ -2,16 +2,16 @@ package no.nav.amt.person.service.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import jakarta.servlet.http.HttpServletRequest
-import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
-import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
-import org.apache.commons.lang3.exception.ExceptionUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ResponseStatusException
 
 @RestControllerAdvice
 class GlobalExceptionHandler(
@@ -24,25 +24,12 @@ class GlobalExceptionHandler(
         ex: RuntimeException,
         request: HttpServletRequest,
     ): ResponseEntity<Response> = when (ex) {
-        is NoSuchElementException -> {
-            buildResponse(HttpStatus.NOT_FOUND, ex)
-        }
-
-        is IllegalStateException -> {
-            buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
-        }
-
-        is JwtTokenUnauthorizedException -> {
-            buildResponse(HttpStatus.UNAUTHORIZED, ex)
-        }
-
-        is JwtTokenMissingException -> {
-            buildResponse(HttpStatus.UNAUTHORIZED, ex)
-        }
-
-        is HttpMessageNotReadableException -> {
-            buildResponse(HttpStatus.BAD_REQUEST, ex)
-        }
+        is NoSuchElementException -> buildResponse(HttpStatus.NOT_FOUND, ex)
+        is IllegalStateException -> buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex)
+        is AuthenticationException -> buildResponse(HttpStatus.UNAUTHORIZED, ex)
+        is AccessDeniedException -> buildResponse(HttpStatus.FORBIDDEN, ex)
+        is HttpMessageNotReadableException -> buildResponse(HttpStatus.BAD_REQUEST, ex)
+        is ResponseStatusException -> buildResponse(HttpStatus.valueOf(ex.statusCode.value()), ex)
 
         else -> {
             log.error("Internal server error - ${ex.message} - ${request.method}: ${request.requestURI}", ex)
@@ -60,7 +47,7 @@ class GlobalExceptionHandler(
                 status = status.value(),
                 title = status,
                 detail = exception.message,
-                stacktrace = if (includeStacktrace) ExceptionUtils.getStackTrace(exception) else null,
+                stacktrace = if (includeStacktrace) exception.stackTraceToString() else null,
             ),
         )
 

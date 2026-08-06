@@ -1,60 +1,33 @@
 package no.nav.amt.person.service.clients.pdl
 
-import no.nav.amt.person.service.clients.HeaderConstants.BEHANDLINGSNUMMER_HEADER
-import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
-import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER
-import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
-import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.PoststedRepository
 import no.nav.amt.person.service.utils.GraphqlUtils
-import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlResponse
+import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlQuery
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
 
 @Service
 class PdlClient(
-    @Value($$"${pdl-api.url}") url: String,
-    restClientBuilder: RestClient.Builder,
+    private val pdlApi: PdlApi,
     private val poststedRepository: PoststedRepository,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
-        private const val BEHANDLINGSNUMMER =
-            // https://behandlingskatalog.nais.adeo.no/process/team/5345bce7-e076-4b37-8bf4-49030901a4c3/b3003849-c4bb-4c60-a4cb-e07ce6025623
-            "B446"
-
         private const val EMPTY_DATA_MSG = "PDL respons inneholder ikke data"
     }
 
-    private val restClient: RestClient = restClientBuilder
-        .baseUrl("$url/graphql")
-        .defaultHeader(TEMA_HEADER, GEN_TEMA_HEADER_VALUE)
-        .defaultHeader(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER)
-        .defaultHeader(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .build()
-
     fun hentPerson(personident: String): PdlPerson {
-        val response = executeQuery<PdlQueries.HentPerson.Response>(
-            query = PdlQueries.HentPerson.query,
-            personident = personident,
-        )
-
+        val response = pdlApi.hentPerson(graphqlQuery(PdlQueries.HentPerson.query, personident))
         val data = validateAndGetData(response, response.extensions)
         return data.toPdlBruker { postnummer -> poststedRepository.getPoststeder(postnummer) }
     }
 
     fun hentPersonFodselsar(personident: String): Int {
-        val response = executeQuery<PdlQueries.HentPersonFodselsar.Response>(
-            PdlQueries.HentPersonFodselsar.query,
-            personident,
-        )
-
+        val response = pdlApi.hentPersonFodselsar(graphqlQuery(PdlQueries.HentPersonFodselsar.query, personident))
         val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.foedselsdato
             .firstOrNull()
@@ -63,11 +36,7 @@ class PdlClient(
     }
 
     fun hentIdenter(personident: String): List<Personident> {
-        val response = executeQuery<PdlQueries.HentIdenter.Response>(
-            PdlQueries.HentIdenter.query,
-            personident,
-        )
-
+        val response = pdlApi.hentIdenter(graphqlQuery(PdlQueries.HentIdenter.query, personident))
         val data = validateAndGetData(response, response.extensions)
         val hentIdenter = data.hentIdenter ?: throw RuntimeException(EMPTY_DATA_MSG)
         return hentIdenter.identer.map {
@@ -80,36 +49,24 @@ class PdlClient(
     }
 
     fun hentTelefon(personident: String): String? {
-        val response = executeQuery<PdlQueries.HentTelefon.Response>(
-            PdlQueries.HentTelefon.query,
-            personident,
-        )
-
+        val response = pdlApi.hentTelefon(graphqlQuery(PdlQueries.HentTelefon.query, personident))
         val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.telefonnummer.toTelefonnummer()
     }
 
     fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
-        val response = executeQuery<PdlQueries.HentAdressebeskyttelse.Response>(
-            PdlQueries.HentAdressebeskyttelse.query,
-            personident,
-        )
-
+        val response = pdlApi.hentAdressebeskyttelse(graphqlQuery(PdlQueries.HentAdressebeskyttelse.query, personident))
         val data = validateAndGetData(response, response.extensions)
         return data.hentPerson.adressebeskyttelse.toDiskresjonskode()
     }
 
-    private inline fun <reified T : Any> executeQuery(
+    private fun graphqlQuery(
         query: String,
         personident: String,
-    ): T = restClient
-        .post()
-        .body(GraphqlUtils.GraphqlQuery(query, PdlQueries.Variables(personident)))
-        .retrieve()
-        .body(T::class.java) ?: throw RuntimeException("Tomt svar fra PDL")
+    ) = GraphqlQuery(query, PdlQueries.Variables(personident))
 
     private fun <Data> validateAndGetData(
-        response: GraphqlResponse<Data, PdlQueries.PdlErrorExtension>,
+        response: GraphqlUtils.GraphqlResponse<Data, PdlQueries.PdlErrorExtension>,
         extensions: PdlQueries.Extensions?,
     ): Data {
         throwPdlApiErrors(response)
@@ -117,7 +74,7 @@ class PdlClient(
         return response.data ?: throw RuntimeException(EMPTY_DATA_MSG)
     }
 
-    private fun throwPdlApiErrors(response: GraphqlResponse<*, PdlQueries.PdlErrorExtension>) {
+    private fun throwPdlApiErrors(response: GraphqlUtils.GraphqlResponse<*, PdlQueries.PdlErrorExtension>) {
         response.errors?.takeIf { it.isNotEmpty() }?.let { feilmeldinger ->
             val melding = buildString {
                 append("Feilmeldinger i respons fra pdl:\n")
@@ -138,7 +95,6 @@ class PdlClient(
                 "query: ${it.query},\n" + "id: ${it.id},\n" + "message: ${it.message},\n" + "details: ${it.details}\n",
             )
         }
-
         log.warn(stringBuilder.toString())
     }
 }

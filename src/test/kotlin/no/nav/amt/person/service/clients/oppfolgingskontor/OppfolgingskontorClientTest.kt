@@ -4,7 +4,10 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
+import no.nav.amt.person.service.config.ClientConfig
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
@@ -12,7 +15,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -20,17 +22,18 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-@RestClientTest(OppfolgingskontorClient::class)
-@TestPropertySource(properties = ["ao-oppfolgingskontor.url=http://ao-oppfolgingskontor"])
+@RestClientTest(components = [OppfolgingskontorClient::class, ClientConfig::class])
 class OppfolgingskontorClientTest(
     private val sut: OppfolgingskontorClient,
-) : RestClientTestBase() {
+) : RestClientTestBase("ao-oppfolgingskontor") {
     @Test
     fun `hentKontorForBruker skal lage riktig request og parse respons`() {
         server
-            .expect(requestTo("http://ao-oppfolgingskontor/graphql"))
+            .expect(requestTo("/graphql"))
             .andExpect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andExpect(content().string(containsString("kontorTilhorigheter")))
             .andExpect(content().string(containsString("12345678901")))
             .andRespond(

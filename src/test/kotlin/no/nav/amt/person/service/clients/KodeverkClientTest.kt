@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.config.ClientConfig
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
@@ -9,32 +10,27 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
-import java.util.UUID
 
-@RestClientTest(KodeverkClient::class)
-@TestPropertySource(properties = ["kodeverk-api.url=http://kodeverk-api"])
+@RestClientTest(components = [KodeverkClient::class, ClientConfig::class])
 class KodeverkClientTest(
     private val sut: KodeverkClient,
-) : RestClientTestBase() {
+) : RestClientTestBase("kodeverk-api") {
     @Test
     fun `hentKodeverk - skal sende riktige headere og query-parametre, og parse respons`() {
-        val callId = UUID.randomUUID()
-
         server
             .expect(requestTo(containsString("/api/v1/kodeverk/Postnummer/koder/betydninger")))
             .andExpect(requestTo(containsString("ekskluderUgyldige=true")))
             .andExpect(requestTo(containsString("oppslagsdato=")))
             .andExpect(requestTo(containsString("spraak=nb")))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
-            .andExpect(header("Nav-Call-Id", callId.toString()))
-            .andExpect(header("Nav-Consumer-Id", "amt-person-service"))
+            .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))
+            .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andRespond(
                 withSuccess(
                     javaClass.getResourceAsStream("/kodeverkrespons.json")!!.bufferedReader().readText(),
@@ -42,7 +38,7 @@ class KodeverkClientTest(
                 ),
             )
 
-        val postnummer = sut.hentKodeverk(callId)
+        val postnummer = sut.hentKodeverk()
 
         postnummer.find { it.postnummer == "3831" }?.poststed shouldBe "ULEFOSS"
     }
@@ -54,7 +50,7 @@ class KodeverkClientTest(
             .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
 
         shouldThrow<RuntimeException> {
-            sut.hentKodeverk(UUID.randomUUID())
+            sut.hentKodeverk()
         }
     }
 
@@ -65,7 +61,7 @@ class KodeverkClientTest(
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
 
         shouldThrow<RuntimeException> {
-            sut.hentKodeverk(UUID.randomUUID())
+            sut.hentKodeverk()
         }
     }
 }

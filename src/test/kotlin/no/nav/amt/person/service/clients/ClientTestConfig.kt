@@ -1,54 +1,58 @@
 package no.nav.amt.person.service.clients
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.amt.person.service.clients.RestClientTestBase.Companion.TOKEN_IN_TEST
-import no.nav.security.token.support.client.core.ClientProperties
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import no.nav.security.token.support.client.spring.oauth2.ClientConfigurationPropertiesMatcher
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
-import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.registration.ClientRegistration
+import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer
+import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.OAuth2AccessToken
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
+import org.springframework.web.service.registry.HttpServiceGroup
+import java.time.Instant
 
-@TestConfiguration(proxyBeanMethods = false)
+@TestConfiguration
 class ClientTestConfig {
-    private val clientProperties = mockk<ClientProperties>(relaxed = true)
+    private val mocks = mutableMapOf<String, MockRestServiceServer>()
 
-    private val mockClientConfigurationProperties = mockk<ClientConfigurationProperties>().also {
-        every { it.registration } returns registrationNames.associateWith { clientProperties }
-    }
-
-    private val mockOAuthAccessTokenService = mockk<OAuth2AccessTokenService>().also { service ->
-        val tokenResponse = mockk<OAuth2AccessTokenResponse> {
-            every { access_token } returns TOKEN_IN_TEST
+    @Bean
+    fun mockServerConfigurer(): RestClientHttpServiceGroupConfigurer = RestClientHttpServiceGroupConfigurer { groups ->
+        groups.forEachClient { group: HttpServiceGroup, builder: RestClient.Builder ->
+            mocks[group.name()] = MockRestServiceServer.bindTo(builder).build()
         }
-        every { service.getAccessToken(any()) } returns tokenResponse
     }
 
     @Bean
-    fun oAuth2RestClientCustomizer() = RestClientCustomizer {
-        it.requestInterceptor(
-            OAuth2ClientRequestInterceptor(
-                properties = mockClientConfigurationProperties,
-                service = mockOAuthAccessTokenService,
-                matcher = object : ClientConfigurationPropertiesMatcher {},
-            ),
+    fun authorizedClientManager(): OAuth2AuthorizedClientManager {
+        val registration = ClientRegistration
+            .withRegistrationId("test")
+            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+            .clientId("test")
+            .clientSecret("test-secret")
+            .tokenUri("http://localhost:9999/token")
+            .build()
+
+        val accessToken = OAuth2AccessToken(
+            OAuth2AccessToken.TokenType.BEARER,
+            TOKEN,
+            Instant.now(),
+            Instant.now().plusSeconds(3600),
         )
+
+        val authorizedClient = OAuth2AuthorizedClient(registration, "test", accessToken)
+        return OAuth2AuthorizedClientManager { _ -> authorizedClient }
     }
 
+    @Bean
+    fun oauth2Configurer(manager: OAuth2AuthorizedClientManager): OAuth2RestClientHttpServiceGroupConfigurer =
+        OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
+
+    fun getMock(group: String): MockRestServiceServer = mocks[group] ?: error("No mock for group '$group'")
+
     companion object {
-        private val registrationNames = listOf(
-            "pdl-api",
-            "digdir-krr-proxy",
-            "veilarboppfolging",
-            "veilarbvedtaksstotte",
-            "kodeverk-api",
-            "poao-tilgang",
-            "nom-api",
-            "ao-oppfolgingskontor",
-        )
+        const val TOKEN = "test-token"
     }
 }

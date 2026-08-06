@@ -1,18 +1,10 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
-import no.nav.amt.person.service.clients.HeaderConstants
-import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.body
 
 @Service
 class OppfolgingskontorClient(
-    @Value($$"${ao-oppfolgingskontor.url}") baseUrl: String,
-    restClientBuilder: RestClient.Builder,
+    private val api: OppfolgingskontorApi,
 ) {
     companion object {
         private val kontorForBrukerQuery =
@@ -28,24 +20,13 @@ class OppfolgingskontorClient(
             """.trimIndent()
     }
 
-    private val restClient: RestClient = restClientBuilder
-        .baseUrl(baseUrl)
-        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .build()
-
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
-        val gqlResponse = restClient
-            .post()
-            .uri("/graphql")
-            .body(
-                GraphQLRequest(
-                    query = kontorForBrukerQuery,
-                    variables = mapOf("ident" to ident),
-                ),
-            ).retrieve()
-            .body<GraphQLResponse<HentKontorerResponse>>()
-            ?: throw RuntimeException("Tomt svar fra ao-oppfolgingskontor")
+        val gqlResponse = api.hentKontorForBruker(
+            OppfolgingskontorApi.GraphQLRequest(
+                query = kontorForBrukerQuery,
+                variables = mapOf("ident" to ident),
+            ),
+        )
 
         gqlResponse.errors?.takeIf { it.isNotEmpty() }?.let { errors ->
             val melding = errors.joinToString(separator = "\n") { "- ${it.message}" }
@@ -58,26 +39,4 @@ class OppfolgingskontorClient(
 
         return gqlResponse.data.kontorTilhorigheter.arbeidsoppfolging
     }
-
-    private data class GraphQLRequest(
-        val query: String,
-        val variables: Map<String, String> = emptyMap(),
-    )
-
-    private data class GraphQLResponse<T>(
-        val data: T? = null,
-        val errors: List<GraphQLError>? = null,
-    )
-
-    private data class GraphQLError(
-        val message: String,
-    )
-
-    private data class HentKontorerResponse(
-        val kontorTilhorigheter: KontorTilhorigheter,
-    )
-
-    private data class KontorTilhorigheter(
-        val arbeidsoppfolging: Arbeidsoppfolging? = null,
-    )
 }

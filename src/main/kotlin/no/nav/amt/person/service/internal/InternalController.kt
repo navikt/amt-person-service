@@ -16,7 +16,6 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils.isDev
 import no.nav.common.job.JobRunner
-import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,7 +34,6 @@ import java.util.UUID
 
 @Suppress("SpringMvcPathVariableDeclarationInspection")
 @RestController
-@Unprotected
 @RequestMapping("/internal")
 class InternalController(
     private val personService: PersonService,

@@ -36,8 +36,8 @@ dependencies {
 
     implementation(libs.poao.tilgang.client)
 
-    implementation(libs.token.validation.spring)
-    implementation(libs.token.client.spring)
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     implementation(libs.shedlock.spring)
     implementation(libs.shedlock.provider.jdbc.template)
@@ -50,6 +50,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
     testImplementation("org.springframework.boot:spring-boot-restclient-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
+    testImplementation("org.springframework.security:spring-security-test")
 
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)
@@ -58,8 +59,6 @@ dependencies {
 
     testImplementation(libs.mockk)
     testImplementation(libs.springmockk)
-    testImplementation(libs.mock.oauth2.server)
-    testImplementation(libs.token.validation.spring.test)
     testImplementation(libs.amt.lib.testing)
 }
 

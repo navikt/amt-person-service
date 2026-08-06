@@ -5,10 +5,13 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import no.nav.amt.person.service.clients.HeaderConstants.BEHANDLINGSNUMMER_HEADER
-import no.nav.amt.person.service.clients.HeaderConstants.GEN_TEMA_HEADER_VALUE
-import no.nav.amt.person.service.clients.HeaderConstants.TEMA_HEADER
+import no.nav.amt.person.service.clients.BEHANDLINGSNUMMER_HEADER
+import no.nav.amt.person.service.clients.BEHANDLINGSNUMMER_HEADER_VALUE
+import no.nav.amt.person.service.clients.GEN_TEMA_HEADER_VALUE
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
+import no.nav.amt.person.service.clients.TEMA_HEADER
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.ERROR_PREFIX
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.NULL_ERROR
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.flereFeilRespons
@@ -16,6 +19,7 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.fodselsarRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
+import no.nav.amt.person.service.config.ClientConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.postnumreInTest
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
@@ -29,7 +33,6 @@ import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
@@ -37,11 +40,10 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClientResponseException
 
-@RestClientTest(PdlClient::class)
-@TestPropertySource(properties = ["pdl-api.url=http://pdl-api"])
+@RestClientTest(components = [PdlClient::class, ClientConfig::class])
 class PdlClientTest(
     private val client: PdlClient,
-) : RestClientTestBase() {
+) : RestClientTestBase("pdl-api") {
     @MockkBean
     private lateinit var poststedRepository: PoststedRepository
 
@@ -55,11 +57,12 @@ class PdlClientTest(
         @Test
         fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
             server
-                .expect(requestTo("http://pdl-api/graphql"))
+                .expect(requestTo("/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
                 .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
-                .andExpect(header(BEHANDLINGSNUMMER_HEADER, "B446"))
+                .andExpect(header(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_HEADER_VALUE))
                 .andRespond(withSuccess(gyldigRespons, MediaType.APPLICATION_JSON))
 
             val pdlPerson = client.hentPerson("FNR")
@@ -303,7 +306,7 @@ class PdlClientTest(
         @Test
         fun `hentAdressebeskyttelse - person er beskyttet - returnerer gradering`() {
             server
-                .expect(requestTo("http://pdl-api/graphql"))
+                .expect(requestTo("/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andRespond(
