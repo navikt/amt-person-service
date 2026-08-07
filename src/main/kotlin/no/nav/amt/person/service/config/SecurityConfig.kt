@@ -1,7 +1,7 @@
 package no.nav.amt.person.service.config
 
-import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
 import no.nav.amt.person.service.api.auth.InternalAuthorizationManager
+import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint
