@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.util.matcher.OrRequestMatcher
 
 @Configuration(proxyBeanMethods = false)
 class SecurityConfig {
@@ -45,11 +46,10 @@ class SecurityConfig {
             oauth2ResourceServer { jwt { } }
             authorizeHttpRequests {
                 authorize(
-                    EndpointRequest.to(HealthEndpoint::class.java),
-                    permitAll,
-                )
-                authorize(
-                    EndpointRequest.to(PrometheusScrapeEndpoint::class.java),
+                    OrRequestMatcher(
+                        EndpointRequest.to(HealthEndpoint::class.java),
+                        EndpointRequest.to(PrometheusScrapeEndpoint::class.java),
+                    ),
                     permitAll,
                 )
                 authorize("/internal/**", permitAll)
