@@ -1,11 +1,13 @@
 package no.nav.amt.person.service.config
 
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
@@ -34,21 +36,27 @@ class SecurityConfig {
     fun oauth2Configurer(manager: OAuth2AuthorizedClientManager) = OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
-        .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-        .csrf { it.disable() }
-        .logout { it.disable() }
-        .requestCache { it.disable() }
-        .oauth2ResourceServer { it.jwt {} }
-        .authorizeHttpRequests {
-            it
-                .requestMatchers(
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http {
+            sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
+            csrf { disable() }
+            logout { disable() }
+            requestCache { disable() }
+            oauth2ResourceServer { jwt { } }
+            authorizeHttpRequests {
+                authorize(
                     EndpointRequest.to(HealthEndpoint::class.java),
+                    permitAll,
+                )
+                authorize(
                     EndpointRequest.to(PrometheusScrapeEndpoint::class.java),
-                ).permitAll()
-                .requestMatchers("/internal/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-        }.build()
+                    permitAll,
+                )
+                authorize("/internal/**", permitAll)
+                authorize(anyRequest, authenticated)
+            }
+        }
+
+        return http.build()
+    }
 }
