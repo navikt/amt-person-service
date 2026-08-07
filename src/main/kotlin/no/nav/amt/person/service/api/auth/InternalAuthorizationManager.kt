@@ -1,0 +1,18 @@
+package no.nav.amt.person.service.api.auth
+
+import org.springframework.security.authorization.AuthorizationDecision
+import org.springframework.security.authorization.AuthorizationManager
+import org.springframework.security.core.Authentication
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext
+import org.springframework.stereotype.Component
+import java.util.function.Supplier
+
+@Component
+class InternalAuthorizationManager : AuthorizationManager<RequestAuthorizationContext> {
+    override fun authorize(
+        authentication: Supplier<out Authentication>,
+        context: RequestAuthorizationContext,
+    ): AuthorizationDecision = AuthorizationDecision(isInternal(context))
+
+    internal fun isInternal(context: RequestAuthorizationContext): Boolean = context.request.remoteAddr == "127.0.0.1"
+}

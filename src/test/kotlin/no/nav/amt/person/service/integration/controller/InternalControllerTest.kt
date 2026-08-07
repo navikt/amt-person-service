@@ -86,11 +86,11 @@ class InternalControllerTest(
         }
 
         @Test
-        fun `skal ikke kjøre jobb når request kommer fra ekstern adresse`() {
+        fun `skal avvise request fra ekstern adresse`() {
             mockMvc
                 .post("/internal/person/identer") {
                     fraEksternAdresse()
-                }.andExpect { status { isOk() } }
+                }.andExpect { status { isUnauthorized() } }
 
             verify(exactly = 0) { personUpdater.oppdaterPersonidenter(any()) }
         }
@@ -121,13 +121,13 @@ class InternalControllerTest(
         }
 
         @Test
-        fun `skal returnere 200 uten å oppdatere navn for ekstern request`() {
+        fun `skal avvise request fra ekstern adresse`() {
             testDataRepository.insertPerson(person)
 
             mockMvc
                 .get("/internal/person/navn/${person.id}") {
                     fraEksternAdresse()
-                }.andExpect { status { isOk() } }
+                }.andExpect { status { isUnauthorized() } }
 
             verify(exactly = 0) { pdlClient.hentPerson(any()) }
         }
