@@ -31,15 +31,16 @@ class NavAnsattService(
     fun hentEllerOpprettAnsatt(navIdent: String): NavAnsattDbo {
         navAnsattRepository.get(navIdent)?.let { navAnsatt -> return navAnsatt }
 
-        val nomNavAnsatt =
-            nomClient.hentNavAnsatt(navIdent)
-                ?: throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident $navIdent").also {
+        val nomNavAnsatt = nomClient.hentNavAnsatt(navIdent)
+            ?: throw IllegalArgumentException("Klarte ikke å finne nav ansatt med ident $navIdent")
+                .also {
                     log.error("Klarte ikke å hente nav ansatt med ident $navIdent")
                 }
 
         log.info("Oppretter ny nav ansatt for nav ident $navIdent")
 
-        val navEnhet = nomNavAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
+        val navEnhet = nomNavAnsatt.navEnhetNummer
+            ?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
 
         return upsert(nomNavAnsatt.toNavAnsatt(navEnhet?.id))
     }

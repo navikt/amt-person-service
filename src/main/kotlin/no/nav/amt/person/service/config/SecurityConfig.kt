@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.config
 
+import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint
@@ -37,7 +38,10 @@ class SecurityConfig {
     fun oauth2Configurer(manager: OAuth2AuthorizedClientManager) = OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(
+        http: HttpSecurity,
+        machineToMachineAuthorizationManager: MachineToMachineAuthorizationManager,
+    ): SecurityFilterChain {
         http {
             sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
             csrf { disable() }
@@ -52,6 +56,7 @@ class SecurityConfig {
                     ),
                     permitAll,
                 )
+                authorize("/api/**", machineToMachineAuthorizationManager)
                 authorize("/internal/**", permitAll)
                 authorize(anyRequest, authenticated)
             }
