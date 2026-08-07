@@ -4,35 +4,56 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.verify
-import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
+import no.nav.amt.person.service.api.auth.InternalAuthorizationManager
+import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
+import no.nav.amt.person.service.config.SecurityConfig
 import no.nav.amt.person.service.data.TestData
-import no.nav.amt.person.service.integration.IntegrationTestBase
-import no.nav.amt.person.service.internal.PersonUpdater
-import no.nav.amt.person.service.navansatt.NavAnsattUpdater
-import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
+import no.nav.amt.person.service.internal.InternalController
+import no.nav.amt.person.service.internal.InternalService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType
+import org.springframework.security.authorization.AuthorizationDecision
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockHttpServletRequestDsl
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.util.UUID
 
-@AutoConfigureMockMvc
+@WebMvcTest(InternalController::class, SecurityConfig::class, InternalAuthorizationManager::class)
+@ActiveProfiles("integration")
+@EnableWebSecurity
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class InternalControllerTest(
     private val mockMvc: MockMvc,
-    @MockkBean private val navEnhetUpdateJob: NavEnhetUpdateJob,
-    @MockkBean private val personUpdater: PersonUpdater,
-    @MockkBean private val navAnsattUpdater: NavAnsattUpdater,
-) : IntegrationTestBase() {
+    @MockkBean private val internalService: InternalService,
+    @MockkBean private val machineToMachineAuthorizationManager: MachineToMachineAuthorizationManager,
+) {
     @BeforeEach
-    fun setupInternalMocks() {
-        justRun { navEnhetUpdateJob.update() }
-        justRun { personUpdater.oppdaterPersonidenter(any()) }
-        justRun { navAnsattUpdater.oppdaterAlle() }
+    fun setup() {
+        every { machineToMachineAuthorizationManager.authorize(any(), any()) } returns AuthorizationDecision(true)
+
+        justRun { internalService.oppdaterPersonidenter(any()) }
+        justRun { internalService.oppdaterNavn(any()) }
+        justRun { internalService.republiserNavBrukere(any(), any()) }
+        justRun { internalService.oppdaterAdresseOgRepubliserNavBrukere(any(), any(), any()) }
+        justRun { internalService.oppdaterAdresseOgRepubliserNavBruker(any()) }
+        justRun { internalService.oppdaterInnsatsOgRepubliserNavBrukere(any(), any(), any(), any()) }
+        justRun { internalService.oppdaterInnsatsOgRepubliserNavBruker(any()) }
+        justRun { internalService.publiserNavBruker(any()) }
+        justRun { internalService.republiserArrangorAnsatte(any(), any()) }
+        justRun { internalService.republiserNavAnsatte() }
+        justRun { internalService.oppdaterNavAnsatte() }
+        justRun { internalService.oppdaterNavEnheter() }
+        justRun { internalService.synkroniserKrr(any(), any()) }
+        justRun { internalService.synkroniserKrrForPerson(any()) }
+        justRun { internalService.oppdaterManglendeKontaktinfo(any()) }
+        justRun { internalService.republiserNavBrukereMedNyIdent() }
     }
 
     // MockMvc defaults to remoteAddr = "127.0.0.1", so requests are treated as internal by default.
@@ -82,7 +103,7 @@ class InternalControllerTest(
                 .post("/internal/person/identer")
                 .andExpect { status { isOk() } }
 
-            verify { personUpdater.oppdaterPersonidenter(0) }
+            verify { internalService.oppdaterPersonidenter(0) }
         }
 
         @Test
@@ -92,7 +113,7 @@ class InternalControllerTest(
                     fraEksternAdresse()
                 }.andExpect { status { isUnauthorized() } }
 
-            verify(exactly = 0) { personUpdater.oppdaterPersonidenter(any()) }
+            verify(exactly = 0) { internalService.oppdaterPersonidenter(any()) }
         }
 
         @Test
@@ -102,34 +123,27 @@ class InternalControllerTest(
                     param("offset", "100")
                 }.andExpect { status { isOk() } }
 
-            verify { personUpdater.oppdaterPersonidenter(100) }
+            verify { internalService.oppdaterPersonidenter(100) }
         }
     }
 
     @Nested
     inner class OppdaterNavn {
-        val person = TestData.lagPerson()
-
         @Test
         fun `skal returnere 200 og oppdatere navn for intern request`() {
-            testDataRepository.insertPerson(person)
-            every { pdlClient.hentPerson(person.personident) } returns TestData.lagPdlPerson(person)
-
             mockMvc
-                .get("/internal/person/navn/${person.id}")
+                .get("/internal/person/navn/${UUID.randomUUID()}")
                 .andExpect { status { isOk() } }
         }
 
         @Test
         fun `skal avvise request fra ekstern adresse`() {
-            testDataRepository.insertPerson(person)
-
             mockMvc
-                .get("/internal/person/navn/${person.id}") {
+                .get("/internal/person/navn/${UUID.randomUUID()}") {
                     fraEksternAdresse()
                 }.andExpect { status { isUnauthorized() } }
 
-            verify(exactly = 0) { pdlClient.hentPerson(any()) }
+            verify(exactly = 0) { internalService.oppdaterNavn(any()) }
         }
     }
 
@@ -157,12 +171,8 @@ class InternalControllerTest(
     inner class OppdaterAdresseOgRepubliserNavBruker {
         @Test
         fun `skal returnere 200 for intern request`() {
-            val navBruker = TestData.lagNavBruker()
-            testDataRepository.insertNavBruker(navBruker)
-            every { pdlClient.hentPerson(navBruker.person.personident) } returns TestData.lagPdlPerson(navBruker.person)
-
             mockMvc
-                .get("/internal/nav-bruker/oppdater-adr-republiser/${navBruker.id}")
+                .get("/internal/nav-bruker/oppdater-adr-republiser/${UUID.randomUUID()}")
                 .andExpect { status { isOk() } }
         }
     }
@@ -178,15 +188,8 @@ class InternalControllerTest(
 
         @Test
         fun `skal returnere 200 for enkelt Nav-bruker`() {
-            val navBruker = TestData.lagNavBruker()
-            testDataRepository.insertNavBruker(navBruker)
-            every { veilarboppfolgingClient.hentOppfolgingperioder(navBruker.person.personident) } returns
-                navBruker.oppfolgingsperioder
-            every { veilarbvedtaksstotteClient.hentInnsatsgruppe(navBruker.person.personident) } returns
-                navBruker.innsatsgruppe
-
             mockMvc
-                .get("/internal/nav-bruker/oppdater-innsats-republiser/${navBruker.id}")
+                .get("/internal/nav-bruker/oppdater-innsats-republiser/${UUID.randomUUID()}")
                 .andExpect { status { isOk() } }
         }
     }
@@ -195,11 +198,8 @@ class InternalControllerTest(
     inner class RepubliserNavBruker {
         @Test
         fun `skal returnere 200 for intern request`() {
-            val navBruker = TestData.lagNavBruker()
-            testDataRepository.insertNavBruker(navBruker)
-
             mockMvc
-                .get("/internal/nav-brukere/republiser/${navBruker.id}")
+                .get("/internal/nav-brukere/republiser/${UUID.randomUUID()}")
                 .andExpect { status { isOk() } }
         }
     }
@@ -246,8 +246,6 @@ class InternalControllerTest(
 
     @Nested
     inner class SynkroniserKrr {
-        val navBruker = TestData.lagNavBruker()
-
         @Test
         fun `skal returnere 200 for intern request`() {
             mockMvc
@@ -261,30 +259,24 @@ class InternalControllerTest(
                 .post("/internal/nav-brukere/synkroniser-krr") {
                     fraEksternAdresse()
                     contentType = MediaType.APPLICATION_JSON
-                    content = """{"personident": "${navBruker.person.personident}"}"""
+                    content = """{"personident": "${TestData.randomIdent()}"}"""
                 }.andExpect { status { isUnauthorized() } }
         }
 
         @Test
         fun `skal synkronisere kontaktinfo for enkelt Nav-bruker`() {
-            testDataRepository.insertNavBruker(navBruker)
-            every { krrProxyClient.hentKontaktinformasjon(navBruker.person.personident) } returns
-                Result.success(
-                    Kontaktinformasjon(
-                        epost = navBruker.epost,
-                        telefonnummer = navBruker.telefon,
-                    ),
-                )
-
             mockMvc
                 .post("/internal/nav-brukere/synkroniser-krr") {
                     contentType = MediaType.APPLICATION_JSON
-                    content = """{"personident": "${navBruker.person.personident}"}"""
+                    content = """{"personident": "${TestData.randomIdent()}"}"""
                 }.andExpect { status { isOk() } }
         }
 
         @Test
         fun `skal returnere 500 når Nav-bruker ikke finnes`() {
+            every { internalService.synkroniserKrrForPerson(any()) } throws
+                IllegalArgumentException("Fant ikke Nav-bruker")
+
             mockMvc
                 .post("/internal/nav-brukere/synkroniser-krr") {
                     contentType = MediaType.APPLICATION_JSON
