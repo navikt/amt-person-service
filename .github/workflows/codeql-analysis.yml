@@ -35,9 +35,7 @@ jobs:
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: Build artifacts
-        env:
-          KOTLIN_DAEMON_JVM_OPTIONS: "-Xmx2g"
-        run: ./gradlew assemble -x test --no-configuration-cache --console=plain --no-daemon
+        run: ./gradlew assemble -x test --no-configuration-cache --no-daemon -Dkotlin.daemon.jvmargs=-Xmx2g
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
