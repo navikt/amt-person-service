@@ -29,11 +29,10 @@ class NavAnsattUpdater(
             val ansatte = batch.associate { it.navIdent to AnsattSomSkalOppdateres(it, false) }
             val nomResultat = nomClient.hentNavAnsatte(ansatte.keys.toList())
 
-            val oppdaterteAnsatte =
-                nomResultat
-                    .mapNotNull { nomAnsatt ->
-                        ansatte[nomAnsatt.navIdent]?.let { finnOppdatering(it, nomAnsatt) }
-                    }.toSet()
+            val oppdaterteAnsatte = nomResultat
+                .mapNotNull { nomAnsatt ->
+                    ansatte[nomAnsatt.navIdent]?.let { finnOppdatering(it, nomAnsatt) }
+                }.toSet()
 
             log.info("Oppdaterer informasjon om ${oppdaterteAnsatte.size} Nav-ansatte, sjekket ${nomResultat.size} ansatte")
 

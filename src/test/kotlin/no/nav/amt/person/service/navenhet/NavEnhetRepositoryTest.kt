@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.navenhet
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -10,7 +11,6 @@ import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.utils.shouldBeEqualTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.UUID
 
@@ -36,7 +36,7 @@ class NavEnhetRepositoryTest(
 
     @Test
     fun `get(uuid) - enhet finnes ikke - kaster NoSuchElementException`() {
-        assertThrows<NoSuchElementException> {
+        shouldThrow<NoSuchElementException> {
             enhetRepository.get(UUID.randomUUID())
         }
     }

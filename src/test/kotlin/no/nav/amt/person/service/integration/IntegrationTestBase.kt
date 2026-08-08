@@ -14,7 +14,6 @@ import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.poao_tilgang.client.PoaoTilgangClient
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles
 import tools.jackson.databind.ObjectMapper
 
 @ActiveProfiles("integration")
-@EnableMockOAuth2Server
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationTestBase : RepositoryTestBase() {
     @LocalServerPort

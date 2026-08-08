@@ -1,29 +1,15 @@
 package no.nav.amt.person.service.clients.krr
 
-import no.nav.amt.person.service.clients.HeaderConstants
-import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.config.TeamLogs
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
-import org.springframework.web.client.body
 
 @Service
 class KrrProxyClient(
-    @Value($$"${digdir-krr-proxy.url}") baseUrl: String,
-    restClientBuilder: RestClient.Builder,
+    private val krrProxyApi: KrrProxyApi,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-
-    private val restClient: RestClient = restClientBuilder
-        .baseUrl(baseUrl)
-        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .build()
 
     fun hentKontaktinformasjon(personident: String): Result<Kontaktinformasjon> = hentKontaktinformasjon(
         personidenter = setOf(personident),
@@ -33,17 +19,7 @@ class KrrProxyClient(
 
     fun hentKontaktinformasjon(personidenter: Set<String>): Result<Map<String, Kontaktinformasjon>> {
         try {
-            val responseDto = restClient
-                .post()
-                .uri { uriBuilder ->
-                    uriBuilder
-                        .path("/rest/v1/personer")
-                        .queryParam("inkluderSikkerDigitalPost", false)
-                        .build()
-                }.body(PostPersonerRequest(personidenter))
-                .retrieve()
-                .body<PostPersonerResponse>()
-                ?: return Result.failure(RuntimeException("Tomt svar fra KRR-proxy"))
+            val responseDto = krrProxyApi.hentPersoner(KrrProxyApi.PostPersonerRequest(personidenter))
 
             if (responseDto.feil.isNotEmpty()) {
                 TeamLogs.error(responseDto.feil.toString())
@@ -60,20 +36,5 @@ class KrrProxyClient(
                 RuntimeException("Klarte ikke å hente kontaktinformasjon fra KRR-proxy. Status: ${e.statusCode.value()}", e),
             )
         }
-    }
-
-    private data class PostPersonerRequest(
-        val personidenter: Set<String>,
-    )
-
-    internal data class PostPersonerResponse(
-        val personer: Map<String, KontaktinformasjonDto>,
-        val feil: Map<String, String>,
-    ) {
-        data class KontaktinformasjonDto(
-            val personident: String,
-            val epostadresse: String?,
-            val mobiltelefonnummer: String?,
-        )
     }
 }

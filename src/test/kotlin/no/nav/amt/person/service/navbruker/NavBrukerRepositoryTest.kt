@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.navbruker
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -14,7 +15,6 @@ import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
 import java.util.UUID
@@ -107,7 +107,7 @@ class NavBrukerRepositoryTest(
 
         @Test
         fun `get(uuid) - bruker finnes ikke - kaster NoSuchElementException`() {
-            assertThrows<NoSuchElementException> {
+            shouldThrow<NoSuchElementException> {
                 brukerRepository.get(UUID.randomUUID())
             }
         }

@@ -13,7 +13,7 @@ import java.util.UUID
 class PoststedJob(
     val kodeverkClient: KodeverkClient,
     val poststedRepository: PoststedRepository,
-    @Value("\${app.poststed.run-on-startup:false}")
+    @Value($$"${app.poststed.run-on-startup:false}")
     private val runOnStartup: Boolean,
 ) : InitializingBean {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -30,7 +30,7 @@ class PoststedJob(
     fun run() {
         val sporingsId = UUID.randomUUID()
         log.info("Oppdaterer database med postnummer og poststed, $sporingsId")
-        val postnummerListe = kodeverkClient.hentKodeverk(sporingsId)
+        val postnummerListe = kodeverkClient.hentKodeverk()
         poststedRepository.oppdaterPoststed(postnummerListe.toSet(), sporingsId)
         log.info("Ferdig med å oppdatere poststed i database, $sporingsId")
     }

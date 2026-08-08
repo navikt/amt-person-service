@@ -2,14 +2,15 @@ package no.nav.amt.person.service.clients
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.config.ClientConfig
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -18,25 +19,25 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import tools.jackson.databind.ObjectMapper
 
-@RestClientTest(VeilarbvedtaksstotteClient::class)
-@TestPropertySource(properties = ["veilarbvedtaksstotte.url=http://veilarbvedtaksstotte"])
+@RestClientTest(components = [VeilarbvedtaksstotteClient::class, ClientConfig::class])
 class VeilarbvedtaksstotteClientTest(
     private val sut: VeilarbvedtaksstotteClient,
     private val objectMapper: ObjectMapper,
-) : RestClientTestBase() {
+) : RestClientTestBase("veilarbvedtaksstotte") {
     @Test
     fun `hentInnsatsgruppe - bruker har innsatsgruppe - returnerer innsatsgruppe`() {
         val responseBody = objectMapper.writeValueAsString(
-            VeilarbvedtaksstotteClient.Gjeldende14aVedtakResponse(
+            VeilarbvedtaksstotteApi.Gjeldende14aVedtakResponse(
                 innsatsgruppe = InnsatsgruppeV2.JOBBE_DELVIS,
             ),
         )
 
         server
             .expect(
-                requestTo("http://veilarbvedtaksstotte/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
+                requestTo("/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
             ).andExpect(method(HttpMethod.POST))
-            .andExpect(header("Authorization", "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
             .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON))
 
