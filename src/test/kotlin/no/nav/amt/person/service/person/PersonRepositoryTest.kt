@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
@@ -13,7 +14,6 @@ import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
 import java.util.UUID
@@ -42,7 +42,7 @@ class PersonRepositoryTest(
 
     @Test
     fun `get(uuid) - person finnes ikke - kaster NoSuchElementException`() {
-        assertThrows<NoSuchElementException> {
+        shouldThrow<NoSuchElementException> {
             personRepository.get(UUID.randomUUID())
         }
     }

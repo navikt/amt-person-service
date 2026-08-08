@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.navansatt
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -10,7 +11,6 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.utils.shouldBeCloseTo
 import no.nav.amt.person.service.utils.shouldBeEqualTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
 import java.util.UUID
@@ -39,7 +39,7 @@ class NavAnsattRepositoryTest(
 
     @Test
     fun `get(uuid) - ansatt finnes ikke - kaster NoSuchElementException`() {
-        assertThrows<NoSuchElementException> {
+        shouldThrow<NoSuchElementException> {
             ansattRepository.get(UUID.randomUUID())
         }
     }

@@ -1,12 +1,12 @@
 package no.nav.amt.person.service.integration.kafka.ingestor
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.kafka.consumer.SkjermetPersonConsumer
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class SkjermetPersonConsumerTest(
     private val navBrukerRepository: NavBrukerRepository,
@@ -28,7 +28,7 @@ class SkjermetPersonConsumerTest(
         val navBruker = TestData.lagNavBruker(erSkjermet = false)
         testDataRepository.insertNavBruker(navBruker)
 
-        assertThrows<IllegalArgumentException> {
+        shouldThrow<IllegalArgumentException> {
             skjermetPersonConsumer.ingestTombstone(navBruker.person.personident)
         }
     }

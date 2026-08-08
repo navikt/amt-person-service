@@ -1,44 +1,24 @@
 package no.nav.amt.person.service.clients.nom
 
-import no.nav.amt.person.service.clients.HeaderConstants
-import no.nav.amt.person.service.clients.HeaderConstants.NAV_CONSUMER_ID_HEADER_VALUE
-import no.nav.amt.person.service.utils.GraphqlUtils
+import no.nav.amt.person.service.utils.GraphqlUtils.GraphqlQuery
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.body
 
 @Service
 class NomClient(
-    @Value($$"${nom-api.url}") url: String,
-    restClientBuilder: RestClient.Builder,
+    private val nomApi: NomApi,
 ) {
-    private val restClient: RestClient = restClientBuilder
-        .baseUrl(url)
-        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HeaderConstants.NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE)
-        .build()
-
     fun hentNavAnsatt(navIdent: String): NomNavAnsatt? = hentNavAnsatte(listOf(navIdent))
         .firstOrNull()
         .also { if (it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 
     fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
-        val ressurserResponse = restClient
-            .post()
-            .uri("/graphql")
-            .body(
-                GraphqlUtils.GraphqlQuery(
-                    NomQueries.HentRessurser.query,
-                    NomQueries.HentRessurser.Variables(navIdenter),
-                ),
-            ).retrieve()
-            .body<NomQueries.HentRessurser.Response>()
-            ?: throw RuntimeException("Tomt svar fra NOM")
-
+        val ressurserResponse = nomApi.hentRessurser(
+            GraphqlQuery(
+                NomQueries.HentRessurser.query,
+                NomQueries.HentRessurser.Variables(navIdenter),
+            ),
+        )
         return ressurserResponse.toVeiledere()
     }
 

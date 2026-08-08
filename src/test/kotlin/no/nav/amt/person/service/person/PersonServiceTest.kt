@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.person
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -12,7 +13,6 @@ import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.context.ApplicationEventPublisher
 
 class PersonServiceTest {
@@ -72,7 +72,7 @@ class PersonServiceTest {
         every { personRepository.getPersoner(identer.map { it.ident }.toSet()) } returns
             identer.map { TestData.lagPerson(personident = it.ident) }
 
-        assertThrows<IllegalStateException> {
+        shouldThrow<IllegalStateException> {
             service.oppdaterPersonIdent(identer)
         }
     }

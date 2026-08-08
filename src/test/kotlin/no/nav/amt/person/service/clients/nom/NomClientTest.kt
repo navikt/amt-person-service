@@ -5,7 +5,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.clients.ClientTestConfig
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
+import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
+import no.nav.amt.person.service.config.ClientConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import org.junit.jupiter.api.Test
@@ -13,24 +17,24 @@ import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-@RestClientTest(NomClient::class)
-@TestPropertySource(properties = ["nom-api.url=http://nom-api"])
+@RestClientTest(components = [NomClient::class, ClientConfig::class])
 class NomClientTest(
     private val sut: NomClient,
-) : RestClientTestBase() {
+) : RestClientTestBase("nom-api") {
     @Test
     fun `hentNavAnsatt - veileder finnes ikke - returnerer null`() {
         server
-            .expect(requestTo("http://nom-api/graphql"))
+            .expect(requestTo("/graphql"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))
+            .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andRespond(
                 withSuccess(
                     hentRessurserResponse(emptyList(), 1),

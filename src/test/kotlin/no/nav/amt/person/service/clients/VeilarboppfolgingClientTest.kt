@@ -4,6 +4,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
+import no.nav.amt.person.service.config.ClientConfig
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -13,7 +14,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -27,20 +27,20 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
 
-@RestClientTest(VeilarboppfolgingClient::class)
-@TestPropertySource(properties = ["veilarboppfolging.url=http://veilarboppfolging"])
+@RestClientTest(components = [VeilarboppfolgingClient::class, ClientConfig::class])
 class VeilarboppfolgingClientTest(
     private val sut: VeilarboppfolgingClient,
     private val objectMapper: ObjectMapper,
-) : RestClientTestBase() {
+) : RestClientTestBase("veilarboppfolging") {
     @Nested
     inner class HentVeilederIdent {
         @Test
         fun `HentVeilederIdent - Skal sende med authorization og treffe riktig URL`() {
             server
-                .expect(requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/hent-veileder"))
+                .expect(requestTo("/veilarboppfolging/api/v3/hent-veileder"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
                 .andRespond(
                     withSuccess(
@@ -120,7 +120,7 @@ class VeilarboppfolgingClientTest(
 
             server
                 .expect(
-                    requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
+                    requestTo("/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
                 ).andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
@@ -157,7 +157,7 @@ class VeilarboppfolgingClientTest(
                 .withZoneSameInstant(ZoneId.systemDefault())
                 .toLocalDateTime()
 
-        private fun createOppfolgingPeriodeDto(useEndDate: Boolean) = VeilarboppfolgingClient.OppfolgingPeriodeDto(
+        private fun createOppfolgingPeriodeDto(useEndDate: Boolean) = VeilarboppfolgingApi.OppfolgingPeriodeResponse(
             uuid = UUID.randomUUID(),
             startDato = nowAsZonedDateTimeUtc,
             sluttDato = if (useEndDate) nowAsZonedDateTimeUtc.plusDays(1) else null,
