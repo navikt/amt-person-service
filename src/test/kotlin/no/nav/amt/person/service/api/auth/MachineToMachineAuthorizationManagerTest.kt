@@ -81,16 +81,38 @@ class MachineToMachineAuthorizationManagerTest {
 
             isMachineToMachine(jwt) shouldBe false
         }
+
+        @Test
+        fun `isMachineToMachine - ugyldig sub - returnerer false`() {
+            val jwt = createJwt(sub = "ugyldig", oid = UUID.randomUUID().toString())
+
+            isMachineToMachine(jwt) shouldBe false
+        }
+
+        @Test
+        fun `isMachineToMachine - ugyldig oid - returnerer false`() {
+            val jwt = createJwt(sub = UUID.randomUUID().toString(), oid = "ugyldig")
+
+            isMachineToMachine(jwt) shouldBe false
+        }
     }
 
     companion object {
         private fun createJwt(
             sub: UUID?,
             oid: UUID?,
+        ) = createJwt(
+            sub = sub?.toString(),
+            oid = oid?.toString(),
+        )
+
+        private fun createJwt(
+            sub: String?,
+            oid: String?,
         ): Jwt {
             val claims = mutableMapOf<String, Any>()
-            if (sub != null) claims["sub"] = sub.toString()
-            if (oid != null) claims["oid"] = oid.toString()
+            if (sub != null) claims["sub"] = sub
+            if (oid != null) claims["oid"] = oid
 
             return Jwt
                 .withTokenValue("token")
