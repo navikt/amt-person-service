@@ -36,7 +36,7 @@ jobs:
 
       - name: Build artifacts
         env:
-          GRADLE_OPTS: "-Xmx1g"
+          KOTLIN_DAEMON_JVM_OPTIONS: "-Xmx2g"
         run: ./gradlew assemble -x test --no-configuration-cache --console=plain --no-daemon
 
       - name: Perform CodeQL Analysis
