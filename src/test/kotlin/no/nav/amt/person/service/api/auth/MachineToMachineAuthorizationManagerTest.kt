@@ -1,11 +1,10 @@
 package no.nav.amt.person.service.api.auth
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager.Companion.isMachineToMachine
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -14,10 +13,10 @@ import java.time.Instant
 import java.util.UUID
 
 class MachineToMachineAuthorizationManagerTest {
-    private val authorizationManager = MachineToMachineAuthorizationManager()
-
     @Nested
     inner class AuthorizeTests {
+        private val authorizationManager = MachineToMachineAuthorizationManager()
+
         @Test
         fun `authorize - principal er ikke jwt - returnerer false`() {
             val authentication = TestingAuthenticationToken("not-a-jwt", null)
@@ -44,13 +43,11 @@ class MachineToMachineAuthorizationManagerTest {
         }
 
         @Test
-        fun `authorize - jwt uten oid - kaster AccessDeniedException`() {
+        fun `authorize - jwt uten oid - returnerer false`() {
             val jwtAuthentication = JwtAuthenticationToken(createJwt(sub = UUID.randomUUID(), oid = null))
             val context = RequestAuthorizationContext(MockHttpServletRequest())
 
-            shouldThrow<AccessDeniedException> {
-                authorizationManager.authorize({ jwtAuthentication }, context)
-            }
+            authorizationManager.authorize({ jwtAuthentication }, context).isGranted shouldBe false
         }
     }
 
@@ -61,49 +58,47 @@ class MachineToMachineAuthorizationManagerTest {
             val sub = UUID.randomUUID()
             val jwt = createJwt(sub = sub, oid = sub)
 
-            authorizationManager.isMachineToMachine(jwt) shouldBe true
+            isMachineToMachine(jwt) shouldBe true
         }
 
         @Test
         fun `isMachineToMachine - oid og sub er ikke lik - er ikke M2M token`() {
             val jwt = createJwt(sub = UUID.randomUUID(), oid = UUID.randomUUID())
 
-            authorizationManager.isMachineToMachine(jwt) shouldBe false
+            isMachineToMachine(jwt) shouldBe false
         }
 
         @Test
-        fun `isMachineToMachine - oid mangler - kaster AccessDeniedException`() {
+        fun `isMachineToMachine - oid mangler - returnerer false`() {
             val jwt = createJwt(sub = UUID.randomUUID(), oid = null)
 
-            shouldThrow<AccessDeniedException> {
-                authorizationManager.isMachineToMachine(jwt)
-            }
+            isMachineToMachine(jwt) shouldBe false
         }
 
         @Test
-        fun `isMachineToMachine - sub mangler - kaster AccessDeniedException`() {
+        fun `isMachineToMachine - sub mangler - returnerer false`() {
             val jwt = createJwt(sub = null, oid = UUID.randomUUID())
 
-            shouldThrow<AccessDeniedException> {
-                authorizationManager.isMachineToMachine(jwt)
-            }
+            isMachineToMachine(jwt) shouldBe false
         }
     }
 
-    private fun createJwt(
-        sub: UUID?,
-        oid: UUID?,
-    ): Jwt {
-        val claims = mutableMapOf<String, Any>()
-        if (sub != null) claims["sub"] = sub.toString()
-        if (oid != null) claims["oid"] = oid.toString()
+    companion object {
+        private fun createJwt(
+            sub: UUID?,
+            oid: UUID?,
+        ): Jwt {
+            val claims = mutableMapOf<String, Any>()
+            if (sub != null) claims["sub"] = sub.toString()
+            if (oid != null) claims["oid"] = oid.toString()
 
-        return Jwt
-            .withTokenValue("token")
-            .header("alg", "RS256")
-            .claims { it.putAll(claims) }
-            .issuedAt(Instant.now())
-            .expiresAt(Instant.now().plusSeconds(3600))
-            .build()
+            return Jwt
+                .withTokenValue("token")
+                .header("alg", "RS256")
+                .claims { it.putAll(claims) }
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build()
+        }
     }
 }

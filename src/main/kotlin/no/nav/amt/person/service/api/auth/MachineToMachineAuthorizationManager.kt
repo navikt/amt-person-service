@@ -1,6 +1,5 @@
 package no.nav.amt.person.service.api.auth
 
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.core.Authentication
@@ -22,13 +21,20 @@ class MachineToMachineAuthorizationManager : AuthorizationManager<RequestAuthori
         return AuthorizationDecision(isMachineToMachine(jwt))
     }
 
-    internal fun isMachineToMachine(jwt: Jwt): Boolean {
-        val sub = jwt.getClaimAsString("sub")?.let { UUID.fromString(it) }
-            ?: throw AccessDeniedException("Sub is missing")
+    companion object {
+        private const val SUB_CLAIM = "sub"
+        private const val OID_CLAIM = "oid"
 
-        val oid = jwt.getClaimAsString("oid")?.let { UUID.fromString(it) }
-            ?: throw AccessDeniedException("Oid is missing")
+        internal fun isMachineToMachine(jwt: Jwt): Boolean {
+            val sub = runCatching {
+                jwt.getClaimAsString(SUB_CLAIM)?.let(UUID::fromString)
+            }.getOrNull() ?: return false
 
-        return sub == oid
+            val oid = runCatching {
+                jwt.getClaimAsString(OID_CLAIM)?.let(UUID::fromString)
+            }.getOrNull() ?: return false
+
+            return sub == oid
+        }
     }
 }
