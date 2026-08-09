@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnProperty("kafka.enabled", havingValue = "true", matchIfMissing = true)
-class KafkaLifecycle(
+class KafkaConsumerLifecycle(
     private val client: KafkaConsumerClient,
     private val consumerRecordProcessor: KafkaConsumerRecordProcessor,
 ) : SmartLifecycle {
@@ -25,6 +25,7 @@ class KafkaLifecycle(
         log.info("Starting Kafka consumer and stored record processor...")
         client.start()
         consumerRecordProcessor.start()
+
         running = true
     }
 
