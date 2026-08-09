@@ -29,7 +29,7 @@ class NomClientTest(
     @Test
     fun `hentNavAnsatt - veileder finnes ikke - returnerer null`() {
         server
-            .expect(requestTo("/graphql"))
+            .expect(requestTo("http://nom-api/graphql"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))

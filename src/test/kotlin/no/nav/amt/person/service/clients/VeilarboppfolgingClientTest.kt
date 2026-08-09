@@ -36,7 +36,7 @@ class VeilarboppfolgingClientTest(
         @Test
         fun `HentVeilederIdent - Skal sende med authorization og treffe riktig URL`() {
             server
-                .expect(requestTo("/veilarboppfolging/api/v3/hent-veileder"))
+                .expect(requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/hent-veileder"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
@@ -119,7 +119,7 @@ class VeilarboppfolgingClientTest(
 
             server
                 .expect(
-                    requestTo("/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
+                    requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
                 ).andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))

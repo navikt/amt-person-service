@@ -33,7 +33,7 @@ class VeilarbvedtaksstotteClientTest(
 
         server
             .expect(
-                requestTo("/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
+                requestTo("http://veilarbvedtaksstotte/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
             ).andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
             .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))

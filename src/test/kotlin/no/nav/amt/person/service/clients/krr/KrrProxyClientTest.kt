@@ -29,7 +29,7 @@ class KrrProxyClientTest(
         val personident = "12345678901"
 
         server
-            .expect(requestTo("/rest/v1/personer?inkluderSikkerDigitalPost=false"))
+            .expect(requestTo("http://digdir-krr-proxy/rest/v1/personer?inkluderSikkerDigitalPost=false"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))

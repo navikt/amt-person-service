@@ -28,7 +28,7 @@ class OppfolgingskontorClientTest(
     @Test
     fun `hentKontorForBruker skal lage riktig request og parse respons`() {
         server
-            .expect(requestTo("/graphql"))
+            .expect(requestTo("http://ao-oppfolgingskontor/graphql"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))

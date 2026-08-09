@@ -3,6 +3,7 @@ package no.nav.amt.person.service.clients
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.core.env.Environment
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.registration.ClientRegistration
@@ -18,8 +19,10 @@ class ClientTestConfig {
     private val mocks = mutableMapOf<String, MockRestServiceServer>()
 
     @Bean
-    fun mockServerConfigurer() = RestClientHttpServiceGroupConfigurer { groups ->
+    fun mockServerConfigurer(environment: Environment) = RestClientHttpServiceGroupConfigurer { groups ->
         groups.forEachClient { group, builder ->
+            val baseUrl = environment.getRequiredProperty("spring.http.serviceclient.${group.name()}.base-url")
+            builder.baseUrl(baseUrl)
             mocks[group.name()] = MockRestServiceServer.bindTo(builder).build()
         }
     }

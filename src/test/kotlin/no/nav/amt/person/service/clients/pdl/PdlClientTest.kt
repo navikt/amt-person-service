@@ -56,7 +56,7 @@ class PdlClientTest(
         @Test
         fun `hentPerson - gyldig respons - skal lage riktig request og parse pdl person`() {
             server
-                .expect(requestTo("/graphql"))
+                .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
@@ -305,7 +305,7 @@ class PdlClientTest(
         @Test
         fun `hentAdressebeskyttelse - person er beskyttet - returnerer gradering`() {
             server
-                .expect(requestTo("/graphql"))
+                .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andRespond(

@@ -22,7 +22,7 @@ class KodeverkClientTest(
     @Test
     fun `hentKodeverk - skal sende riktige headere og query-parametre, og parse respons`() {
         server
-            .expect(requestTo(containsString("/api/v1/kodeverk/Postnummer/koder/betydninger")))
+            .expect(requestTo(containsString("http://kodeverk-api/api/v1/kodeverk/Postnummer/koder/betydninger")))
             .andExpect(requestTo(containsString("ekskluderUgyldige=true")))
             .andExpect(requestTo(containsString("oppslagsdato=")))
             .andExpect(requestTo(containsString("spraak=nb")))
