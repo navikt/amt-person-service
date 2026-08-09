@@ -28,6 +28,8 @@ class ActuatorTest(
 
         val response = restTemplate.getForEntity<String>(uri)
 
+        response.statusCode shouldBe HttpStatus.OK
+
         val body = objectMapper.readTree(response.body)
 
         assertSoftly {
