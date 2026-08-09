@@ -19,7 +19,6 @@ import no.nav.amt.person.service.clients.pdl.PdlClientTestData.fodselsarRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.gyldigRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.minimalFeilRespons
 import no.nav.amt.person.service.clients.pdl.PdlClientTestData.telefonResponse
-import no.nav.amt.person.service.config.ClientConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.postnumreInTest
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
@@ -40,7 +39,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClientResponseException
 
-@RestClientTest(components = [PdlClient::class, ClientConfig::class])
+@RestClientTest(PdlClient::class)
 class PdlClientTest(
     private val client: PdlClient,
 ) : RestClientTestBase("pdl-api") {

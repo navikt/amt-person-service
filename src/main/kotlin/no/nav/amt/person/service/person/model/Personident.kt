@@ -17,12 +17,11 @@ data class Personident(
 
     companion object {
         fun List<Personident>.finnGjeldendeIdent(): Result<Personident> {
-            val gjeldendeIdent =
-                this.firstOrNull {
-                    !it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
-                } ?: this.firstOrNull {
-                    !it.historisk && it.type == IdentType.NPID
-                }
+            val gjeldendeIdent = this.firstOrNull {
+                !it.historisk && it.type == IdentType.FOLKEREGISTERIDENT
+            } ?: this.firstOrNull {
+                !it.historisk && it.type == IdentType.NPID
+            }
 
             return gjeldendeIdent?.let { Result.success(it) }
                 ?: Result.failure(NoSuchElementException("Ingen gjeldende personident finnes"))

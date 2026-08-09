@@ -8,8 +8,8 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
-    maven { url = uri("https://packages.confluent.io/maven/") }
+    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {
@@ -20,6 +20,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.springframework.boot:spring-boot-restclient")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     implementation(libs.tools.jackson.module.kotlin)
     implementation("org.flywaydb:flyway-database-postgresql")
@@ -36,9 +38,6 @@ dependencies {
 
     implementation(libs.poao.tilgang.client)
 
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-
     implementation(libs.shedlock.spring)
     implementation(libs.shedlock.provider.jdbc.template)
 
@@ -50,7 +49,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
     testImplementation("org.springframework.boot:spring-boot-restclient-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
-    testImplementation("org.springframework.security:spring-security-test")
 
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)

@@ -29,12 +29,11 @@ class RolleRepository(
             ON CONFLICT (person_id, type) DO NOTHING
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "id" to UUID.randomUUID(),
-                "personId" to personId,
-                "rolle" to rolle.name,
-            )
+        val parameters = sqlParameters(
+            "id" to UUID.randomUUID(),
+            "personId" to personId,
+            "rolle" to rolle.name,
+        )
 
         template.update(sql, parameters)
     }

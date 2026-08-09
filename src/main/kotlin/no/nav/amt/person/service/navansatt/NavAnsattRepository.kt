@@ -44,19 +44,18 @@ class NavAnsattRepository(
     }
 
     companion object {
-        private val rowMapper =
-            RowMapper { rs, _ ->
-                NavAnsattDbo(
-                    id = rs.getUUID("id"),
-                    navIdent = rs.getString("nav_ident"),
-                    navn = rs.getString("navn"),
-                    telefon = rs.getString("telefon"),
-                    epost = rs.getString("epost"),
-                    navEnhetId = rs.getNullableUUID("nav_enhet_id"),
-                    createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-                    modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-                )
-            }
+        private val rowMapper = RowMapper { rs, _ ->
+            NavAnsattDbo(
+                id = rs.getUUID("id"),
+                navIdent = rs.getString("nav_ident"),
+                navn = rs.getString("navn"),
+                telefon = rs.getString("telefon"),
+                epost = rs.getString("epost"),
+                navEnhetId = rs.getNullableUUID("nav_enhet_id"),
+                createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+                modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+            )
+        }
 
         private fun upsertParamsFromNavAnsatt(navAnsatt: NavAnsattDbo) = sqlParameters(
             "id" to navAnsatt.id,

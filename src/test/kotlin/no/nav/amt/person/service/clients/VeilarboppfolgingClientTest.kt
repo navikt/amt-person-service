@@ -4,7 +4,6 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import no.nav.amt.person.service.config.ClientConfig
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -27,7 +26,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
 
-@RestClientTest(components = [VeilarboppfolgingClient::class, ClientConfig::class])
+@RestClientTest(VeilarboppfolgingClient::class)
 class VeilarboppfolgingClientTest(
     private val sut: VeilarboppfolgingClient,
     private val objectMapper: ObjectMapper,

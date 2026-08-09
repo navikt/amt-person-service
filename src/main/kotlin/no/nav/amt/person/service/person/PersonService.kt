@@ -55,20 +55,19 @@ class PersonService(
 
     @Transactional
     fun oppdaterNavn(person: PersonDbo) {
-        val pdlPerson =
-            try {
-                pdlClient.hentPerson(person.personident)
-            } catch (e: Exception) {
-                val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
+        val pdlPerson = try {
+            pdlClient.hentPerson(person.personident)
+        } catch (e: Exception) {
+            val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
 
-                if (EnvUtils.isDev()) {
-                    log.info(feilmelding)
-                    return
-                } else {
-                    log.error(feilmelding, e)
-                    throw RuntimeException(feilmelding, e)
-                }
+            if (EnvUtils.isDev()) {
+                log.info(feilmelding)
+                return
+            } else {
+                log.error(feilmelding, e)
+                throw RuntimeException(feilmelding, e)
             }
+        }
 
         if (
             person.fornavn == pdlPerson.fornavn &&

@@ -6,7 +6,6 @@ import no.nav.amt.person.service.clients.ClientTestConfig
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
-import no.nav.amt.person.service.config.ClientConfig
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
@@ -21,7 +20,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-@RestClientTest(components = [KrrProxyClient::class, ClientConfig::class])
+@RestClientTest(KrrProxyClient::class)
 class KrrProxyClientTest(
     private val sut: KrrProxyClient,
 ) : RestClientTestBase("digdir-krr-proxy") {

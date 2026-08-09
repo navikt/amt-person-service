@@ -28,9 +28,17 @@ class ActuatorTest(
 
         val response = restTemplate.getForEntity<String>(uri)
 
-        assertSoftly(response) {
-            statusCode shouldBe HttpStatus.OK
-            body shouldBe "{\"status\":\"UP\"}"
+        val body = objectMapper.readTree(response.body)
+
+        assertSoftly {
+            body["status"].asString() shouldBe "UP"
+
+            if (probeName == "readiness") {
+                body["components"]["readinessState"]["status"].asString() shouldBe "UP"
+                body["components"]["db"]["status"].asString() shouldBe "UP"
+            } else {
+                body["components"]["livenessState"]["status"].asString() shouldBe "UP"
+            }
         }
     }
 

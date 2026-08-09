@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.config.ClientConfig
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import org.junit.jupiter.api.Test
@@ -19,7 +18,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import tools.jackson.databind.ObjectMapper
 
-@RestClientTest(components = [VeilarbvedtaksstotteClient::class, ClientConfig::class])
+@RestClientTest(VeilarbvedtaksstotteClient::class)
 class VeilarbvedtaksstotteClientTest(
     private val sut: VeilarbvedtaksstotteClient,
     private val objectMapper: ObjectMapper,

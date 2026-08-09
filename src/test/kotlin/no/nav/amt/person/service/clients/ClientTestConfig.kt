@@ -2,6 +2,7 @@ package no.nav.amt.person.service.clients
 
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.registration.ClientRegistration
@@ -9,23 +10,22 @@ import org.springframework.security.oauth2.client.web.client.support.OAuth2RestC
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.OAuth2AccessToken
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
-import org.springframework.web.service.registry.HttpServiceGroup
 import java.time.Instant
 
-@TestConfiguration
+@TestConfiguration(proxyBeanMethods = false)
 class ClientTestConfig {
     private val mocks = mutableMapOf<String, MockRestServiceServer>()
 
     @Bean
-    fun mockServerConfigurer(): RestClientHttpServiceGroupConfigurer = RestClientHttpServiceGroupConfigurer { groups ->
-        groups.forEachClient { group: HttpServiceGroup, builder: RestClient.Builder ->
+    fun mockServerConfigurer() = RestClientHttpServiceGroupConfigurer { groups ->
+        groups.forEachClient { group, builder ->
             mocks[group.name()] = MockRestServiceServer.bindTo(builder).build()
         }
     }
 
     @Bean
+    @Primary
     fun authorizedClientManager(): OAuth2AuthorizedClientManager {
         val registration = ClientRegistration
             .withRegistrationId("test")
@@ -47,8 +47,7 @@ class ClientTestConfig {
     }
 
     @Bean
-    fun oauth2Configurer(manager: OAuth2AuthorizedClientManager): OAuth2RestClientHttpServiceGroupConfigurer =
-        OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
+    fun oauth2Configurer(manager: OAuth2AuthorizedClientManager) = OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
 
     fun getMock(group: String): MockRestServiceServer = mocks[group] ?: error("No mock for group '$group'")
 
