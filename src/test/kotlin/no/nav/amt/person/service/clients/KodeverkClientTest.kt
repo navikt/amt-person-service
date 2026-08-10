@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.config.ClientConfig
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
@@ -16,14 +15,14 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-@RestClientTest(components = [KodeverkClient::class, ClientConfig::class])
+@RestClientTest(KodeverkClient::class)
 class KodeverkClientTest(
     private val sut: KodeverkClient,
 ) : RestClientTestBase("kodeverk-api") {
     @Test
     fun `hentKodeverk - skal sende riktige headere og query-parametre, og parse respons`() {
         server
-            .expect(requestTo(containsString("/api/v1/kodeverk/Postnummer/koder/betydninger")))
+            .expect(requestTo(containsString("http://kodeverk-api/api/v1/kodeverk/Postnummer/koder/betydninger")))
             .andExpect(requestTo(containsString("ekskluderUgyldige=true")))
             .andExpect(requestTo(containsString("oppslagsdato=")))
             .andExpect(requestTo(containsString("spraak=nb")))

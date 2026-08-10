@@ -50,15 +50,14 @@ class NavEnhetRepository(
     }
 
     companion object {
-        private val rowMapper =
-            RowMapper { rs, _ ->
-                NavEnhetDbo(
-                    id = rs.getUUID("id"),
-                    enhetId = rs.getString("nav_enhet_id"),
-                    navn = rs.getString("navn"),
-                    createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-                    modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-                )
-            }
+        private val rowMapper = RowMapper { rs, _ ->
+            NavEnhetDbo(
+                id = rs.getUUID("id"),
+                enhetId = rs.getString("nav_enhet_id"),
+                navn = rs.getString("navn"),
+                createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+                modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+            )
+        }
     }
 }

@@ -130,12 +130,11 @@ class NavBrukerRepository(
             LIMIT :limit
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "offset" to offset,
-                "limit" to limit,
-                "notSyncedSince" to notSyncedSince,
-            )
+        val parameters = sqlParameters(
+            "offset" to offset,
+            "limit" to limit,
+            "notSyncedSince" to notSyncedSince,
+        )
 
         return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
     }
@@ -156,11 +155,10 @@ class NavBrukerRepository(
             LIMIT :limit
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "siste_personident" to sistePersonident,
-                "limit" to limit,
-            )
+        val parameters = sqlParameters(
+            "siste_personident" to sistePersonident,
+            "limit" to limit,
+        )
 
         return template.query(sql, parameters) { rs, _ -> rs.getString("personident") }
     }
@@ -210,21 +208,20 @@ class NavBrukerRepository(
             	modified_at = CURRENT_TIMESTAMP
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "id" to navBruker.id,
-                "personId" to navBruker.person.id,
-                "navVeilederId" to navBruker.navVeileder?.id,
-                "navEnhetId" to navBruker.navEnhet?.id,
-                "telefon" to navBruker.telefon,
-                "epost" to navBruker.epost,
-                "erSkjermet" to navBruker.erSkjermet,
-                "adresse" to toPGObject(navBruker.adresse, objectMapper),
-                "sisteKrrSync" to navBruker.sisteKrrSync,
-                "adressebeskyttelse" to navBruker.adressebeskyttelse?.name,
-                "oppfolgingsperioder" to toPGObject(navBruker.oppfolgingsperioder, objectMapper),
-                "innsatsgruppe" to navBruker.innsatsgruppe?.name,
-            )
+        val parameters = sqlParameters(
+            "id" to navBruker.id,
+            "personId" to navBruker.person.id,
+            "navVeilederId" to navBruker.navVeileder?.id,
+            "navEnhetId" to navBruker.navEnhet?.id,
+            "telefon" to navBruker.telefon,
+            "epost" to navBruker.epost,
+            "erSkjermet" to navBruker.erSkjermet,
+            "adresse" to toPGObject(navBruker.adresse, objectMapper),
+            "sisteKrrSync" to navBruker.sisteKrrSync,
+            "adressebeskyttelse" to navBruker.adressebeskyttelse?.name,
+            "oppfolgingsperioder" to toPGObject(navBruker.oppfolgingsperioder, objectMapper),
+            "innsatsgruppe" to navBruker.innsatsgruppe?.name,
+        )
 
         template.update(sql, parameters)
     }
@@ -242,68 +239,71 @@ class NavBrukerRepository(
 
         val parameters = sqlParameters("personident" to personident)
 
-        return template.query(sql, parameters) { rs, _ -> rs.getNullableUUID("nav_bruker.id") }.firstOrNull()
+        return template
+            .query(sql, parameters) { rs, _ -> rs.getNullableUUID("nav_bruker.id") }
+            .firstOrNull()
     }
 
-    private val rowMapper =
-        RowMapper { rs, _ ->
-            NavBrukerDbo(
-                id = rs.getUUID("nav_bruker.id"),
-                person =
-                    PersonDbo(
-                        id = rs.getUUID("nav_bruker.person_id"),
-                        personident = rs.getString("person.personident"),
-                        erFalskIdentitet = rs.getBoolean("person.er_falsk_identitet"),
-                        fornavn = rs.getString("person.fornavn"),
-                        mellomnavn = rs.getString("person.mellomnavn"),
-                        etternavn = rs.getString("person.etternavn"),
-                        createdAt = rs.getTimestamp("person.created_at").toLocalDateTime(),
-                        modifiedAt = rs.getTimestamp("person.modified_at").toLocalDateTime(),
-                    ),
-                navVeileder =
-                    rs.getNullableUUID("nav_bruker.nav_veileder_id")?.let {
-                        NavAnsattDbo(
-                            id = rs.getUUID("nav_bruker.nav_veileder_id"),
-                            navIdent = rs.getString("nav_ansatt.nav_ident"),
-                            navn = rs.getString("nav_ansatt.navn"),
-                            telefon = rs.getString("nav_ansatt.telefon"),
-                            epost = rs.getString("nav_ansatt.epost"),
-                            navEnhetId = rs.getNullableUUID("nav_ansatt.nav_enhet_id"),
-                            createdAt = rs.getTimestamp("nav_ansatt.created_at").toLocalDateTime(),
-                            modifiedAt = rs.getTimestamp("nav_ansatt.modified_at").toLocalDateTime(),
-                        )
-                    },
-                navEnhet =
-                    rs.getNullableUUID("nav_bruker.nav_enhet_id")?.let {
-                        NavEnhetDbo(
-                            id = rs.getUUID("nav_bruker.nav_enhet_id"),
-                            enhetId = rs.getString("nav_enhet.nav_enhet_id"),
-                            navn = rs.getString("nav_enhet.navn"),
-                            createdAt = rs.getTimestamp("nav_enhet.created_at").toLocalDateTime(),
-                            modifiedAt = rs.getTimestamp("nav_enhet.modified_at").toLocalDateTime(),
-                        )
-                    },
-                telefon = rs.getString("nav_bruker.telefon"),
-                epost = rs.getString("nav_bruker.epost"),
-                erSkjermet = rs.getBoolean("nav_bruker.er_skjermet"),
-                adresse =
-                    rs.getString("nav_bruker.adresse")?.let {
-                        objectMapper.readValue<Adresse>(it)
-                    },
-                sisteKrrSync = rs.getTimestamp("siste_krr_sync")?.toLocalDateTime(),
-                createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
-                modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
-                adressebeskyttelse =
-                    rs
-                        .getString("nav_bruker.adressebeskyttelse")
-                        ?.let { Adressebeskyttelse.valueOf(it) },
-                oppfolgingsperioder =
-                    rs
-                        .getString("nav_bruker.oppfolgingsperioder")
-                        ?.let { objectMapper.readValue<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
-                innsatsgruppe = rs.getString("nav_bruker.innsatsgruppe")?.let { InnsatsgruppeV1.valueOf(it) },
-            )
-        }
+    private val rowMapper = RowMapper { rs, _ ->
+        NavBrukerDbo(
+            id = rs.getUUID("nav_bruker.id"),
+            person = PersonDbo(
+                id = rs.getUUID("nav_bruker.person_id"),
+                personident = rs.getString("person.personident"),
+                erFalskIdentitet = rs.getBoolean("person.er_falsk_identitet"),
+                fornavn = rs.getString("person.fornavn"),
+                mellomnavn = rs.getString("person.mellomnavn"),
+                etternavn = rs.getString("person.etternavn"),
+                createdAt = rs.getTimestamp("person.created_at").toLocalDateTime(),
+                modifiedAt = rs.getTimestamp("person.modified_at").toLocalDateTime(),
+            ),
+            navVeileder = rs
+                .getNullableUUID("nav_bruker.nav_veileder_id")
+                ?.let {
+                    NavAnsattDbo(
+                        id = rs.getUUID("nav_bruker.nav_veileder_id"),
+                        navIdent = rs.getString("nav_ansatt.nav_ident"),
+                        navn = rs.getString("nav_ansatt.navn"),
+                        telefon = rs.getString("nav_ansatt.telefon"),
+                        epost = rs.getString("nav_ansatt.epost"),
+                        navEnhetId = rs.getNullableUUID("nav_ansatt.nav_enhet_id"),
+                        createdAt = rs.getTimestamp("nav_ansatt.created_at").toLocalDateTime(),
+                        modifiedAt = rs.getTimestamp("nav_ansatt.modified_at").toLocalDateTime(),
+                    )
+                },
+            navEnhet = rs
+                .getNullableUUID("nav_bruker.nav_enhet_id")
+                ?.let {
+                    NavEnhetDbo(
+                        id = rs.getUUID("nav_bruker.nav_enhet_id"),
+                        enhetId = rs.getString("nav_enhet.nav_enhet_id"),
+                        navn = rs.getString("nav_enhet.navn"),
+                        createdAt = rs.getTimestamp("nav_enhet.created_at").toLocalDateTime(),
+                        modifiedAt = rs.getTimestamp("nav_enhet.modified_at").toLocalDateTime(),
+                    )
+                },
+            telefon = rs.getString("nav_bruker.telefon"),
+            epost = rs.getString("nav_bruker.epost"),
+            erSkjermet = rs.getBoolean("nav_bruker.er_skjermet"),
+            adresse = rs
+                .getString("nav_bruker.adresse")
+                ?.let {
+                    objectMapper.readValue<Adresse>(it)
+                },
+            sisteKrrSync = rs.getTimestamp("siste_krr_sync")?.toLocalDateTime(),
+            createdAt = rs.getTimestamp("nav_bruker.created_at").toLocalDateTime(),
+            modifiedAt = rs.getTimestamp("nav_bruker.modified_at").toLocalDateTime(),
+            adressebeskyttelse = rs
+                .getString("nav_bruker.adressebeskyttelse")
+                ?.let { Adressebeskyttelse.valueOf(it) },
+            oppfolgingsperioder = rs
+                .getString("nav_bruker.oppfolgingsperioder")
+                ?.let { objectMapper.readValue<List<Oppfolgingsperiode>>(it) } ?: emptyList(),
+            innsatsgruppe = rs
+                .getString("nav_bruker.innsatsgruppe")
+                ?.let { InnsatsgruppeV1.valueOf(it) },
+        )
+    }
 
     companion object {
         private fun selectNavBrukerQuery(where: String): String =

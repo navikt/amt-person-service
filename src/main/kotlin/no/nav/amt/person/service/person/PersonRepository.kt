@@ -70,15 +70,14 @@ class PersonRepository(
             	modified_at = CURRENT_TIMESTAMP
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "id" to person.id,
-                "personident" to person.personident,
-                "er_falsk_identitet" to person.erFalskIdentitet,
-                "fornavn" to person.fornavn,
-                "mellomnavn" to person.mellomnavn,
-                "etternavn" to person.etternavn,
-            )
+        val parameters = sqlParameters(
+            "id" to person.id,
+            "personident" to person.personident,
+            "er_falsk_identitet" to person.erFalskIdentitet,
+            "fornavn" to person.fornavn,
+            "mellomnavn" to person.mellomnavn,
+            "etternavn" to person.etternavn,
+        )
 
         template.update(sql, parameters)
     }
@@ -99,12 +98,11 @@ class PersonRepository(
             )
             """.trimIndent()
 
-        return template
-            .query(
-                sql,
-                sqlParameters("identer" to identer),
-                rowMapper,
-            )
+        return template.query(
+            sql,
+            sqlParameters("identer" to identer),
+            rowMapper,
+        )
     }
 
     fun getAll(
@@ -140,12 +138,11 @@ class PersonRepository(
             OFFSET :offset
             """.trimIndent()
 
-        val parameters =
-            sqlParameters(
-                "offset" to offset,
-                "limit" to limit,
-                "rolle" to rolle.name,
-            )
+        val parameters = sqlParameters(
+            "offset" to offset,
+            "limit" to limit,
+            "rolle" to rolle.name,
+        )
 
         return template.query(sql, parameters, rowMapper)
     }
@@ -166,18 +163,17 @@ class PersonRepository(
     }
 
     companion object {
-        private val rowMapper =
-            RowMapper { rs, _ ->
-                PersonDbo(
-                    id = rs.getUUID("id"),
-                    personident = rs.getString("personident"),
-                    erFalskIdentitet = rs.getBoolean("er_falsk_identitet"),
-                    fornavn = rs.getString("fornavn"),
-                    mellomnavn = rs.getString("mellomnavn"),
-                    etternavn = rs.getString("etternavn"),
-                    createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-                    modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-                )
-            }
+        private val rowMapper = RowMapper { rs, _ ->
+            PersonDbo(
+                id = rs.getUUID("id"),
+                personident = rs.getString("personident"),
+                erFalskIdentitet = rs.getBoolean("er_falsk_identitet"),
+                fornavn = rs.getString("fornavn"),
+                mellomnavn = rs.getString("mellomnavn"),
+                etternavn = rs.getString("etternavn"),
+                createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+                modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+            )
+        }
     }
 }

@@ -33,12 +33,11 @@ class NavEnhetService(
     private fun opprettEnhet(enhetId: String): NavEnhetDbo? {
         val norgEnhet = norgClient.hentNavEnhet(enhetId) ?: return null
 
-        val enhet =
-            NavEnhetDbo(
-                id = UUID.randomUUID(),
-                enhetId = enhetId,
-                navn = norgEnhet.navn,
-            )
+        val enhet = NavEnhetDbo(
+            id = UUID.randomUUID(),
+            enhetId = enhetId,
+            navn = norgEnhet.navn,
+        )
 
         navEnhetRepository.insert(enhet)
         kafkaProducerService.publiserNavEnhet(enhet)

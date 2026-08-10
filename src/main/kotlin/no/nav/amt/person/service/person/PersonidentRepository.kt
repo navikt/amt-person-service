@@ -36,15 +36,14 @@ class PersonidentRepository(
             	modified_at = CURRENT_TIMESTAMP
             """.trimIndent()
 
-        val parameters =
-            identer.map {
-                sqlParameters(
-                    "ident" to it.ident,
-                    "personId" to it.personId,
-                    "historisk" to it.historisk,
-                    "type" to it.type.name,
-                )
-            }
+        val parameters = identer.map {
+            sqlParameters(
+                "ident" to it.ident,
+                "personId" to it.personId,
+                "historisk" to it.historisk,
+                "type" to it.type.name,
+            )
+        }
 
         template.batchUpdate(sql, parameters.toTypedArray())
     }
@@ -72,16 +71,15 @@ class PersonidentRepository(
     )
 
     companion object {
-        private val rowMapper =
-            RowMapper { rs, _ ->
-                PersonidentDbo(
-                    ident = rs.getString("ident"),
-                    personId = rs.getUUID("person_id"),
-                    historisk = rs.getBoolean("historisk"),
-                    type = rs.getString("type")?.let { IdentType.valueOf(it) } ?: IdentType.UKJENT,
-                    createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
-                    modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
-                )
-            }
+        private val rowMapper = RowMapper { rs, _ ->
+            PersonidentDbo(
+                ident = rs.getString("ident"),
+                personId = rs.getUUID("person_id"),
+                historisk = rs.getBoolean("historisk"),
+                type = rs.getString("type")?.let { IdentType.valueOf(it) } ?: IdentType.UKJENT,
+                createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
+                modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime(),
+            )
+        }
     }
 }

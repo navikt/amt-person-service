@@ -4,7 +4,6 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import no.nav.amt.person.service.config.ClientConfig
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -27,7 +26,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
 
-@RestClientTest(components = [VeilarboppfolgingClient::class, ClientConfig::class])
+@RestClientTest(VeilarboppfolgingClient::class)
 class VeilarboppfolgingClientTest(
     private val sut: VeilarboppfolgingClient,
     private val objectMapper: ObjectMapper,
@@ -37,7 +36,7 @@ class VeilarboppfolgingClientTest(
         @Test
         fun `HentVeilederIdent - Skal sende med authorization og treffe riktig URL`() {
             server
-                .expect(requestTo("/veilarboppfolging/api/v3/hent-veileder"))
+                .expect(requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/hent-veileder"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
@@ -120,7 +119,7 @@ class VeilarboppfolgingClientTest(
 
             server
                 .expect(
-                    requestTo("/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
+                    requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
                 ).andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))

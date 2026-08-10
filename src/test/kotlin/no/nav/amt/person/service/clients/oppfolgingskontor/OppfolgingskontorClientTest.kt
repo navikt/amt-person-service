@@ -7,7 +7,6 @@ import io.kotest.matchers.string.shouldStartWith
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
-import no.nav.amt.person.service.config.ClientConfig
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
@@ -22,14 +21,14 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
-@RestClientTest(components = [OppfolgingskontorClient::class, ClientConfig::class])
+@RestClientTest(OppfolgingskontorClient::class)
 class OppfolgingskontorClientTest(
     private val sut: OppfolgingskontorClient,
 ) : RestClientTestBase("ao-oppfolgingskontor") {
     @Test
     fun `hentKontorForBruker skal lage riktig request og parse respons`() {
         server
-            .expect(requestTo("/graphql"))
+            .expect(requestTo("http://ao-oppfolgingskontor/graphql"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
