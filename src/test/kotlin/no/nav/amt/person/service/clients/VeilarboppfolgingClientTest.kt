@@ -38,7 +38,7 @@ class VeilarboppfolgingClientTest(
             server
                 .expect(requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/hent-veileder"))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer veilarboppfolging-token"))
                 .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
                 .andRespond(
@@ -121,7 +121,7 @@ class VeilarboppfolgingClientTest(
                 .expect(
                     requestTo("http://veilarboppfolging/veilarboppfolging/api/v3/oppfolging/hent-perioder"),
                 ).andExpect(method(HttpMethod.POST))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer veilarboppfolging-token"))
                 .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
                 .andRespond(
                     withSuccess(

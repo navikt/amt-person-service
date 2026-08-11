@@ -2,7 +2,6 @@ package no.nav.amt.person.service.clients.krr
 
 import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.clients.ClientTestConfig
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -32,7 +31,7 @@ class KrrProxyClientTest(
             .expect(requestTo("http://digdir-krr-proxy/rest/v1/personer?inkluderSikkerDigitalPost=false"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer digdir-krr-proxy-token"))
             .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andExpect(jsonPath("$.personidenter[0]").value(personident))
             .andRespond(

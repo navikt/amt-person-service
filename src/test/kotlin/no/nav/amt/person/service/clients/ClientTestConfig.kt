@@ -29,32 +29,33 @@ class ClientTestConfig {
 
     @Bean
     @Primary
-    fun authorizedClientManager(): OAuth2AuthorizedClientManager {
+    fun authorizedClientManager(): OAuth2AuthorizedClientManager = OAuth2AuthorizedClientManager { authorizeRequest ->
+        val registrationId = authorizeRequest.clientRegistrationId
+
         val registration = ClientRegistration
-            .withRegistrationId("test")
+            .withRegistrationId(registrationId)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .clientId("test")
+            .clientId(registrationId)
             .clientSecret("test-secret")
             .tokenUri("http://localhost:9999/token")
             .build()
 
         val accessToken = OAuth2AccessToken(
             OAuth2AccessToken.TokenType.BEARER,
-            TOKEN,
+            "$registrationId-token",
             Instant.now(),
             Instant.now().plusSeconds(3600),
         )
 
-        val authorizedClient = OAuth2AuthorizedClient(registration, "test", accessToken)
-        return OAuth2AuthorizedClientManager { _ -> authorizedClient }
+        OAuth2AuthorizedClient(
+            registration,
+            registrationId,
+            accessToken,
+        )
     }
 
     @Bean
     fun oauth2Configurer(manager: OAuth2AuthorizedClientManager) = OAuth2RestClientHttpServiceGroupConfigurer.from(manager)
 
     fun getMock(group: String): MockRestServiceServer = mocks[group] ?: error("No mock for group '$group'")
-
-    companion object {
-        const val TOKEN = "test-token"
-    }
 }
