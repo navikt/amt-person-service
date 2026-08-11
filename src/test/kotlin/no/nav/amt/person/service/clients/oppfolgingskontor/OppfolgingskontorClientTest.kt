@@ -31,7 +31,7 @@ class OppfolgingskontorClientTest(
             .expect(requestTo("http://ao-oppfolgingskontor/graphql"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ao-oppfolgingskontor-token"))
             .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andExpect(content().string(containsString("kontorTilhorigheter")))
             .andExpect(content().string(containsString("12345678901")))

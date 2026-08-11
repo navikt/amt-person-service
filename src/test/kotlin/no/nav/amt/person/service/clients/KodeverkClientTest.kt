@@ -28,7 +28,7 @@ class KodeverkClientTest(
             .andExpect(requestTo(containsString("spraak=nb")))
             .andExpect(method(HttpMethod.GET))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer ${ClientTestConfig.TOKEN}"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer kodeverk-api-token"))
             .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andRespond(
                 withSuccess(

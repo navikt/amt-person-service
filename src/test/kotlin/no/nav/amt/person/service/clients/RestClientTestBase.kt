@@ -35,8 +35,4 @@ abstract class RestClientTestBase(
         server = testConfig.getMock(group)
         server.reset()
     }
-
-    companion object {
-        const val TOKEN_IN_TEST = ClientTestConfig.TOKEN
-    }
 }

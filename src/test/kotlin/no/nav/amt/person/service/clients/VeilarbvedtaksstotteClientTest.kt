@@ -35,7 +35,7 @@ class VeilarbvedtaksstotteClientTest(
             .expect(
                 requestTo("http://veilarbvedtaksstotte/veilarbvedtaksstotte/api/hent-gjeldende-14a-vedtak"),
             ).andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer veilarbvedtaksstotte-token"))
             .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
             .andExpect(content().json("""{"fnr":"$FNR_IN_TEST"}"""))
             .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON))

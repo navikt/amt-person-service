@@ -58,7 +58,7 @@ class PdlClientTest(
             server
                 .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer pdl-api-token"))
                 .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
                 .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
                 .andExpect(header(BEHANDLINGSNUMMER_HEADER, BEHANDLINGSNUMMER_HEADER_VALUE))
@@ -152,7 +152,7 @@ class PdlClientTest(
 
         server
             .expect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer pdl-api-token"))
             .andExpect(header(TEMA_HEADER, GEN_TEMA_HEADER_VALUE))
             .andRespond(
                 withSuccess(
@@ -307,7 +307,7 @@ class PdlClientTest(
             server
                 .expect(requestTo("http://pdl-api/graphql"))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $TOKEN_IN_TEST"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer pdl-api-token"))
                 .andRespond(
                     withSuccess(
                         """{"errors": null, "data": {"hentPerson": {"adressebeskyttelse": [{"gradering": "STRENGT_FORTROLIG"}]}}}""",
