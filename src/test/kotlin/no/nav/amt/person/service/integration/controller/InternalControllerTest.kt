@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.authorization.AuthorizationDecision
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockHttpServletRequestDsl
@@ -27,7 +26,6 @@ import java.util.UUID
 
 @WebMvcTest(InternalController::class, SecurityConfig::class, InternalAuthorizationManager::class)
 @ActiveProfiles("integration")
-@EnableWebSecurity
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class InternalControllerTest(
     private val mockMvc: MockMvc,
