@@ -1,7 +1,6 @@
 package no.nav.amt.person.service.config
 
 import no.nav.amt.person.service.api.auth.InternalAuthorizationManager
-import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
@@ -20,7 +19,6 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(
         http: HttpSecurity,
-        machineToMachineAuthorizationManager: MachineToMachineAuthorizationManager,
         internalAuthorizationManager: InternalAuthorizationManager,
     ): SecurityFilterChain {
         http {
@@ -36,7 +34,7 @@ class SecurityConfig {
                     ),
                     permitAll,
                 )
-                authorize("/api/**", machineToMachineAuthorizationManager)
+                authorize("/api/**", hasRole("access_as_application"))
                 authorize("/internal/**", internalAuthorizationManager)
                 authorize(anyRequest, authenticated)
             }

@@ -40,6 +40,8 @@ spring:
         jwt:
           issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
           audiences: ${AZURE_APP_CLIENT_ID}
+          authorities-claim-name: roles
+          authority-prefix: ROLE_
 
       client:
         # Benyttes i klientkonfigurasjonene under

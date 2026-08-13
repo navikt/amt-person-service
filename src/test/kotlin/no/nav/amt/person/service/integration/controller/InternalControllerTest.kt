@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.verify
 import no.nav.amt.person.service.api.auth.InternalAuthorizationManager
-import no.nav.amt.person.service.api.auth.MachineToMachineAuthorizationManager
 import no.nav.amt.person.service.config.SecurityConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.internal.InternalController
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType
-import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockHttpServletRequestDsl
@@ -30,12 +28,9 @@ import java.util.UUID
 class InternalControllerTest(
     private val mockMvc: MockMvc,
     @MockkBean private val internalService: InternalService,
-    @MockkBean private val machineToMachineAuthorizationManager: MachineToMachineAuthorizationManager,
 ) {
     @BeforeEach
     fun setup() {
-        every { machineToMachineAuthorizationManager.authorize(any(), any()) } returns AuthorizationDecision(true)
-
         justRun { internalService.oppdaterPersonidenter(any()) }
         justRun { internalService.oppdaterNavn(any()) }
         justRun { internalService.republiserNavBrukere(any(), any()) }
