@@ -566,18 +566,19 @@ class PersonApiControllerTest(
 
     private fun issueAzureAdM2MToken(sub: UUID = UUID.randomUUID()): String = getAzureAdToken(
         sub = sub,
-        oid = sub,
+        roles = listOf("access_as_application"),
     )
 
     private fun issueAzureAdToken(): String = getAzureAdToken(
         sub = UUID.randomUUID(),
-        oid = UUID.randomUUID(),
+        roles = emptyList(),
     )
 
     private fun getAzureAdToken(
         sub: UUID = UUID.randomUUID(),
-        oid: UUID = sub,
+        oid: UUID = UUID.randomUUID(),
         audience: String = "amt-person-service-client-id",
+        roles: List<String> = emptyList(),
     ): String {
         val claims = JwtClaimsSet
             .builder()
@@ -585,6 +586,7 @@ class PersonApiControllerTest(
             .subject(sub.toString())
             .audience(listOf(audience))
             .claim("oid", oid.toString())
+            .claim("roles", roles)
             .issuedAt(Instant.now())
             .expiresAt(Instant.now().plusSeconds(3600))
             .build()
