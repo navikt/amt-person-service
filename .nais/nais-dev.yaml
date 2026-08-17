@@ -9,8 +9,6 @@ spec:
   image: {{image}}
   port: 8080
   terminationGracePeriodSeconds: 30
-  ingresses:
-    - https://amt-person-service.intern.dev.nav.no
 
   prometheus:
     enabled: true
@@ -159,10 +157,10 @@ spec:
             envVarPrefix: DB
 
   observability:
-      autoInstrumentation:
-        enabled: true
-        runtime: java
-      logging:
-        destinations:
-          - id: elastic
-          - id: loki
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
