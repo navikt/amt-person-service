@@ -18,11 +18,10 @@ class NavAnsattUpdater(
 
     fun oppdaterAlle(batchSize: Int = 100) {
         var batchNumber = 1
-        val ansattBatcher =
-            navAnsattRepository
-                .getAll()
-                .also { log.info("Oppdaterer ${it.size} nav-ansatte") }
-                .chunked(batchSize)
+        val ansattBatcher = navAnsattRepository
+            .getAll()
+            .also { log.info("Oppdaterer ${it.size} Nav-ansatte") }
+            .chunked(batchSize)
 
         ansattBatcher.forEach { batch ->
             log.info("Prosesserer batch ${batchNumber++}")
@@ -54,16 +53,16 @@ class NavAnsattUpdater(
         val navEnhet = nomAnsatt.navEnhetNummer?.let { navEnhetService.hentEllerOpprettNavEnhet(it) }
 
         return if (ansatt.lagretAnsatt.skalOppdateres(nomAnsatt, navEnhet)) {
-            val telefon =
-                nomAnsatt.telefonnummer ?: ansatt.lagretAnsatt.telefon?.also {
-                    log.warn(
+            val telefon = nomAnsatt.telefonnummer
+                ?: ansatt.lagretAnsatt.telefon?.also {
+                    log.info(
                         "Telefonnummer for Nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.",
                     )
                 }
 
-            val epost =
-                nomAnsatt.epost ?: ansatt.lagretAnsatt.epost?.also {
-                    log.warn("E-post for Nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
+            val epost = nomAnsatt.epost
+                ?: ansatt.lagretAnsatt.epost?.also {
+                    log.info("E-post for Nav-ansatt ${ansatt.lagretAnsatt.id} er nullstilt i response fra Nom, ignorerer oppdatering.")
                 }
 
             NavAnsattDbo(
