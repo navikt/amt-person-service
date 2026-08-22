@@ -17,12 +17,12 @@ class NomClient(
         .also { if (it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 
     fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
-        val response = nomApi.execute(GraphqlRequest(hentRessurserQuery, mapOf("identer" to navIdenter)))
+        val response = nomApi.execute(GraphqlRequest(hentRessurserQuery, mapOf(QUERY_IDENTER to navIdenter)))
 
-        val data = response["data"] ?: return emptyList()
+        val data = response[DATA] ?: return emptyList()
         if (data.isNull) return emptyList()
 
-        val ressurserNode = data["ressurser"] ?: return emptyList()
+        val ressurserNode = data[RESSURSER] ?: return emptyList()
         val ressurser: List<NomQueries.RessursResult> = objectMapper.treeToValue(ressurserNode)
 
         return ressurser.mapNotNull { result ->
@@ -43,6 +43,9 @@ class NomClient(
 
     companion object {
         private val log = LoggerFactory.getLogger(NomClient::class.java)
+        private const val QUERY_IDENTER = "identer"
+        private const val DATA = "data"
+        private const val RESSURSER = "ressurser"
 
         private val hentRessurserQuery =
             ClassPathResource("graphql-documents/hentRessurser.graphql").getContentAsString(Charsets.UTF_8)
