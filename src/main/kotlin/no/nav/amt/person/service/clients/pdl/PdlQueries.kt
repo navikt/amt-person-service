@@ -6,6 +6,12 @@ object PdlQueries {
     )
 
     data class PdlErrorDetails(
+        val type: String? = null,
+        val cause: String? = null,
+        val policy: String? = null,
+    )
+
+    data class HentPersonResult(
         val falskIdentitet: Attribute.FalskIdentitet?,
         val navn: List<Attribute.Navn>,
         val telefonnummer: List<Attribute.Telefonnummer>,
