@@ -20,12 +20,6 @@ class PdlClient(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    private val hentPersonQuery = loadQuery(HENT_PERSON_DOCUMENT)
-    private val hentPersonFodselsarQuery = loadQuery(HENT_PERSON_FODSELSAAR_DOCUMENT)
-    private val hentIdenterQuery = loadQuery(HENT_IDENTER_DOCUMENT)
-    private val hentTelefonQuery = loadQuery(HENT_TELEFON_DOCUMENT)
-    private val hentAdressebeskyttelseQuery = loadQuery(HENT_ADRESSEBESKYTTELSE_DOCUMENT)
-
     companion object {
         private const val EMPTY_DATA_MSG = "PDL respons inneholder ikke data"
         private const val HENT_PERSON_DOCUMENT = "hentPerson"
@@ -48,6 +42,12 @@ class PdlClient(
         private const val MESSAGE = "message"
         private const val QUERY = "query"
         private const val ID = "id"
+
+        private val hentPersonQuery = loadQuery(HENT_PERSON_DOCUMENT)
+        private val hentPersonFodselsarQuery = loadQuery(HENT_PERSON_FODSELSAAR_DOCUMENT)
+        private val hentIdenterQuery = loadQuery(HENT_IDENTER_DOCUMENT)
+        private val hentTelefonQuery = loadQuery(HENT_TELEFON_DOCUMENT)
+        private val hentAdressebeskyttelseQuery = loadQuery(HENT_ADRESSEBESKYTTELSE_DOCUMENT)
 
         private fun loadQuery(name: String) = ClassPathResource("graphql-documents/$name.graphql").getContentAsString(Charsets.UTF_8)
     }
