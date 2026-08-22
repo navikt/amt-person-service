@@ -9,7 +9,7 @@ data class NomNavAnsatt(
     val navn: String,
     val telefonnummer: String?,
     val epost: String?,
-    private val orgTilknytning: List<NomQueries.HentRessurser.OrgTilknytning>,
+    private val orgTilknytning: List<NomQueries.OrgTilknytning>,
 ) {
     val navEnhetNummer: String?
         get() =
