@@ -26,22 +26,20 @@ import java.util.UUID
 object TestData {
     fun randomIdent(): String = (10_00_19_00_00_000..31_12_20_99_99_999).random().toString()
 
-    val navGrunerlokka =
-        NavEnhetDbo(
-            id = UUID(0L, 0L),
-            navn = "Nav Grünerløkka",
-            enhetId = "0315",
-        )
+    val navGrunerlokka = NavEnhetDbo(
+        id = UUID(0L, 0L),
+        navn = "Nav Grünerløkka",
+        enhetId = "0315",
+    )
 
-    val orgTilknytning =
-        listOf(
-            NomQueries.HentRessurser.OrgTilknytning(
-                gyldigFom = LocalDate.of(2020, 1, 1),
-                gyldigTom = null,
-                orgEnhet = NomQueries.HentRessurser.OrgTilknytning.OrgEnhet("0315"),
-                erDagligOppfolging = true,
-            ),
-        )
+    val orgTilknytning = listOf(
+        NomQueries.OrgTilknytning(
+            gyldigFom = LocalDate.of(2020, 1, 1),
+            gyldigTom = null,
+            orgEnhet = NomQueries.OrgTilknytning.OrgEnhet("0315"),
+            erDagligOppfolging = true,
+        ),
+    )
 
     fun randomNavIdent(): String = ('A'..'Z').random().toString() + (100_000..999_999).random().toString()
 

@@ -13,7 +13,11 @@ import no.nav.amt.person.service.person.model.Postboksadresse
 import no.nav.amt.person.service.person.model.Vegadresse
 import no.nav.amt.person.service.poststed.Postnummer
 
-fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>): PdlPerson {
+fun toPdlBruker(
+    hentPerson: PdlQueries.HentPersonResult,
+    hentIdenter: PdlQueries.HentIdenterResult,
+    postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>,
+): PdlPerson {
     val navn = hentPerson.navn.toNavnMedFallback()
 
     return PdlPerson(
@@ -23,14 +27,13 @@ fun PdlQueries.HentPerson.ResponseData.toPdlBruker(postnummerTilPoststedFunc: (S
         etternavn = navn.etternavn,
         telefonnummer = hentPerson.telefonnummer.toTelefonnummer(),
         adressebeskyttelseGradering = hentPerson.adressebeskyttelse.toDiskresjonskode(),
-        identer = hentIdenter.identer.map
-            {
-                Personident(
-                    it.ident,
-                    it.historisk,
-                    IdentType.valueOf(it.gruppe),
-                )
-            },
+        identer = hentIdenter.identer.map {
+            Personident(
+                it.ident,
+                it.historisk,
+                IdentType.valueOf(it.gruppe),
+            )
+        },
         adresse = hentPerson.toAdresse(postnummerTilPoststedFunc),
     )
 }
@@ -48,7 +51,7 @@ fun List<PdlQueries.Attribute.Telefonnummer>.toTelefonnummer(): String? {
     return "${prioritertNummer.landskode}${prioritertNummer.nummer}"
 }
 
-private fun PdlQueries.HentPerson.HentPerson.toAdresse(postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>): Adresse? {
+private fun PdlQueries.HentPersonResult.toAdresse(postnummerTilPoststedFunc: (Set<String>) -> List<Postnummer>): Adresse? {
     val kontaktadresseFraPdl = kontaktadresse.firstOrNull()
     val bostedsadresseFraPdl = bostedsadresse.firstOrNull()
     val oppholdsadresseFraPdl = oppholdsadresse.firstOrNull()
