@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.treeToValue
 
 @Service
 class PdlClient(
@@ -37,10 +38,8 @@ class PdlClient(
         logPdlWarnings(response)
 
         val data = requiredData(response)
-        val hentPerson = objectMapper.treeToValue(data["hentPerson"], PdlQueries.HentPersonResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
-        val hentIdenter = objectMapper.treeToValue(data["hentIdenter"], PdlQueries.HentIdenterResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
+        val hentPerson: PdlQueries.HentPersonResult = objectMapper.treeToValue(data["hentPerson"])
+        val hentIdenter: PdlQueries.HentIdenterResult = objectMapper.treeToValue(data["hentIdenter"])
 
         return toPdlBruker(hentPerson, hentIdenter) { postnummer -> poststedRepository.getPoststeder(postnummer) }
     }
@@ -51,8 +50,7 @@ class PdlClient(
         logPdlWarnings(response)
 
         val data = requiredData(response)
-        val hentPerson = objectMapper.treeToValue(data["hentPerson"], PdlQueries.HentPersonFoedselsdatoResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
+        val hentPerson: PdlQueries.HentPersonFoedselsdatoResult = objectMapper.treeToValue(data["hentPerson"])
 
         return hentPerson.foedselsdato.firstOrNull()?.foedselsaar
             ?: throw RuntimeException("PDL person mangler fodselsdato")
@@ -67,8 +65,7 @@ class PdlClient(
         val hentIdenterNode = data["hentIdenter"]
         if (hentIdenterNode == null || hentIdenterNode.isNull) throw RuntimeException(EMPTY_DATA_MSG)
 
-        val hentIdenter = objectMapper.treeToValue(hentIdenterNode, PdlQueries.HentIdenterResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
+        val hentIdenter: PdlQueries.HentIdenterResult = objectMapper.treeToValue(hentIdenterNode)
 
         return hentIdenter.identer.map {
             Personident(
@@ -85,8 +82,7 @@ class PdlClient(
         logPdlWarnings(response)
 
         val data = requiredData(response)
-        val hentPerson = objectMapper.treeToValue(data["hentPerson"], HentTelefonResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
+        val hentPerson: HentTelefonResult = objectMapper.treeToValue(data["hentPerson"])
 
         return hentPerson.telefonnummer.toTelefonnummer()
     }
@@ -97,8 +93,7 @@ class PdlClient(
         logPdlWarnings(response)
 
         val data = requiredData(response)
-        val hentPerson = objectMapper.treeToValue(data["hentPerson"], HentAdressebeskyttelseResult::class.java)
-            ?: throw RuntimeException(EMPTY_DATA_MSG)
+        val hentPerson: HentAdressebeskyttelseResult = objectMapper.treeToValue(data["hentPerson"])
 
         return hentPerson.adressebeskyttelse.toDiskresjonskode()
     }

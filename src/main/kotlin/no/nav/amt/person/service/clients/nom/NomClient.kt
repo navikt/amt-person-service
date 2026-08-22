@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.treeToValue
 
 @Service
 class NomClient(
@@ -22,9 +23,7 @@ class NomClient(
         if (data.isNull) return emptyList()
 
         val ressurserNode = data["ressurser"] ?: return emptyList()
-        val ressurserType = objectMapper.typeFactory
-            .constructCollectionType(List::class.java, NomQueries.RessursResult::class.java)
-        val ressurser: List<NomQueries.RessursResult> = objectMapper.treeToValue(ressurserNode, ressurserType)
+        val ressurser: List<NomQueries.RessursResult> = objectMapper.treeToValue(ressurserNode)
 
         return ressurser.mapNotNull { result ->
             if (result.code != NomQueries.ResultCode.OK || result.ressurs == null) {
