@@ -48,6 +48,7 @@ class PdlClient(
     fun hentPersonFodselsar(personident: String): Int {
         val response = pdlApi.execute(GraphqlRequest(hentPersonFodselsarQuery, PdlQueries.Variables(personident)))
         handlePdlErrors(response)
+        logPdlWarnings(response)
 
         val data = requiredData(response)
         val hentPerson = objectMapper.treeToValue(data["hentPerson"], PdlQueries.HentPersonFoedselsdatoResult::class.java)
@@ -60,6 +61,7 @@ class PdlClient(
     fun hentIdenter(personident: String): List<Personident> {
         val response = pdlApi.execute(GraphqlRequest(hentIdenterQuery, PdlQueries.Variables(personident)))
         handlePdlErrors(response)
+        logPdlWarnings(response)
 
         val data = requiredData(response)
         val hentIdenterNode = data["hentIdenter"]
@@ -92,6 +94,7 @@ class PdlClient(
     fun hentAdressebeskyttelse(personident: String): AdressebeskyttelseGradering? {
         val response = pdlApi.execute(GraphqlRequest(hentAdressebeskyttelseQuery, PdlQueries.Variables(personident)))
         handlePdlErrors(response)
+        logPdlWarnings(response)
 
         val data = requiredData(response)
         val hentPerson = objectMapper.treeToValue(data["hentPerson"], HentAdressebeskyttelseResult::class.java)
