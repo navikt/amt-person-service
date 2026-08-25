@@ -9,8 +9,8 @@ spring-boot = "4.1.0"
 spring-dependency-management = "1.1.7"
 
 # Serialization / Avro
-apache-avro = "1.12.1"
-jackson-module-kotlin = "3.2.1"
+apache-avro = "1.12.2"
+jackson-module-kotlin = "3.2.2"
 confluent = "8.1.1"
 
 # Logging
@@ -22,10 +22,10 @@ poao-tilgang = "2025.11.03_13.40-18456d0598be"
 amt-lib = "1.2026.04.19_10.49-44013e7d5585"
 
 # Misc
-shedlock = "7.7.0"
+shedlock = "7.8.0"
 
 # Testing
-kotest = "6.2.3"
+kotest = "6.2.4"
 mockk = "1.14.11"
 springmockk-version = "5.0.1"
 
