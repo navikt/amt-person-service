@@ -134,6 +134,10 @@ class PersonService(
         person: PersonDbo,
         pdlPerson: PdlPerson,
     ): PersonDbo {
+        personidentRepository.upsert(
+            identer = pdlPerson.identer.map { it.toDbo(person.id) }.toSet(),
+        )
+
         val oppdatertPerson = person.copy(
             erFalskIdentitet = pdlPerson.erFalskIdentitet,
             fornavn = pdlPerson.fornavn.titlecase(),

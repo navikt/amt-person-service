@@ -179,6 +179,27 @@ class NavBrukerServiceTest {
             verify(exactly = 0) { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) }
             verify(exactly = 0) { navBrukerRepository.getByPersonId(any()) }
         }
+
+        @Test
+        fun `hentEllerOpprettNavBruker - falsk identitet med ukjent navn og gammel modifiedAt - refresher ikke fra PDL`() {
+            val personident = TestData.randomIdent()
+            val person = TestData.lagPerson(
+                personident = personident,
+                fornavn = UNKNOWN_NAME,
+                etternavn = UNKNOWN_NAME,
+                erFalskIdentitet = true,
+                modifiedAt = LocalDateTime.now().minusDays(2),
+            )
+            val navBruker = TestData.lagNavBruker(person = person)
+
+            every { navBrukerRepository.get(personident) } returns navBruker
+
+            val faktiskBruker = sut.hentEllerOpprettNavBruker(personident)
+
+            faktiskBruker shouldBe navBruker
+            verify(exactly = 0) { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) }
+            verify(exactly = 0) { navBrukerRepository.getByPersonId(any()) }
+        }
     }
 
     @Nested

@@ -55,7 +55,7 @@ class PersonServiceTest {
 
         val person = service.hentEllerOpprettPerson(personident)
         assertSoftly(person) {
-            personident shouldBe personident
+            this.personident shouldBe personident
             fornavn shouldBe pdlPerson.fornavn
             mellomnavn shouldBe pdlPerson.mellomnavn
             etternavn shouldBe pdlPerson.etternavn
@@ -64,9 +64,10 @@ class PersonServiceTest {
 
     @Test
     fun `hentEllerOpprettPerson - forceFetchFromPdl - oppdaterer eksisterende person`() {
-        val personident = TestData.randomIdent()
+        val gammelPersonident = TestData.randomIdent()
+        val nyPersonident = TestData.randomIdent()
         val eksisterendePerson = TestData.lagPerson(
-            personident = personident,
+            personident = gammelPersonident,
             fornavn = "Gammelt",
             etternavn = "Navn",
             erFalskIdentitet = false,
@@ -78,25 +79,37 @@ class PersonServiceTest {
             etternavn = "Nytt etternavn",
             telefonnummer = null,
             adressebeskyttelseGradering = null,
-            identer = listOf(Personident(ident = personident, historisk = false, type = IdentType.FOLKEREGISTERIDENT)),
+            identer = listOf(
+                Personident(ident = nyPersonident, historisk = false, type = IdentType.FOLKEREGISTERIDENT),
+                Personident(ident = gammelPersonident, historisk = true, type = IdentType.FOLKEREGISTERIDENT),
+            ),
             adresse = null,
         )
 
-        every { pdlClient.hentPerson(personident) } returns pdlPerson
-        every { personRepository.get(personident) } returns eksisterendePerson
+        every { pdlClient.hentPerson(gammelPersonident) } returns pdlPerson
+        every { personRepository.get(gammelPersonident) } returns eksisterendePerson
 
-        val oppdatertPerson = service.hentEllerOpprettPerson(personident, forceFetchFromPdl = true)
+        val oppdatertPerson = service.hentEllerOpprettPerson(gammelPersonident, forceFetchFromPdl = true)
 
         assertSoftly(oppdatertPerson) {
             id shouldBe eksisterendePerson.id
-            personident shouldBe eksisterendePerson.personident
+            this.personident shouldBe nyPersonident
             erFalskIdentitet shouldBe true
             fornavn shouldBe "Nytt Fornavn"
             mellomnavn shouldBe "Nytt Mellomnavn"
             etternavn shouldBe "Nytt Etternavn"
         }
 
-        verify(exactly = 1) { pdlClient.hentPerson(personident) }
+        verify(exactly = 1) { pdlClient.hentPerson(gammelPersonident) }
+        verify {
+            personidentRepository.upsert(
+                match { identer ->
+                    identer.size == 2 &&
+                        identer.any { it.ident == nyPersonident && !it.historisk && it.personId == eksisterendePerson.id } &&
+                        identer.any { it.ident == gammelPersonident && it.historisk && it.personId == eksisterendePerson.id }
+                },
+            )
+        }
         verify { personRepository.upsert(oppdatertPerson) }
     }
 
