@@ -214,7 +214,7 @@ class PersonApiControllerTest(
 
         @Test
         fun `bruker finnes - skal returnere eksisterende`() {
-            val navBruker = TestData.lagNavBruker()
+            val navBruker = TestData.lagNavBruker(person = TestData.lagPerson(erFalskIdentitet = true))
             testDataRepository.insertNavBruker(navBruker)
 
             val result = mockMvc
@@ -549,6 +549,7 @@ class PersonApiControllerTest(
                 fornavn shouldBe brukerDto.fornavn
                 mellomnavn shouldBe brukerDto.mellomnavn
                 etternavn shouldBe brukerDto.etternavn
+                erFalskIdentitet shouldBe brukerDto.harFalskIdentitet
             }
 
             telefon shouldBe brukerDto.telefon
