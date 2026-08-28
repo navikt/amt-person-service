@@ -13,6 +13,8 @@ import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonUpdateEvent
 import no.nav.amt.person.service.person.RolleRepository
+import no.nav.amt.person.service.person.dbo.PersonDbo
+import no.nav.amt.person.service.person.dbo.PersonDbo.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Adresse
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils
@@ -43,11 +45,22 @@ class NavBrukerService(
 
     fun hentEllerOpprettNavBruker(personident: String): NavBrukerDbo {
         val navBruker = navBrukerRepository.get(personident)?.let { navBrukerDbo ->
-            if (navBrukerDbo.innsatsgruppe == null) {
-                oppdaterOppfolgingsperiodeOgInnsatsgruppe(navBrukerDbo)
-                navBrukerRepository.get(navBrukerDbo.id)
+            val oppdatertNavBruker = if (skalOppdaterePersonFraPdl(navBrukerDbo.person)) {
+                val oppdatertPerson = personService.hentEllerOpprettPerson(
+                    personident = personident,
+                    forceFetchFromPdl = true,
+                )
+                navBrukerRepository.getByPersonId(oppdatertPerson.id)
+                    ?: throw IllegalStateException("Fant ikke Nav-bruker etter oppdatering av personident $personident")
             } else {
                 navBrukerDbo
+            }
+
+            if (oppdatertNavBruker.innsatsgruppe == null) {
+                oppdaterOppfolgingsperiodeOgInnsatsgruppe(oppdatertNavBruker)
+                navBrukerRepository.get(oppdatertNavBruker.id)
+            } else {
+                oppdatertNavBruker
             }
         } ?: opprettNavBruker(personident)
 
@@ -57,7 +70,7 @@ class NavBrukerService(
     private fun opprettNavBruker(personident: String): NavBrukerDbo {
         val pdlPerson = pdlClient.hentPerson(personident)
 
-        val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
+        val person = personService.hentEllerOpprettPerson(personident, pdlPerson, forceFetchFromPdl = true)
         val veileder = navAnsattService.hentBrukersVeileder(personident)
         val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
         val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
@@ -95,6 +108,11 @@ class NavBrukerService(
                 "Fant ikke Nav-bruker for person ${person.id}, skulle ha opprettet bruker ${navBruker.id}",
             )
     }
+
+    private fun skalOppdaterePersonFraPdl(person: PersonDbo): Boolean = person.fornavn == UNKNOWN_NAME &&
+        person.etternavn == UNKNOWN_NAME &&
+        !person.erFalskIdentitet &&
+        person.modifiedAt.isBefore(LocalDateTime.now().minusDays(1))
 
     fun upsert(navBruker: NavBrukerDbo) {
         transactionTemplate.executeWithoutResult {
