@@ -19,6 +19,7 @@ import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.RolleRepository
+import no.nav.amt.person.service.person.dbo.PersonDbo.Companion.UNKNOWN_NAME
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import no.nav.poao_tilgang.client.PoaoTilgangClient
@@ -122,6 +123,36 @@ class NavBrukerServiceTest {
             val faktiskBruker = sut.hentEllerOpprettNavBruker(navBruker.person.personident)
             faktiskBruker.oppfolgingsperioder shouldBe navBruker.oppfolgingsperioder
             faktiskBruker.innsatsgruppe shouldBe null
+        }
+
+        @Test
+        fun `hentEllerOpprettNavBruker - eksisterende bruker med ukjent navn - oppdaterer person fra PDL`() {
+            val personident = TestData.randomIdent()
+            val gammelPerson = TestData.lagPerson(
+                personident = personident,
+                fornavn = UNKNOWN_NAME,
+                etternavn = UNKNOWN_NAME,
+                erFalskIdentitet = false,
+            )
+            val oppdatertPerson = gammelPerson.copy(
+                fornavn = "Nytt Fornavn",
+                mellomnavn = "Nytt Mellomnavn",
+                etternavn = "Nytt Etternavn",
+                erFalskIdentitet = true,
+            )
+            val gammelNavBruker = TestData.lagNavBruker(person = gammelPerson)
+            val oppdatertNavBruker = gammelNavBruker.copy(person = oppdatertPerson)
+
+            every { navBrukerRepository.get(personident) } returns gammelNavBruker
+            every { navBrukerRepository.getByPersonId(oppdatertPerson.id) } returns oppdatertNavBruker
+            every { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) } returns oppdatertPerson
+
+            val faktiskBruker = sut.hentEllerOpprettNavBruker(personident)
+
+            faktiskBruker.person shouldBe oppdatertPerson
+            verify(exactly = 1) { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) }
+            verify(exactly = 1) { navBrukerRepository.get(personident) }
+            verify(exactly = 1) { navBrukerRepository.getByPersonId(oppdatertPerson.id) }
         }
     }
 

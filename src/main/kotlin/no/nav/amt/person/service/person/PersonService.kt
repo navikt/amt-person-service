@@ -24,16 +24,37 @@ class PersonService(
 
     @Retryable(maxRetries = 2)
     @Transactional
-    fun hentEllerOpprettPerson(personident: String): PersonDbo = personRepository.get(personident) ?: run {
-        val pdlPerson = pdlClient.hentPerson(personident)
-        opprettPerson(pdlPerson)
+    fun hentEllerOpprettPerson(
+        personident: String,
+        forceFetchFromPdl: Boolean = false,
+    ): PersonDbo = when {
+        forceFetchFromPdl -> {
+            val pdlPerson = pdlClient.hentPerson(personident)
+            personRepository
+                .get(personident)
+                ?.let {
+                    oppdaterPersonFraPdl(
+                        person = it,
+                        pdlPerson = pdlPerson,
+                    )
+                } ?: opprettPerson(pdlPerson)
+        }
+
+        else -> personRepository.get(personident) ?: run {
+            val pdlPerson = pdlClient.hentPerson(personident)
+            opprettPerson(pdlPerson)
+        }
     }
 
     @Transactional
     fun hentEllerOpprettPerson(
         personident: String,
         pdlPerson: PdlPerson,
-    ): PersonDbo = personRepository.get(personident) ?: opprettPerson(pdlPerson)
+        forceFetchFromPdl: Boolean = false,
+    ): PersonDbo = when {
+        forceFetchFromPdl -> personRepository.get(personident)?.let { oppdaterPersonFraPdl(it, pdlPerson) } ?: opprettPerson(pdlPerson)
+        else -> personRepository.get(personident) ?: opprettPerson(pdlPerson)
+    }
 
     @Transactional
     fun oppdaterPersonIdent(identer: List<Personident>) {
@@ -107,5 +128,24 @@ class PersonService(
         log.info("Opprettet ny person med id ${person.id}")
 
         return person
+    }
+
+    private fun oppdaterPersonFraPdl(
+        person: PersonDbo,
+        pdlPerson: PdlPerson,
+    ): PersonDbo {
+        val oppdatertPerson = person.copy(
+            erFalskIdentitet = pdlPerson.erFalskIdentitet,
+            fornavn = pdlPerson.fornavn.titlecase(),
+            mellomnavn = pdlPerson.mellomnavn?.titlecase(),
+            etternavn = pdlPerson.etternavn.titlecase(),
+            personident = pdlPerson.identer
+                .finnGjeldendeIdent()
+                .getOrThrow()
+                .ident,
+        )
+
+        upsert(oppdatertPerson)
+        return oppdatertPerson
     }
 }

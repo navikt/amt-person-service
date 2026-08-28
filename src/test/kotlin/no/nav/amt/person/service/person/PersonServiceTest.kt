@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.data.TestData
@@ -59,6 +60,57 @@ class PersonServiceTest {
             mellomnavn shouldBe pdlPerson.mellomnavn
             etternavn shouldBe pdlPerson.etternavn
         }
+    }
+
+    @Test
+    fun `hentEllerOpprettPerson - forceFetchFromPdl - oppdaterer eksisterende person`() {
+        val personident = TestData.randomIdent()
+        val eksisterendePerson = TestData.lagPerson(
+            personident = personident,
+            fornavn = "Gammelt",
+            etternavn = "Navn",
+            erFalskIdentitet = false,
+        )
+        val pdlPerson = PdlPerson(
+            erFalskIdentitet = true,
+            fornavn = "Nytt fornavn",
+            mellomnavn = "Nytt mellomnavn",
+            etternavn = "Nytt etternavn",
+            telefonnummer = null,
+            adressebeskyttelseGradering = null,
+            identer = listOf(Personident(ident = personident, historisk = false, type = IdentType.FOLKEREGISTERIDENT)),
+            adresse = null,
+        )
+
+        every { pdlClient.hentPerson(personident) } returns pdlPerson
+        every { personRepository.get(personident) } returns eksisterendePerson
+
+        val oppdatertPerson = service.hentEllerOpprettPerson(personident, forceFetchFromPdl = true)
+
+        assertSoftly(oppdatertPerson) {
+            id shouldBe eksisterendePerson.id
+            personident shouldBe eksisterendePerson.personident
+            erFalskIdentitet shouldBe true
+            fornavn shouldBe "Nytt Fornavn"
+            mellomnavn shouldBe "Nytt Mellomnavn"
+            etternavn shouldBe "Nytt Etternavn"
+        }
+
+        verify(exactly = 1) { pdlClient.hentPerson(personident) }
+        verify { personRepository.upsert(oppdatertPerson) }
+    }
+
+    @Test
+    fun `hentEllerOpprettPerson - person har ekte navn - bruker eksisterende uten å hente PDL`() {
+        val personident = TestData.randomIdent()
+        val eksisterendePerson = TestData.lagPerson(personident = personident)
+
+        every { personRepository.get(personident) } returns eksisterendePerson
+
+        val person = service.hentEllerOpprettPerson(personident)
+
+        person shouldBe eksisterendePerson
+        verify(exactly = 0) { pdlClient.hentPerson(personident) }
     }
 
     @Test
