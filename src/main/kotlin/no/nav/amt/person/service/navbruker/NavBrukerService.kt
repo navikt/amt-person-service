@@ -70,7 +70,7 @@ class NavBrukerService(
     private fun opprettNavBruker(personident: String): NavBrukerDbo {
         val pdlPerson = pdlClient.hentPerson(personident)
 
-        val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
+        val person = personService.hentEllerOpprettPerson(personident, pdlPerson, forceFetchFromPdl = true)
         val veileder = navAnsattService.hentBrukersVeileder(personident)
         val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
         val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
@@ -111,7 +111,8 @@ class NavBrukerService(
 
     private fun skalOppdaterePersonFraPdl(person: PersonDbo): Boolean = person.fornavn == UNKNOWN_NAME &&
         person.etternavn == UNKNOWN_NAME &&
-        !person.erFalskIdentitet
+        !person.erFalskIdentitet &&
+        person.modifiedAt.isBefore(LocalDateTime.now().minusDays(1))
 
     fun upsert(navBruker: NavBrukerDbo) {
         transactionTemplate.executeWithoutResult {

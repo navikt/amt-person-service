@@ -87,6 +87,9 @@ class NavBrukerServiceTest {
                 oppfolgingsperioder shouldBe navBruker.oppfolgingsperioder
                 innsatsgruppe shouldBe navBruker.innsatsgruppe
             }
+            verify(exactly = 1) {
+                personService.hentEllerOpprettPerson(navBruker.person.personident, pdlPerson, forceFetchFromPdl = true)
+            }
         }
 
         @Test
@@ -133,6 +136,7 @@ class NavBrukerServiceTest {
                 fornavn = UNKNOWN_NAME,
                 etternavn = UNKNOWN_NAME,
                 erFalskIdentitet = false,
+                modifiedAt = LocalDateTime.now().minusDays(2),
             )
             val oppdatertPerson = gammelPerson.copy(
                 fornavn = "Nytt Fornavn",
@@ -153,6 +157,27 @@ class NavBrukerServiceTest {
             verify(exactly = 1) { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) }
             verify(exactly = 1) { navBrukerRepository.get(personident) }
             verify(exactly = 1) { navBrukerRepository.getByPersonId(oppdatertPerson.id) }
+        }
+
+        @Test
+        fun `hentEllerOpprettNavBruker - nylig oppdatert ukjent navn - refresher ikke fra PDL`() {
+            val personident = TestData.randomIdent()
+            val person = TestData.lagPerson(
+                personident = personident,
+                fornavn = UNKNOWN_NAME,
+                etternavn = UNKNOWN_NAME,
+                erFalskIdentitet = false,
+                modifiedAt = LocalDateTime.now().minusHours(1),
+            )
+            val navBruker = TestData.lagNavBruker(person = person)
+
+            every { navBrukerRepository.get(personident) } returns navBruker
+
+            val faktiskBruker = sut.hentEllerOpprettNavBruker(personident)
+
+            faktiskBruker shouldBe navBruker
+            verify(exactly = 0) { personService.hentEllerOpprettPerson(personident, forceFetchFromPdl = true) }
+            verify(exactly = 0) { navBrukerRepository.getByPersonId(any()) }
         }
     }
 
@@ -591,7 +616,7 @@ class NavBrukerServiceTest {
         every { pdlClient.hentPerson(person.personident) } returns pdlPerson
         every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
         every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
-        every { personService.hentEllerOpprettPerson(person.personident, pdlPerson) } returns person
+        every { personService.hentEllerOpprettPerson(person.personident, pdlPerson, forceFetchFromPdl = true) } returns person
         every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder
         every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet
         every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
