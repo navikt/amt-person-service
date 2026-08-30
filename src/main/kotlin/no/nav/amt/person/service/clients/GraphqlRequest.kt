@@ -15,8 +15,8 @@ data class GraphqlRequest(
  */
 class GraphqlResponse(
     private val response: JsonNode,
-    @PublishedApi internal val objectMapper: ObjectMapper,
-    @PublishedApi internal val serviceName: String = "GraphQL",
+    val objectMapper: ObjectMapper,
+    val serviceName: String = "GraphQL",
 ) {
     val data: JsonNode?
         get() = response["data"]?.takeUnless { it.isNull }
@@ -24,13 +24,27 @@ class GraphqlResponse(
     val errors: JsonNode?
         get() = response["errors"]?.takeIf { !it.isNull && it.isArray && !it.isEmpty }
 
+    val extensions: JsonNode?
+        get() = response["extensions"]?.takeUnless { it.isNull }
+
+    fun throwOnErrors() {
+        val errors = errors ?: return
+        val melding = buildString {
+            append("Feilmeldinger i respons fra $serviceName:\n")
+            if (data == null) append("- data i respons er null \n")
+            errors.forEach { error ->
+                append("- ${error["message"]?.asString()}\n")
+            }
+        }
+        throw RuntimeException(melding)
+    }
+
     inline fun <reified T> dataAt(field: String): T? {
         val node = data?.get(field)?.takeUnless { it.isNull } ?: return null
         return objectMapper.treeToValue<T>(node)
     }
 
-    @PublishedApi
-    internal fun requiredData(): JsonNode = data ?: throw RuntimeException("$serviceName respons inneholder ikke data")
+    fun requiredData(): JsonNode = data ?: throw RuntimeException("$serviceName respons inneholder ikke data")
 
     inline fun <reified T> requiredDataAt(field: String): T {
         val node = requiredData()[field]?.takeUnless { it.isNull }

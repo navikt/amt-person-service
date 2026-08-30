@@ -8,7 +8,6 @@ import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.poststed.PoststedRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 
 @Service
@@ -74,7 +73,7 @@ class PdlClient(
         val jsonResponse = pdlApi.execute(GraphqlRequest(query, PdlQueries.Variables(personident)))
         val response = GraphqlResponse(jsonResponse, objectMapper, "PDL")
         handlePdlErrors(response)
-        logPdlWarnings(jsonResponse)
+        logPdlWarnings(response)
         return response
     }
 
@@ -101,8 +100,8 @@ class PdlClient(
         throw RuntimeException(melding)
     }
 
-    private fun logPdlWarnings(raw: JsonNode) {
-        val warnings = raw["extensions"]?.get("warnings")?.takeIf { !it.isNull && it.isArray && !it.isEmpty } ?: return
+    private fun logPdlWarnings(response: GraphqlResponse) {
+        val warnings = response.extensions?.get("warnings")?.takeIf { !it.isNull && it.isArray && !it.isEmpty } ?: return
         val melding = buildString {
             append("Respons fra Pdl inneholder warnings:\n")
             warnings.forEach { warning ->

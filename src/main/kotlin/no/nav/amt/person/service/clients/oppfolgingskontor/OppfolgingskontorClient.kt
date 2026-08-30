@@ -13,11 +13,7 @@ class OppfolgingskontorClient(
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
         val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf("ident" to ident)))
         val response = GraphqlResponse(jsonResponse, objectMapper, "ao-oppfolgingskontor")
-
-        response.errors?.let { errors ->
-            val melding = errors.joinToString(separator = "\n") { "- ${it["message"]?.asString()}" }
-            throw RuntimeException("Feilmeldinger i respons fra ao-oppfolgingskontor:\n$melding")
-        }
+        response.throwOnErrors()
 
         val kontorTilhorigheter: KontorTilhorigheter = response.requiredDataAt("kontorTilhorigheter")
 
@@ -27,8 +23,8 @@ class OppfolgingskontorClient(
     companion object {
         private val kontorForBrukerQuery = GraphqlResponse.loadDocument("hentKontorForBruker")
     }
-}
 
-data class KontorTilhorigheter(
-    val arbeidsoppfolging: Arbeidsoppfolging? = null,
-)
+    private data class KontorTilhorigheter(
+        val arbeidsoppfolging: Arbeidsoppfolging? = null,
+    )
+}
