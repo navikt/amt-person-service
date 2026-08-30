@@ -143,56 +143,37 @@ class PersonServiceTest {
     @Nested
     inner class HentEllerOpprettPersonMedPdlPerson {
         @Test
-        fun `oppdaterer eksisterende person uten PDL-oppslag`() {
+        fun `returnerer eksisterende person uten oppdatering`() {
             // Arrange
-            val gammelPersonident = TestData.randomIdent()
-            val nyPersonident = TestData.randomIdent()
+            val personident = TestData.randomIdent()
             val eksisterendePerson = TestData.lagPerson(
-                personident = gammelPersonident,
-                fornavn = "Gammelt",
-                etternavn = "Navn",
-                erFalskIdentitet = false,
+                personident = personident,
+                fornavn = "Eksisterende",
+                etternavn = "Person",
             )
             val pdlPerson = PdlPerson(
-                erFalskIdentitet = true,
-                fornavn = "Nytt fornavn",
-                mellomnavn = "Nytt mellomnavn",
-                etternavn = "Nytt etternavn",
+                erFalskIdentitet = false,
+                fornavn = "Annet fornavn",
+                mellomnavn = null,
+                etternavn = "Annet etternavn",
                 telefonnummer = null,
                 adressebeskyttelseGradering = null,
                 identer = listOf(
-                    Personident(ident = nyPersonident, historisk = false, type = IdentType.FOLKEREGISTERIDENT),
-                    Personident(ident = gammelPersonident, historisk = true, type = IdentType.FOLKEREGISTERIDENT),
+                    Personident(ident = personident, historisk = false, type = IdentType.FOLKEREGISTERIDENT),
                 ),
                 adresse = null,
             )
 
-            every { personRepository.get(gammelPersonident) } returns eksisterendePerson
+            every { personRepository.get(personident) } returns eksisterendePerson
 
             // Act
-            val oppdatertPerson = service.hentEllerOpprettPerson(gammelPersonident, pdlPerson)
+            val person = service.hentEllerOpprettPerson(personident, pdlPerson)
 
             // Assert
-            assertSoftly(oppdatertPerson) {
-                id shouldBe eksisterendePerson.id
-                this.personident shouldBe nyPersonident
-                erFalskIdentitet shouldBe true
-                fornavn shouldBe "Nytt Fornavn"
-                mellomnavn shouldBe "Nytt Mellomnavn"
-                etternavn shouldBe "Nytt Etternavn"
-            }
+            person shouldBe eksisterendePerson
 
             verify(exactly = 0) { pdlClient.hentPerson(any()) }
-            verify {
-                personidentRepository.upsert(
-                    match { identer ->
-                        identer.size == 2 &&
-                            identer.any { it.ident == nyPersonident && !it.historisk && it.personId == eksisterendePerson.id } &&
-                            identer.any { it.ident == gammelPersonident && it.historisk && it.personId == eksisterendePerson.id }
-                    },
-                )
-            }
-            verify { personRepository.upsert(oppdatertPerson) }
+            verify(exactly = 0) { personRepository.upsert(any()) }
         }
     }
 

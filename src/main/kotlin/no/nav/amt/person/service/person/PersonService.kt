@@ -53,26 +53,18 @@ class PersonService(
     }
 
     /**
-     * Oppdaterer eksisterende person med gitt [pdlPerson], eller oppretter ny.
+     * Returnerer eksisterende person, eller oppretter ny fra [pdlPerson].
      * Gjør ikke eget PDL-oppslag — bruk når kalleren allerede har hentet PdlPerson.
      *
      * @param personident fødselsnummer eller d-nummer
      * @param pdlPerson ferske persondata fra PDL
-     * @return oppdatert eller nyopprettet person
+     * @return eksisterende eller nyopprettet person
      */
     @Transactional
     fun hentEllerOpprettPerson(
         personident: String,
         pdlPerson: PdlPerson,
-    ): PersonDbo = personRepository
-        .get(personident)
-        ?.let {
-            oppdaterPersonFraPdl(
-                person = it,
-                pdlPerson = pdlPerson,
-            )
-        }
-        ?: opprettPerson(pdlPerson)
+    ): PersonDbo = personRepository.get(personident) ?: opprettPerson(pdlPerson)
 
     @Transactional
     fun oppdaterPersonIdent(identer: List<Personident>) {
