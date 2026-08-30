@@ -70,7 +70,7 @@ class NavBrukerService(
     private fun opprettNavBruker(personident: String): NavBrukerDbo {
         val pdlPerson = pdlClient.hentPerson(personident)
 
-        val person = personService.hentEllerOpprettPerson(personident, pdlPerson, forceFetchFromPdl = true)
+        val person = personService.hentEllerOpprettPerson(personident, pdlPerson)
         val veileder = navAnsattService.hentBrukersVeileder(personident)
         val navEnhet = navEnhetService.hentNavEnhetForBruker(personident)
         val kontaktinformasjon = krrProxyClient.hentKontaktinformasjon(personident).getOrElse {
