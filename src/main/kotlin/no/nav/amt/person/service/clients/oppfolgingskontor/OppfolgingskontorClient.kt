@@ -1,42 +1,34 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
+import no.nav.amt.person.service.clients.GraphqlRequest
+import no.nav.amt.person.service.clients.GraphqlResponse
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class OppfolgingskontorClient(
     private val api: OppfolgingskontorApi,
+    private val objectMapper: ObjectMapper,
 ) {
-    companion object {
-        private val kontorForBrukerQuery =
-            $$"""
-            query HentKontorer($ident: String!) {
-              kontorTilhorigheter(ident: $ident) {
-                arbeidsoppfolging {
-                    kontorId   
-                    kontorNavn 
-                }
-              }
-            }
-            """.trimIndent()
-    }
-
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
-        val gqlResponse = api.hentKontorForBruker(
-            OppfolgingskontorApi.GraphQLRequest(
-                query = kontorForBrukerQuery,
-                variables = mapOf("ident" to ident),
-            ),
-        )
+        val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf("ident" to ident)))
+        val response = GraphqlResponse(jsonResponse, objectMapper)
 
-        gqlResponse.errors?.takeIf { it.isNotEmpty() }?.let { errors ->
-            val melding = errors.joinToString(separator = "\n") { "- ${it.message}" }
+        response.errors?.let { errors ->
+            val melding = errors.joinToString(separator = "\n") { "- ${it["message"]?.asString()}" }
             throw RuntimeException("Feilmeldinger i respons fra ao-oppfolgingskontor:\n$melding")
         }
 
-        if (gqlResponse.data == null) {
-            throw RuntimeException("ao-oppfolgingskontor respons inneholder ikke data")
-        }
+        val kontorTilhorigheter: KontorTilhorigheter = response.requiredDataAt("kontorTilhorigheter")
 
-        return gqlResponse.data.kontorTilhorigheter.arbeidsoppfolging
+        return kontorTilhorigheter.arbeidsoppfolging
+    }
+
+    companion object {
+        private val kontorForBrukerQuery = GraphqlResponse.loadDocument("hentKontorForBruker")
     }
 }
+
+data class KontorTilhorigheter(
+    val arbeidsoppfolging: Arbeidsoppfolging? = null,
+)
