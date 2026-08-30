@@ -1,42 +1,34 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
+import no.nav.amt.person.service.clients.GraphqlRequest
+import no.nav.amt.person.service.clients.GraphqlResponse
 import org.springframework.stereotype.Service
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class OppfolgingskontorClient(
     private val api: OppfolgingskontorApi,
+    private val objectMapper: ObjectMapper,
 ) {
-    companion object {
-        private val kontorForBrukerQuery =
-            $$"""
-            query HentKontorer($ident: String!) {
-              kontorTilhorigheter(ident: $ident) {
-                arbeidsoppfolging {
-                    kontorId   
-                    kontorNavn 
-                }
-              }
-            }
-            """.trimIndent()
-    }
-
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
-        val gqlResponse = api.hentKontorForBruker(
-            OppfolgingskontorApi.GraphQLRequest(
-                query = kontorForBrukerQuery,
-                variables = mapOf("ident" to ident),
-            ),
-        )
+        val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf(QUERY_IDENT to ident)))
+        val response = GraphqlResponse(jsonResponse, objectMapper, SERVICE_NAME)
+        response.throwOnErrors()
 
-        gqlResponse.errors?.takeIf { it.isNotEmpty() }?.let { errors ->
-            val melding = errors.joinToString(separator = "\n") { "- ${it.message}" }
-            throw RuntimeException("Feilmeldinger i respons fra ao-oppfolgingskontor:\n$melding")
-        }
+        val kontorTilhorigheter: KontorTilhorigheter = response.requiredDataAt(KONTOR_TILHORIGHETER)
 
-        if (gqlResponse.data == null) {
-            throw RuntimeException("ao-oppfolgingskontor respons inneholder ikke data")
-        }
-
-        return gqlResponse.data.kontorTilhorigheter.arbeidsoppfolging
+        return kontorTilhorigheter.arbeidsoppfolging
     }
+
+    companion object {
+        private const val QUERY_IDENT = "ident"
+        private const val SERVICE_NAME = "ao-oppfolgingskontor"
+        private const val KONTOR_TILHORIGHETER = "kontorTilhorigheter"
+
+        private val kontorForBrukerQuery = GraphqlResponse.loadDocument("hentKontorForBruker")
+    }
+
+    private data class KontorTilhorigheter(
+        val arbeidsoppfolging: Arbeidsoppfolging? = null,
+    )
 }
