@@ -72,7 +72,7 @@ class PdlClient(
         personident: String,
     ): GraphqlResponse {
         val jsonResponse = pdlApi.execute(GraphqlRequest(query, PdlQueries.Variables(personident)))
-        val response = GraphqlResponse(jsonResponse, objectMapper)
+        val response = GraphqlResponse(jsonResponse, objectMapper, "PDL")
         handlePdlErrors(response)
         logPdlWarnings(jsonResponse)
         return response

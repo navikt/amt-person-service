@@ -16,6 +16,7 @@ data class GraphqlRequest(
 class GraphqlResponse(
     private val response: JsonNode,
     @PublishedApi internal val objectMapper: ObjectMapper,
+    @PublishedApi internal val serviceName: String = "GraphQL",
 ) {
     val data: JsonNode?
         get() = response["data"]?.takeUnless { it.isNull }
@@ -29,11 +30,11 @@ class GraphqlResponse(
     }
 
     @PublishedApi
-    internal fun requiredData(): JsonNode = data ?: throw RuntimeException("PDL respons inneholder ikke data")
+    internal fun requiredData(): JsonNode = data ?: throw RuntimeException("$serviceName respons inneholder ikke data")
 
     inline fun <reified T> requiredDataAt(field: String): T {
         val node = requiredData()[field]?.takeUnless { it.isNull }
-            ?: throw RuntimeException("PDL respons inneholder ikke data")
+            ?: throw RuntimeException("$serviceName respons inneholder ikke data")
         return objectMapper.treeToValue<T>(node)
     }
 

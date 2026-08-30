@@ -12,7 +12,7 @@ class OppfolgingskontorClient(
 ) {
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
         val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf("ident" to ident)))
-        val response = GraphqlResponse(jsonResponse, objectMapper)
+        val response = GraphqlResponse(jsonResponse, objectMapper, "ao-oppfolgingskontor")
 
         response.errors?.let { errors ->
             val melding = errors.joinToString(separator = "\n") { "- ${it["message"]?.asString()}" }
