@@ -11,16 +11,20 @@ class OppfolgingskontorClient(
     private val objectMapper: ObjectMapper,
 ) {
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
-        val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf("ident" to ident)))
-        val response = GraphqlResponse(jsonResponse, objectMapper, "ao-oppfolgingskontor")
+        val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf(QUERY_IDENT to ident)))
+        val response = GraphqlResponse(jsonResponse, objectMapper, SERVICE_NAME)
         response.throwOnErrors()
 
-        val kontorTilhorigheter: KontorTilhorigheter = response.requiredDataAt("kontorTilhorigheter")
+        val kontorTilhorigheter: KontorTilhorigheter = response.requiredDataAt(KONTOR_TILHORIGHETER)
 
         return kontorTilhorigheter.arbeidsoppfolging
     }
 
     companion object {
+        private const val QUERY_IDENT = "ident"
+        private const val SERVICE_NAME = "ao-oppfolgingskontor"
+        private const val KONTOR_TILHORIGHETER = "kontorTilhorigheter"
+
         private val kontorForBrukerQuery = GraphqlResponse.loadDocument("hentKontorForBruker")
     }
 

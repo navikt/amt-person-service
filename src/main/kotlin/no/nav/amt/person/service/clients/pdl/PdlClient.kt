@@ -71,7 +71,7 @@ class PdlClient(
         personident: String,
     ): GraphqlResponse {
         val jsonResponse = pdlApi.execute(GraphqlRequest(query, PdlQueries.Variables(personident)))
-        val response = GraphqlResponse(jsonResponse, objectMapper, "PDL")
+        val response = GraphqlResponse(jsonResponse, objectMapper, SERVICE_NAME)
         handlePdlErrors(response)
         logPdlWarnings(response)
         return response
@@ -84,32 +84,32 @@ class PdlClient(
             append("Feilmeldinger i respons fra pdl:\n")
             if (response.data == null) append("- data i respons er null \n")
             errors.forEach { error ->
-                val extensions = error["extensions"]
-                val code = extensions?.get("code")?.asString()
-                val detailsNode = extensions?.get("details")
+                val extensions = error[EXTENSIONS]
+                val code = extensions?.get(CODE)?.asString()
+                val detailsNode = extensions?.get(DETAILS)
                 val details = detailsNode?.takeIf { !it.isNull }?.let {
                     PdlQueries.PdlErrorDetails(
-                        type = it["type"]?.asString(),
-                        cause = it["cause"]?.asString(),
-                        policy = it["policy"]?.asString(),
+                        type = it[TYPE]?.asString(),
+                        cause = it[CAUSE]?.asString(),
+                        policy = it[POLICY]?.asString(),
                     )
                 }
-                append("- ${error["message"]?.asString()} (code: $code details: $details)\n")
+                append("- ${error[MESSAGE]?.asString()} (code: $code details: $details)\n")
             }
         }
         throw RuntimeException(melding)
     }
 
     private fun logPdlWarnings(response: GraphqlResponse) {
-        val warnings = response.extensions?.get("warnings")?.takeIf { !it.isNull && it.isArray && !it.isEmpty } ?: return
+        val warnings = response.extensions?.get(WARNINGS)?.takeIf { !it.isNull && it.isArray && !it.isEmpty } ?: return
         val melding = buildString {
             append("Respons fra Pdl inneholder warnings:\n")
             warnings.forEach { warning ->
                 append(
-                    "query: ${warning["query"]?.asString()},\n" +
-                        "id: ${warning["id"]?.asString()},\n" +
-                        "message: ${warning["message"]?.asString()},\n" +
-                        "details: ${warning["details"]?.asString()}\n",
+                    "query: ${warning[QUERY]?.asString()},\n" +
+                        "id: ${warning[ID]?.asString()},\n" +
+                        "message: ${warning[MESSAGE]?.asString()},\n" +
+                        "details: ${warning[DETAILS]?.asString()}\n",
                 )
             }
         }
@@ -125,8 +125,19 @@ class PdlClient(
     )
 
     companion object {
+        private const val SERVICE_NAME = "PDL"
         private const val HENT_PERSON = "hentPerson"
         private const val HENT_IDENTER = "hentIdenter"
+        private const val EXTENSIONS = "extensions"
+        private const val CODE = "code"
+        private const val DETAILS = "details"
+        private const val TYPE = "type"
+        private const val CAUSE = "cause"
+        private const val POLICY = "policy"
+        private const val MESSAGE = "message"
+        private const val WARNINGS = "warnings"
+        private const val QUERY = "query"
+        private const val ID = "id"
 
         private val hentPersonQuery = GraphqlResponse.loadDocument("hentPerson")
         private val hentPersonFodselsarQuery = GraphqlResponse.loadDocument("hentPersonFodselsar")

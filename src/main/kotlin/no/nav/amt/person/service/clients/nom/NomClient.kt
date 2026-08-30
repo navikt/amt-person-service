@@ -16,10 +16,10 @@ class NomClient(
         .also { if (it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 
     fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
-        val jsonResponse = nomApi.execute(GraphqlRequest(hentRessurserQuery, mapOf("identer" to navIdenter)))
+        val jsonResponse = nomApi.execute(GraphqlRequest(hentRessurserQuery, mapOf(QUERY_IDENTER to navIdenter)))
         val response = GraphqlResponse(jsonResponse, objectMapper)
 
-        val ressurser: List<NomQueries.RessursResult> = response.dataAt("ressurser") ?: return emptyList()
+        val ressurser: List<NomQueries.RessursResult> = response.dataAt(RESSURSER) ?: return emptyList()
 
         return ressurser.mapNotNull { result ->
             if (result.code != NomQueries.ResultCode.OK || result.ressurs == null) {
@@ -39,12 +39,16 @@ class NomClient(
 
     companion object {
         private val log = LoggerFactory.getLogger(NomClient::class.java)
+        private const val QUERY_IDENTER = "identer"
+        private const val RESSURSER = "ressurser"
+        private const val NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON"
+        private const val NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON"
 
         private val hentRessurserQuery = GraphqlResponse.loadDocument("hentRessurser")
 
         private fun hentTjenesteTelefonnummer(ansatt: NomQueries.Ressurs): String? =
-            ansatt.telefon.find { it.type == "NAV_KONTOR_TELEFON" }?.nummer
-                ?: ansatt.telefon.find { it.type == "NAV_TJENESTE_TELEFON" }?.nummer
+            ansatt.telefon.find { it.type == NAV_KONTOR_TELEFON }?.nummer
+                ?: ansatt.telefon.find { it.type == NAV_TJENESTE_TELEFON }?.nummer
                 ?: ansatt.primaryTelefon
     }
 }
