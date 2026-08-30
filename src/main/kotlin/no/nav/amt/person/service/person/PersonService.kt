@@ -22,39 +22,49 @@ class PersonService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
+    /**
+     * Henter eksisterende person eller oppretter ny fra PDL.
+     * Med [forceFetchFromPdl] oppdateres eksisterende person med ferske data fra PDL.
+     *
+     * @param personident fødselsnummer eller d-nummer
+     * @param forceFetchFromPdl hvis true, hentes alltid ferske data fra PDL og eksisterende person oppdateres
+     * @return eksisterende, oppdatert eller nyopprettet person
+     */
     @Retryable(maxRetries = 2)
     @Transactional
     fun hentEllerOpprettPerson(
         personident: String,
         forceFetchFromPdl: Boolean = false,
-    ): PersonDbo = when {
-        forceFetchFromPdl -> {
-            val pdlPerson = pdlClient.hentPerson(personident)
-            personRepository
-                .get(personident)
-                ?.let {
-                    oppdaterPersonFraPdl(
-                        person = it,
-                        pdlPerson = pdlPerson,
-                    )
-                } ?: opprettPerson(pdlPerson)
-        }
+    ): PersonDbo {
+        val eksisterendePerson = personRepository.get(personident)
 
-        else -> personRepository.get(personident) ?: run {
-            val pdlPerson = pdlClient.hentPerson(personident)
-            opprettPerson(pdlPerson)
-        }
+        if (!(forceFetchFromPdl || eksisterendePerson == null)) return eksisterendePerson
+
+        val pdlPerson = pdlClient.hentPerson(personident)
+
+        return eksisterendePerson
+            ?.let {
+                oppdaterPersonFraPdl(
+                    person = it,
+                    pdlPerson = pdlPerson,
+                )
+            }
+            ?: opprettPerson(pdlPerson)
     }
 
+    /**
+     * Returnerer eksisterende person, eller oppretter ny fra [pdlPerson].
+     * Gjør ikke eget PDL-oppslag — bruk når kalleren allerede har hentet PdlPerson.
+     *
+     * @param personident fødselsnummer eller d-nummer
+     * @param pdlPerson ferske persondata fra PDL
+     * @return eksisterende eller nyopprettet person
+     */
     @Transactional
     fun hentEllerOpprettPerson(
         personident: String,
         pdlPerson: PdlPerson,
-        forceFetchFromPdl: Boolean = false,
-    ): PersonDbo = when {
-        forceFetchFromPdl -> personRepository.get(personident)?.let { oppdaterPersonFraPdl(it, pdlPerson) } ?: opprettPerson(pdlPerson)
-        else -> personRepository.get(personident) ?: opprettPerson(pdlPerson)
-    }
+    ): PersonDbo = personRepository.get(personident) ?: opprettPerson(pdlPerson)
 
     @Transactional
     fun oppdaterPersonIdent(identer: List<Personident>) {

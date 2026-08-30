@@ -7,12 +7,12 @@ import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
-import no.nav.amt.person.service.navbruker.Adressebeskyttelse
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.utils.titlecase
 import no.nav.person.pdl.leesah.adressebeskyttelse.Gradering
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LeesahConsumerTest(
@@ -20,63 +20,98 @@ class LeesahConsumerTest(
     private val personRepository: PersonRepository,
     private val navBrukerRepository: NavBrukerRepository,
 ) : IntegrationTestBase() {
-    @Test
-    fun `Ingest - nav bruker finnes - oppdaterer navn`() {
-        val person = TestData.lagPerson()
-        val navBruker = TestData.lagNavBruker(person = person)
+    @Nested
+    inner class Navn {
+        @Test
+        fun `oppdaterer navn på person`() {
+            // Arrange
+            val person = TestData.lagPerson()
+            val navBruker = TestData.lagNavBruker(person = person)
+            testDataRepository.insertNavBruker(navBruker)
 
-        testDataRepository.insertNavBruker(navBruker)
+            val nyttFornavn = "NYTT FORNAVN"
+            val nyttMellomnavn = "NYTT MELLOMNAVN"
+            val nyttEtternavn = "NYTT ETTERNAVN"
 
-        val nyttFornavn = "NYTT FORNAVN"
-        val nyttMellomnavn = "NYTT MELLOMNAVN"
-        val nyttEtternavn = "NYTT ETTERNAVN"
+            every { pdlClient.hentTelefon(person.personident) } returns null
+            every { pdlClient.hentPerson(person.personident) } returns TestData.lagPdlPerson(
+                person.copy(
+                    fornavn = nyttFornavn,
+                    mellomnavn = nyttMellomnavn,
+                    etternavn = nyttEtternavn,
+                ),
+            )
 
-        every { pdlClient.hentTelefon(person.personident) } returns null
-        every { pdlClient.hentPerson(person.personident) } returns TestData.lagPdlPerson(
-            person.copy(
+            val personhendelse = KafkaMessageCreator.lagPersonhendelseNavn(
+                personidenter = listOf(person.personident),
                 fornavn = nyttFornavn,
                 mellomnavn = nyttMellomnavn,
                 etternavn = nyttEtternavn,
-            ),
-        )
+            )
 
-        val personhendelse = KafkaMessageCreator.lagPersonhendelseNavn(
-            personidenter = listOf(person.personident),
-            fornavn = nyttFornavn,
-            mellomnavn = nyttMellomnavn,
-            etternavn = nyttEtternavn,
-        )
+            // Act
+            leesahConsumer.ingest(personhendelse)
 
-        leesahConsumer.ingest(personhendelse)
-
-        assertSoftly(personRepository.get(person.id)) {
-            fornavn shouldBe nyttFornavn.titlecase()
-            mellomnavn shouldBe nyttMellomnavn.titlecase()
-            etternavn shouldBe nyttEtternavn.titlecase()
+            // Assert
+            assertSoftly(personRepository.get(person.id)) {
+                fornavn shouldBe nyttFornavn.titlecase()
+                mellomnavn shouldBe nyttMellomnavn.titlecase()
+                etternavn shouldBe nyttEtternavn.titlecase()
+            }
         }
     }
 
-    @Test
-    fun `Ingest - person far adressebeskyttelse - oppdaterer navbruker`() {
-        val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
-        testDataRepository.insertNavBruker(navBruker)
+    @Nested
+    inner class Adressebeskyttelse {
+        @Test
+        fun `oppdaterer adressebeskyttelse og fjerner adresse`() {
+            // Arrange
+            val navBruker = TestData.lagNavBruker(adresse = TestData.lagAdresse())
+            testDataRepository.insertNavBruker(navBruker)
 
-        every { pdlClient.hentPerson(navBruker.person.personident) } returns TestData.lagPdlPerson(
-            navBruker.person,
-            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-            adresse = navBruker.adresse,
-        )
+            every { pdlClient.hentPerson(navBruker.person.personident) } returns TestData.lagPdlPerson(
+                navBruker.person,
+                adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                adresse = navBruker.adresse,
+            )
 
-        val personhendelse = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
-            personidenter = listOf(navBruker.person.personident),
-            gradering = Gradering.STRENGT_FORTROLIG,
-        )
+            val personhendelse = KafkaMessageCreator.lagPersonhendelseAdressebeskyttelse(
+                personidenter = listOf(navBruker.person.personident),
+                gradering = Gradering.STRENGT_FORTROLIG,
+            )
 
-        leesahConsumer.ingest(personhendelse)
+            // Act
+            leesahConsumer.ingest(personhendelse)
 
-        val oppdatertNavBruker = navBrukerRepository.get(navBruker.person.personident)
+            // Assert
+            val oppdatertNavBruker = navBrukerRepository.get(navBruker.person.personident)
+            oppdatertNavBruker?.adressebeskyttelse shouldBe no.nav.amt.person.service.navbruker.Adressebeskyttelse.STRENGT_FORTROLIG
+            oppdatertNavBruker?.adresse shouldBe null
+        }
+    }
 
-        oppdatertNavBruker?.adressebeskyttelse shouldBe Adressebeskyttelse.STRENGT_FORTROLIG
-        oppdatertNavBruker?.adresse shouldBe null
+    @Nested
+    inner class FalskIdentitet {
+        @Test
+        fun `oppdaterer erFalskIdentitet på person`() {
+            // Arrange
+            val person = TestData.lagPerson(erFalskIdentitet = false)
+            val navBruker = TestData.lagNavBruker(person = person)
+            testDataRepository.insertNavBruker(navBruker)
+
+            every { pdlClient.hentPerson(person.personident) } returns TestData.lagPdlPerson(
+                person.copy(erFalskIdentitet = true),
+            )
+
+            val personhendelse = KafkaMessageCreator.lagPersonhendelseFalskIdentitet(
+                personidenter = listOf(person.personident),
+            )
+
+            // Act
+            leesahConsumer.ingest(personhendelse)
+
+            // Assert
+            personRepository.get(person.id).erFalskIdentitet shouldBe true
+        }
     }
 }

@@ -14,6 +14,7 @@ enum class OpplysningsType {
     KONTAKTADRESSE_V1,
     BOSTEDSADRESSE_V1,
     OPPHOLDSADRESSE_V1,
+    FALSK_ID_V1,
 }
 
 @Component
@@ -26,28 +27,21 @@ class LeesahConsumer(
 
     fun ingest(personhendelse: Personhendelse) {
         when (personhendelse.opplysningstype) {
-            OpplysningsType.NAVN_V1.toString() -> {
-                handterNavn(personhendelse.personidenter.toSet())
-            }
+            OpplysningsType.NAVN_V1.toString() -> handterNavn(personhendelse.personidenter.toSet())
 
-            OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() -> {
+            OpplysningsType.ADRESSEBESKYTTELSE_V1.toString() ->
                 handterAdressebeskyttelse(
                     personidenter = personhendelse.personidenter.toSet(),
                     adressebeskyttelse = personhendelse.adressebeskyttelse,
                 )
-            }
 
-            OpplysningsType.BOSTEDSADRESSE_V1.toString() -> {
-                handterAdresse(personhendelse.personidenter.toSet())
-            }
+            OpplysningsType.BOSTEDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter.toSet())
 
-            OpplysningsType.KONTAKTADRESSE_V1.toString() -> {
-                handterAdresse(personhendelse.personidenter.toSet())
-            }
+            OpplysningsType.KONTAKTADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter.toSet())
 
-            OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> {
-                handterAdresse(personhendelse.personidenter.toSet())
-            }
+            OpplysningsType.OPPHOLDSADRESSE_V1.toString() -> handterAdresse(personhendelse.personidenter.toSet())
+
+            OpplysningsType.FALSK_ID_V1.toString() -> handterFalskIdentitet(personhendelse.personidenter.toSet())
         }
     }
 
@@ -81,5 +75,16 @@ class LeesahConsumer(
         if (lagredePersonidenter.isEmpty()) return
 
         navBrukerService.oppdaterAdresse(lagredePersonidenter)
+    }
+
+    private fun handterFalskIdentitet(personidenter: Set<String>) {
+        log.info("Mottatt melding om FALSK_ID_V1 på Leesah topic")
+
+        personRepository.getPersoner(personidenter).forEach {
+            personService.hentEllerOpprettPerson(
+                personident = it.personident,
+                forceFetchFromPdl = true,
+            )
+        }
     }
 }

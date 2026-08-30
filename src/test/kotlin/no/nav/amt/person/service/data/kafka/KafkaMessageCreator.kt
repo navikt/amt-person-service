@@ -68,6 +68,13 @@ object KafkaMessageCreator {
         opplysningsType = OpplysningsType.NAVN_V1,
     )
 
+    fun lagPersonhendelseFalskIdentitet(personidenter: List<String>) = lagPersonhendelse(
+        personidenter = personidenter,
+        navn = null,
+        adressebeskyttelse = null,
+        opplysningsType = OpplysningsType.FALSK_ID_V1,
+    )
+
     private fun lagPersonhendelse(
         personidenter: List<String>,
         navn: Navn?,

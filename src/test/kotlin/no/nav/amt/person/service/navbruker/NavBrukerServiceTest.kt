@@ -88,7 +88,7 @@ class NavBrukerServiceTest {
                 innsatsgruppe shouldBe navBruker.innsatsgruppe
             }
             verify(exactly = 1) {
-                personService.hentEllerOpprettPerson(navBruker.person.personident, pdlPerson, forceFetchFromPdl = true)
+                personService.hentEllerOpprettPerson(navBruker.person.personident, pdlPerson)
             }
         }
 
@@ -637,7 +637,7 @@ class NavBrukerServiceTest {
         every { pdlClient.hentPerson(person.personident) } returns pdlPerson
         every { veilarboppfolgingClient.hentOppfolgingperioder(person.personident) } returns navBruker.oppfolgingsperioder
         every { veilarbvedtaksstotteClient.hentInnsatsgruppe(person.personident) } returns navBruker.innsatsgruppe
-        every { personService.hentEllerOpprettPerson(person.personident, pdlPerson, forceFetchFromPdl = true) } returns person
+        every { personService.hentEllerOpprettPerson(person.personident, pdlPerson) } returns person
         every { navAnsattService.hentBrukersVeileder(person.personident) } returns veileder
         every { navEnhetService.hentNavEnhetForBruker(person.personident) } returns navEnhet
         every { krrProxyClient.hentKontaktinformasjon(person.personident) } returns Result.success(kontaktinformasjon)
