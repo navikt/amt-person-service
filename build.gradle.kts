@@ -19,9 +19,6 @@ dependencyManagement {
     }
 }
 
-// midlertidig fix for CVE-2026-65182
-extra["tomcat.version"] = "11.0.25"
-
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java") {
@@ -34,7 +31,10 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-jetty")
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-flyway")
