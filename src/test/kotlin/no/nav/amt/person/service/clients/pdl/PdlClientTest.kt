@@ -92,7 +92,7 @@ class PdlClientTest(
             assertSoftly(ident) {
                 type shouldBe IdentType.FOLKEREGISTERIDENT
                 historisk shouldBe false
-                it.ident shouldBe "29119826819"
+                it.ident shouldBe "00000000000"
             }
         }
 

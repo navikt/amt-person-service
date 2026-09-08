@@ -114,7 +114,7 @@ object PdlClientTestData {
         		"hentIdenter": {
         		  "identer": [
         			{
-        			  "ident": "29119826819",
+        			  "ident": "00000000000",
         			  "historisk": false,
         			  "gruppe": "FOLKEREGISTERIDENT"
         			}
