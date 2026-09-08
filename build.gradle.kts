@@ -12,7 +12,26 @@ repositories {
     maven("https://packages.confluent.io/maven/")
 }
 
+dependencyManagement {
+    dependencies {
+        // kun nødvendig hvis vi faktisk vil bruke Kafka 4.3.1
+        dependency("org.apache.kafka:kafka-clients:4.3.1")
+    }
+}
+
+// midlertidig fix for CVE-2026-65182
+extra["tomcat.version"] = "11.0.25"
+
 dependencies {
+    constraints {
+        implementation("at.yawk.lz4:lz4-java") {
+            version {
+                strictly("1.11.2")
+            }
+            because("Fixes CVE-2026-59949")
+        }
+    }
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
