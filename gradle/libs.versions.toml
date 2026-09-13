@@ -22,7 +22,7 @@ poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
 amt-lib = "1.2026.08.20_15.10-7f2aa4174f71"
 
 # Misc
-shedlock = "7.9.0"
+shedlock = "7.10.0"
 
 # Testing
 kotest = "6.2.4"
