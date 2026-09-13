@@ -2,11 +2,11 @@ package no.nav.amt.person.service
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.TestConstructor
 import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDateTime
 import java.time.Year
@@ -27,6 +27,8 @@ import java.time.Year
 class JsonMapperTest(
     private val springObjectMapper: ObjectMapper,
 ) {
+    val staticObjectMapper = jacksonObjectMapper()
+
     @Test
     fun `static mapper skal serialisere samme som Spring mapper`() {
         val dto = TestDto("John Doe", 42, now)

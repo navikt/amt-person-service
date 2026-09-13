@@ -11,7 +11,6 @@ import no.nav.amt.person.service.data.kafka.message.KontorPayload
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.kafka.consumer.SisteOppfolgingsperiodeConsumer
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.Test
 
 class SisteOppfolgingsperiodeConsumerTest(
@@ -32,7 +31,7 @@ class SisteOppfolgingsperiodeConsumerTest(
 
         every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 
-        sisteOppfolgingsperiodeConsumer.ingest(staticObjectMapper.writeValueAsString(kafkaPayload))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(kafkaPayload))
 
         val faktiskBruker = navBrukerRepository.get(navBruker.id)
 

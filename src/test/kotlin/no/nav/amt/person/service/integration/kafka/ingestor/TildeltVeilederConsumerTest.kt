@@ -14,7 +14,6 @@ import no.nav.amt.person.service.navansatt.NavAnsattRepository
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.Test
 
 class TildeltVeilederConsumerTest(
@@ -44,7 +43,7 @@ class TildeltVeilederConsumerTest(
         every { norgClient.hentNavEnhet(TestData.navGrunerlokka.enhetId) } returns
             NorgNavEnhetDto.fromDbo(TestData.navGrunerlokka)
 
-        tildeltVeilederConsumer.ingest(staticObjectMapper.writeValueAsString(payload))
+        tildeltVeilederConsumer.ingest(objectMapper.writeValueAsString(payload))
 
         val faktiskNavAnsatt = navAnsattRepository.get(navAnsatt.navIdent)
 
@@ -67,7 +66,7 @@ class TildeltVeilederConsumerTest(
         every { pdlClient.hentIdenter(payload.aktorId) } returns
             listOf(Personident("ukjent ident", false, IdentType.FOLKEREGISTERIDENT))
 
-        tildeltVeilederConsumer.ingest(staticObjectMapper.writeValueAsString(payload))
+        tildeltVeilederConsumer.ingest(objectMapper.writeValueAsString(payload))
 
         navAnsattRepository.get(payload.veilederId) shouldBe null
     }

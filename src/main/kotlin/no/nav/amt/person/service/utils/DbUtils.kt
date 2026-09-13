@@ -14,10 +14,7 @@ fun ResultSet.getNullableUUID(columnLabel: String): UUID? = this
     .getString(columnLabel)
     ?.let { UUID.fromString(it) }
 
-fun toPGObject(
-    value: Any?,
-    objectMapper: ObjectMapper,
-) = PGobject().also {
+fun ObjectMapper.toPGObject(value: Any) = PGobject().also {
     it.type = "json"
-    it.value = value?.let { v -> objectMapper.writeValueAsString(v) }
+    it.value = this.writeValueAsString(value)
 }

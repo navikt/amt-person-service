@@ -11,7 +11,6 @@ import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -41,7 +40,7 @@ class OppfolgingsperiodeConsumerTest(
         every { veilarbvedtaksstotteClient.hentInnsatsgruppe(navBruker.person.personident) } returns
             InnsatsgruppeV2.TRENGER_VEILEDNING_NEDSATT_ARBEIDSEVNE.toV1()
 
-        oppfolgingsperiodeConsumer.ingest(staticObjectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
+        oppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
         val faktiskBruker = navBrukerRepository.get(navBruker.id)
         faktiskBruker.oppfolgingsperioder.size shouldBe 1
@@ -70,7 +69,7 @@ class OppfolgingsperiodeConsumerTest(
         every { pdlClient.hentIdenter(sisteOppfolgingsperiodeV1.aktorId) } returns
             listOf(Personident("ukjent ident", false, IdentType.FOLKEREGISTERIDENT))
 
-        oppfolgingsperiodeConsumer.ingest(staticObjectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
+        oppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(sisteOppfolgingsperiodeV1))
 
         // No exception = success (bruker not found, skipped)
     }

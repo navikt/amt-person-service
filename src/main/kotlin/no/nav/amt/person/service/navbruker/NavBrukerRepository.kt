@@ -216,10 +216,10 @@ class NavBrukerRepository(
             "telefon" to navBruker.telefon,
             "epost" to navBruker.epost,
             "erSkjermet" to navBruker.erSkjermet,
-            "adresse" to toPGObject(navBruker.adresse, objectMapper),
+            "adresse" to navBruker.adresse?.let { objectMapper.toPGObject(it) },
             "sisteKrrSync" to navBruker.sisteKrrSync,
             "adressebeskyttelse" to navBruker.adressebeskyttelse?.name,
-            "oppfolgingsperioder" to toPGObject(navBruker.oppfolgingsperioder, objectMapper),
+            "oppfolgingsperioder" to objectMapper.toPGObject(navBruker.oppfolgingsperioder),
             "innsatsgruppe" to navBruker.innsatsgruppe?.name,
         )
 

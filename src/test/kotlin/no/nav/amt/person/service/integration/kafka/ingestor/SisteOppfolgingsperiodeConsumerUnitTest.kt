@@ -4,6 +4,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.amt.lib.utils.objectMapper
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.data.kafka.message.KontorPayload
@@ -11,9 +12,9 @@ import no.nav.amt.person.service.kafka.consumer.SisteOppfolgingsperiodeConsumer
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
-import no.nav.amt.person.service.utils.JsonUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class SisteOppfolgingsperiodeConsumerUnitTest {
     private val navBrukerRepository: NavBrukerRepository = mockk(relaxUnitFun = true)
@@ -23,7 +24,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
         navBrukerRepository = navBrukerRepository,
         navBrukerService = navBrukerService,
         navEnhetService = navEnhetService,
-        objectMapper = JsonUtils.staticObjectMapper,
+        objectMapper = jacksonObjectMapper(),
     )
 
     @BeforeEach
@@ -35,7 +36,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
 
         every { navBrukerRepository.get(msg.ident) } returns null
 
-        sisteOppfolgingsperiodeConsumer.ingest(JsonUtils.staticObjectMapper.writeValueAsString(msg))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 0) {
             navEnhetService.hentEllerOpprettNavEnhet(any())
@@ -53,7 +54,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
 
         every { navBrukerRepository.get(msg.ident) } returns navBruker
 
-        sisteOppfolgingsperiodeConsumer.ingest(JsonUtils.staticObjectMapper.writeValueAsString(msg))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 0) {
             navEnhetService.hentEllerOpprettNavEnhet(any())
@@ -75,7 +76,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
         every { navEnhetService.hentEllerOpprettNavEnhet(nyttNavEnhet.enhetId) } returns nyttNavEnhet
         every { navBrukerService.upsert(any()) } returns mockk()
 
-        sisteOppfolgingsperiodeConsumer.ingest(JsonUtils.staticObjectMapper.writeValueAsString(msg))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 1) {
             navEnhetService.hentEllerOpprettNavEnhet(nyttNavEnhet.enhetId)
@@ -94,7 +95,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
 
         every { navBrukerRepository.get(msg.ident) } returns navBruker
 
-        sisteOppfolgingsperiodeConsumer.ingest(JsonUtils.staticObjectMapper.writeValueAsString(msg))
+        sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(msg))
 
         verify(exactly = 0) {
             navEnhetService.hentEllerOpprettNavEnhet(any())
