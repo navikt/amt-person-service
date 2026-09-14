@@ -9,7 +9,6 @@ import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import org.junit.jupiter.api.Test
 
 class InnsatsgruppeConsumerTest(
@@ -29,7 +28,7 @@ class InnsatsgruppeConsumerTest(
         every { pdlClient.hentIdenter(siste14aVedtak.aktorId) } returns
             listOf(Personident(navBruker.person.personident, false, IdentType.FOLKEREGISTERIDENT))
 
-        innsatsgruppeConsumer.ingest(staticObjectMapper.writeValueAsString(siste14aVedtak))
+        innsatsgruppeConsumer.ingest(objectMapper.writeValueAsString(siste14aVedtak))
 
         val faktiskBruker = navBrukerRepository.get(navBruker.id)
         faktiskBruker.innsatsgruppe shouldBe InnsatsgruppeV1.SPESIELT_TILPASSET_INNSATS
@@ -44,7 +43,7 @@ class InnsatsgruppeConsumerTest(
         every { pdlClient.hentIdenter(siste14aVedtak.aktorId) } returns
             listOf(Personident("ukjent ident", false, IdentType.FOLKEREGISTERIDENT))
 
-        innsatsgruppeConsumer.ingest(staticObjectMapper.writeValueAsString(siste14aVedtak))
+        innsatsgruppeConsumer.ingest(objectMapper.writeValueAsString(siste14aVedtak))
 
         // No exception = success (bruker not found, skipped)
     }

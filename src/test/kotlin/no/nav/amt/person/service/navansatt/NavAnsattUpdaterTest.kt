@@ -14,7 +14,6 @@ import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.data.TestData.orgTilknytning
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class NavAnsattUpdaterTest {
@@ -28,8 +27,7 @@ class NavAnsattUpdaterTest {
     fun setup() = clearAllMocks()
 
     @Test
-    @Disabled("Vent til neste versjon av amt-lib")
-    fun `oppdaterAlle - navIdent mangler hos Nom - logger warning`() {
+    suspend fun `oppdaterAlle - navIdent mangler hos Nom - logger warning`() {
         val ansatt1 = TestData.lagNavAnsatt()
         val ansatt2 = TestData.lagNavAnsatt()
 

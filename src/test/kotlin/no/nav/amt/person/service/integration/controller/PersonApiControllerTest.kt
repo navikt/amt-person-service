@@ -26,7 +26,6 @@ import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.poao_tilgang.client.api.ApiResult
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -331,7 +330,7 @@ class PersonApiControllerTest(
                         setBearerAuth(issueAzureAdM2MToken())
                         contentType = MediaType.APPLICATION_JSON
                     }
-                    content = staticObjectMapper.writeValueAsString(setOf(navBruker.person.personident))
+                    content = objectMapper.writeValueAsString(setOf(navBruker.person.personident))
                 }.andExpect { status { isOk() } }
                 .andReturn()
 

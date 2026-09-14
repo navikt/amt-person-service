@@ -13,7 +13,6 @@ import no.nav.amt.person.service.kafka.producer.dto.NavBrukerDtoV1
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonidentRepository
 import no.nav.amt.person.service.person.model.IdentType
-import no.nav.amt.person.service.utils.JsonUtils.staticObjectMapper
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.aktor.v2.Identifikator
 import no.nav.person.pdl.aktor.v2.Type
@@ -54,7 +53,7 @@ class AktorV2ConsumerTest(
         val recordSlot = slot<ProducerRecord<String, String>>()
         verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
 
-        val navBrukerRecord = staticObjectMapper.readValue(recordSlot.captured.value(), NavBrukerDtoV1::class.java)
+        val navBrukerRecord = objectMapper.readValue(recordSlot.captured.value(), NavBrukerDtoV1::class.java)
         recordSlot.captured.key() shouldBe person.id.toString()
         navBrukerRecord.personident shouldBe nyttFnr
     }
