@@ -4,7 +4,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.amt.lib.utils.objectMapper
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.data.kafka.message.KontorPayload
@@ -14,9 +13,14 @@ import no.nav.amt.person.service.navbruker.NavBrukerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.json.JsonTest
+import tools.jackson.databind.ObjectMapper
 
-class SisteOppfolgingsperiodeConsumerUnitTest {
+@JsonTest
+class SisteOppfolgingsperiodeConsumerUnitTest(
+    @Autowired private val objectMapper: ObjectMapper,
+) {
     private val navBrukerRepository: NavBrukerRepository = mockk(relaxUnitFun = true)
     private val navBrukerService: NavBrukerService = mockk()
     private val navEnhetService: NavEnhetService = mockk()
@@ -24,7 +28,7 @@ class SisteOppfolgingsperiodeConsumerUnitTest {
         navBrukerRepository = navBrukerRepository,
         navBrukerService = navBrukerService,
         navEnhetService = navEnhetService,
-        objectMapper = jacksonObjectMapper(),
+        objectMapper = objectMapper,
     )
 
     @BeforeEach
