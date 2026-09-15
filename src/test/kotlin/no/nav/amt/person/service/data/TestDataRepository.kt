@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.data
 
+import no.nav.amt.lib.utils.toPGObject
 import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navbruker.NavBrukerDbo
@@ -8,7 +9,6 @@ import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.dbo.PersonidentDbo
 import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.sqlParameters
-import no.nav.amt.person.service.utils.toPGObject
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

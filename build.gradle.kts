@@ -48,6 +48,7 @@ dependencies {
 
     implementation("io.micrometer:micrometer-registry-prometheus")
 
+    implementation(libs.amt.lib.utils)
     implementation(libs.nav.common.log)
     implementation(libs.nav.common.job)
     implementation(libs.nav.common.kafka)

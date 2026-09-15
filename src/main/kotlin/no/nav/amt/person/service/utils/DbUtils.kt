@@ -1,8 +1,6 @@
 package no.nav.amt.person.service.utils
 
-import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import tools.jackson.databind.ObjectMapper
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -13,8 +11,3 @@ fun ResultSet.getUUID(columnLabel: String): UUID = UUID.fromString(this.getStrin
 fun ResultSet.getNullableUUID(columnLabel: String): UUID? = this
     .getString(columnLabel)
     ?.let { UUID.fromString(it) }
-
-fun ObjectMapper.toPGObject(value: Any) = PGobject().also {
-    it.type = "json"
-    it.value = this.writeValueAsString(value)
-}

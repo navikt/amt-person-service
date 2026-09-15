@@ -19,7 +19,7 @@ logstash-encoder = "9.0"
 # NAV
 nav-common = "4.2026.09.14_05.43-2bd32bda23c4"
 poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
-amt-lib = "1.2026.09.14_12.30-85fa2a522fb3"
+amt-lib = "1.2026.09.15_11.04-5b00ff35985b"
 
 # Misc
 shedlock = "7.10.0"
@@ -59,6 +59,7 @@ nav-common-kafka = { module = "no.nav.common:kafka", version.ref = "nav-common" 
 poao-tilgang-client = { module = "no.nav.poao-tilgang:client", version.ref = "poao-tilgang" }
 
 # AMT lib
+amt-lib-utils = { module = "no.nav.amt.deltakelser.lib:utils", version.ref = "amt-lib" }
 amt-lib-testing = { module = "no.nav.amt.deltakelser.lib:testing", version.ref = "amt-lib" }
 
 # Shedlock
