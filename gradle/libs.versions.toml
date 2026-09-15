@@ -17,7 +17,7 @@ confluent = "8.1.1"
 logstash-encoder = "9.0"
 
 # NAV
-nav-common = "4.2026.09.01_09.49-e681e09ca089"
+nav-common = "4.2026.09.14_05.43-2bd32bda23c4"
 poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
 amt-lib = "1.2026.09.14_12.30-85fa2a522fb3"
 
