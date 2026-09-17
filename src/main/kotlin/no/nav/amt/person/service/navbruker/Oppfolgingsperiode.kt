@@ -15,4 +15,4 @@ data class Oppfolgingsperiode(
     }
 }
 
-fun harAktivOppfolgingsperiode(oppfolgingsperioder: List<Oppfolgingsperiode>): Boolean = oppfolgingsperioder.find { it.erAktiv() } != null
+fun harAktivOppfolgingsperiode(oppfolgingsperioder: List<Oppfolgingsperiode>) = oppfolgingsperioder.any { it.erAktiv() }
