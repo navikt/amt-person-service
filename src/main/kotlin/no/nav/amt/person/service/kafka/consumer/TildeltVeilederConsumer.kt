@@ -24,11 +24,10 @@ class TildeltVeilederConsumer(
     fun ingest(value: String) {
         val sisteTildeltVeileder = objectMapper.readValue<SisteTildeltVeilederPayload>(value)
 
-        val gjeldendeIdent =
-            pdlClient
-                .hentIdenter(sisteTildeltVeileder.aktorId)
-                .finnGjeldendeIdent()
-                .getOrThrow()
+        val gjeldendeIdent = pdlClient
+            .hentIdenter(sisteTildeltVeileder.aktorId)
+            .finnGjeldendeIdent()
+            .getOrThrow()
 
         val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 

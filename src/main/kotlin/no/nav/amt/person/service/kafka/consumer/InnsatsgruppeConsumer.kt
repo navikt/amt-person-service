@@ -22,11 +22,10 @@ class InnsatsgruppeConsumer(
     fun ingest(value: String) {
         val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
-        val gjeldendeIdent =
-            pdlClient
-                .hentIdenter(siste14aVedtak.aktorId)
-                .finnGjeldendeIdent()
-                .getOrThrow()
+        val gjeldendeIdent = pdlClient
+            .hentIdenter(siste14aVedtak.aktorId)
+            .finnGjeldendeIdent()
+            .getOrThrow()
 
         val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
@@ -36,8 +35,8 @@ class InnsatsgruppeConsumer(
         }
 
         navBrukerService.oppdaterInnsatsgruppe(
-            brukerId,
-            siste14aVedtak.innsatsgruppe,
+            navBrukerId = brukerId,
+            innsatsgruppe = siste14aVedtak.innsatsgruppe,
         )
         log.info("Oppdatert innsatsgruppe for bruker $brukerId")
     }

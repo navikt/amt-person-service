@@ -22,19 +22,18 @@ class OppfolgingsperiodeConsumer(
     fun ingest(value: String) {
         val sisteOppfolgingsperiode = objectMapper.readValue<SisteOppfolgingsperiodeKafkaPayload>(value)
 
-        val gjeldendeIdent =
-            try {
-                pdlClient
-                    .hentIdenter(sisteOppfolgingsperiode.aktorId)
-                    .finnGjeldendeIdent()
-                    .getOrThrow()
-            } catch (e: Exception) {
-                if (e.message?.contains("Fant ikke person") == true) {
-                    log.warn(e.message, e)
-                    return
-                }
-                throw e
+        val gjeldendeIdent = try {
+            pdlClient
+                .hentIdenter(sisteOppfolgingsperiode.aktorId)
+                .finnGjeldendeIdent()
+                .getOrThrow()
+        } catch (e: Exception) {
+            if (e.message?.contains("Fant ikke person") == true) {
+                log.warn(e.message, e)
+                return
             }
+            throw e
+        }
 
         val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
@@ -44,8 +43,8 @@ class OppfolgingsperiodeConsumer(
         }
 
         navBrukerService.oppdaterOppfolgingsperiodeOgInnsatsgruppe(
-            brukerId,
-            sisteOppfolgingsperiode.toOppfolgingsperiode(),
+            navBrukerId = brukerId,
+            oppfolgingsperiode = sisteOppfolgingsperiode.toOppfolgingsperiode(),
         )
 
         log.info("Oppdatert oppfølgingsperiode med id ${sisteOppfolgingsperiode.uuid} for bruker $brukerId")
