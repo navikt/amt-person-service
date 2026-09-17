@@ -42,6 +42,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     implementation(libs.tools.jackson.module.kotlin)
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql")
