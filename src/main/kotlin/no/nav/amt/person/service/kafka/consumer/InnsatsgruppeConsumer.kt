@@ -22,10 +22,18 @@ class InnsatsgruppeConsumer(
     fun ingest(value: String) {
         val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
-        val gjeldendeIdent = pdlClient
-            .hentIdenter(siste14aVedtak.aktorId)
-            .finnGjeldendeIdent()
-            .getOrThrow()
+        val gjeldendeIdent = try {
+            pdlClient
+                .hentIdenter(siste14aVedtak.aktorId)
+                .finnGjeldendeIdent()
+                .getOrThrow()
+        } catch (e: RuntimeException) {
+            if (e.message?.contains("Fant ikke person") == true) {
+                log.warn("Fant ikke person i PDL, hopper over Kafka-melding")
+                return
+            }
+            throw e
+        }
 
         val brukerId = navBrukerRepository.finnBrukerId(gjeldendeIdent.ident)
 
