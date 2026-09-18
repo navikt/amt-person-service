@@ -72,7 +72,7 @@ class KafkaTopicConfiguration(
                 Deserializers.stringDeserializer(),
                 Consumer { oppfolgingsperiodeConsumer.ingest(it.value()) },
             ),
-/*        KafkaConsumerClientBuilder
+        KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
             .withStoreOnFailure(consumerRepository)
@@ -81,7 +81,7 @@ class KafkaTopicConfiguration(
                 Deserializers.stringDeserializer(),
                 Deserializers.stringDeserializer(),
                 Consumer { innsatsgruppeConsumer.ingest(it.value()) },
-            ),*/
+            ),
         KafkaConsumerClientBuilder
             .TopicConfig<String, Aktor>()
             .withLogging()
