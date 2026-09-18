@@ -1,18 +1,14 @@
 package no.nav.amt.person.service.kafka.consumer
 
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import no.nav.amt.person.service.navbruker.NavBrukerRepository
 import no.nav.amt.person.service.navbruker.NavBrukerService
-import no.nav.amt.person.service.person.model.Personident
 import no.nav.amt.person.service.person.model.Personident.Companion.finnGjeldendeIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.time.Duration
 
 @Component
 class InnsatsgruppeConsumer(
@@ -23,25 +19,14 @@ class InnsatsgruppeConsumer(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    // Cacher gjeldende ident per aktørId for å unngå unødvendige oppslag mot PDL
-    // for aktører vi nylig har slått opp. "Fant ikke person"-tilfeller caches ikke,
-    // siden get(key, mappingFunction) ikke lagrer noe dersom mappingFunction kaster.
-    private val gjeldendeIdentCache: Cache<String, Personident> = Caffeine
-        .newBuilder()
-        .maximumSize(10_000)
-        .expireAfterWrite(Duration.ofHours(6))
-        .build()
-
     fun ingest(value: String) {
         val siste14aVedtak = objectMapper.readValue<Siste14aVedtak>(value)
 
         val gjeldendeIdent = try {
-            gjeldendeIdentCache.get(siste14aVedtak.aktorId) { aktorId ->
-                pdlClient
-                    .hentIdenter(aktorId)
-                    .finnGjeldendeIdent()
-                    .getOrThrow()
-            }
+            pdlClient
+                .hentIdenter(siste14aVedtak.aktorId)
+                .finnGjeldendeIdent()
+                .getOrThrow()
         } catch (e: RuntimeException) {
             if (e.message?.contains("Fant ikke person") == true) {
                 log.warn("Fant ikke person i PDL, hopper over Kafka-melding")
