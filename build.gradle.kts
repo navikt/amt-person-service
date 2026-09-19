@@ -35,7 +35,6 @@ dependencies {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     implementation("org.springframework.boot:spring-boot-starter-jetty")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.springframework.boot:spring-boot-restclient")
@@ -49,6 +48,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation(libs.amt.lib.utils)
+    implementation(libs.amt.lib.spring.boot)
     implementation(libs.nav.common.log)
     implementation(libs.nav.common.job)
     implementation(libs.nav.common.kafka)

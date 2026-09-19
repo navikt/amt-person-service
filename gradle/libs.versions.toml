@@ -19,7 +19,7 @@ logstash-encoder = "9.0"
 # NAV
 nav-common = "4.2026.09.14_05.43-2bd32bda23c4"
 poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
-amt-lib = "1.2026.09.15_11.04-5b00ff35985b"
+amt-lib = "1.2026.09.19_14.04-d95fadb1dbac"
 
 # Misc
 shedlock = "7.10.0"
@@ -60,6 +60,7 @@ poao-tilgang-client = { module = "no.nav.poao-tilgang:client", version.ref = "po
 
 # AMT lib
 amt-lib-utils = { module = "no.nav.amt.deltakelser.lib:utils", version.ref = "amt-lib" }
+amt-lib-spring-boot = { module = "no.nav.amt.deltakelser.lib:spring-boot", version.ref = "amt-lib" }
 amt-lib-testing = { module = "no.nav.amt.deltakelser.lib:testing", version.ref = "amt-lib" }
 
 # Shedlock

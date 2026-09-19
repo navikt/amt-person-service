@@ -4,7 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.verify
-import no.nav.amt.person.service.api.auth.InternalAuthorizationManager
+import no.nav.amt.lib.spring.boot.security.InternalAuthorizationManager
 import no.nav.amt.person.service.config.SecurityConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.internal.InternalController
