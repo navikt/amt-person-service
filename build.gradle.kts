@@ -30,7 +30,6 @@ dependencies {
     }
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
@@ -43,14 +42,12 @@ dependencies {
 
     implementation(libs.tools.jackson.module.kotlin)
     implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql")
 
     implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation(libs.amt.lib.utils)
     implementation(libs.amt.lib.spring.boot)
-    implementation(libs.nav.common.log)
-    implementation(libs.nav.common.job)
     implementation(libs.nav.common.kafka)
 
     implementation(libs.logstash.encoder)
@@ -71,10 +68,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
 
     testImplementation(libs.kotest.assertions.core)
-    testImplementation(libs.kotest.assertions.json)
-
     testImplementation(libs.testcontainers.postgresql)
-
     testImplementation(libs.mockk)
     testImplementation(libs.springmockk)
     testImplementation(libs.amt.lib.testing)

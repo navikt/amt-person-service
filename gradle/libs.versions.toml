@@ -51,8 +51,6 @@ tools-jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-ko
 logstash-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-encoder" }
 
 # NAV common
-nav-common-log = { module = "no.nav.common:log", version.ref = "nav-common" }
-nav-common-job = { module = "no.nav.common:job", version.ref = "nav-common" }
 nav-common-kafka = { module = "no.nav.common:kafka", version.ref = "nav-common" }
 
 # Nav tilgang
