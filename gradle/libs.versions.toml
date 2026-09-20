@@ -1,6 +1,6 @@
 [versions]
 # Kotlin & build
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 ktlint-plugin = "14.2.0"
 ktlint-cli-version = "1.8.0"
 
@@ -22,10 +22,10 @@ poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
 amt-lib = "1.2026.09.19_14.04-d95fadb1dbac"
 
 # Misc
-shedlock = "7.10.0"
+shedlock = "7.10.1"
 
 # Testing
-kotest = "6.2.4"
+kotest = "6.2.5"
 mockk = "1.14.11"
 springmockk-version = "5.0.1"
 
