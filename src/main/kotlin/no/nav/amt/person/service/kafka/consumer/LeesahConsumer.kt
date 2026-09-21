@@ -66,11 +66,10 @@ class LeesahConsumer(
         .forEach { personDbo -> personService.oppdaterNavn(personDbo) }
 
     private fun handterAdresse(personidenter: Set<String>) {
-        val lagredePersonidenter =
-            personRepository
-                .getPersoner(personidenter)
-                .map { it.personident }
-                .toSet()
+        val lagredePersonidenter = personRepository
+            .getPersoner(personidenter)
+            .map { it.personident }
+            .toSet()
 
         if (lagredePersonidenter.isEmpty()) return
 

@@ -41,14 +41,12 @@ class PersonApiController(
     @PostMapping("/nav-bruker")
     fun hentEllerOpprettNavBruker(
         @RequestBody request: NavBrukerRequest,
-    ): NavBrukerDto = NavBrukerDto.fromDbo(
-        navBrukerService.hentEllerOpprettNavBruker(request.personident),
-    )
+    ) = NavBrukerDto.fromDbo(navBrukerService.hentEllerOpprettNavBruker(request.personident))
 
     @PostMapping("/nav-bruker-fodselsar")
     fun hentNavBrukerFodselsar(
         @RequestBody request: NavBrukerRequest,
-    ): NavBrukerFodselsdatoDto = NavBrukerFodselsdatoDto(pdlClient.hentPersonFodselsar(request.personident))
+    ) = NavBrukerFodselsdatoDto(pdlClient.hentPersonFodselsar(request.personident))
 
     @PostMapping("/nav-bruker/kontaktinformasjon")
     fun hentNavBrukerKontaktinformasjon(
@@ -58,17 +56,17 @@ class PersonApiController(
     @PostMapping("/nav-ansatt")
     fun hentEllerOpprettNavAnsatt(
         @RequestBody request: NavAnsattRequest,
-    ): NavAnsattDto = NavAnsattDto.fromDbo(navAnsattService.hentEllerOpprettAnsatt(request.navIdent))
+    ) = NavAnsattDto.fromDbo(navAnsattService.hentEllerOpprettAnsatt(request.navIdent))
 
     @GetMapping("/nav-ansatt/{id}")
     fun hentNavAnsatt(
         @PathVariable id: UUID,
-    ): NavAnsattDto = NavAnsattDto.fromDbo(navAnsattRepository.get(id))
+    ) = NavAnsattDto.fromDbo(navAnsattRepository.get(id))
 
     @PostMapping("/arrangor-ansatt")
     fun hentEllerOpprettArrangorAnsatt(
         @RequestBody request: ArrangorAnsattRequest,
-    ): ArrangorAnsattDto = ArrangorAnsattDto.fromDbo(arrangorAnsattService.hentEllerOpprettAnsatt(request.personident))
+    ) = ArrangorAnsattDto.fromDbo(arrangorAnsattService.hentEllerOpprettAnsatt(request.personident))
 
     @PostMapping("/nav-enhet")
     fun hentEllerOpprettNavEnhet(
@@ -81,10 +79,10 @@ class PersonApiController(
     @GetMapping("/nav-enhet/{id}")
     fun hentNavEnhet(
         @PathVariable id: UUID,
-    ): NavEnhetDto = NavEnhetDto.fromDbo(navEnhetsRepository.get(id))
+    ) = NavEnhetDto.fromDbo(navEnhetsRepository.get(id))
 
     @PostMapping("/person/adressebeskyttelse")
     fun hentAdressebeskyttelse(
         @RequestBody request: AdressebeskyttelseRequest,
-    ): AdressebeskyttelseDto = AdressebeskyttelseDto(pdlClient.hentAdressebeskyttelse(request.personident))
+    ) = AdressebeskyttelseDto(pdlClient.hentAdressebeskyttelse(request.personident))
 }

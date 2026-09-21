@@ -26,8 +26,13 @@ class AktorV2Consumer(
             return
         }
 
-        val identer = value.identifikatorer
-            .map { Personident(it.idnummer, !it.gjeldende, it.type.toIdentType()) }
+        val identer = value.identifikatorer.map {
+            Personident(
+                ident = it.idnummer,
+                historisk = !it.gjeldende,
+                type = it.type.toIdentType(),
+            )
+        }
 
         if (identer.finnGjeldendeIdent().isFailure) {
             TeamLogs.error("AktorV2 ingestor mottok bruker med 0 gjeldende personident(er): ${value.identifikatorer}")

@@ -1,7 +1,5 @@
 package no.nav.amt.person.service.kafka.config
 
-import no.nav.amt.person.service.kafka.config.KafkaTopicProperties.Companion.CONSUMER_GROUP_ID
-import no.nav.amt.person.service.kafka.config.KafkaTopicProperties.Companion.PRODUCER_ID
 import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.common.kafka.producer.KafkaProducerClientImpl
 import no.nav.common.kafka.util.KafkaPropertiesBuilder
@@ -46,4 +44,9 @@ class KafkaBeans {
     @Bean
     fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
         KafkaProducerClientImpl(kafkaProperties.producer())
+
+    companion object {
+        private const val CONSUMER_GROUP_ID = "amt-person-service-consumer.v1"
+        private const val PRODUCER_ID = "amt-person-service-producer"
+    }
 }

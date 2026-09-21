@@ -21,8 +21,8 @@ class SkjermetPersonConsumer(
     ) {
         val brukerId = navBrukerRepository.finnBrukerId(personident) ?: return
         navBrukerService.settSkjermet(
-            brukerId,
-            objectMapper.readValue<Boolean>(erSkjermetAsJson),
+            brukerId = brukerId,
+            erSkjermet = objectMapper.readValue<Boolean>(erSkjermetAsJson),
         )
     }
 
