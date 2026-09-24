@@ -22,9 +22,7 @@ dependencyManagement {
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java") {
-            version {
-                strictly("1.11.2")
-            }
+            version { strictly("1.11.2") }
             because("Fixes CVE-2026-59949")
         }
     }
@@ -33,15 +31,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
-    implementation("org.springframework.boot:spring-boot-starter-jetty")
+    runtimeOnly("org.springframework.boot:spring-boot-starter-jetty")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-flyway")
+    runtimeOnly("org.springframework.boot:spring-boot-flyway")
     implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     implementation(libs.tools.jackson.module.kotlin)
-    implementation("org.flywaydb:flyway-database-postgresql")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -50,7 +48,7 @@ dependencies {
     implementation(libs.amt.lib.spring.boot)
     implementation(libs.nav.common.kafka)
 
-    implementation(libs.logstash.encoder)
+    runtimeOnly(libs.logstash.encoder)
     implementation(libs.kafka.avro.serializer)
 
     implementation(libs.poao.tilgang.client)
