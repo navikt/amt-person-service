@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.config
 
+import jakarta.servlet.DispatcherType
 import no.nav.amt.lib.spring.boot.security.InternalAuthorizationManager
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusScrapeEndpoint
@@ -12,7 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.DispatcherTypeRequestMatcher
 
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
@@ -29,16 +30,17 @@ class SecurityConfig {
             logout { disable() }
             oauth2ResourceServer { jwt { } }
             authorizeHttpRequests {
+                // Bevarer opprinnelig feilrespons når et internt kall uten bearer-token redispatches til /error.
+                authorize(DispatcherTypeRequestMatcher(DispatcherType.ERROR), permitAll)
                 authorize(
-                    OrRequestMatcher(
-                        EndpointRequest.to(HealthEndpoint::class.java),
-                        EndpointRequest.to(PrometheusScrapeEndpoint::class.java),
+                    EndpointRequest.to(
+                        HealthEndpoint::class.java,
+                        PrometheusScrapeEndpoint::class.java,
                     ),
                     permitAll,
                 )
-                authorize("/api/**", hasRole("access_as_application"))
                 authorize("/internal/**", internalAuthorizationManager)
-                authorize(anyRequest, authenticated)
+                authorize(anyRequest, hasRole("access_as_application"))
             }
         }
 
