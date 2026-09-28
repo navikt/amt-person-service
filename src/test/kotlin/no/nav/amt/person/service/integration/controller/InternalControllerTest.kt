@@ -9,6 +9,8 @@ import no.nav.amt.person.service.config.SecurityConfig
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.internal.InternalController
 import no.nav.amt.person.service.internal.InternalService
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -268,13 +270,52 @@ class InternalControllerTest(
         @Test
         fun `skal returnere 500 når Nav-bruker ikke finnes`() {
             every { internalService.synkroniserKrrForPerson(any()) } throws
-                IllegalArgumentException("Fant ikke Nav-bruker")
+                IllegalArgumentException("Sensitiv feilmelding")
 
             mockMvc
                 .post("/internal/nav-brukere/synkroniser-krr") {
                     contentType = MediaType.APPLICATION_JSON
                     content = """{"personident": "${TestData.randomIdent()}"}"""
                 }.andExpect { status { isInternalServerError() } }
+                .andExpect {
+                    content {
+                        contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+                        string(not(containsString("Sensitiv feilmelding")))
+                    }
+                    jsonPath("$.detail") { value("En uventet feil oppstod") }
+                    jsonPath("$.errorId") { isNotEmpty() }
+                    jsonPath("$.stacktrace") { doesNotExist() }
+                }
+        }
+
+        @Test
+        fun `skal returnere 400 uten å eksponere ugyldig request`() {
+            mockMvc
+                .post("/internal/nav-brukere/synkroniser-krr") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"personident": """
+                }.andExpect { status { isBadRequest() } }
+                .andExpect {
+                    content { contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON) }
+                    jsonPath("$.detail") { value("Forespørselen inneholder ugyldige data") }
+                    jsonPath("$.errorId") { doesNotExist() }
+                }
+        }
+
+        @Test
+        fun `skal returnere 404 uten intern feilmelding`() {
+            every { internalService.synkroniserKrrForPerson(any()) } throws
+                NoSuchElementException("Sensitiv feilmelding")
+
+            mockMvc
+                .post("/internal/nav-brukere/synkroniser-krr") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"personident": "${TestData.randomIdent()}"}"""
+                }.andExpect { status { isNotFound() } }
+                .andExpect {
+                    jsonPath("$.detail") { value("Ressursen finnes ikke") }
+                    jsonPath("$.errorId") { doesNotExist() }
+                }
         }
     }
 

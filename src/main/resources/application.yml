@@ -168,9 +168,6 @@ kafka:
       username: ${KAFKA_SCHEMA_REGISTRY_USER}
       password: ${KAFKA_SCHEMA_REGISTRY_PASSWORD}
 
-rest:
-  include-stacktrace: false
-
 poao-tilgang:
   url: ${POAO_TILGANG_URL}
 
