@@ -15,6 +15,7 @@ import no.nav.amt.person.service.person.model.Rolle
 import no.nav.amt.person.service.utils.EnvUtils.isDev
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -33,6 +34,7 @@ class InternalService(
     private val navAnsattUpdater: NavAnsattUpdater,
     private val navEnhetUpdateJob: NavEnhetUpdateJob,
     private val personidentRepository: PersonidentRepository,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -59,7 +61,7 @@ class InternalService(
         batchSize: Int,
     ) {
         batchHandterNavBrukere(startFromOffset, batchSize) { navBruker ->
-            kafkaProducerService.publiserNavBruker(navBruker)
+            republiser { kafkaProducerService.publiserNavBruker(navBruker) }
         }
     }
 
@@ -105,7 +107,7 @@ class InternalService(
 
     fun publiserNavBruker(navBrukerId: UUID) {
         val bruker = navBrukerRepository.get(navBrukerId)
-        kafkaProducerService.publiserNavBruker(bruker)
+        republiser { kafkaProducerService.publiserNavBruker(bruker) }
     }
 
     fun republiserArrangorAnsatte(
@@ -117,7 +119,7 @@ class InternalService(
 
         do {
             ansatte = personRepository.getAllWithRolle(offset, batchSize, Rolle.ARRANGOR_ANSATT)
-            ansatte.forEach { kafkaProducerService.publiserArrangorAnsatt(it) }
+            ansatte.forEach { republiser { kafkaProducerService.publiserArrangorAnsatt(it) } }
             log.info("Publiserte arrangøransatte fra offset $offset til ${offset + ansatte.size}")
             offset += batchSize
         } while (ansatte.isNotEmpty())
@@ -125,7 +127,7 @@ class InternalService(
 
     fun republiserNavAnsatte() {
         val ansatte = navAnsattRepository.getAll()
-        ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
+        ansatte.forEach { republiser { kafkaProducerService.publiserNavAnsatt(it) } }
         log.info("Publiserte ${ansatte.size} navansatte")
     }
 
@@ -185,10 +187,16 @@ class InternalService(
 
         personidenter.forEach {
             navBrukerRepository.getByPersonId(it)?.let { navBrukerDbo ->
-                kafkaProducerService.publiserNavBruker(navBrukerDbo)
+                republiser { kafkaProducerService.publiserNavBruker(navBrukerDbo) }
             }
         }
         log.info("Ferdig med republisering av Nav-brukere med ny ident")
+    }
+
+    // KafkaProducerService krever en transaksjon. Én kort transaksjon per melding gir samme
+    // oppførsel som før: meldinger som allerede er lagt i outboxen blir liggende hvis en senere feiler.
+    private fun republiser(block: () -> Unit) {
+        transactionTemplate.executeWithoutResult { block() }
     }
 
     private fun batchHandterNavBrukere(

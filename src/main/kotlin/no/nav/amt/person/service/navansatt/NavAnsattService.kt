@@ -6,6 +6,7 @@ import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navenhet.NavEnhetService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 
 @Service
 class NavAnsattService(
@@ -14,18 +15,19 @@ class NavAnsattService(
     private val veilarboppfolgingClient: VeilarboppfolgingClient,
     private val kafkaProducerService: KafkaProducerService,
     private val navEnhetService: NavEnhetService,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo {
-        val upsertedNavAnsatt = navAnsattRepository.upsert(navAnsatt)
-        kafkaProducerService.publiserNavAnsatt(upsertedNavAnsatt)
-        return upsertedNavAnsatt
+    fun upsert(navAnsatt: NavAnsattDbo): NavAnsattDbo = transactionTemplate.execute {
+        navAnsattRepository.upsert(navAnsatt).also(kafkaProducerService::publiserNavAnsatt)
     }
 
     fun upsertMany(ansatte: Set<NavAnsattDbo>) {
-        navAnsattRepository.upsertMany(ansatte)
-        ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
+        transactionTemplate.executeWithoutResult {
+            navAnsattRepository.upsertMany(ansatte)
+            ansatte.forEach { kafkaProducerService.publiserNavAnsatt(it) }
+        }
     }
 
     fun hentEllerOpprettAnsatt(navIdent: String): NavAnsattDbo {

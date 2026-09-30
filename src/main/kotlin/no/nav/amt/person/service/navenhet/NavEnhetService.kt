@@ -6,6 +6,7 @@ import no.nav.amt.person.service.config.TeamLogs
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
 
 @Service
@@ -14,6 +15,7 @@ class NavEnhetService(
     private val norgClient: NorgClient,
     private val oppfolgingskontorClient: OppfolgingskontorClient,
     private val kafkaProducerService: KafkaProducerService,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -39,8 +41,10 @@ class NavEnhetService(
             navn = norgEnhet.navn,
         )
 
-        navEnhetRepository.insert(enhet)
-        kafkaProducerService.publiserNavEnhet(enhet)
+        transactionTemplate.executeWithoutResult {
+            navEnhetRepository.insert(enhet)
+            kafkaProducerService.publiserNavEnhet(enhet)
+        }
 
         return enhet
     }
@@ -58,8 +62,10 @@ class NavEnhetService(
 
             if (oppdatertEnhet != null && oppdatertEnhet.navn != opprinneligEnhet.navn) {
                 val enhetMedNyttNavn = opprinneligEnhet.copy(navn = oppdatertEnhet.navn)
-                navEnhetRepository.update(enhetMedNyttNavn)
-                kafkaProducerService.publiserNavEnhet(enhetMedNyttNavn)
+                transactionTemplate.executeWithoutResult {
+                    navEnhetRepository.update(enhetMedNyttNavn)
+                    kafkaProducerService.publiserNavEnhet(enhetMedNyttNavn)
+                }
                 log.info(
                     "Oppdaterer navn for enhetId=${opprinneligEnhet.enhetId} fra '${opprinneligEnhet.navn}' til '${oppdatertEnhet.navn}'",
                 )

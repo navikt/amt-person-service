@@ -2,58 +2,67 @@ package no.nav.amt.person.service.integration.kafka.producer
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.slot
-import io.mockk.verify
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
+import no.nav.amt.person.service.kafka.config.KafkaTopicProperties
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.kafka.producer.dto.NavAnsattDtoV1
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService
 import no.nav.amt.person.service.navansatt.NavAnsattUpdater
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.Test
+import org.springframework.transaction.support.TransactionTemplate
 
 class NavAnsattProducerTest(
     private val kafkaProducerService: KafkaProducerService,
     private val navAnsattService: NavAnsattService,
     private val navAnsattUpdater: NavAnsattUpdater,
+    private val kafkaTopicProperties: KafkaTopicProperties,
+    private val transactionTemplate: TransactionTemplate,
 ) : IntegrationTestBase() {
     @Test
     fun `publiserNavAnsatt - skal publisere ansatt med riktig key og value`() {
+        // Arrange
         val ansatt = TestData.lagNavAnsatt()
 
-        kafkaProducerService.publiserNavAnsatt(ansatt)
+        // Act
+        transactionTemplate.executeWithoutResult { kafkaProducerService.publiserNavAnsatt(ansatt) }
 
-        val recordSlot = slot<ProducerRecord<String, String>>()
-        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
-
+        // Assert
+        val record = outboxRecords().single()
         val forventetValue = ansattTilV1Json(ansatt)
 
-        recordSlot.captured.key() shouldBe ansatt.id.toString()
-        recordSlot.captured.value() shouldBe forventetValue
+        record.topic shouldBe kafkaTopicProperties.amtNavAnsattPersonaliaTopic
+        record.key shouldBe ansatt.id.toString()
+        record.value shouldBe forventetValue
     }
 
     @Test
     fun `publiserNavAnsatt - ansatt er oppdatert - skal publisere ny melding`() {
+        // Arrange
         val ansatt = TestData.lagNavAnsatt()
         testDataRepository.insertNavAnsatt(ansatt)
+        val oppdatertAnsatt = ansatt.copy(
+            navn = "nytt navn",
+            telefon = "nytt nummer",
+            epost = "ny@epost.no",
+        )
 
-        val oppdatertAnsatt = ansatt.copy(navn = "nytt navn", telefon = "nytt nummer", epost = "ny@epost.no")
+        // Act
         navAnsattService.upsert(oppdatertAnsatt)
 
-        val recordSlot = slot<ProducerRecord<String, String>>()
-        verify { kafkaProducerClient.sendSync(capture(recordSlot)) }
-
+        // Assert
+        val record = outboxRecords().single()
         val forventetValue = ansattTilV1Json(oppdatertAnsatt)
 
-        recordSlot.captured.key() shouldBe ansatt.id.toString()
-        recordSlot.captured.value() shouldBe forventetValue
+        record.key shouldBe ansatt.id.toString()
+        record.value shouldBe forventetValue
     }
 
     @Test
     fun `publiserNavAnsatt - flere ansatte sjekkes for oppdatering - skal publisere melding kun for de med endring`() {
+        // Arrange
         val endretAnsatt = TestData.lagNavAnsatt()
         testDataRepository.insertNavAnsatt(endretAnsatt)
 
@@ -77,12 +86,13 @@ class NavAnsattProducerTest(
             ),
         )
 
+        // Act
         navAnsattUpdater.oppdaterAlle()
 
-        val recordSlot = slot<ProducerRecord<String, String>>()
-        verify(exactly = 1) { kafkaProducerClient.sendSync(capture(recordSlot)) }
-
-        recordSlot.captured.key() shouldBe endretAnsatt.id.toString()
+        // Assert
+        val records = outboxRecords()
+        records.size shouldBe 1
+        records.single().key shouldBe endretAnsatt.id.toString()
     }
 
     private fun ansattTilV1Json(ansatt: NavAnsattDbo): String = objectMapper.writeValueAsString(

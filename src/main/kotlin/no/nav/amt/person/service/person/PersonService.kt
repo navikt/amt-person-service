@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 
 @Service
 class PersonService(
@@ -19,6 +20,7 @@ class PersonService(
     private val personRepository: PersonRepository,
     private val personidentRepository: PersonidentRepository,
     private val applicationEventPublisher: ApplicationEventPublisher,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -31,7 +33,6 @@ class PersonService(
      * @return eksisterende, oppdatert eller nyopprettet person
      */
     @Retryable(maxRetries = 2)
-    @Transactional
     fun hentEllerOpprettPerson(
         personident: String,
         forceFetchFromPdl: Boolean = false,
@@ -42,14 +43,17 @@ class PersonService(
 
         val pdlPerson = pdlClient.hentPerson(personident)
 
-        return eksisterendePerson
-            ?.let {
-                oppdaterPersonFraPdl(
-                    person = it,
-                    pdlPerson = pdlPerson,
-                )
-            }
-            ?: opprettPerson(pdlPerson)
+        return transactionTemplate.execute {
+            personRepository
+                .get(personident)
+                ?.let {
+                    oppdaterPersonFraPdl(
+                        person = it,
+                        pdlPerson = pdlPerson,
+                    )
+                }
+                ?: opprettPerson(pdlPerson)
+        }
     }
 
     /**
@@ -84,7 +88,6 @@ class PersonService(
         }
     }
 
-    @Transactional
     fun oppdaterNavn(person: PersonDbo) {
         val pdlPerson = try {
             pdlClient.hentPerson(person.personident)
@@ -109,18 +112,20 @@ class PersonService(
             return
         }
 
-        upsert(
-            person.copy(
-                fornavn = pdlPerson.fornavn.titlecase(),
-                mellomnavn = pdlPerson.mellomnavn?.titlecase(),
-                etternavn = pdlPerson.etternavn.titlecase(),
-            ),
-        )
+        transactionTemplate.executeWithoutResult {
+            upsert(
+                person.copy(
+                    fornavn = pdlPerson.fornavn.titlecase(),
+                    mellomnavn = pdlPerson.mellomnavn?.titlecase(),
+                    etternavn = pdlPerson.etternavn.titlecase(),
+                ),
+            )
+        }
 
         log.info("Oppdaterte navn på person ${person.id}")
     }
 
-    fun upsert(person: PersonDbo) {
+    private fun upsert(person: PersonDbo) {
         personRepository.upsert(person)
         applicationEventPublisher.publishEvent(PersonUpdateEvent(person))
 

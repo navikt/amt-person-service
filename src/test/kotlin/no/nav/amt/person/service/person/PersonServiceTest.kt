@@ -10,28 +10,38 @@ import io.mockk.verify
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.data.TestData
+import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.utils.mockExecute
+import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.transaction.support.TransactionTemplate
 
 class PersonServiceTest {
     private val pdlClient: PdlClient = mockk(relaxUnitFun = true)
     private val personRepository: PersonRepository = mockk(relaxUnitFun = true)
     private val personidentRepository: PersonidentRepository = mockk(relaxUnitFun = true)
     private val applicationEventPublisher: ApplicationEventPublisher = mockk(relaxUnitFun = true)
+    private val transactionTemplate: TransactionTemplate = mockk()
 
     private val service = PersonService(
         pdlClient = pdlClient,
         personRepository = personRepository,
         personidentRepository = personidentRepository,
         applicationEventPublisher = applicationEventPublisher,
+        transactionTemplate = transactionTemplate,
     )
 
     @BeforeEach
-    fun setup() = clearAllMocks()
+    fun setup() {
+        clearAllMocks()
+        mockExecute<PersonDbo>(transactionTemplate)
+        mockExecuteWithoutResult(transactionTemplate)
+    }
 
     @Nested
     inner class HentEllerOpprettPerson {
