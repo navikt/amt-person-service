@@ -1,11 +1,15 @@
 package no.nav.amt.person.service.kafka.config
 
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.common.kafka.producer.KafkaProducerClient
-import no.nav.common.kafka.producer.KafkaProducerClientImpl
+import no.nav.common.kafka.producer.util.KafkaProducerClientBuilder
 import no.nav.common.kafka.util.KafkaPropertiesBuilder
 import no.nav.common.kafka.util.KafkaPropertiesPreset
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.ByteArraySerializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -42,8 +46,23 @@ class KafkaBeans {
     }
 
     @Bean
-    fun kafkaProducer(kafkaProperties: KafkaProperties): KafkaProducerClient<String, String> =
-        KafkaProducerClientImpl(kafkaProperties.producer())
+    @ConditionalOnProperty("kafka.enabled", havingValue = "true", matchIfMissing = true)
+    fun kafkaOutboxProducer(
+        kafkaProperties: KafkaProperties,
+        meterRegistry: MeterRegistry,
+    ): KafkaProducerClient<ByteArray, ByteArray> {
+        val properties = Properties().apply {
+            putAll(kafkaProperties.producer())
+            put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer::class.java)
+            put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer::class.java)
+        }
+
+        return KafkaProducerClientBuilder
+            .builder<ByteArray, ByteArray>()
+            .withProperties(properties)
+            .withMetrics(meterRegistry)
+            .build()
+    }
 
     companion object {
         private const val CONSUMER_GROUP_ID = "amt-person-service-consumer.v1"

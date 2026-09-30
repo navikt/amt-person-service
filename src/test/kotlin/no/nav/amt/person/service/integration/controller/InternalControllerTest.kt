@@ -98,7 +98,7 @@ class InternalControllerTest(
                 .post("/internal/person/identer")
                 .andExpect { status { isOk() } }
 
-            verify { internalService.oppdaterPersonidenter(0) }
+            verify(timeout = 5_000) { internalService.oppdaterPersonidenter(0) }
         }
 
         @Test
@@ -118,7 +118,7 @@ class InternalControllerTest(
                     param("offset", "100")
                 }.andExpect { status { isOk() } }
 
-            verify { internalService.oppdaterPersonidenter(100) }
+            verify(timeout = 5_000) { internalService.oppdaterPersonidenter(100) }
         }
     }
 

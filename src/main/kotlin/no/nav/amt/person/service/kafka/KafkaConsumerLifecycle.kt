@@ -2,6 +2,7 @@ package no.nav.amt.person.service.kafka
 
 import no.nav.common.kafka.consumer.KafkaConsumerClient
 import no.nav.common.kafka.consumer.feilhandtering.KafkaConsumerRecordProcessor
+import no.nav.common.kafka.producer.feilhandtering.KafkaProducerRecordProcessor
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.SmartLifecycle
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 class KafkaConsumerLifecycle(
     private val client: KafkaConsumerClient,
     private val consumerRecordProcessor: KafkaConsumerRecordProcessor,
+    private val producerRecordProcessor: KafkaProducerRecordProcessor,
 ) : SmartLifecycle {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -25,6 +27,7 @@ class KafkaConsumerLifecycle(
         log.info("Starting Kafka consumer and stored record processor...")
         client.start()
         consumerRecordProcessor.start()
+        producerRecordProcessor.start()
 
         running = true
     }
@@ -35,6 +38,7 @@ class KafkaConsumerLifecycle(
         }
 
         log.info("Stopping Kafka consumer and stored record processor...")
+        producerRecordProcessor.close()
         consumerRecordProcessor.stop()
         client.stop()
 

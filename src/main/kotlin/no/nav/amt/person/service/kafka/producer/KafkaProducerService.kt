@@ -9,34 +9,42 @@ import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navbruker.NavBrukerDbo
 import no.nav.amt.person.service.navenhet.NavEnhetDbo
 import no.nav.amt.person.service.person.dbo.PersonDbo
-import no.nav.common.kafka.producer.KafkaProducerClient
+import no.nav.common.kafka.producer.feilhandtering.KafkaProducerRecordStorage
+import no.nav.common.kafka.producer.util.ProducerUtils
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.util.UUID
 
+/**
+ * Legger meldinger i Kafka-outboxen (kafka_producer_record).
+ *
+ * MANDATORY: Alle metoder må kalles i en aktiv transaksjon, slik at outbox-raden lagres
+ * atomisk sammen med dataene den beskriver. Kaster IllegalTransactionStateException ellers.
+ */
 @Service
+@Transactional(propagation = Propagation.MANDATORY)
 class KafkaProducerService(
     private val kafkaTopicProperties: KafkaTopicProperties,
-    private val kafkaProducerClient: KafkaProducerClient<String, String>,
+    private val producerRecordStorage: KafkaProducerRecordStorage,
     private val objectMapper: ObjectMapper,
 ) {
-    private val log = LoggerFactory.getLogger(javaClass)
-
     fun publiserNavBruker(navBruker: NavBrukerDbo) {
-        kafkaProducerClient.sendSync(
+        store(
             ProducerRecord(
                 kafkaTopicProperties.amtNavBrukerTopic,
                 navBruker.person.id.toString(),
                 objectMapper.writeValueAsString(NavBrukerDtoV1.fromDbo(navBruker)),
             ),
         )
-        log.info("Publiserte Nav-bruker med personId ${navBruker.person.id} til topic")
     }
 
+    // Kalles bare ved endringer i personalia (ArrangorAnsattService.onPersonUpdate), ikke ved
+    // tildeling av rollen. Se KDoc på ArrangorAnsattService.hentEllerOpprettAnsatt.
     fun publiserArrangorAnsatt(ansatt: PersonDbo) {
-        kafkaProducerClient.sendSync(
+        store(
             ProducerRecord(
                 kafkaTopicProperties.amtArrangorAnsattPersonaliaTopic,
                 ansatt.id.toString(),
@@ -46,7 +54,7 @@ class KafkaProducerService(
     }
 
     fun publiserNavAnsatt(ansatt: NavAnsattDbo) {
-        kafkaProducerClient.sendSync(
+        store(
             ProducerRecord(
                 kafkaTopicProperties.amtNavAnsattPersonaliaTopic,
                 ansatt.id.toString(),
@@ -56,24 +64,27 @@ class KafkaProducerService(
     }
 
     fun publiserNavEnhet(navEnhet: NavEnhetDbo) {
-        kafkaProducerClient.sendSync(
+        store(
             ProducerRecord(
                 kafkaTopicProperties.amtNavEnhetTopic,
                 navEnhet.id.toString(),
                 objectMapper.writeValueAsString(NavEnhetDtoV1.fromDbo(navEnhet)),
             ),
         )
-        log.info("Publiserte nav enhet med id ${navEnhet.id} til topic")
     }
 
     // brukes kun av tester
     internal fun publiserSlettNavBruker(personId: UUID) {
-        kafkaProducerClient.sendSync(
+        store(
             ProducerRecord(
                 kafkaTopicProperties.amtNavBrukerTopic,
                 personId.toString(),
                 null,
             ),
         )
+    }
+
+    private fun store(record: ProducerRecord<String, String>) {
+        producerRecordStorage.store(ProducerUtils.serializeStringRecord(record))
     }
 }

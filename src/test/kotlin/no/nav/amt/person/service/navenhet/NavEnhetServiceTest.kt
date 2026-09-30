@@ -13,56 +13,76 @@ import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
+import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.transaction.support.TransactionTemplate
 
 class NavEnhetServiceTest {
     private val norgClient: NorgClient = mockk()
     private val navEnhetRepository: NavEnhetRepository = mockk(relaxUnitFun = true)
     private val oppfolgingskontorClient: OppfolgingskontorClient = mockk()
     private val kafkaProducerService = mockk<KafkaProducerService>(relaxUnitFun = true)
+    private val transactionTemplate = mockk<TransactionTemplate>()
 
     private val service = NavEnhetService(
         navEnhetRepository = navEnhetRepository,
         norgClient = norgClient,
         oppfolgingskontorClient = oppfolgingskontorClient,
-        kafkaProducerService,
+        kafkaProducerService = kafkaProducerService,
+        transactionTemplate = transactionTemplate,
     )
 
     @BeforeEach
-    fun setup() = clearAllMocks()
-
-    @Test
-    fun `hentNavEnhetForBruker - enhet finnes ikke - skal opprette enhet`() {
-        val navEnhet = TestData.lagNavEnhet()
-        val personident = "FNR"
-
-        every { oppfolgingskontorClient.hentKontorForBruker(personident) } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
-        every { navEnhetRepository.get(navEnhet.enhetId) } returns null
-        every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
-
-        val faktiskEnhet = service.hentNavEnhetForBruker(personident)
-        assertSoftly(faktiskEnhet.shouldNotBeNull()) {
-            enhetId shouldBe navEnhet.enhetId
-            navn shouldBe navEnhet.navn
-        }
-
-        verify { kafkaProducerService.publiserNavEnhet(faktiskEnhet) }
+    fun setup() {
+        clearAllMocks()
+        mockExecuteWithoutResult(
+            transactionTemplate = transactionTemplate,
+        )
     }
 
-    @Test
-    fun `hentNavEnhetForBruker - bruker har ingen arbeidsoppfolgingsenhet - skal returnere null`() {
-        val personident = "FNR"
+    @Nested
+    inner class HentNavEnhetForBruker {
+        @Test
+        fun `enhet finnes ikke - skal opprette enhet`() {
+            // Arrange
+            val navEnhet = TestData.lagNavEnhet()
+            val personident = "FNR"
+            every {
+                oppfolgingskontorClient.hentKontorForBruker(personident)
+            } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
+            every { navEnhetRepository.get(navEnhet.enhetId) } returns null
+            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
 
-        every { oppfolgingskontorClient.hentKontorForBruker(personident) } returns null
+            // Act
+            val faktiskEnhet = service.hentNavEnhetForBruker(personident)
 
-        val faktiskEnhet = service.hentNavEnhetForBruker(personident)
+            // Assert
+            assertSoftly(faktiskEnhet.shouldNotBeNull()) {
+                enhetId shouldBe navEnhet.enhetId
+                navn shouldBe navEnhet.navn
+            }
+            verify { kafkaProducerService.publiserNavEnhet(faktiskEnhet) }
+        }
 
-        faktiskEnhet shouldBe null
+        @Test
+        fun `bruker har ingen arbeidsoppfolgingsenhet - skal returnere null`() {
+            // Arrange
+            val personident = "FNR"
+            every { oppfolgingskontorClient.hentKontorForBruker(personident) } returns null
+
+            // Act
+            val faktiskEnhet = service.hentNavEnhetForBruker(personident)
+
+            // Assert
+            faktiskEnhet shouldBe null
+        }
     }
 
     @Test
     fun `oppdaterNavEnheter - enhet med nytt navn - oppdaterer enhet`() {
+        // Arrange
         val enhet1 = TestData.lagNavEnhet(navn = "NAV Test 1")
         val enhet2 = TestData.lagNavEnhet(navn = "NAV Test 2")
 
@@ -74,8 +94,10 @@ class NavEnhetServiceTest {
                 NorgNavEnhetDto.fromDbo(enhet2),
             )
 
+        // Act
         service.oppdaterNavEnheter(listOf(enhet1, enhet2))
 
+        // Assert
         val enhet1MedNyttNavn = enhet1.copy(navn = "Nytt Navn")
         verify(exactly = 1) {
             navEnhetRepository.update(enhet1MedNyttNavn)

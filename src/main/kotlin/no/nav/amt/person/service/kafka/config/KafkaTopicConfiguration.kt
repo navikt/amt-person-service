@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.kafka.config
 
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.amt.person.service.kafka.consumer.AktorV2Consumer
 import no.nav.amt.person.service.kafka.consumer.InnsatsgruppeConsumer
 import no.nav.amt.person.service.kafka.consumer.LeesahConsumer
@@ -41,10 +42,14 @@ class KafkaTopicConfiguration(
     fun consumerRepository(jdbcTemplate: JdbcTemplate) = PostgresJdbcTemplateConsumerRepository(jdbcTemplate)
 
     @Bean
-    fun topicConfigs(consumerRepository: PostgresJdbcTemplateConsumerRepository) = listOf(
+    fun topicConfigs(
+        consumerRepository: PostgresJdbcTemplateConsumerRepository,
+        meterRegistry: MeterRegistry,
+    ) = listOf(
         KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.sisteOppfolgingsperiodeTopic,
@@ -55,6 +60,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.sisteTilordnetVeilederTopic,
@@ -65,6 +71,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.oppfolgingsperiodeTopic,
@@ -75,6 +82,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.innsatsgruppeTopic,
@@ -85,6 +93,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, Aktor>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.aktorV2Topic,
@@ -99,6 +108,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, Personhendelse>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.leesahTopic,
@@ -113,6 +123,7 @@ class KafkaTopicConfiguration(
         KafkaConsumerClientBuilder
             .TopicConfig<String, String>()
             .withLogging()
+            .withMetrics(meterRegistry)
             .withStoreOnFailure(consumerRepository)
             .withConsumerConfig(
                 kafkaTopicProperties.skjermedePersonerTopic,

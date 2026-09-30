@@ -2,7 +2,6 @@ package no.nav.amt.person.service.integration
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.clearMocks
-import io.mockk.every
 import no.nav.amt.person.service.clients.KodeverkClient
 import no.nav.amt.person.service.clients.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.VeilarbvedtaksstotteClient
@@ -12,10 +11,8 @@ import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.data.RepositoryTestBase
-import no.nav.common.kafka.producer.KafkaProducerClient
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -58,14 +55,6 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
     @MockkBean
     lateinit var veilarbvedtaksstotteClient: VeilarbvedtaksstotteClient
 
-    @MockkBean
-    lateinit var kafkaProducerClient: KafkaProducerClient<String, String>
-
-    @BeforeEach
-    fun setup() {
-        every { kafkaProducerClient.sendSync(any()) } returns null
-    }
-
     @AfterEach
     fun cleanUp() {
         clearMocks(
@@ -78,7 +67,22 @@ abstract class IntegrationTestBase : RepositoryTestBase() {
             poaoTilgangClient,
             veilarboppfolgingClient,
             veilarbvedtaksstotteClient,
-            kafkaProducerClient,
         )
     }
+
+    protected fun outboxRecords(): List<OutboxRecord> = template.jdbcTemplate.query(
+        "SELECT topic, key, value FROM kafka_producer_record ORDER BY id",
+    ) { rs, _ ->
+        OutboxRecord(
+            topic = rs.getString("topic"),
+            key = rs.getBytes("key")?.toString(Charsets.UTF_8),
+            value = rs.getBytes("value")?.toString(Charsets.UTF_8),
+        )
+    }
+
+    protected data class OutboxRecord(
+        val topic: String,
+        val key: String?,
+        val value: String?,
+    )
 }

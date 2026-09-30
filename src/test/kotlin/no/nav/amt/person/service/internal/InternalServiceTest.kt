@@ -15,9 +15,11 @@ import no.nav.amt.person.service.navenhet.NavEnhetUpdateJob
 import no.nav.amt.person.service.person.PersonRepository
 import no.nav.amt.person.service.person.PersonService
 import no.nav.amt.person.service.person.PersonidentRepository
+import no.nav.amt.person.service.utils.mockExecuteWithoutResult
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDate
 import java.util.UUID
 
@@ -32,6 +34,7 @@ class InternalServiceTest {
     private val navAnsattUpdater: NavAnsattUpdater = mockk(relaxUnitFun = true)
     private val navEnhetUpdateJob: NavEnhetUpdateJob = mockk(relaxUnitFun = true)
     private val personidentRepository: PersonidentRepository = mockk()
+    private val transactionTemplate: TransactionTemplate = mockk()
 
     private val service = InternalService(
         personService = personService,
@@ -44,10 +47,14 @@ class InternalServiceTest {
         navAnsattUpdater = navAnsattUpdater,
         navEnhetUpdateJob = navEnhetUpdateJob,
         personidentRepository = personidentRepository,
+        transactionTemplate = transactionTemplate,
     )
 
     @BeforeEach
-    fun setup() = clearAllMocks()
+    fun setup() {
+        clearAllMocks()
+        mockExecuteWithoutResult(transactionTemplate)
+    }
 
     @Nested
     inner class OppdaterPersonidenter {

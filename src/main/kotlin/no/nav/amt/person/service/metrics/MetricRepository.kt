@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.metrics
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.queryForObject
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -15,7 +16,7 @@ class MetricRepository(
             	(SELECT count(*) FROM nav_bruker) AS antall_nav_brukere,
             	(SELECT count(*) FROM nav_ansatt) AS antall_nav_ansatte,
             	(SELECT count(*) FROM nav_enhet) AS antall_nav_enheter,
-            	(SELECT count(*) FROM person_rolle WHERE type = 'ARRANGOR_ANSATT') AS antall_arrangor_ansatte
+                (SELECT count(*) FROM person_rolle WHERE type = 'ARRANGOR_ANSATT') AS antall_arrangor_ansatte
             """.trimIndent()
 
         return template
@@ -29,4 +30,8 @@ class MetricRepository(
                 )
             }.first()
     }
+
+    fun getKafkaOutboxCount(): Int = template.jdbcTemplate
+        .queryForObject<Int>("SELECT count(*) FROM kafka_producer_record")
+        ?: throw IllegalStateException("Klarte ikke å hente antall ventende Kafka-meldinger")
 }
