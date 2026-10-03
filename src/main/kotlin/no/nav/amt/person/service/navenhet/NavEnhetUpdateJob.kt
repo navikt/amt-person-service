@@ -10,7 +10,7 @@ class NavEnhetUpdateJob(
     private val navEnhetRepository: NavEnhetRepository,
     private val navEnhetService: NavEnhetService,
 ) {
-    @Scheduled(cron = "@daily")
+    @Scheduled(cron = "0 0 1 * * *", zone = "Europe/Oslo")
     @SchedulerLock(name = "NavEnhetUpdateJob", lockAtMostFor = "60m")
     fun update() {
         JobRunner.runAsync("oppdater_nav_enheter") { oppdaterEnheter() }
