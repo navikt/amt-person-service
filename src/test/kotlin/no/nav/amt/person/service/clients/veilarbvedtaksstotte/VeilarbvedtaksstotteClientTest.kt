@@ -2,6 +2,8 @@ package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -61,9 +63,23 @@ class VeilarbvedtaksstotteClientTest(
             .expect(method(HttpMethod.POST))
             .andRespond(withStatus(HttpStatus.FORBIDDEN))
 
-        shouldThrow<RuntimeException> {
+        val exception = shouldThrow<UpstreamServiceException> {
             sut.hentInnsatsgruppe(FNR_IN_TEST)
         }
+        exception.statusCode shouldBe HttpStatus.FORBIDDEN.value()
+    }
+
+    @Test
+    fun `hentInnsatsgruppe - HTTP 500 - kaster retrybar exception`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
+
+        val exception = shouldThrow<RetryableUpstreamServiceException> {
+            sut.hentInnsatsgruppe(FNR_IN_TEST)
+        }
+
+        exception.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR.value()
     }
 
     companion object {

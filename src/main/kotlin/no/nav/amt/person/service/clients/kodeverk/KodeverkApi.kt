@@ -1,6 +1,7 @@
 package no.nav.amt.person.service.clients.kodeverk
 
 import no.nav.amt.person.service.clients.KODEVERK_API_CLIENT_ID
+import org.springframework.http.ResponseEntity
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.service.annotation.GetExchange
@@ -12,17 +13,5 @@ interface KodeverkApi {
         @RequestParam ekskluderUgyldige: Boolean,
         @RequestParam oppslagsdato: String,
         @RequestParam spraak: String,
-    ): GetKodeverkKoderBetydningerResponse
-
-    data class GetKodeverkKoderBetydningerResponse(
-        val betydninger: Map<String, List<Betydning>>,
-    ) {
-        data class Betydning(
-            val beskrivelser: Map<String, Beskrivelse>,
-        ) {
-            data class Beskrivelse(
-                val term: String,
-            )
-        }
-    }
+    ): ResponseEntity<GetKodeverkKoderBetydningerResponse>
 }

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.pdl
 
+import no.nav.amt.lib.spring.boot.client.executeUpstreamCallWithRequiredBody
 import no.nav.amt.person.service.clients.GraphqlRequest
 import no.nav.amt.person.service.clients.GraphqlResponse
 import no.nav.amt.person.service.person.model.AdressebeskyttelseGradering
@@ -70,7 +71,17 @@ class PdlClient(
         query: String,
         personident: String,
     ): GraphqlResponse {
-        val jsonResponse = pdlApi.execute(GraphqlRequest(query, PdlQueries.Variables(personident)))
+        val jsonResponse = executeUpstreamCallWithRequiredBody(
+            serviceName = "PDL",
+            operation = "utfør GraphQL-spørring",
+        ) {
+            pdlApi.execute(
+                GraphqlRequest(
+                    query = query,
+                    variables = PdlQueries.Variables(personident),
+                ),
+            )
+        }
         val response = GraphqlResponse(jsonResponse, objectMapper, SERVICE_NAME)
         handlePdlErrors(response)
         logPdlWarnings(response)

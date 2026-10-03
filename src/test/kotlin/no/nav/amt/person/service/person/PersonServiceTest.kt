@@ -6,20 +6,31 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.person.dbo.PersonDbo
 import no.nav.amt.person.service.person.model.IdentType
 import no.nav.amt.person.service.person.model.Personident
+import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.amt.person.service.utils.mockExecute
 import no.nav.amt.person.service.utils.mockExecuteWithoutResult
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.dao.DataAccessException
+import org.springframework.resilience.annotation.Retryable
+import org.springframework.transaction.TransactionException
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.RestClientException
+import java.util.function.Consumer
 
 class PersonServiceTest {
     private val pdlClient: PdlClient = mockk(relaxUnitFun = true)
@@ -45,6 +56,23 @@ class PersonServiceTest {
 
     @Nested
     inner class HentEllerOpprettPerson {
+        @Test
+        fun `retryer bare midlertidige PDL-feil og databasefeil`() {
+            val retryable = PersonService::class.java
+                .getDeclaredMethod(
+                    "hentEllerOpprettPerson",
+                    String::class.java,
+                    java.lang.Boolean.TYPE,
+                ).getAnnotation(Retryable::class.java)
+
+            retryable.maxRetries shouldBe 2
+            retryable.includes.toSet() shouldBe setOf(
+                RetryableUpstreamServiceException::class,
+                DataAccessException::class,
+                TransactionException::class,
+            )
+        }
+
         @Test
         fun `personen finnes ikke - opprettes fra PDL`() {
             // Arrange
@@ -185,6 +213,101 @@ class PersonServiceTest {
             verify(exactly = 0) { pdlClient.hentPerson(any()) }
             verify(exactly = 0) { personRepository.upsert(any()) }
         }
+    }
+
+    @Nested
+    inner class OppdaterNavn {
+        @BeforeEach
+        fun mockEnvUtils() {
+            mockkObject(EnvUtils)
+        }
+
+        @AfterEach
+        fun unmockEnvUtils() {
+            unmockkObject(EnvUtils)
+        }
+
+        @Test
+        fun `midlertidig PDL-feil i dev - hopper over navneoppdatering uten å skrive`() {
+            // Arrange
+            val person = TestData.lagPerson()
+            every { EnvUtils.isDev() } returns true
+            every { pdlClient.hentPerson(person.personident) } throws retryableUpstreamException()
+
+            // Act
+            service.oppdaterNavn(person)
+
+            // Assert
+            verify(exactly = 1) { pdlClient.hentPerson(person.personident) }
+            verifyNoWrites()
+        }
+
+        @Test
+        fun `midlertidig PDL-feil utenfor dev - kaster samme exception`() {
+            // Arrange
+            val person = TestData.lagPerson()
+            val exception = retryableUpstreamException()
+            every { EnvUtils.isDev() } returns false
+            every { pdlClient.hentPerson(person.personident) } throws exception
+
+            // Act
+            val thrown = shouldThrow<RetryableUpstreamServiceException> {
+                service.oppdaterNavn(person)
+            }
+
+            // Assert
+            thrown shouldBe exception
+            verify(exactly = 1) { pdlClient.hentPerson(person.personident) }
+            verifyNoWrites()
+        }
+
+        @Test
+        fun `ikke-midlertidig PDL-feil i dev propageres`() {
+            // Arrange
+            val person = TestData.lagPerson()
+            val exception = IllegalStateException("Ugyldig PDL-respons")
+            every { EnvUtils.isDev() } returns true
+            every { pdlClient.hentPerson(person.personident) } throws exception
+
+            // Act
+            val thrown = shouldThrow<IllegalStateException> {
+                service.oppdaterNavn(person)
+            }
+
+            // Assert
+            thrown shouldBe exception
+            verify(exactly = 1) { pdlClient.hentPerson(person.personident) }
+            verify(exactly = 0) { EnvUtils.isDev() }
+            verifyNoWrites()
+        }
+
+        @Test
+        fun `lar andre feil enn midlertidige PDL-feil propageres`() {
+            val person = TestData.lagPerson()
+            val exception = IllegalStateException("Ugyldig PDL-respons")
+            every { pdlClient.hentPerson(person.personident) } throws exception
+
+            val thrown = shouldThrow<IllegalStateException> {
+                service.oppdaterNavn(person)
+            }
+
+            thrown shouldBe exception
+        }
+
+        private fun verifyNoWrites() {
+            verify(exactly = 0) {
+                transactionTemplate.executeWithoutResult(any<Consumer<TransactionStatus>>())
+            }
+            verify(exactly = 0) { personRepository.upsert(any()) }
+            verify(exactly = 0) { personidentRepository.upsert(any()) }
+        }
+
+        private fun retryableUpstreamException() = RetryableUpstreamServiceException(
+            serviceName = "PDL",
+            operation = "hent person",
+            statusCode = 503,
+            cause = RestClientException("temporary failure"),
+        )
     }
 
     @Nested

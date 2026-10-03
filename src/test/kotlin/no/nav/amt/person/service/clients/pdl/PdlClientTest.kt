@@ -5,6 +5,8 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.BEHANDLINGSNUMMER_HEADER
 import no.nav.amt.person.service.clients.BEHANDLINGSNUMMER_HEADER_VALUE
 import no.nav.amt.person.service.clients.GEN_TEMA_HEADER_VALUE
@@ -37,7 +39,6 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
-import org.springframework.web.client.RestClientResponseException
 
 @RestClientTest(PdlClient::class)
 class PdlClientTest(
@@ -357,8 +358,21 @@ class PdlClientTest(
             .expect(method(HttpMethod.POST))
             .andRespond(withServerError())
 
-        shouldThrow<RestClientResponseException> {
+        shouldThrow<RetryableUpstreamServiceException> {
             client.hentPerson("FNR")
         }
+    }
+
+    @Test
+    fun `executeQuery - tom HTTP 200-respons - skal kaste UpstreamServiceException med status`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+        val exception = shouldThrow<UpstreamServiceException> {
+            client.hentPerson("FNR")
+        }
+
+        exception.statusCode shouldBe 200
     }
 }

@@ -18,7 +18,7 @@ interface VeilarboppfolgingApi {
     @PostExchange("/api/v3/oppfolging/hent-perioder")
     fun hentOppfolgingsperioder(
         @RequestBody request: PersonRequest,
-    ): List<OppfolgingPeriodeResponse>
+    ): ResponseEntity<List<OppfolgingPeriodeResponse>>
 
     data class PersonRequest(
         val fnr: String,
