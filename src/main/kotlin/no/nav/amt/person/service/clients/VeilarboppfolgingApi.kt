@@ -3,12 +3,10 @@ package no.nav.amt.person.service.clients
 import org.springframework.http.ResponseEntity
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.service.annotation.HttpExchange
 import org.springframework.web.service.annotation.PostExchange
 import java.time.ZonedDateTime
 import java.util.UUID
 
-@HttpExchange("/veilarboppfolging")
 @ClientRegistrationId(VEILARBOPPFOLGING_CLIENT_ID)
 interface VeilarboppfolgingApi {
     @PostExchange("/api/v3/hent-veileder")

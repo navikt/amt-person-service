@@ -19,9 +19,9 @@ spring:
       digdir-krr-proxy:
         base-url: ${DIGDIR_KRR_PROXY_URL}
       veilarboppfolging:
-        base-url: ${VEILARBOPPFOLGING_URL}
+        base-url: ${VEILARBOPPFOLGING_URL}/veilarboppfolging
       veilarbvedtaksstotte:
-        base-url: ${VEILARBVEDTAKSSTOTTE_URL}
+        base-url: ${VEILARBVEDTAKSSTOTTE_URL}/veilarbvedtaksstotte
       kodeverk-api:
         base-url: ${KODEVERK_URL}
       nom-api:

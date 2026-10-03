@@ -4,11 +4,9 @@ import no.nav.amt.person.service.clients.AO_OPPFOLGINGSKONTOR_CLIENT_ID
 import no.nav.amt.person.service.clients.GraphqlRequest
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.service.annotation.HttpExchange
 import org.springframework.web.service.annotation.PostExchange
 import tools.jackson.databind.JsonNode
 
-@HttpExchange
 @ClientRegistrationId(AO_OPPFOLGINGSKONTOR_CLIENT_ID)
 interface OppfolgingskontorApi {
     @PostExchange("/graphql")

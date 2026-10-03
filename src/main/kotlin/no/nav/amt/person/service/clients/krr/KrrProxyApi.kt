@@ -3,10 +3,8 @@ package no.nav.amt.person.service.clients.krr
 import no.nav.amt.person.service.clients.DIGDIR_KRR_PROXY_CLIENT_ID
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.service.annotation.HttpExchange
 import org.springframework.web.service.annotation.PostExchange
 
-@HttpExchange
 @ClientRegistrationId(DIGDIR_KRR_PROXY_CLIENT_ID)
 interface KrrProxyApi {
     @PostExchange("/rest/v1/personer?inkluderSikkerDigitalPost=false")

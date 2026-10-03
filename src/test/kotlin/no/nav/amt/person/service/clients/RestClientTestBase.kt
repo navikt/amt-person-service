@@ -14,8 +14,8 @@ import org.springframework.test.web.client.MockRestServiceServer
     properties = [
         "spring.http.serviceclient.pdl-api.base-url=http://pdl-api",
         "spring.http.serviceclient.digdir-krr-proxy.base-url=http://digdir-krr-proxy",
-        "spring.http.serviceclient.veilarboppfolging.base-url=http://veilarboppfolging",
-        "spring.http.serviceclient.veilarbvedtaksstotte.base-url=http://veilarbvedtaksstotte",
+        "spring.http.serviceclient.veilarboppfolging.base-url=http://veilarboppfolging/veilarboppfolging",
+        "spring.http.serviceclient.veilarbvedtaksstotte.base-url=http://veilarbvedtaksstotte/veilarbvedtaksstotte",
         "spring.http.serviceclient.kodeverk-api.base-url=http://kodeverk-api",
         "spring.http.serviceclient.nom-api.base-url=http://nom-api",
         "spring.http.serviceclient.ao-oppfolgingskontor.base-url=http://ao-oppfolgingskontor",
