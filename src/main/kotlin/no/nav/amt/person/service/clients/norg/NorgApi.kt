@@ -13,6 +13,6 @@ interface NorgApi {
 
     @GetExchange("/norg2/api/v1/enhet")
     fun hentNavEnheter(
-        @RequestParam("enhetsnummerListe") enhetsnummerListe: String,
+        @RequestParam("enhetsnummerListe") enhetsnummerListe: List<String>,
     ): ResponseEntity<List<NorgNavEnhetDto>>
 }

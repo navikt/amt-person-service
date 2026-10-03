@@ -34,9 +34,7 @@ class NorgClient(
         return executeUpstreamCallWithRequiredBody(
             serviceName = "NORG",
             operation = "hent enheter",
-        ) {
-            norgApi.hentNavEnheter(validatedEnheter.joinToString(","))
-        }
+        ) { norgApi.hentNavEnheter(validatedEnheter) }
     }
 
     private fun validateEnhetId(enhetId: String): String {

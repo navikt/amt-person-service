@@ -123,7 +123,7 @@ class NorgClientTest(
         fun `hentNavEnheter - skal lage riktig request og parse respons`() {
             // Arrange
             server
-                .expect(requestTo("http://norg/norg2/api/v1/enhet?enhetsnummerListe=1234%2C5678"))
+                .expect(requestTo("http://norg/norg2/api/v1/enhet?enhetsnummerListe=1234&enhetsnummerListe=5678"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(
                     withSuccess(
