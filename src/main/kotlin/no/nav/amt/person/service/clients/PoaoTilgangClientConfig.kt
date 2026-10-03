@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 
+/**
+ * Konfigurerer klienten som [no.nav.amt.person.service.navbruker.NavBrukerService] bruker for å
+ * sjekke om en person er skjermet når en ny Nav-bruker opprettes.
+ */
 @Configuration(proxyBeanMethods = false)
 class PoaoTilgangClientConfig {
     @Bean
