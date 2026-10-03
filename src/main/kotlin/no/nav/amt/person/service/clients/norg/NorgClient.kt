@@ -4,6 +4,7 @@ import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.lib.spring.boot.client.executeUpstreamCallWithRequiredBody
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.util.DefaultUriBuilderFactory
 
 @Service
 class NorgClient(
@@ -14,6 +15,10 @@ class NorgClient(
 
     init {
         require(url.startsWith("https://") || url.startsWith("http://")) { "Ugyldig url-skjema for norg-klient" }
+    }
+
+    private val uriBuilderFactory = DefaultUriBuilderFactory(url).apply {
+        encodingMode = DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT
     }
 
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
@@ -34,7 +39,12 @@ class NorgClient(
         return executeUpstreamCallWithRequiredBody(
             serviceName = "NORG",
             operation = "hent enheter",
-        ) { norgApi.hentNavEnheter(validatedEnheter) }
+        ) {
+            norgApi.hentNavEnheter(
+                enhetsnummerListe = validatedEnheter.joinToString(","),
+                uriBuilderFactory = uriBuilderFactory,
+            )
+        }
     }
 
     private fun validateEnhetId(enhetId: String): String {
