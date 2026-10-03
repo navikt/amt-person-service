@@ -3,6 +3,8 @@ package no.nav.amt.person.service.clients.norg
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.NORG_API_CLIENT_ID
@@ -78,12 +80,26 @@ class NorgClientTest(
                 .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
 
             // Act
-            val exception = shouldThrow<RuntimeException> {
+            val exception = shouldThrow<RetryableUpstreamServiceException> {
                 sut.hentNavEnhet("9999")
             }
 
             // Assert
-            exception.message shouldBe "Klarte ikke å hente enhetId=9999 fra norg status=500"
+            exception.statusCode shouldBe 500
+            exception.message shouldBe "Kall mot NORG feilet under hent enhet (HTTP 500)"
+        }
+
+        @Test
+        fun `hentNavEnhet - tom HTTP 200-respons - kaster UpstreamServiceException med status`() {
+            server
+                .expect(requestTo("http://norg/norg2/api/v1/enhet/1234"))
+                .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+            val exception = shouldThrow<UpstreamServiceException> {
+                sut.hentNavEnhet("1234")
+            }
+
+            exception.statusCode shouldBe HttpStatus.OK.value()
         }
 
         @Test
@@ -144,7 +160,7 @@ class NorgClientTest(
             }
 
             // Assert
-            exception.message shouldBe "Klarte ikke å hente enheter fra norg status=500"
+            exception.message shouldBe "Kall mot NORG feilet under hent enheter (HTTP 500)"
         }
 
         @Test

@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.nom
 
+import no.nav.amt.lib.spring.boot.client.executeUpstreamCallWithRequiredBody
 import no.nav.amt.person.service.clients.GraphqlRequest
 import no.nav.amt.person.service.clients.GraphqlResponse
 import org.slf4j.LoggerFactory
@@ -16,7 +17,17 @@ class NomClient(
         .also { if (it == null) log.info("Fant ikke veileder i NOM med ident $navIdent") }
 
     fun hentNavAnsatte(navIdenter: List<String>): List<NomNavAnsatt> {
-        val jsonResponse = nomApi.execute(GraphqlRequest(hentRessurserQuery, mapOf(QUERY_IDENTER to navIdenter)))
+        val jsonResponse = executeUpstreamCallWithRequiredBody(
+            serviceName = "NOM",
+            operation = "utfør GraphQL-spørring",
+        ) {
+            nomApi.execute(
+                GraphqlRequest(
+                    query = hentRessurserQuery,
+                    variables = mapOf(QUERY_IDENTER to navIdenter),
+                ),
+            )
+        }
         val response = GraphqlResponse(jsonResponse, objectMapper)
 
         val ressurser: List<NomQueries.RessursResult> = response.dataAt(RESSURSER) ?: return emptyList()

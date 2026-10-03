@@ -1,7 +1,10 @@
 package no.nav.amt.person.service.clients.krr
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.shouldBe
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -83,6 +86,24 @@ class KrrProxyClientTest(
         val result = sut.hentKontaktinformasjon(setOf("12345678901"))
 
         result.isFailure shouldBe true
+        val exception = shouldThrow<RetryableUpstreamServiceException> {
+            result.getOrThrow()
+        }
+        exception.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR.value()
+    }
+
+    @Test
+    fun `hentKontaktinformasjon - tom HTTP 200-respons - failure med upstream-status`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+        val result = sut.hentKontaktinformasjon(setOf("12345678901"))
+
+        val exception = shouldThrow<UpstreamServiceException> {
+            result.getOrThrow()
+        }
+        exception.statusCode shouldBe HttpStatus.OK.value()
     }
 
     @Test

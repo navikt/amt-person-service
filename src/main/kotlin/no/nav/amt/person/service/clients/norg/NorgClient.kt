@@ -1,8 +1,9 @@
 package no.nav.amt.person.service.clients.norg
 
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.executeUpstreamCallWithRequiredBody
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClientResponseException
 
 @Service
 class NorgClient(
@@ -18,24 +19,23 @@ class NorgClient(
     fun hentNavEnhet(enhetId: String): NorgNavEnhetDto? {
         val validatedEnhetId = validateEnhetId(enhetId)
         return try {
-            norgApi.hentNavEnhet(validatedEnhetId)
-        } catch (e: RestClientResponseException) {
-            if (e.statusCode.value() == 404) return null
-
-            throw RuntimeException(
-                "Klarte ikke å hente enhetId=$enhetId fra norg status=${e.statusCode.value()}",
-                e,
-            )
+            executeUpstreamCallWithRequiredBody(
+                serviceName = "NORG",
+                operation = "hent enhet",
+            ) { norgApi.hentNavEnhet(validatedEnhetId) }
+        } catch (e: UpstreamServiceException) {
+            if (e.statusCode == 404) null else throw e
         }
     }
 
     fun hentNavEnheter(enheter: List<String>): List<NorgNavEnhetDto> {
         val validatedEnheter = enheter.map { validateEnhetId(it) }
 
-        return try {
+        return executeUpstreamCallWithRequiredBody(
+            serviceName = "NORG",
+            operation = "hent enheter",
+        ) {
             norgApi.hentNavEnheter(validatedEnheter.joinToString(","))
-        } catch (e: RestClientResponseException) {
-            throw RuntimeException("Klarte ikke å hente enheter fra norg status=${e.statusCode.value()}", e)
         }
     }
 

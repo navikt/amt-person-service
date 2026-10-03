@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.person
 
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
 import no.nav.amt.person.service.person.dbo.PersonDbo
@@ -9,8 +10,10 @@ import no.nav.amt.person.service.utils.EnvUtils
 import no.nav.amt.person.service.utils.titlecase
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.dao.DataAccessException
 import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.TransactionException
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 
@@ -32,7 +35,14 @@ class PersonService(
      * @param forceFetchFromPdl hvis true, hentes alltid ferske data fra PDL og eksisterende person oppdateres
      * @return eksisterende, oppdatert eller nyopprettet person
      */
-    @Retryable(maxRetries = 2)
+    @Retryable(
+        maxRetries = 2,
+        includes = [
+            RetryableUpstreamServiceException::class,
+            DataAccessException::class,
+            TransactionException::class,
+        ],
+    )
     fun hentEllerOpprettPerson(
         personident: String,
         forceFetchFromPdl: Boolean = false,
@@ -91,16 +101,15 @@ class PersonService(
     fun oppdaterNavn(person: PersonDbo) {
         val pdlPerson = try {
             pdlClient.hentPerson(person.personident)
-        } catch (e: Exception) {
-            val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn: ${e.message}"
+        } catch (e: RetryableUpstreamServiceException) {
+            val feilmelding = "Klarte ikke hente person ${person.id} fra PDL ved oppdatert navn"
 
             if (EnvUtils.isDev()) {
-                log.info(feilmelding)
+                log.info("$feilmelding (feiltype=${e.javaClass.simpleName})")
                 return
-            } else {
-                log.error(feilmelding, e)
-                throw RuntimeException(feilmelding, e)
             }
+            log.error("$feilmelding (feiltype=${e.javaClass.simpleName}, status=${e.statusCode})")
+            throw e
         }
 
         if (

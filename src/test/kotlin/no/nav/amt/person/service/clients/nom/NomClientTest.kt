@@ -5,6 +5,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -217,9 +220,24 @@ class NomClientTest(
             .expect(method(HttpMethod.POST))
             .andRespond(withServerError())
 
-        shouldThrow<Exception> {
+        val exception = shouldThrow<RetryableUpstreamServiceException> {
             sut.hentNavAnsatte(listOf("Z123"))
         }
+
+        exception.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR.value()
+    }
+
+    @Test
+    fun `hentNavAnsatte - tom HTTP 200-respons - kaster UpstreamServiceException med status`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+        val exception = shouldThrow<UpstreamServiceException> {
+            sut.hentNavAnsatte(listOf("Z123"))
+        }
+
+        exception.statusCode shouldBe HttpStatus.OK.value()
     }
 
     companion object {

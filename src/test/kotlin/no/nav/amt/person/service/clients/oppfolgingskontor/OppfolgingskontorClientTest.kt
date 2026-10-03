@@ -4,6 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -106,14 +108,29 @@ class OppfolgingskontorClientTest(
     }
 
     @Test
-    fun `hentKontorForBruker skal kaste exception ved ikke-vellykket HTTP-status`() {
+    fun `hentKontorForBruker skal klassifisere HTTP 500 som retrybar`() {
         server
             .expect(method(HttpMethod.POST))
             .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
 
-        shouldThrow<RuntimeException> {
+        val thrown = shouldThrow<RetryableUpstreamServiceException> {
             sut.hentKontorForBruker("12345678901")
         }
+
+        thrown.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR.value()
+    }
+
+    @Test
+    fun `hentKontorForBruker skal kaste UpstreamServiceException ved tom HTTP 200-respons`() {
+        server
+            .expect(method(HttpMethod.POST))
+            .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+        val thrown = shouldThrow<UpstreamServiceException> {
+            sut.hentKontorForBruker("12345678901")
+        }
+
+        thrown.statusCode shouldBe HttpStatus.OK.value()
     }
 
     @Test

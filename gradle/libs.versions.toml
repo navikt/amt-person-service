@@ -19,7 +19,7 @@ logstash-encoder = "9.0"
 # NAV
 nav-common = "4.2026.09.24_06.17-80dfc0eacb29"
 poao-tilgang = "2026.05.05_11.16-1dae3bdff205"
-amt-lib = "1.2026.09.28_05.44-15fb3d33d2d7"
+amt-lib = "1.2026.10.03_18.27-25a0e2530cba"
 
 # Misc
 shedlock = "7.10.1"

@@ -3,7 +3,8 @@ package no.nav.amt.person.service.clients.veilarboppfolging
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldStartWith
+import no.nav.amt.lib.spring.boot.client.exception.RetryableUpstreamServiceException
+import no.nav.amt.lib.spring.boot.client.exception.UpstreamServiceException
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.RestClientTestBase
@@ -74,11 +75,12 @@ class VeilarboppfolgingClientTest(
                 .expect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.FORBIDDEN))
 
-            val thrown = shouldThrow<RuntimeException> {
+            val thrown = shouldThrow<UpstreamServiceException> {
                 sut.hentVeilederIdent(FNR_IN_TEST)
             }
 
-            thrown.message shouldStartWith "Uventet status ved kall mot veilarboppfolging"
+            thrown.statusCode shouldBe 403
+            thrown.message shouldBe "Kall mot veilarboppfolging feilet under hent veileder (HTTP 403)"
         }
 
         @Test
@@ -99,11 +101,12 @@ class VeilarboppfolgingClientTest(
                 .expect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.UNAUTHORIZED))
 
-            val thrown = shouldThrow<RuntimeException> {
+            val thrown = shouldThrow<UpstreamServiceException> {
                 sut.hentOppfolgingperioder(FNR_IN_TEST)
             }
 
-            thrown.message shouldStartWith "Uventet status ved hent status-kall mot veilarboppfolging"
+            thrown.statusCode shouldBe 401
+            thrown.message shouldBe "Kall mot veilarboppfolging feilet under hent oppfølgingsperioder (HTTP 401)"
         }
 
         @Test
@@ -113,6 +116,32 @@ class VeilarboppfolgingClientTest(
                 .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON))
 
             sut.hentOppfolgingperioder(FNR_IN_TEST) shouldBe emptyList()
+        }
+
+        @Test
+        fun `hentOppfolgingperioder - HTTP 500 - kaster retrybar exception`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            val thrown = shouldThrow<RetryableUpstreamServiceException> {
+                sut.hentOppfolgingperioder(FNR_IN_TEST)
+            }
+
+            thrown.statusCode shouldBe HttpStatus.INTERNAL_SERVER_ERROR.value()
+        }
+
+        @Test
+        fun `hentOppfolgingperioder - tom HTTP 200-respons - kaster UpstreamServiceException med status`() {
+            server
+                .expect(method(HttpMethod.POST))
+                .andRespond(withSuccess("", MediaType.APPLICATION_JSON))
+
+            val thrown = shouldThrow<UpstreamServiceException> {
+                sut.hentOppfolgingperioder(FNR_IN_TEST)
+            }
+
+            thrown.statusCode shouldBe HttpStatus.OK.value()
         }
 
         @ParameterizedTest

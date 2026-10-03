@@ -1,5 +1,6 @@
 package no.nav.amt.person.service.clients.oppfolgingskontor
 
+import no.nav.amt.lib.spring.boot.client.executeUpstreamCallWithRequiredBody
 import no.nav.amt.person.service.clients.GraphqlRequest
 import no.nav.amt.person.service.clients.GraphqlResponse
 import org.springframework.stereotype.Service
@@ -11,7 +12,17 @@ class OppfolgingskontorClient(
     private val objectMapper: ObjectMapper,
 ) {
     fun hentKontorForBruker(ident: String): Arbeidsoppfolging? {
-        val jsonResponse = api.execute(GraphqlRequest(kontorForBrukerQuery, mapOf(QUERY_IDENT to ident)))
+        val jsonResponse = executeUpstreamCallWithRequiredBody(
+            serviceName = "ao-oppfolgingskontor",
+            operation = "utfør GraphQL-spørring",
+        ) {
+            api.execute(
+                GraphqlRequest(
+                    query = kontorForBrukerQuery,
+                    variables = mapOf(QUERY_IDENT to ident),
+                ),
+            )
+        }
         val response = GraphqlResponse(jsonResponse, objectMapper, SERVICE_NAME)
         response.throwOnErrors()
 
