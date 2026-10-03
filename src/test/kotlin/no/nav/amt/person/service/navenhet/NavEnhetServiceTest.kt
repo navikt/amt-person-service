@@ -8,7 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.amt.person.service.clients.norg.NorgClient
-import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.clients.norg.toNorgNavEnhetDto
 import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.data.TestData
@@ -53,7 +53,7 @@ class NavEnhetServiceTest {
                 oppfolgingskontorClient.hentKontorForBruker(personident)
             } returns Arbeidsoppfolging(navEnhet.enhetId, navEnhet.navn)
             every { navEnhetRepository.get(navEnhet.enhetId) } returns null
-            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
+            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns navEnhet.toNorgNavEnhetDto()
 
             // Act
             val faktiskEnhet = service.hentNavEnhetForBruker(personident)
@@ -86,12 +86,12 @@ class NavEnhetServiceTest {
         val enhet1 = TestData.lagNavEnhet(navn = "NAV Test 1")
         val enhet2 = TestData.lagNavEnhet(navn = "NAV Test 2")
 
-        val oppdatertEnhet1 = NorgNavEnhetDto.fromDbo(enhet1.copy(navn = "Nytt Navn"))
+        val oppdatertEnhet1 = enhet1.copy(navn = "Nytt Navn").toNorgNavEnhetDto()
 
         every { norgClient.hentNavEnheter(listOf(enhet1.enhetId, enhet2.enhetId)) } returns
             listOf(
                 oppdatertEnhet1,
-                NorgNavEnhetDto.fromDbo(enhet2),
+                enhet2.toNorgNavEnhetDto(),
             )
 
         // Act

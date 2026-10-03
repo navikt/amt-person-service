@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
-import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.clients.norg.toNorgNavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -41,7 +41,7 @@ class TildeltVeilederConsumerTest(
         )
 
         every { norgClient.hentNavEnhet(TestData.navGrunerlokka.enhetId) } returns
-            NorgNavEnhetDto.fromDbo(TestData.navGrunerlokka)
+            TestData.navGrunerlokka.toNorgNavEnhetDto()
 
         tildeltVeilederConsumer.ingest(objectMapper.writeValueAsString(payload))
 
