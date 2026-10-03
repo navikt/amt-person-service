@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.amt.person.service.clients.VeilarboppfolgingClient
 import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.TestData.navGrunerlokka
 import no.nav.amt.person.service.data.TestData.orgTilknytning

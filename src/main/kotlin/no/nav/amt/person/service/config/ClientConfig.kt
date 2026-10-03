@@ -6,7 +6,6 @@ import no.nav.amt.person.service.clients.BEHANDLINGSNUMMER_HEADER_VALUE
 import no.nav.amt.person.service.clients.DIGDIR_KRR_PROXY_CLIENT_ID
 import no.nav.amt.person.service.clients.GEN_TEMA_HEADER_VALUE
 import no.nav.amt.person.service.clients.KODEVERK_API_CLIENT_ID
-import no.nav.amt.person.service.clients.KodeverkApi
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.NOM_API_CLIENT_ID
@@ -14,12 +13,13 @@ import no.nav.amt.person.service.clients.PDL_API_CLIENT_ID
 import no.nav.amt.person.service.clients.TEMA_HEADER
 import no.nav.amt.person.service.clients.VEILARBOPPFOLGING_CLIENT_ID
 import no.nav.amt.person.service.clients.VEILARBVEDTAKSSTOTTE_CLIENT_ID
-import no.nav.amt.person.service.clients.VeilarboppfolgingApi
-import no.nav.amt.person.service.clients.VeilarbvedtaksstotteApi
+import no.nav.amt.person.service.clients.kodeverk.KodeverkApi
 import no.nav.amt.person.service.clients.krr.KrrProxyApi
 import no.nav.amt.person.service.clients.nom.NomApi
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorApi
 import no.nav.amt.person.service.clients.pdl.PdlApi
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingApi
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType

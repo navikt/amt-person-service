@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients
+package no.nav.amt.person.service.clients.kodeverk
 
 import no.nav.amt.person.service.poststed.Postnummer
 import org.slf4j.LoggerFactory

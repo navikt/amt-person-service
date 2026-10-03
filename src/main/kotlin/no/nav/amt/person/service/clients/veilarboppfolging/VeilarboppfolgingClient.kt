@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients
+package no.nav.amt.person.service.clients.veilarboppfolging
 
 import no.nav.amt.person.service.navbruker.Oppfolgingsperiode
 import no.nav.amt.person.service.utils.toSystemZoneLocalDateTime

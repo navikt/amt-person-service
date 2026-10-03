@@ -1,11 +1,11 @@
 package no.nav.amt.person.service.navbruker
 
-import no.nav.amt.person.service.clients.VeilarboppfolgingClient
-import no.nav.amt.person.service.clients.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
 import no.nav.amt.person.service.clients.pdl.PdlPerson
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
 import no.nav.amt.person.service.navansatt.NavAnsattDbo
 import no.nav.amt.person.service.navansatt.NavAnsattService

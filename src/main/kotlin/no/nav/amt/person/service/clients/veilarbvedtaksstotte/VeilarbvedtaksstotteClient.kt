@@ -1,4 +1,4 @@
-package no.nav.amt.person.service.clients
+package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV1
 import org.springframework.stereotype.Service

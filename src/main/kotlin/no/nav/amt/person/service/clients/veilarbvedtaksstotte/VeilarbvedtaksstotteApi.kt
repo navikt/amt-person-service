@@ -1,5 +1,6 @@
-package no.nav.amt.person.service.clients
+package no.nav.amt.person.service.clients.veilarbvedtaksstotte
 
+import no.nav.amt.person.service.clients.VEILARBVEDTAKSSTOTTE_CLIENT_ID
 import no.nav.amt.person.service.navbruker.InnsatsgruppeV2
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestBody

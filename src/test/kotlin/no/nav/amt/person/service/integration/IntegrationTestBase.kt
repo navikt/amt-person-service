@@ -2,14 +2,14 @@ package no.nav.amt.person.service.integration
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.clearMocks
-import no.nav.amt.person.service.clients.KodeverkClient
-import no.nav.amt.person.service.clients.VeilarboppfolgingClient
-import no.nav.amt.person.service.clients.VeilarbvedtaksstotteClient
+import no.nav.amt.person.service.clients.kodeverk.KodeverkClient
 import no.nav.amt.person.service.clients.krr.KrrProxyClient
 import no.nav.amt.person.service.clients.nom.NomClient
 import no.nav.amt.person.service.clients.norg.NorgClient
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorClient
 import no.nav.amt.person.service.clients.pdl.PdlClient
+import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingClient
+import no.nav.amt.person.service.clients.veilarbvedtaksstotte.VeilarbvedtaksstotteClient
 import no.nav.amt.person.service.data.RepositoryTestBase
 import no.nav.poao_tilgang.client.PoaoTilgangClient
 import org.junit.jupiter.api.AfterEach

@@ -1,5 +1,6 @@
-package no.nav.amt.person.service.clients
+package no.nav.amt.person.service.clients.kodeverk
 
+import no.nav.amt.person.service.clients.KODEVERK_API_CLIENT_ID
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.service.annotation.GetExchange
