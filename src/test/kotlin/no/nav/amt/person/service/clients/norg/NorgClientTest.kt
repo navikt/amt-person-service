@@ -5,119 +5,160 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
+import no.nav.amt.person.service.clients.NORG_API_CLIENT_ID
+import no.nav.amt.person.service.clients.RestClientTestBase
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
-import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.headerDoesNotExist
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RestClientTest(NorgClient::class)
-@TestPropertySource(properties = ["norg.url=http://norg"])
 class NorgClientTest(
-    @Autowired private val sut: NorgClient,
-    @Autowired private val server: MockRestServiceServer,
-) {
-    @Test
-    fun `hentNavEnhet - skal lage riktig request og parse respons`() {
-        server
-            .expect(requestTo("http://norg/norg2/api/v1/enhet/1234"))
-            .andExpect(method(HttpMethod.GET))
-            .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
-            .andRespond(
-                withSuccess(
-                    """
-                    {
-                      "navn": "NAV Testheim",
-                      "enhetNr": "1234"
-                    }
-                    """.trimIndent(),
-                    MediaType.APPLICATION_JSON,
-                ),
+    private val sut: NorgClient,
+) : RestClientTestBase(NORG_API_CLIENT_ID) {
+    @Nested
+    inner class HentNavEnhet {
+        @Test
+        fun `hentNavEnhet - skal lage riktig request og parse respons`() {
+            // Arrange
+            server
+                .expect(requestTo("http://norg/norg2/api/v1/enhet/1234"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID_HEADER_VALUE))
+                .andExpect(headerDoesNotExist(HttpHeaders.AUTHORIZATION))
+                .andRespond(
+                    withSuccess(
+                        """
+                        {
+                          "navn": "Nav Testheim",
+                          "enhetNr": "1234"
+                        }
+                        """.trimIndent(),
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            // Act
+            val enhet = sut.hentNavEnhet("1234")
+
+            // Assert
+            enhet?.enhetNr shouldBe "1234"
+            enhet?.navn shouldBe "Nav Testheim"
+        }
+
+        @Test
+        fun `hentNavEnhet - 404 fra norg - returnerer null`() {
+            // Arrange
+            server
+                .expect(requestTo("http://norg/norg2/api/v1/enhet/4321"))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND))
+
+            // Act
+            val enhet = sut.hentNavEnhet("4321")
+
+            // Assert
+            enhet.shouldBeNull()
+        }
+
+        @Test
+        fun `hentNavEnhet - 500 fra norg - kaster exception`() {
+            // Arrange
+            server
+                .expect(requestTo("http://norg/norg2/api/v1/enhet/9999"))
+                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            // Act
+            val exception = shouldThrow<RuntimeException> {
+                sut.hentNavEnhet("9999")
+            }
+
+            // Assert
+            exception.message shouldBe "Klarte ikke å hente enhetId=9999 fra norg status=500"
+        }
+
+        @Test
+        fun `hentNavEnhet - ugyldig enhetId - kaster IllegalArgumentException`() {
+            // Arrange
+            val ugyldigEnhetId = "12"
+
+            // Act
+            val exception = shouldThrow<IllegalArgumentException> {
+                sut.hentNavEnhet(ugyldigEnhetId)
+            }
+
+            // Assert
+            exception.message shouldBe "Ugyldig enhetId-format"
+        }
+    }
+
+    @Nested
+    inner class HentNavEnheter {
+        @Test
+        fun `hentNavEnheter - skal lage riktig request og parse respons`() {
+            // Arrange
+            server
+                .expect(requestTo("http://norg/norg2/api/v1/enhet?enhetsnummerListe=1234%2C5678"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(
+                    withSuccess(
+                        """
+                        [
+                          { "navn": "Nav Testheim", "enhetNr": "1234" },
+                          { "navn": "Nav Annet",    "enhetNr": "5678" }
+                        ]
+                        """.trimIndent(),
+                        MediaType.APPLICATION_JSON,
+                    ),
+                )
+
+            // Act
+            val enheter = sut.hentNavEnheter(listOf("1234", "5678"))
+
+            // Assert
+            enheter shouldBe listOf(
+                NorgNavEnhetDto(navn = "Nav Testheim", enhetNr = "1234"),
+                NorgNavEnhetDto(navn = "Nav Annet", enhetNr = "5678"),
             )
-
-        val enhet = sut.hentNavEnhet("1234")
-
-        enhet?.enhetNr shouldBe "1234"
-        enhet?.navn shouldBe "NAV Testheim"
-    }
-
-    @Test
-    fun `hentNavEnhet - 404 fra norg - returnerer null`() {
-        server
-            .expect(requestTo("http://norg/norg2/api/v1/enhet/4321"))
-            .andRespond(withStatus(HttpStatus.NOT_FOUND))
-
-        sut.hentNavEnhet("4321").shouldBeNull()
-    }
-
-    @Test
-    fun `hentNavEnhet - 500 fra norg - kaster exception`() {
-        server
-            .expect(requestTo("http://norg/norg2/api/v1/enhet/9999"))
-            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
-
-        shouldThrow<RuntimeException> {
-            sut.hentNavEnhet("9999")
         }
-    }
 
-    @Test
-    fun `hentNavEnhet - ugyldig enhetId - kaster IllegalArgumentException`() {
-        shouldThrow<IllegalArgumentException> {
-            sut.hentNavEnhet("12")
+        @Test
+        fun `hentNavEnheter - 500 fra norg - kaster exception`() {
+            // Arrange
+            server
+                .expect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            // Act
+            val exception = shouldThrow<RuntimeException> {
+                sut.hentNavEnheter(listOf("1234"))
+            }
+
+            // Assert
+            exception.message shouldBe "Klarte ikke å hente enheter fra norg status=500"
         }
-    }
 
-    @Test
-    fun `hentNavEnheter - skal lage riktig request og parse respons`() {
-        server
-            .expect(requestTo("http://norg/norg2/api/v1/enhet?enhetsnummerListe=1234,5678"))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(
-                withSuccess(
-                    """
-                    [
-                      { "navn": "NAV Testheim", "enhetNr": "1234" },
-                      { "navn": "NAV Annet",    "enhetNr": "5678" }
-                    ]
-                    """.trimIndent(),
-                    MediaType.APPLICATION_JSON,
-                ),
-            )
+        @Test
+        fun `hentNavEnheter - ugyldig enhetId - kaster IllegalArgumentException`() {
+            // Arrange
+            val ugyldigEnhetId = "12"
 
-        val enheter = sut.hentNavEnheter(listOf("1234", "5678"))
+            // Act
+            val exception = shouldThrow<IllegalArgumentException> {
+                sut.hentNavEnheter(listOf(ugyldigEnhetId))
+            }
 
-        enheter shouldBe listOf(
-            NorgNavEnhetDto(navn = "NAV Testheim", enhetNr = "1234"),
-            NorgNavEnhetDto(navn = "NAV Annet", enhetNr = "5678"),
-        )
-    }
-
-    @Test
-    fun `hentNavEnheter - 500 fra norg - kaster exception`() {
-        server
-            .expect(method(HttpMethod.GET))
-            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
-
-        shouldThrow<RuntimeException> {
-            sut.hentNavEnheter(listOf("1234"))
-        }
-    }
-
-    @Test
-    fun `hentNavEnheter - ugyldig enhetId - kaster IllegalArgumentException`() {
-        shouldThrow<IllegalArgumentException> {
-            sut.hentNavEnheter(listOf("12"))
+            // Assert
+            exception.message shouldBe "Ugyldig enhetId-format"
         }
     }
 }

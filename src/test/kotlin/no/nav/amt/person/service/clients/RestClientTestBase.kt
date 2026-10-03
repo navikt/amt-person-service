@@ -19,6 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer
         "spring.http.serviceclient.kodeverk-api.base-url=http://kodeverk-api",
         "spring.http.serviceclient.nom-api.base-url=http://nom-api",
         "spring.http.serviceclient.ao-oppfolgingskontor.base-url=http://ao-oppfolgingskontor",
+        "spring.http.serviceclient.norg-api.base-url=http://norg",
         "spring.test.restclient.mockrestserviceserver.enabled=false",
     ],
 )
