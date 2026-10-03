@@ -9,6 +9,7 @@ import no.nav.amt.person.service.clients.KODEVERK_API_CLIENT_ID
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER
 import no.nav.amt.person.service.clients.NAV_CONSUMER_ID_HEADER_VALUE
 import no.nav.amt.person.service.clients.NOM_API_CLIENT_ID
+import no.nav.amt.person.service.clients.NORG_API_CLIENT_ID
 import no.nav.amt.person.service.clients.PDL_API_CLIENT_ID
 import no.nav.amt.person.service.clients.TEMA_HEADER
 import no.nav.amt.person.service.clients.VEILARBOPPFOLGING_CLIENT_ID
@@ -16,6 +17,7 @@ import no.nav.amt.person.service.clients.VEILARBVEDTAKSSTOTTE_CLIENT_ID
 import no.nav.amt.person.service.clients.kodeverk.KodeverkApi
 import no.nav.amt.person.service.clients.krr.KrrProxyApi
 import no.nav.amt.person.service.clients.nom.NomApi
+import no.nav.amt.person.service.clients.norg.NorgApi
 import no.nav.amt.person.service.clients.oppfolgingskontor.OppfolgingskontorApi
 import no.nav.amt.person.service.clients.pdl.PdlApi
 import no.nav.amt.person.service.clients.veilarboppfolging.VeilarboppfolgingApi
@@ -35,6 +37,7 @@ import org.springframework.web.service.registry.ImportHttpServices
 @ImportHttpServices(group = NOM_API_CLIENT_ID, types = [NomApi::class])
 @ImportHttpServices(group = AO_OPPFOLGINGSKONTOR_CLIENT_ID, types = [OppfolgingskontorApi::class])
 @ImportHttpServices(group = PDL_API_CLIENT_ID, types = [PdlApi::class])
+@ImportHttpServices(group = NORG_API_CLIENT_ID, types = [NorgApi::class])
 class ClientConfig {
     @Bean
     fun httpServiceGroupConfigurer() = RestClientHttpServiceGroupConfigurer { groups ->

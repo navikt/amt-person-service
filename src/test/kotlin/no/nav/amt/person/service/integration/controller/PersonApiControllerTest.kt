@@ -13,7 +13,7 @@ import no.nav.amt.person.service.api.dto.NavBrukerFodselsdatoDto
 import no.nav.amt.person.service.api.dto.NavEnhetDto
 import no.nav.amt.person.service.clients.krr.Kontaktinformasjon
 import no.nav.amt.person.service.clients.nom.NomNavAnsatt
-import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.clients.norg.toNorgNavEnhetDto
 import no.nav.amt.person.service.clients.oppfolgingskontor.Arbeidsoppfolging
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
@@ -261,9 +261,9 @@ class PersonApiControllerTest(
                 epost = navAnsatt.epost,
                 orgTilknytning = TestData.orgTilknytning,
             )
-            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
+            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns navEnhet.toNorgNavEnhetDto()
             every { norgClient.hentNavEnhet(TestData.navGrunerlokka.enhetId) } returns
-                NorgNavEnhetDto.fromDbo(TestData.navGrunerlokka)
+                TestData.navGrunerlokka.toNorgNavEnhetDto()
 
             val result = mockMvc
                 .post("/api/nav-bruker") {
@@ -353,7 +353,7 @@ class PersonApiControllerTest(
                 orgTilknytning = TestData.orgTilknytning,
             )
             every { norgClient.hentNavEnhet(TestData.navGrunerlokka.enhetId) } returns
-                NorgNavEnhetDto.fromDbo(TestData.navGrunerlokka)
+                TestData.navGrunerlokka.toNorgNavEnhetDto()
 
             val result = mockMvc
                 .post("/api/nav-ansatt") {
@@ -408,7 +408,7 @@ class PersonApiControllerTest(
         fun `enhet finnes ikke - skal opprette og returnere`() {
             val navEnhet = TestData.lagNavEnhet()
 
-            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
+            every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns navEnhet.toNorgNavEnhetDto()
 
             val result = mockMvc
                 .post("/api/nav-enhet") {
@@ -529,12 +529,12 @@ class PersonApiControllerTest(
 
         if (navBruker.navEnhet != null) {
             every { norgClient.hentNavEnhet(navBruker.navEnhet.enhetId) } returns
-                NorgNavEnhetDto.fromDbo(navBruker.navEnhet)
+                navBruker.navEnhet.toNorgNavEnhetDto()
         }
 
         // NavAnsattService needs norg to resolve the ansatt's enhet
         every { norgClient.hentNavEnhet(TestData.navGrunerlokka.enhetId) } returns
-            NorgNavEnhetDto.fromDbo(TestData.navGrunerlokka)
+            TestData.navGrunerlokka.toNorgNavEnhetDto()
     }
 
     private fun sammenlignBrukerDtoer(

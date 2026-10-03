@@ -4,7 +4,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.clients.norg.toNorgNavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.data.kafka.KafkaMessageCreator
 import no.nav.amt.person.service.data.kafka.message.KontorPayload
@@ -29,7 +29,7 @@ class SisteOppfolgingsperiodeConsumerTest(
 
         testDataRepository.insertNavBruker(navBruker)
 
-        every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
+        every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns navEnhet.toNorgNavEnhetDto()
 
         sisteOppfolgingsperiodeConsumer.ingest(objectMapper.writeValueAsString(kafkaPayload))
 

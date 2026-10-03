@@ -3,7 +3,7 @@ package no.nav.amt.person.service.integration.kafka.producer
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import no.nav.amt.person.service.clients.norg.NorgNavEnhetDto
+import no.nav.amt.person.service.clients.norg.toNorgNavEnhetDto
 import no.nav.amt.person.service.data.TestData
 import no.nav.amt.person.service.integration.IntegrationTestBase
 import no.nav.amt.person.service.kafka.producer.KafkaProducerService
@@ -94,7 +94,7 @@ class KafkaOutboxTransactionTest(
     fun `nav-enhet og outbox-rad rulles tilbake sammen`() {
         // Arrange
         val navEnhet = TestData.lagNavEnhet()
-        every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns NorgNavEnhetDto.fromDbo(navEnhet)
+        every { norgClient.hentNavEnhet(navEnhet.enhetId) } returns navEnhet.toNorgNavEnhetDto()
 
         // Act
         transactionTemplate.executeWithoutResult {
@@ -116,7 +116,7 @@ class KafkaOutboxTransactionTest(
         val navEnhet = TestData.lagNavEnhet()
         testDataRepository.insertNavEnhet(navEnhet)
         every { norgClient.hentNavEnheter(listOf(navEnhet.enhetId)) } returns
-            listOf(NorgNavEnhetDto.fromDbo(navEnhet.copy(navn = "Oppdatert")))
+            listOf(navEnhet.copy(navn = "Oppdatert").toNorgNavEnhetDto())
 
         // Act
         transactionTemplate.executeWithoutResult {

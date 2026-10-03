@@ -28,6 +28,9 @@ spring:
         base-url: ${NOM_URL}
       ao-oppfolgingskontor:
         base-url: ${AO_OPPFOLGINGSKONTOR_URL}
+      # Ikke OAuth2-protected
+      norg-api:
+        base-url: ${NORG_URL}
 
   datasource:
     url: ${DB_JDBC_URL}
@@ -170,7 +173,3 @@ kafka:
 
 poao-tilgang:
   url: ${POAO_TILGANG_URL}
-
-# Ikke OAuth2-protected
-norg:
-  url: ${NORG_URL}
