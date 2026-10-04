@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 class PoaoTilgangClientConfig {
     @Bean
     fun poaoTilgangClient(
-        @Value($$"${poao-tilgang.url}") poaoTilgangUrl: String,
+        @Value($$"${POAO_TILGANG_URL}") poaoTilgangUrl: String,
         authorizedClientManager: OAuth2AuthorizedClientManager,
     ): PoaoTilgangClient = PoaoTilgangCachedClient(
         PoaoTilgangHttpClient(

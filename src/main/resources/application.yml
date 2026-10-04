@@ -35,7 +35,7 @@ spring:
   datasource:
     url: ${DB_JDBC_URL}
     hikari:
-      maximum-pool-size: 3
+      maximum-pool-size: 10
 
   security:
     oauth2:
@@ -170,6 +170,3 @@ kafka:
       url: ${KAFKA_SCHEMA_REGISTRY}
       username: ${KAFKA_SCHEMA_REGISTRY_USER}
       password: ${KAFKA_SCHEMA_REGISTRY_PASSWORD}
-
-poao-tilgang:
-  url: ${POAO_TILGANG_URL}
