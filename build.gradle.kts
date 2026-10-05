@@ -18,8 +18,8 @@ dependencyManagement {
         dependency("org.apache.kafka:kafka-clients:4.3.1")
 
         // security fixes
-        dependency("tools.jackson.core:jackson-core: 3.1.7")
-        dependency("tools.jackson.core:jackson-databind: 3.1.7")
+        dependency("tools.jackson.core:jackson-core:3.1.7")
+        dependency("tools.jackson.core:jackson-databind:3.1.7")
     }
 }
 
