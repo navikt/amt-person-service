@@ -13,6 +13,9 @@ repositories {
 }
 
 dependencyManagement {
+    imports {
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.6")
+    }
     dependencies {
         // kun nødvendig hvis vi faktisk vil bruke Kafka 4.3.1
         dependency("org.apache.kafka:kafka-clients:4.3.1")
