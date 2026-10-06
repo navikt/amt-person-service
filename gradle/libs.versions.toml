@@ -1,6 +1,6 @@
 [versions]
 # Kotlin & build
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 ktlint-plugin = "14.2.0"
 ktlint-cli-version = "1.8.0"
 
@@ -10,7 +10,7 @@ spring-dependency-management = "1.1.7"
 
 # Serialization / Avro
 apache-avro = "1.12.2"
-jackson-module-kotlin = "3.2.2"
+jackson-module-kotlin = "3.2.3"
 confluent = "8.1.1"
 
 # Logging
