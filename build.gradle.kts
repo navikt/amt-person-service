@@ -14,15 +14,15 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("com.fasterxml.jackson:jackson-bom:2.22.3")
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.7")
     }
     dependencies {
         // kun nødvendig hvis vi faktisk vil bruke Kafka 4.3.1
         dependency("org.apache.kafka:kafka-clients:4.3.1")
 
         // security fixes
-        dependency("tools.jackson.core:jackson-core:3.2.3")
-        dependency("tools.jackson.core:jackson-databind:3.2.3")
+        dependency("tools.jackson.core:jackson-core:3.1.7")
+        dependency("tools.jackson.core:jackson-databind:3.1.7")
     }
 }
 
