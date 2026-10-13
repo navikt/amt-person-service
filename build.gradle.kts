@@ -14,7 +14,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.7")
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.22.3")
     }
     dependencies {
         // kun nødvendig hvis vi faktisk vil bruke Kafka 4.3.1
@@ -29,7 +29,7 @@ dependencyManagement {
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java") {
-            version { strictly("1.11.2") }
+            version { strictly("1.11.4") }
             because("Fixes CVE-2026-59949")
         }
     }
