@@ -21,15 +21,15 @@ dependencyManagement {
         dependency("org.apache.kafka:kafka-clients:4.3.1")
 
         // security fixes
-        dependency("tools.jackson.core:jackson-core:3.2.3")
-        dependency("tools.jackson.core:jackson-databind:3.2.3")
+        dependency("tools.jackson.core:jackson-core:3.1.7")
+        dependency("tools.jackson.core:jackson-databind:3.1.7")
     }
 }
 
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java") {
-            version { strictly("1.11.2") }
+            version { strictly("1.11.4") }
             because("Fixes CVE-2026-59949")
         }
     }
