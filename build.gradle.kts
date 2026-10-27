@@ -16,24 +16,9 @@ dependencyManagement {
     imports {
         mavenBom("com.fasterxml.jackson:jackson-bom:2.22.4")
     }
-    dependencies {
-        // kun nødvendig hvis vi faktisk vil bruke Kafka 4.3.1
-        dependency("org.apache.kafka:kafka-clients:4.3.2")
-
-        // security fixes
-        dependency("tools.jackson.core:jackson-core:3.2.4")
-        dependency("tools.jackson.core:jackson-databind:3.2.4")
-    }
 }
 
 dependencies {
-    constraints {
-        implementation("at.yawk.lz4:lz4-java") {
-            version { strictly("1.11.4") }
-            because("Fixes CVE-2026-59949")
-        }
-    }
-
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
@@ -91,6 +76,17 @@ kotlin {
 
 ktlint {
     version = libs.versions.ktlint.cli.version.get()
+}
+
+configurations.named("ktlint") {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            requested.version?.let {
+                useVersion(it)
+                because("ktlint must use the Kotlin versions it was compiled against")
+            }
+        }
+    }
 }
 
 tasks.register<GenerateAvroTask>("generateAvroJava") {
